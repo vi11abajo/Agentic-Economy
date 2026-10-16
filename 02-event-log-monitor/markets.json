@@ -1,0 +1,22 @@
+{
+  "intervalSec": 3,
+  "confirmations": 3,
+  "markets": [
+    {
+      "name": "SPACE X Strategy (sxss)",
+      "market": "0x5c3E0e4B1BE0851DCbC5F6a5cc04d799AcbE8B7F"
+    },
+    {
+      "name": "Penguin",
+      "market": "0xe534Dadb1E32A9DF075ffcAE0D636fF472A040db"
+    },
+    {
+      "name": "Flyelon",
+      "market": "0xd2b5B3cae93501325Ab7A2306C65CB8f1b4cAde1"
+    },
+    {
+      "name": "smile",
+      "market": "0x40F4049011A08e3834aE050Cf8BE004F8132B6cA"
+    }
+  ]
+}

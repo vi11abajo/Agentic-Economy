@@ -3,3 +3,5 @@ dist/
 .env
 *.log
 .npm-cache/
+.monitor-state.json
+trades.jsonl

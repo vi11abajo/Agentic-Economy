@@ -6,7 +6,8 @@
   "type": "module",
   "workspaces": [
     "packages/pharos-mcp",
-    "01-read-contract-state"
+    "01-read-contract-state",
+    "02-event-log-monitor"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present"

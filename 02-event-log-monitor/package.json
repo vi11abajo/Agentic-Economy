@@ -1,0 +1,17 @@
+{
+  "name": "event-log-monitor",
+  "version": "1.0.0",
+  "description": "Watch Prosper bonding curves on Pharos for every buy and sell through Pharos Chain MCP (multi-token config)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js watch",
+    "add": "node dist/index.js add",
+    "discover": "node dist/index.js discover"
+  },
+  "dependencies": {
+    "@agentic-economy/pharos-mcp": "1.0.0",
+    "viem": "2.57.7"
+  }
+}

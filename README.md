@@ -15,6 +15,7 @@ npm run build
 | # | Task | Track | Tier | Folder |
 |---|------|-------|------|--------|
 | 01 | Read Contract State | Chain MCP | Easy | [`01-read-contract-state`](01-read-contract-state) |
+| 02 | Event/Log Monitor — Prosper curve buys & sells | Chain MCP | Easy | [`02-event-log-monitor`](02-event-log-monitor) |
 
 ## Shared packages
 
