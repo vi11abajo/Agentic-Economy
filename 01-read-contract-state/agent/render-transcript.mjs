@@ -36,11 +36,12 @@ for (const file of files) {
         out.push(`**Tool call:** \`${block.name}\``, "", "```json", JSON.stringify(block.input, null, 2), "```", "");
       } else if (e.type === "user" && block.type === "tool_result") {
         const name = toolNames.get(block.tool_use_id) ?? "";
-        if (!name.startsWith("mcp__")) continue;
+        if (name !== "Bash" && !name.startsWith("mcp__")) continue;
         const text = Array.isArray(block.content)
           ? block.content.map((c) => c.text ?? "").join("\n")
           : String(block.content ?? "");
-        out.push(`**MCP result** (\`${name}\`):`, "", "```json", text.trim(), "```", "");
+        const label = name === "Bash" ? "Command output" : "MCP result";
+        out.push(`**${label}** (\`${name}\`):`, "", "```text", text.trim(), "```", "");
       }
     }
   }

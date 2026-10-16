@@ -20,40 +20,35 @@ Any other contract works too (`--contract 0x...`); functions the contract does n
 
 ## 1 · Agent: Claude Code + Pharos Chain MCP
 
-**Connect the MCP to the agent** (project scope — writes [`agent/.mcp.json`](agent/.mcp.json), nothing global):
+A Claude Code agent is asked plain-English questions, one conversation ([`agent/prompts/`](agent/prompts)).
+In the first message it **installs Pharos Chain MCP itself**; afterwards it can only use the Pharos MCP tools.
 
-```bash
-cd agent
-claude mcp add --transport http pharos https://mcp.pharos.xyz/mcp -s project
-```
-
-**Ask it like a person** — the questions in [`agent/prompts/`](agent/prompts), sent as one conversation:
-
-| # | Prompt | MCP tools the agent called | Answer (block 20,399,245) |
+| # | You ask | What the agent did | Answer |
 |---|---|---|---|
-| 1 | "Hey, are you hooked up to the Pharos chain? Which network are you on, and what's the latest block?" | `get_chain_info`, `get_block_number` | chain 1672, connected |
-| 2 | "There's a token contract at 0xC879…1815 on Pharos mainnet. What's it called? Please read it on-chain at block 20,399,245, …" | `eth_call` (name, symbol) | **USDC** |
-| 3 | "How many of these tokens are out there? Give me the total supply in a format a normal person can read." | `eth_call` (totalSupply, decimals) | **41,609,740.342546 USDC** |
-| 4 | "Who owns this contract?" | `eth_call` (owner), `get_code`, `get_storage_at` | **0x9F8E…4D92** (no code: an EOA) |
-| 5 | "How much of it does 0x40836f8f1bd7e13d99a4cc9de5c0b80a83109819 hold?" | `eth_call` (balanceOf) | **1,311,134 USDC** (~3.15% of supply) |
-| 6 | "Sum it up for me in plain English: what is this token, and what do those numbers mean for someone who isn't a developer?" | — (uses the values above) | plain-English summary |
+| 1 | "Hi! Please install the Pharos MCP server for yourself: https://mcp.pharos.xyz/mcp" | ran `claude mcp add --transport http -s project pharos https://mcp.pharos.xyz/mcp` → [`agent/.mcp.json`](agent/.mcp.json) | installed; tools load next turn |
+| 2 | "Hey, are you hooked up to the Pharos chain? Which network are you on, and what's the latest block?" | Pharos MCP `get_chain_info` | chain 1672, latest block 20,414,351 |
+| 3 | "There's a token contract at 0xC879…1815 on Pharos mainnet. What's it called? Please read it on-chain at block 20,399,245, …" | `eth_call` name(), symbol() | **USDC** |
+| 4 | "How many of these tokens are out there? Give me the total supply in a format a normal person can read." | `eth_call` totalSupply(), decimals() | **41,609,740.342546 USDC** |
+| 5 | "Who owns this contract?" | `eth_call` owner() | **0x9f8e…4d92** |
+| 6 | "How much of it does 0x40836f8f1bd7e13d99a4cc9de5c0b80a83109819 hold?" | `eth_call` balanceOf() | **1,311,134 USDC** (~3.15% of supply) |
+| 7 | "Sum it up for me in plain English: what is this token, and what do those numbers mean for someone who isn't a developer?" | — (uses the values above) | plain-English summary |
 
 **Run it** (needs the signed-in `claude` CLI):
 
 ```bash
-bash agent/run-agent.sh
+bash agent/run-agent.sh   # the conversation, saved as transcripts
+bash agent/demo.sh        # the same conversation typed live in the terminal (used for the video)
 ```
 
-The agent runs with `--strict-mcp-config` and only the `pharos` MCP server allowed; shell, file and web tools
-are disabled, so every fact has to come from a Pharos Chain MCP call. Results:
+Turn 1 may only run `claude mcp add`; every later turn runs with `--strict-mcp-config` and only the `pharos`
+MCP server allowed (shell, file and web tools off), so every fact has to come from a Pharos Chain MCP call.
 
-- [`agent/TRANSCRIPT.md`](agent/TRANSCRIPT.md) — readable: prompt → MCP tool call with arguments → raw MCP result → answer
-- [`agent/transcripts/`](agent/transcripts) — the same as JSON Lines (sanitized: local machine details removed)
+- [`agent/TRANSCRIPT.md`](agent/TRANSCRIPT.md) — readable: prompt → tool call with arguments → raw result → answer
+- [`agent/transcripts/`](agent/transcripts) — the same as JSON Lines (sanitized: other MCP servers and local paths removed)
 
 **Cross-check with the script.** All four values match the script's trace exactly
-([`sample-trace.jsonl`](sample-trace.jsonl)). The script also reads what the agent left open: the agent checked only
-the EIP-1967 proxy slots (empty) and could not confirm a proxy, while the script reads the ZeppelinOS slots used by
-Circle's `FiatTokenProxy` and finds the proxy admin `0x46f9…3F1b` and implementation `0xC35B…eAe8`.
+([`sample-trace.jsonl`](sample-trace.jsonl)). The script also reads what a single question doesn't: all admin roles,
+and the ZeppelinOS proxy slots used by Circle's `FiatTokenProxy` (proxy admin `0x46f9…3F1b`, implementation `0xC35B…eAe8`).
 
 ## 2 · Script: deterministic MCP client
 
