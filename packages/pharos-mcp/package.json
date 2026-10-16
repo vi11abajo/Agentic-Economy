@@ -1,0 +1,21 @@
+{
+  "name": "@agentic-economy/pharos-mcp",
+  "version": "1.0.0",
+  "description": "Rate-limited client for the hosted Pharos Chain MCP server (mcp.pharos.xyz)",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1"
+  }
+}

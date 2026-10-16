@@ -1,0 +1,30 @@
+
+USDC on Pharos Pacific Mainnet (chain 1672)
+Contract:  0xC879C018dB60520F4355C26eD1a6D572cdAC1815  (https://www.pharosscan.xyz/address/0xC879C018dB60520F4355C26eD1a6D572cdAC1815)
+Read at:   block 20,399,245  (2026-10-16 14:14:48 UTC)
+Source:    Pharos Chain MCP https://mcp.pharos.xyz/mcp
+
+Token
+  Name / symbol    USDC / USDC
+  Decimals         6
+  Total supply     41,609,740.342546 USDC  (raw 41609740342546)
+  Pegged to        USD
+  Code version     2
+  Status           Active — transfers are not paused
+
+Who controls it
+  0x9F8Ea09770Dc38fc61f5a62031b3BE0526D54D92  Owner — can reassign every role below
+  0x908EA62d2529F31347d71992954E540A8d169603  Master Minter — decides who may mint new tokens
+  0x828409Db274caD94AC10db6D54aeCa1Dbe00e237  Pauser — can freeze all transfers
+  0xbA8Cd4958d4105Aaa23b00c645573F53fCd59486  Blacklister — can block individual addresses
+  (not assigned)                              Rescuer — can recover tokens sent to the contract by mistake
+  0x46f958BdEFfD33495E058873cDd114c79Ec13F1b  Proxy admin — can upgrade the contract code
+  0xC35BEcB283fEC66626220467265F6d3B3f8cEae8  Implementation — the contract code currently in use
+
+In plain words
+  At block 20,399,245 there were 41,609,740.342546 USDC in circulation on Pharos. Each token is meant to be worth 1 USD. Transfers are working normally.
+  The address you interact with is an upgradeable proxy: its rules live in a separate implementation contract, 
+  and the proxy admin can swap that code. Special roles (owner, minter, pauser, blacklister) hold admin powers.
+
+(17 Pharos MCP tool calls, contract bytecode 1798 bytes)
+

@@ -1,0 +1,21 @@
+{
+  "name": "agentic-economy",
+  "version": "1.0.0",
+  "description": "Pharos Season of AI — Agent Arena builds",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/pharos-mcp",
+    "01-read-contract-state"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3"
+  }
+}
