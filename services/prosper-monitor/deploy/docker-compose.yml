@@ -1,0 +1,17 @@
+# Lives in /opt/prosper-monitor on the server, next to app/ (git clone of the repository), .env and data/.
+services:
+  prosper-monitor:
+    build:
+      context: ./app
+      dockerfile: services/prosper-monitor/deploy/Dockerfile
+    image: prosper-monitor:latest
+    container_name: prosper-monitor
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "127.0.0.1:18611:8080" # only nginx on the host reaches it
+    volumes:
+      - ./data:/data
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }

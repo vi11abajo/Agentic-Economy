@@ -1,0 +1,17 @@
+{
+  "name": "prosper-monitor",
+  "version": "1.0.0",
+  "description": "Prosper bonding-curve monitor on Pharos: indexer over Pharos Chain MCP, own MCP server, live terminal feed and Telegram alerts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node --no-warnings dist/main.js"
+  },
+  "dependencies": {
+    "@agentic-economy/pharos-mcp": "1.0.0",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "viem": "2.57.7",
+    "zod": "4.6.7"
+  }
+}

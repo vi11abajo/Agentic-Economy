@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>prosper-monitor · live Prosper curve trades on Pharos</title>
+<meta name="description" content="Every buy and sell on Prosper bonding curves on Pharos, live. Indexed through Pharos Chain MCP." />
+<style>
+  :root { --bg: #07080d; --panel: #0d0f18; --line: #1a1d2b; --text: #d6d9e4; --muted: #6c7187; --cobalt: #5b67ff;
+          --buy: #3ddc84; --sell: #ff5c6c; --amber: #f5c451; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body { font: 14px/1.55 "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas, "Liberation Mono", monospace; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
+  .term { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+          box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: #0a0c14; }
+  .bar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .bar .t { margin-left: 8px; color: var(--muted); font-size: 12.5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .head { padding: 14px 16px 8px; }
+  .prompt { color: var(--buy); }
+  .prompt b { color: var(--cobalt); font-weight: 600; }
+  .status { color: var(--muted); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; }
+  .status .live { color: var(--buy); }
+  .status .sync { color: var(--amber); }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 16px 10px; }
+  .chip { border: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: 12.5px;
+          padding: 3px 9px; border-radius: 6px; cursor: pointer; }
+  .chip.on { color: var(--text); border-color: var(--cobalt); background: rgba(91,103,255,.12); }
+  #log { height: 62vh; min-height: 360px; overflow-y: auto; padding: 4px 16px 14px; border-top: 1px solid var(--line); }
+  .row { display: grid; grid-template-columns: 74px 54px 82px 1fr; gap: 10px; padding: 3px 0; white-space: nowrap; }
+  .row .time { color: var(--muted); }
+  .row.new { animation: flash 1.6s ease-out; }
+  @keyframes flash { from { background: rgba(91,103,255,.22); } to { background: transparent; } }
+  .BUY { color: var(--buy); font-weight: 700; }
+  .SELL { color: var(--sell); font-weight: 700; }
+  .sym { color: var(--cobalt); font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
+  .what { overflow: hidden; text-overflow: ellipsis; }
+  .what a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+  .what .amt { color: var(--text); font-weight: 700; }
+  .dim { color: var(--muted); }
+  .sys { color: var(--muted); padding: 3px 0; }
+  .cursor { display: inline-block; width: 8px; height: 15px; background: var(--buy); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .help { margin-top: 18px; color: var(--muted); font-size: 12.5px; }
+  .help code { color: var(--text); background: #11131e; border: 1px solid var(--line); padding: 2px 6px; border-radius: 5px; overflow-wrap: anywhere; }
+  .help p { margin: 6px 0; }
+  @media (max-width: 640px) {
+    body { font-size: 12.5px; }
+    .row { grid-template-columns: 58px 42px 1fr; white-space: normal; }
+    .row .sym { display: none; }
+    #log { height: 66vh; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="term">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+      <span class="t">prosper-monitor — Pharos mainnet · Prosper bonding curves</span></div>
+    <div class="head">
+      <div class="prompt">monitor@pharos:~$ <b>tail -f prosper/trades</b> <span class="cursor"></span></div>
+      <div class="status" id="status">connecting…</div>
+    </div>
+    <div class="filters" id="filters"><button class="chip on" data-m="">all tokens</button></div>
+    <div id="log"></div>
+  </div>
+  <div class="help">
+    <p>Every buy and sell on <a style="color:var(--cobalt)" href="https://app.pros-per.xyz" target="_blank" rel="noopener">Prosper</a> curves, indexed live through Pharos Chain MCP.</p>
+    <p>Use it from an AI agent (MCP): <code>claude mcp add --transport http prosper-monitor {{PUBLIC_URL}}/mcp</code></p>
+    <p>JSON: <code>{{BASE}}/trades.json?limit=50</code> · Telegram alerts: by whitelist.</p>
+  </div>
+</div>
+<script>
+(() => {
+  const BASE = "{{BASE}}";
+  const log = document.getElementById("log");
+  const statusEl = document.getElementById("status");
+  const filters = document.getElementById("filters");
+  let filter = "";
+  const fmt = (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: n >= 1000 ? 0 : n >= 1 ? 4 : 6 });
+  const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const atBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+
+  function row(t, isNew) {
+    const d = document.createElement("div");
+    d.className = "row" + (isNew ? " new" : "");
+    d.dataset.m = t.market;
+    if (filter && t.market !== filter) d.style.display = "none";
+    const time = new Date(t.time * 1000).toISOString().slice(11, 19);
+    const what = t.side === "BUY"
+      ? `${esc(short(t.trader))} paid <span class="amt">${fmt(t.pros)} PROS</span> → ${fmt(t.tokens)} ${esc(t.symbol)}`
+      : `${esc(short(t.trader))} sold ${fmt(t.tokens)} ${esc(t.symbol)} → <span class="amt">${fmt(t.pros)} PROS</span>`;
+    d.innerHTML = `<span class="time">${time}</span><span class="${t.side}">${t.side}</span><span class="sym">${esc(t.symbol)}</span>` +
+      `<span class="what">${what} <span class="dim">@ ${Number(t.price).toPrecision(4)}</span> <a href="${t.url}" target="_blank" rel="noopener">tx</a></span>`;
+    return d;
+  }
+  function sys(text) {
+    const d = document.createElement("div");
+    d.className = "sys";
+    d.textContent = "# " + text;
+    log.appendChild(d);
+  }
+  function add(t, isNew) {
+    const stick = atBottom();
+    log.appendChild(row(t, isNew));
+    while (log.children.length > 500) log.removeChild(log.firstChild);
+    if (stick || !isNew) log.scrollTop = log.scrollHeight;
+  }
+  function setFilter(m) {
+    filter = m;
+    for (const c of filters.children) c.classList.toggle("on", c.dataset.m === m);
+    for (const r of log.querySelectorAll(".row")) r.style.display = !m || r.dataset.m === m ? "" : "none";
+    log.scrollTop = log.scrollHeight;
+  }
+  filters.addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) setFilter(b.dataset.m); });
+
+  function connect() {
+    const es = new EventSource(BASE + "/stream");
+    es.addEventListener("status", (e) => {
+      const s = JSON.parse(e.data);
+      const lag = s.head - s.indexedTo;
+      statusEl.innerHTML = `<span class="${s.live ? "live" : "sync"}">● ${s.live ? "live" : "syncing history"}</span>` +
+        `<span>block ${Number(s.indexedTo).toLocaleString("en-US")}</span><span>lag ${lag} blocks</span>` +
+        `<span>${s.markets} curves</span><span>source: Pharos Chain MCP</span>`;
+    });
+    es.addEventListener("markets", (e) => {
+      for (const m of JSON.parse(e.data)) {
+        if (filters.querySelector(`[data-m="${m.market}"]`)) continue;
+        const b = document.createElement("button");
+        b.className = "chip"; b.dataset.m = m.market; b.title = m.name + " · " + m.slug; b.textContent = m.symbol;
+        filters.appendChild(b);
+      }
+    });
+    es.addEventListener("market", (e) => {
+      const m = JSON.parse(e.data);
+      sys(`new curve: ${m.symbol} (${m.name})`);
+    });
+    es.addEventListener("history", (e) => {
+      log.innerHTML = "";
+      const rows = JSON.parse(e.data);
+      sys(`last ${rows.length} trades · waiting for new ones…`);
+      for (const t of rows) add(t, false);
+    });
+    es.addEventListener("trade", (e) => add(JSON.parse(e.data), true));
+    es.onerror = () => { statusEl.innerHTML = '<span class="sync">● reconnecting…</span>'; };
+  }
+  connect();
+})();
+</script>
+</body>
+</html>

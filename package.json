@@ -7,7 +7,8 @@
   "workspaces": [
     "packages/pharos-mcp",
     "01-read-contract-state",
-    "02-event-log-monitor"
+    "02-event-log-monitor",
+    "services/prosper-monitor"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present"
