@@ -1,4 +1,6 @@
+import { appendFileSync, writeFileSync } from "node:fs";
 import {
+  decodeFunctionData,
   decodeFunctionResult,
   encodeFunctionData,
   formatUnits,
@@ -10,7 +12,7 @@ import {
   type Address,
   type Hex,
 } from "viem";
-import { McpToolError, PHAROS_MCP_URL, PharosMcp } from "@agentic-economy/pharos-mcp";
+import { McpToolError, PHAROS_MCP_URL, PharosMcp, type McpCallRecord } from "@agentic-economy/pharos-mcp";
 
 // USDC issued by Circle on Pharos Pacific Mainnet (docs.pharos.xyz -> Token Registry).
 const DEFAULT_CONTRACT = "0xc879c018db60520f4355c26ed1a6d572cdac1815";
@@ -60,11 +62,13 @@ interface Args {
   block?: bigint;
   holders: Address[];
   json: boolean;
+  trace?: string;
 }
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const mcp = new PharosMcp("read-contract-state");
+  if (args.trace) enableTrace(mcp, args.trace);
   await mcp.connect();
   try {
     const report = await readContract(mcp, args);
@@ -205,6 +209,34 @@ function printReport(r: Report): void {
   console.log(`\n(${r.mcpCalls} Pharos MCP tool calls, contract bytecode ${r.bytecodeBytes} bytes)\n`);
 }
 
+/** Writes every MCP tool call (request + raw response) to a JSON Lines file; eth_call lines are decoded. */
+function enableTrace(mcp: PharosMcp, file: string): void {
+  writeFileSync(file, "");
+  let seq = 0;
+  mcp.onCall = (record: McpCallRecord) => {
+    const line: Record<string, unknown> = { seq: ++seq, ...record };
+    try {
+      line.response = JSON.parse(record.response);
+    } catch {
+      // keep the raw text
+    }
+    if (record.tool === "eth_call") {
+      const data = (record.arguments.transaction as { data?: Hex } | undefined)?.data;
+      try {
+        const call = decodeFunctionData({ abi, data: data as Hex });
+        line.function = `${call.functionName}(${(call.args ?? []).join(",")})`;
+        const result = (line.response as { result?: Hex })?.result;
+        if (result && result !== "0x") {
+          line.decoded = decodeFunctionResult({ abi, functionName: call.functionName, data: result } as never);
+        }
+      } catch {
+        // not one of our ABI functions
+      }
+    }
+    appendFileSync(file, `${JSON.stringify(line, jsonBigInt)}\n`);
+  };
+}
+
 function parseArgs(argv: string[]): Args {
   const args: Args = { contract: DEFAULT_CONTRACT, holders: [], json: false };
   for (let i = 0; i < argv.length; i++) {
@@ -218,8 +250,9 @@ function parseArgs(argv: string[]): Args {
     else if (a === "--block") args.block = BigInt(next());
     else if (a === "--holder") args.holders.push(requireAddress(next()));
     else if (a === "--json") args.json = true;
+    else if (a === "--trace") args.trace = next();
     else if (a === "--help" || a === "-h") {
-      console.log("Usage: npm start -- [--contract 0x...] [--block N] [--holder 0x...]... [--json]");
+      console.log("Usage: npm start -- [--contract 0x...] [--block N] [--holder 0x...]... [--json] [--trace file.jsonl]");
       process.exit(0);
     } else throw new Error(`Unknown argument: ${a}`);
   }

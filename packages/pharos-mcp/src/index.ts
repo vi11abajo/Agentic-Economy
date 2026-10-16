@@ -9,11 +9,22 @@ const MAX_ATTEMPTS = 5;
 
 type TextContent = { type: string; text?: string };
 
+/** One completed MCP tool call, as sent and as answered (raw text from the server). */
+export interface McpCallRecord {
+  tool: string;
+  arguments: Record<string, unknown>;
+  isError: boolean;
+  response: string;
+  ms: number;
+}
+
 /** Thin wrapper around the hosted Pharos Chain MCP server (mcp.pharos.xyz). */
 export class PharosMcp {
   private readonly client: Client;
   private nextSlot = 0;
   calls = 0;
+  /** Optional hook called after every answered tool call (used for --trace). */
+  onCall?: (record: McpCallRecord) => void;
 
   constructor(clientName = "agentic-economy") {
     this.client = new Client({ name: clientName, version: "1.0.0" });
@@ -32,9 +43,11 @@ export class PharosMcp {
     for (let attempt = 1; ; attempt++) {
       await this.pace();
       try {
+        const started = Date.now();
         const res = await this.client.callTool({ name, arguments: args });
         this.calls++;
         const text = (res.content as TextContent[]).find((c) => c.type === "text")?.text ?? "";
+        this.onCall?.({ tool: name, arguments: args, isError: Boolean(res.isError), response: text, ms: Date.now() - started });
         if (res.isError) throw new McpToolError(name, text);
         return JSON.parse(text) as T;
       } catch (err) {

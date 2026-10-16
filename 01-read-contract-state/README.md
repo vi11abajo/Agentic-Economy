@@ -45,9 +45,26 @@ Then from this folder:
 ```bash
 npm start                                   # USDC, latest block
 npm start -- --block 20399245               # a specific block
-npm start -- --holder 0x908EA62d2529F31347d71992954E540A8d169603
+npm start -- --holder 0x40836f8f1bd7e13d99a4cc9de5c0b80a83109819
 npm start -- --contract 0x52c48d4213107b20bc583832b0d951fb9ca8f0b0   # WPROS
 npm start -- --json                          # machine-readable output
+npm start -- --trace trace.jsonl             # log every MCP tool call + raw response
+```
+
+The sample files were produced with
+`npm start -- --block 20399245 --holder 0x40836f8f1bd7e13d99a4cc9de5c0b80a83109819 --trace sample-trace.jsonl`.
+
+## Trace: every MCP call, as sent and as answered
+
+[`sample-trace.jsonl`](sample-trace.jsonl) has one JSON line per Pharos Chain MCP tool call (18 calls): the tool
+name, its arguments (for `eth_call`: target + ABI-encoded calldata, pinned block), the raw server response, and
+for `eth_call` the decoded function and value. It shows that nothing is read outside MCP, e.g.:
+
+```text
+eth_call name()            -> "USDC"
+eth_call totalSupply()     -> 41609740342546  (raw, 6 decimals -> 41,609,740.342546)
+eth_call owner()           -> 0x9F8Ea09770Dc38fc61f5a62031b3BE0526D54D92
+eth_call balanceOf(0x4083…9819) -> 1311134000000 (-> 1,311,134 USDC)
 ```
 
 No keys or wallets are needed: everything is read-only. The MCP client paces requests to stay under the
@@ -55,7 +72,7 @@ server's limit of 120 requests per minute per IP (`packages/pharos-mcp`).
 
 ## Sample output
 
-See [`sample-output.txt`](sample-output.txt):
+See [`sample-output.txt`](sample-output.txt) (block 20,399,245, with one `--holder`):
 
 ```text
 USDC on Pharos Pacific Mainnet (chain 1672)
@@ -80,17 +97,20 @@ Who controls it
   0x46f958BdEFfD33495E058873cDd114c79Ec13F1b  Proxy admin — can upgrade the contract code
   0xC35BEcB283fEC66626220467265F6d3B3f8cEae8  Implementation — the contract code currently in use
 
+Balances
+  0x40836f8F1bD7e13d99a4cc9DE5C0B80A83109819  1,311,134 USDC
+
 In plain words
   At block 20,399,245 there were 41,609,740.342546 USDC in circulation on Pharos. Each token is meant to be worth 1 USD. Transfers are working normally.
   The address you interact with is an upgradeable proxy: its rules live in a separate implementation contract,
   and the proxy admin can swap that code. Special roles (owner, minter, pauser, blacklister) hold admin powers.
 
-(17 Pharos MCP tool calls, contract bytecode 1798 bytes)
+(18 Pharos MCP tool calls, contract bytecode 1798 bytes)
 ```
 
 ## Requirements checklist
 
-- [x] Reads at least 3 different values from one contract via Chain MCP (12 values + 2 proxy slots)
+- [x] Reads at least 3 different values from one contract via Chain MCP (13 values incl. a balance + 2 proxy slots; see the trace)
 - [x] Shows the contract address and the block number the data was read at (plus block time and hash in `--json`)
 - [x] Formats raw values for humans: decimals applied, addresses labelled
 - [x] README: contract choice, how to run, sample output

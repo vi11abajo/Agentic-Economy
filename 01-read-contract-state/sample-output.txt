@@ -21,10 +21,13 @@ Who controls it
   0x46f958BdEFfD33495E058873cDd114c79Ec13F1b  Proxy admin — can upgrade the contract code
   0xC35BEcB283fEC66626220467265F6d3B3f8cEae8  Implementation — the contract code currently in use
 
+Balances
+  0x40836f8F1bD7e13d99a4cc9DE5C0B80A83109819  1,311,134 USDC
+
 In plain words
   At block 20,399,245 there were 41,609,740.342546 USDC in circulation on Pharos. Each token is meant to be worth 1 USD. Transfers are working normally.
   The address you interact with is an upgradeable proxy: its rules live in a separate implementation contract, 
   and the proxy admin can swap that code. Special roles (owner, minter, pauser, blacklister) hold admin powers.
 
-(17 Pharos MCP tool calls, contract bytecode 1798 bytes)
+(18 Pharos MCP tool calls, contract bytecode 1798 bytes)
 
