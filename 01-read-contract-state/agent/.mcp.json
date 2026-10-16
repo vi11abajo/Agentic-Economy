@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "pharos": {
+      "type": "http",
+      "url": "https://mcp.pharos.xyz/mcp"
+    }
+  }
+}

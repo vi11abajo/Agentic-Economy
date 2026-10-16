@@ -1,0 +1,1 @@
+There's a token contract at 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 on Pharos mainnet. What's it called? Please read it on-chain at block 20,399,245, and use that same block for everything I ask next.

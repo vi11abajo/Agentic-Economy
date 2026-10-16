@@ -1,7 +1,12 @@
 # 01 · Read Contract State (Chain MCP · Easy)
 
 Reads live state of a deployed Pharos contract **through Pharos Chain MCP** (`https://mcp.pharos.xyz/mcp`)
-and explains it in plain language for a non-developer.
+and explains it in plain language for a non-developer — two ways:
+
+1. **Agent** ([`agent/`](agent)) — a Claude Code agent with Pharos Chain MCP connected, asked plain-English
+   questions; every answer is backed by MCP tool calls recorded in its transcript.
+2. **Script** (`src/`) — a TypeScript MCP client that reads the same values deterministically, formats them and
+   cross-checks the agent.
 
 ## Contract
 
@@ -13,7 +18,46 @@ with several admin roles, so the report can show *who controls the token*, not o
 
 Any other contract works too (`--contract 0x...`); functions the contract does not implement are skipped.
 
-## What it reads (all at one pinned block)
+## 1 · Agent: Claude Code + Pharos Chain MCP
+
+**Connect the MCP to the agent** (project scope — writes [`agent/.mcp.json`](agent/.mcp.json), nothing global):
+
+```bash
+cd agent
+claude mcp add --transport http pharos https://mcp.pharos.xyz/mcp -s project
+```
+
+**Ask it like a person** — the questions in [`agent/prompts/`](agent/prompts), sent as one conversation:
+
+| # | Prompt | MCP tools the agent called | Answer (block 20,399,245) |
+|---|---|---|---|
+| 1 | "Hey, are you hooked up to the Pharos chain? Which network are you on, and what's the latest block?" | `get_chain_info`, `get_block_number` | chain 1672, connected |
+| 2 | "There's a token contract at 0xC879…1815 on Pharos mainnet. What's it called? Please read it on-chain at block 20,399,245, …" | `eth_call` (name, symbol) | **USDC** |
+| 3 | "How many of these tokens are out there? Give me the total supply in a format a normal person can read." | `eth_call` (totalSupply, decimals) | **41,609,740.342546 USDC** |
+| 4 | "Who owns this contract?" | `eth_call` (owner), `get_code`, `get_storage_at` | **0x9F8E…4D92** (no code: an EOA) |
+| 5 | "How much of it does 0x40836f8f1bd7e13d99a4cc9de5c0b80a83109819 hold?" | `eth_call` (balanceOf) | **1,311,134 USDC** (~3.15% of supply) |
+| 6 | "Sum it up for me in plain English: what is this token, and what do those numbers mean for someone who isn't a developer?" | — (uses the values above) | plain-English summary |
+
+**Run it** (needs the signed-in `claude` CLI):
+
+```bash
+bash agent/run-agent.sh
+```
+
+The agent runs with `--strict-mcp-config` and only the `pharos` MCP server allowed; shell, file and web tools
+are disabled, so every fact has to come from a Pharos Chain MCP call. Results:
+
+- [`agent/TRANSCRIPT.md`](agent/TRANSCRIPT.md) — readable: prompt → MCP tool call with arguments → raw MCP result → answer
+- [`agent/transcripts/`](agent/transcripts) — the same as JSON Lines (sanitized: local machine details removed)
+
+**Cross-check with the script.** All four values match the script's trace exactly
+([`sample-trace.jsonl`](sample-trace.jsonl)). The script also reads what the agent left open: the agent checked only
+the EIP-1967 proxy slots (empty) and could not confirm a proxy, while the script reads the ZeppelinOS slots used by
+Circle's `FiatTokenProxy` and finds the proxy admin `0x46f9…3F1b` and implementation `0xC35B…eAe8`.
+
+## 2 · Script: deterministic MCP client
+
+### What it reads (all at one pinned block)
 
 | Value | How (MCP tool) |
 |---|---|
@@ -31,7 +75,7 @@ can do, the zero address shown as "not assigned", the block number and UTC time 
 The block is pinned 3 blocks behind the head so that every value describes the same moment and the block is
 already available on every RPC node behind the MCP server.
 
-## Run
+### Run
 
 From the repository root (one shared install for all tasks):
 
@@ -54,7 +98,7 @@ npm start -- --trace trace.jsonl             # log every MCP tool call + raw res
 The sample files were produced with
 `npm start -- --block 20399245 --holder 0x40836f8f1bd7e13d99a4cc9de5c0b80a83109819 --trace sample-trace.jsonl`.
 
-## Trace: every MCP call, as sent and as answered
+### Trace: every MCP call, as sent and as answered
 
 [`sample-trace.jsonl`](sample-trace.jsonl) has one JSON line per Pharos Chain MCP tool call (18 calls): the tool
 name, its arguments (for `eth_call`: target + ABI-encoded calldata, pinned block), the raw server response, and
@@ -70,7 +114,7 @@ eth_call balanceOf(0x4083…9819) -> 1311134000000 (-> 1,311,134 USDC)
 No keys or wallets are needed: everything is read-only. The MCP client paces requests to stay under the
 server's limit of 120 requests per minute per IP (`packages/pharos-mcp`).
 
-## Sample output
+### Sample output
 
 See [`sample-output.txt`](sample-output.txt) (block 20,399,245, with one `--holder`):
 
@@ -110,7 +154,7 @@ In plain words
 
 ## Requirements checklist
 
-- [x] Reads at least 3 different values from one contract via Chain MCP (13 values incl. a balance + 2 proxy slots; see the trace)
+- [x] Reads at least 3 different values from one contract via Chain MCP — the agent reads name, totalSupply, owner and a balance from plain-English prompts ([transcript](agent/TRANSCRIPT.md)); the script reads 13 values + 2 proxy slots ([trace](sample-trace.jsonl))
 - [x] Shows the contract address and the block number the data was read at (plus block time and hash in `--json`)
 - [x] Formats raw values for humans: decimals applied, addresses labelled
-- [x] README: contract choice, how to run, sample output
+- [x] README: contract choice, how to run (agent and script), sample output and agent transcript
