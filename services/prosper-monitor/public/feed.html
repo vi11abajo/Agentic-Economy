@@ -65,6 +65,7 @@
   .side { font-weight: 700; font-size: 11.5px; letter-spacing: .06em; padding: 2px 9px; border-radius: 5px; }
   .side.BUY { color: var(--buy); background: var(--buy-bg); }
   .side.SELL { color: var(--sell); background: var(--sell-bg); }
+  .blk { margin-left: auto; color: var(--faint); }
   .l2 { grid-column: 1 / -1; color: var(--cobalt); font-weight: 700; font-size: 17px; letter-spacing: .01em; }
   .l3 { color: var(--text); overflow-wrap: anywhere; align-self: end; }
   .l3 .who { color: var(--muted); }
@@ -137,7 +138,7 @@
       ? `<span class="who">${esc(short(t.trader))}</span> paid <span class="amt">${fmt(t.pros)} PROS</span>${arrow}received <span class="amt">${fmt(t.tokens)} ${sym}</span>`
       : `<span class="who">${esc(short(t.trader))}</span> sold <span class="amt">${fmt(t.tokens)} ${sym}</span>${arrow}received <span class="amt">${fmt(t.pros)} PROS</span>`;
     d.innerHTML =
-      `<div class="l1"><span>${stamp(t.time)}</span><span class="side ${t.side}">${t.side}</span></div>` +
+      `<div class="l1"><span>${stamp(t.time)}</span><span class="side ${t.side}">${t.side}</span><span class="blk">block ${Number(t.block).toLocaleString("en-US")}</span></div>` +
       `<div class="l2">${sym}</div>` +
       `<div class="l3">${what}<a href="${t.url}" target="_blank" rel="noopener">tx ↗</a></div>` +
       `<div class="price">current price ${sym} <b>${Number(t.price).toPrecision(4)} PROS</b></div>`;

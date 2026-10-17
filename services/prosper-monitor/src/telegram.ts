@@ -242,6 +242,7 @@ export function formatTrade(t: TradeRow): string {
     `${buy ? "💰 Paid" : "💸 Sold"}  ${flow}`,
     `👤 Trader  ${who}`,
     `📈 Price  <code>${t.price.toPrecision(4)}</code> ${NATIVE} per ${sym}`,
+    `🧱 Block  ${t.block.toLocaleString("en-US")}`,
     "",
     `🕒 ${stamp}  ·  <a href="${EXPLORER}/tx/${t.tx}">View tx ↗</a>`,
   ].join("\n");

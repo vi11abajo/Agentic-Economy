@@ -76,6 +76,16 @@ pMusk history (its whole curve so far):
 Cross-check: the net amounts 9.9 + 4.95 + 49.5 + 4.95 = **69.3 PROS** — exactly the "Graduation progress 69.3 /
 20,000 PROS" the Prosper app shows for this curve; the price rises with each buy, as a bonding curve should.
 
+## Live demo (hosted)
+
+The same Chain MCP log monitoring runs 24/7 as a small service
+([`services/prosper-monitor`](../services/prosper-monitor)) for every Prosper token still on its bonding curve:
+
+- Live feed (decoded trades with block, trader, amounts, price, tx): https://mcp.pharosfdv.xyz/prosper-monitor
+- JSON: https://mcp.pharosfdv.xyz/prosper-monitor/trades.json?limit=50
+- Telegram alerts per token (whitelist), and an MCP endpoint for AI agents:
+  `claude mcp add --transport http prosper-monitor https://mcp.pharosfdv.xyz/prosper-monitor/mcp`
+
 ## Requirements checklist
 
 - [x] Chain MCP log queries filtered by contract address and event signature (`get_logs`, market addresses + `Bought`/`Sold` topics)
