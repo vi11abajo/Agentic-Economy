@@ -1,0 +1,28 @@
+Q: @Pharos Docs MCP I want my agent to react to every buy on a bonding-curve token launched on Pharos mainnet. Which Pharos MCP tool should it poll, and how many blocks can one call cover?
+
+Matched Pharos Docs MCP, reply below:
+
+To react to every buy on a bonding-curve token, your agent should poll the get_logs tool on the Pharos MCP server (it wraps eth_getLogs).
+
+How to use it
+Filter by address: the bonding-curve token contract (or the factory/router that emits the buy event).
+Filter by topics: the event signature topic for the buy/swap event (e.g. Transfer to the curve, or a custom Buy/Trade event — compute the topic as keccak256("EventName(types)")).
+Block range: pass fromBlock / toBlock to page through the chain.
+Block-range limit per call
+
+get_logs is capped at 1000 blocks per call, matching the upstream RPC limit. Requests spanning a wider range are rejected with a message telling you the requested size and the maximum.
+
+So one call covers at most 1000 blocks. To cover a larger range, page through in 1000-block windows (e.g. fromBlock=0, toBlock=999, then 1000–1999, etc.).
+
+Practical polling strategy
+Track the last block you processed.
+On each poll, call get_logs with fromBlock = lastProcessed + 1 and toBlock = min(latestBlock, fromBlock + 999).
+If toBlock < latestBlock, loop again with the next 1000-block window until you catch up.
+Narrow with address + topics — unfiltered queries over wide ranges are slow and may time out.
+MCP endpoint
+Hosted: https://mcp.pharos.xyz/mcp (Streamable HTTP, no auth, 120 req/min per IP)
+Chain ID: 1672
+
+Source: Pharos MCP
+
+— from Pharos Docs MCP

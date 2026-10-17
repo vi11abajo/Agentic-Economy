@@ -1,0 +1,35 @@
+Q: @Pharos Docs MCP Is there an official list of launchpad or DEX factory contracts on Pharos mainnet that I could index, like FaroSwap or a token launchpad?
+
+Matched Pharos Docs MCP, reply below:
+
+The Pharos documentation does not publish an official list of launchpad or DEX factory contracts (no FaroSwap, no bonding-curve launchpad, no Uniswap/Sushiswap-style factory addresses).
+
+The only canonical-contract registry in the docs is the Canonical Contracts page, which lists infrastructure-level deployments common across many EVM chains:
+
+Contract	Address
+Create2Deployer	0x13b0D85CcB8bf860b6b79AF3029fCA081AE9beF2
+Foundry Deterministic Deploy	0x4e59b44847b379578588920ca78fbf26c0b4956c
+MultiCall3	0xcA11bde05977b3631167028862bE2a173976CA11
+GnosisSafe / GnosisSafeL2 (v1.3.0)	0x69f4D1788e39c87893C980c06EdF4b7f686e2938 / 0xfb1bffC9d739B8D520DaF37dF666da4C687191EA
+SafeSingletonFactory	0x914d7Fec6aaC8cd542e72Bca78B30650d45643d7
+CreateX	0xba5Ed099633D3B313e4D5F7bdc1305d3c28ba5Ed
+MultiSend / MultiSendCallOnly (v1.3.0)	0x998739BFdAAdde7C933B942a68053933098f9EDa / 0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B
+Permit2	0x000000000022D473030F116dDEE9F6B43aC78BA3
+ERC-4337 EntryPoint v0.7 / v0.6	0x0000000071727De22E5E9d8BAf0edAc6f37da032 / 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+
+No DeFi protocol addresses (DEX factories, routers, launchpads, bonding-curve contracts) are listed.
+
+Where to look instead
+
+The docs don't cover this, so you'll need to go outside them:
+
+Pharos Block Explorer — https://www.pharosscan.xyz — search for verified contracts named "Factory", "Router", "Launchpad", or look for the well-known FaroSwap / launchpad deployer addresses if the community has published them.
+Protocol's own docs / GitHub / Discord — each DeFi project (FaroSwap, any launchpad) publishes its own deployed addresses.
+Chainlist / DeFiLlama / community repos — often maintain curated address lists for EVM chains.
+Trace the deployer — if you know one pool/token from the launchpad, look at its transaction history on the explorer to find the factory that created it.
+
+This is outside the scope of what the Pharos docs cover, so I can't give you a definitive address list from this source.
+
+Source: Canonical Contracts
+
+— from Pharos Docs MCP

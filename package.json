@@ -1,13 +1,14 @@
 {
   "name": "agentic-economy",
   "version": "1.0.0",
-  "description": "Pharos Season of AI — Agent Arena builds",
+  "description": "Pharos Season of AI \u0432\u0402\u201d Agent Arena builds",
   "private": true,
   "type": "module",
   "workspaces": [
     "packages/pharos-mcp",
     "01-read-contract-state",
     "02-event-log-monitor",
+    "03-docs-mcp-onboarding",
     "services/prosper-monitor"
   ],
   "scripts": {

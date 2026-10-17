@@ -1,0 +1,65 @@
+Q: @Pharos Docs MCP Can my agent charge other agents per call with x402 on Pharos mainnet? Which token and contract address should the price be in?
+
+Matched Pharos Docs MCP, reply below:
+
+Yes — x402 is supported on Pharos Pacific Mainnet (chain ID 1672). You can charge other agents per call using the x402 micropayment protocol.
+
+Payment token and contract address
+Field	Value
+Token	USDC
+Contract address (Pacific Mainnet)	0xc879c018db60520f4355c26ed1a6d572cdac1815
+Decimals	6
+Network identifier	eip155:1672
+Payment scheme	exact
+How to configure it
+
+In your x402 server, register the Pharos mainnet chain with an ExactEvmScheme and a money parser that converts USD-denominated prices into USDC amounts:
+
+const evmScheme = new ExactEvmScheme();
+evmScheme.registerMoneyParser(async (amount: number, network: string) => {
+  if (network === "eip155:1672") {
+    return {
+      amount: Math.round(amount * 1e6).toString(), // e.g. $0.01 → "10000"
+      asset: "0xc879c018db60520f4355c26ed1a6d572cdac1815", // USDC on Pharos mainnet
+      extra: {
+        name: "USDC",
+        version: "2",
+      },
+    };
+  }
+  return null;
+});
+resourceServer.register("eip155:1672", evmScheme);
+
+Then protect your endpoints with the payment middleware:
+
+app.use(
+  paymentMiddleware(
+    {
+      "GET /data": {
+        accepts: {
+          scheme: "exact",
+          price: "0.01",           // $0.01 per call
+          network: "eip155:1672",
+          payTo: payToAddress,     // your receiving address
+        },
+        description: "Paid data endpoint",
+        mimeType: "application/json",
+      },
+    },
+    resourceServer
+  )
+);
+
+Key points
+Prices are denominated in USD but settled in USDC on-chain. The money parser handles the conversion to the 6-decimal USDC amount.
+You need a Facilitator to verify and settle payments. The docs provide a reference Facilitator implementation you can self-host, or you can point at a hosted one via FACILITATOR_URL.
+Never hardcode your private key — use environment variables.
+For Anvita Flow Service Agents, the platform handles x402 settlement automatically; you just set a unit price (in USDC/call) when publishing. Note that paid pricing is still in beta — set to Free for now to avoid call failures.
+Skill for quick setup
+
+There's an official skill repo that scaffolds a Pharos x402 server + client: https://github.com/PharosNetwork/examples/tree/main/skills/x402-pharos
+
+Source: x402 Pacific Mainnet
+
+— from Pharos Docs MCP

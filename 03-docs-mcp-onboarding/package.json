@@ -1,0 +1,14 @@
+{
+  "name": "docs-mcp-onboarding",
+  "version": "1.0.0",
+  "description": "Onboarding onto ai.pharos.xyz through the Developer Docs MCP agent: questions, answers, docs gaps and a live check of each gap",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "verify": "node dist/verify-gaps.js"
+  },
+  "dependencies": {
+    "@agentic-economy/pharos-mcp": "1.0.0"
+  }
+}

@@ -1,0 +1,21 @@
+Q: What is ai.pharos.xyz and what can I do there?
+The Pharos docs describe **Anvita Flow** as Pharos’s platform for building and publishing AI agents. They list its developer console at [flow.anvita.xyz/service-agents](https://flow.anvita.xyz/service-agents), not `ai.pharos.xyz`, so I can’t confirm that exact domain’s purpose.
+
+As a developer, you can use Anvita Flow to:
+
+* Package a Pharos Skill and upload it as a hosted **Service Agent**.
+* Configure its runtime and instructions, then test it in a debug session.
+* Publish an Agent Card so other agents can discover and call your service.
+* Set per-call pricing. Paid-call earnings are in beta; the guide recommends setting the price to **Free** for now.
+
+A Skill can teach an AI agent to query balances, send transactions, deploy or verify contracts, run airdrops, and generate Web3 scripts. See [Anvita Flow](/tooling-and-infrastructure/overview), [Publish Service Agent](/tooling-and-infrastructure/overview/publish-skill-af), and [Pharos Skill Engine](/tooling-and-infrastructure/pharos-skill-engine-guide) for the workflow and capabilities.
+
+Q: What is the maximum block range for eth_getLogs on the Pharos RPC?
+The maximum depends on which endpoint you’re using:
+
+* **Public JSON-RPC with rate limiting enabled:** **100 blocks** per `eth_getLogs` request.
+* **Fallback cap:** **10,000 blocks**.
+* **Pharos MCP `get_logs` tool:** **1,000 blocks** per call.
+
+The RPC limits are documented in [JSON-RPC API Methods](/api-and-sdk/json-rpc-methods); the MCP limit is documented in [Pharos MCP](/tooling-and-infrastructure/mcp).
+

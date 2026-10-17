@@ -1,0 +1,39 @@
+Q: @Pharos Docs MCP My monitor already runs as my own MCP server on a public URL. Can I publish it on Anvita Flow so other agents on ai.pharos.xyz can call it, or does it have to be a Skill?
+
+Matched Pharos Docs MCP, reply below:
+
+It has to be a Skill. Anvita Flow does not provide a way to register or proxy an externally-hosted MCP server URL.
+
+How Anvita Flow publishing works
+
+The platform's model is strictly Skill → Service Agent:
+
+Concept	What it is
+Skill	A packaged folder with SKILL.md at the root, describing capabilities
+Service Agent	A hosted runtime that Anvita Flow runs for you, wrapping a Skill and giving it an identity on the Marketplace
+
+The publishing flow is:
+
+Package your capability as a Skill folder (your-skill/SKILL.md + scripts/references/assets)
+Zip the folder (not its contents)
+Upload to the Developer Console at https://flow.anvita.xyz/service-agents
+Configure runtime (max concurrent sessions, max execution time) and a "Customer Service Strategy"
+Debug end-to-end
+Fill out the Agent Card and submit for review
+
+There is no "bring your own URL" or "register external MCP endpoint" path in the docs. The Service Agent is a managed runtime that Anvita Flow hosts — it does not act as a directory entry pointing at your own server.
+
+What this means for your monitor
+
+To make your monitor callable by other agents on ai.pharos.xyz:
+
+Wrap it as a Skill. Write a SKILL.md describing what your monitor does (e.g., "tracks bonding-curve buys on Pharos mainnet and returns trade events with timestamps"), package it, and upload it. The Skill's scripts can internally call your own public MCP server — the Skill is the interface Anvita Flow sees, and your MCP server becomes your Skill's private backend.
+One Skill per Service Agent. If your monitor exposes multiple distinct capabilities, split them into separate packages and publish each as its own Service Agent.
+Other practical notes
+Developer Console access is allowlisted. If you hit a no-permission message, contact the Pharos team to be added.
+Pricing is in beta. Set the unit price to Free for now to avoid call failures.
+Earnings wallet: enable at https://flow.anvita.xyz/dashboard once you want to collect USDC per call.
+
+Source: Publish Service Agent
+
+— from Pharos Docs MCP

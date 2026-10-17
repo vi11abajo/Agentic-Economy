@@ -1,0 +1,59 @@
+Q: @Pharos Docs MCP The public Pharos MCP allows 120 requests a minute. Is there an API key or paid tier for production bots?
+
+Matched Pharos Docs MCP, reply below:
+
+No — the hosted Pharos MCP endpoint has no API key, no paid tier, and no way to raise the limit on the public service.
+
+From the docs:
+
+Field	Value
+Hosted endpoint	https://mcp.pharos.xyz/mcp
+Authentication	None — public
+Rate limit	120 requests per minute per IP
+
+There is no documented mechanism to authenticate for a higher quota on the hosted server.
+
+The production path: self-host
+
+The docs explicitly point at self-hosting as the answer for production workloads:
+
+"Run your own instance when you need a private RPC provider, a higher rate limit, or your own operational control."
+
+When you self-host, you control the limits:
+
+Variable	Default	Notes
+RATE_LIMIT_PER_MINUTE	120	Set to 0 to disable rate limiting entirely
+MCP_AUTH_TOKEN	—	Add bearer-token auth in front of your instance
+PHAROS_RPC_URL	https://rpc.pharos.xyz	Point at any RPC — including a paid provider (Alchemy, QuickNode, etc.) or your own node
+MAX_SESSIONS	500	Concurrent session cap
+SESSION_TIMEOUT_MINUTES	30	Idle eviction
+Self-host options
+
+Node.js (requires Node 20+):
+
+git clone https://github.com/PharosNetwork/pharos-mcp.git
+cd pharos-mcp
+npm install
+npm run build
+MCP_TRANSPORT=http MCP_HOST=0.0.0.0 RATE_LIMIT_PER_MINUTE=0 MCP_AUTH_TOKEN=your-secret npm start
+
+
+Docker:
+
+docker build -t pharos-mcp-server .
+docker run -p 3001:3001 \
+  -e MCP_TRANSPORT=http \
+  -e MCP_HOST=0.0.0.0 \
+  -e RATE_LIMIT_PER_MINUTE=0 \
+  -e MCP_AUTH_TOKEN=your-secret \
+  pharos-mcp-server
+
+Recommendations for a production bot
+Self-host the MCP server with RATE_LIMIT_PER_MINUTE=0 (or a high value) and MCP_AUTH_TOKEN set.
+Point PHAROS_RPC_URL at a paid RPC provider (Alchemy, QuickNode, ZAN, or your own node) — the public rpc.pharos.xyz may itself have limits unsuitable for heavy polling.
+**Put TLS + auth in front of any publicly reachable instance. The docs warn: "an open broadcast endpoint lets anyone push transactions through your node" if ENABLE_SEND_RAW_TRANSACTION is on.
+For get_logs polling (your bonding-curve monitor), remember the 1000-block cap per call is an upstream RPC limit, not an MCP limit — self-hosting won't raise it. Page in 1000-block windows regardless.
+
+Source: Pharos MCP
+
+— from Pharos Docs MCP

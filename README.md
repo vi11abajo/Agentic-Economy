@@ -16,6 +16,7 @@ npm run build
 |---|------|-------|------|--------|
 | 01 | Read Contract State | Chain MCP | Easy | [`01-read-contract-state`](01-read-contract-state) |
 | 02 | Event/Log Monitor — Prosper curve buys & sells | Chain MCP | Easy | [`02-event-log-monitor`](02-event-log-monitor) |
+| 03 | Docs MCP Onboarding — ai.pharos.xyz via the Docs MCP agent, 6 docs gaps | Developer Docs MCP | Easy | [`03-docs-mcp-onboarding`](03-docs-mcp-onboarding) |
 
 ## Shared packages
 

@@ -1,0 +1,26 @@
+Q: @Pharos Docs MCP Do logs from Pharos MCP include the block time, or does my bot need an extra call per block to know when a trade happened?
+
+Matched Pharos Docs MCP, reply below:
+
+No — get_logs does not include the block timestamp. Each log entry carries a blockNumber (and blockHash, transactionHash, etc.), but not the time the block was produced.
+
+To know when a trade happened, your bot needs an extra call per distinct block:
+
+Use the get_block tool (wraps eth_getBlockByNumber) on each unique blockNumber returned by get_logs, and read the timestamp field from the block result.
+Recommended optimization
+
+Don't call get_block once per log — call it once per distinct block number and cache the result. A single bonding-curve buy event poll over a 1000-block window may return dozens of logs, but there are at most 1000 distinct blocks, and in practice far fewer if trades cluster.
+
+logs = get_logs(fromBlock, toBlock, address, topics)
+block_timestamps = {}
+for log in logs:
+    if log.blockNumber not in block_timestamps:
+        block = get_block(log.blockNumber)
+        block_timestamps[log.blockNumber] = block.timestamp
+    log.timestamp = block_timestamps[log.blockNumber]
+
+Sources
+Pharos MCP — get_logs and get_block tool definitions
+JSON-RPC API Methods — log results include blockNumber; block results include timestamp
+
+— from Pharos Docs MCP
