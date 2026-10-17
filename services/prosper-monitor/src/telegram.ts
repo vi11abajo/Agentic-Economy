@@ -86,6 +86,29 @@ export function startTelegram(db: Db, indexer: Indexer): void {
     }
   });
 
+  // Bot profile: command menu and the texts shown before /start.
+  void Promise.all([
+    api("setMyCommands", {
+      commands: [
+        { command: "watch", description: "Alert me: /watch <token|all> [min PROS]" },
+        { command: "unwatch", description: "Stop alerts: /unwatch <token|all>" },
+        { command: "list", description: "My alerts" },
+        { command: "tokens", description: "Tokens on the bonding curve" },
+        { command: "help", description: "How it works" },
+      ],
+    }),
+    api("setMyShortDescription", {
+      short_description: "Live alerts for every buy and sell on Prosper bonding curves (Pharos). Feed: " + config.publicUrl,
+    }),
+    api("setMyDescription", {
+      description:
+        "Alerts for every buy and sell of Prosper tokens that are still on the bonding curve (Pharos mainnet), " +
+        "indexed live through Pharos Chain MCP.\n\nAccess by whitelist — ask " + config.adminContact + ".\n" +
+        "Public live feed: " + config.publicUrl,
+    }),
+  ]).then((r) => r.forEach((x) => !x.ok && console.error(`[telegram] profile: ${x.description}`)))
+    .catch((e) => console.error(`[telegram] profile: ${e}`));
+
   (async () => {
     let offset = 0;
     console.log("[telegram] bot started");
