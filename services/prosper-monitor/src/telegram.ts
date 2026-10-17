@@ -230,13 +230,21 @@ export function formatTrade(t: TradeRow): string {
   const z = (n: number) => String(n).padStart(2, "0");
   // Telegram has no viewer time zone: dates are UTC.
   const stamp = `${z(d.getUTCDate())}.${z(d.getUTCMonth() + 1)}.${d.getUTCFullYear()} - ${z(d.getUTCHours())}.${z(d.getUTCMinutes())}.${z(d.getUTCSeconds())} UTC`;
-  const who = `${t.trader.slice(0, 6)}…${t.trader.slice(-4)}`;
-  const what = t.side === "BUY"
-    ? `${who} paid <b>${fmt(t.pros)} ${NATIVE}</b> → received <b>${fmt(t.tokens)} ${t.symbol}</b>`
-    : `${who} sold <b>${fmt(t.tokens)} ${t.symbol}</b> → received <b>${fmt(t.pros)} ${NATIVE}</b>`;
-  return `${stamp} ${t.side === "BUY" ? "🟢 BUY" : "🔴 SELL"}
-<b>${t.symbol}</b>
-${what} <a href="${EXPLORER}/tx/${t.tx}">tx</a> - current price ${t.symbol} ${t.price.toPrecision(4)} ${NATIVE}`;
+  const who = `<a href="${EXPLORER}/address/${t.trader}">${t.trader.slice(0, 6)}…${t.trader.slice(-4)}</a>`;
+  const sym = esc(t.symbol);
+  const buy = t.side === "BUY";
+  const flow = buy
+    ? `<b>${fmt(t.pros)} ${NATIVE}</b> → <b>${fmt(t.tokens)} ${sym}</b>`
+    : `<b>${fmt(t.tokens)} ${sym}</b> → <b>${fmt(t.pros)} ${NATIVE}</b>`;
+  return [
+    `${buy ? "🟢" : "🔴"} <b>${t.side} · ${sym}</b>`,
+    "",
+    `${buy ? "💰 Paid" : "💸 Sold"}  ${flow}`,
+    `👤 Trader  ${who}`,
+    `📈 Price  <code>${t.price.toPrecision(4)}</code> ${NATIVE} per ${sym}`,
+    "",
+    `🕒 ${stamp}  ·  <a href="${EXPLORER}/tx/${t.tx}">View tx ↗</a>`,
+  ].join("\n");
 }
 
 function fmt(n: number): string {
