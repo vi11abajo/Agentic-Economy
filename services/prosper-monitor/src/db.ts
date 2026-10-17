@@ -43,6 +43,7 @@ export function openDb(path: string) {
     delAllSubs: db.prepare("DELETE FROM subscriptions WHERE chatId = ?"),
     subsByChat: db.prepare("SELECT * FROM subscriptions WHERE chatId = ? ORDER BY market"),
     subsByMarket: db.prepare("SELECT * FROM subscriptions WHERE market = ? OR market = '*'"),
+    subsByUsername: db.prepare("SELECT * FROM subscriptions WHERE LOWER(username) = ?"),
   };
 
   return {
@@ -82,5 +83,6 @@ export function openDb(path: string) {
     delAllSubs: (chatId: number) => stmt.delAllSubs.run(chatId),
     subsByChat: (chatId: number) => stmt.subsByChat.all(chatId) as unknown as { chatId: number; username: string; market: string; minPros: number }[],
     subsByMarket: (market: string) => stmt.subsByMarket.all(market) as unknown as { chatId: number; username: string; market: string; minPros: number }[],
+    subsByUsername: (username: string) => stmt.subsByUsername.all(username.toLowerCase()) as unknown as { chatId: number; username: string; market: string; minPros: number }[],
   };
 }
