@@ -112,11 +112,17 @@ function findMarket(indexer: Indexer, q: string): string | undefined {
 }
 
 export function formatTrade(t: TradeRow): string {
-  const side = t.side === "BUY" ? "🟢 BUY" : "🔴 SELL";
+  const d = new Date(t.time * 1000);
+  const z = (n: number) => String(n).padStart(2, "0");
+  // Telegram has no viewer time zone: dates are UTC.
+  const stamp = `${z(d.getUTCDate())}.${z(d.getUTCMonth() + 1)}.${d.getUTCFullYear()} - ${z(d.getUTCHours())}.${z(d.getUTCMinutes())}.${z(d.getUTCSeconds())} UTC`;
+  const who = `${t.trader.slice(0, 6)}…${t.trader.slice(-4)}`;
   const what = t.side === "BUY"
-    ? `paid <b>${fmt(t.pros)} ${NATIVE}</b> → ${fmt(t.tokens)} ${t.symbol}`
-    : `sold ${fmt(t.tokens)} ${t.symbol} → <b>${fmt(t.pros)} ${NATIVE}</b>`;
-  return `${side} <b>${t.symbol}</b>\n${what}\nprice ${t.price.toPrecision(4)} ${NATIVE} · ${t.trader.slice(0, 6)}…${t.trader.slice(-4)}\n<a href="${EXPLORER}/tx/${t.tx}">tx</a> · block ${t.block}`;
+    ? `${who} paid <b>${fmt(t.pros)} ${NATIVE}</b> → received <b>${fmt(t.tokens)} ${t.symbol}</b>`
+    : `${who} sold <b>${fmt(t.tokens)} ${t.symbol}</b> → received <b>${fmt(t.pros)} ${NATIVE}</b>`;
+  return `${stamp} ${t.side === "BUY" ? "🟢 BUY" : "🔴 SELL"}
+<b>${t.symbol}</b>
+${what} <a href="${EXPLORER}/tx/${t.tx}">tx</a> - current price ${t.symbol} ${t.price.toPrecision(4)} ${NATIVE}`;
 }
 
 function fmt(n: number): string {

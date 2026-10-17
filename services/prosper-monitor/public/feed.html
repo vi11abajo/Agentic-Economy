@@ -28,7 +28,8 @@
           padding: 3px 9px; border-radius: 6px; cursor: pointer; }
   .chip.on { color: var(--text); border-color: var(--cobalt); background: rgba(91,103,255,.12); }
   #log { height: 62vh; min-height: 360px; overflow-y: auto; padding: 4px 16px 14px; border-top: 1px solid var(--line); }
-  .row { display: grid; grid-template-columns: 74px 54px 82px 1fr; gap: 10px; padding: 3px 0; white-space: nowrap; }
+  .row { padding: 7px 0; border-bottom: 1px solid #12141f; }
+  .row .l3 { overflow-wrap: anywhere; }
   .row .time { color: var(--muted); }
   .row.new { animation: flash 1.6s ease-out; }
   @keyframes flash { from { background: rgba(91,103,255,.22); } to { background: transparent; } }
@@ -47,8 +48,6 @@
   .help p { margin: 6px 0; }
   @media (max-width: 640px) {
     body { font-size: 12.5px; }
-    .row { grid-template-columns: 58px 42px 1fr; white-space: normal; }
-    .row .sym { display: none; }
     #log { height: 66vh; }
   }
 </style>
@@ -83,19 +82,28 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const atBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 40;
 
+  // Local date/time of the trade: dd.mm.yyyy - hh.mm.ss
+  function stamp(sec) {
+    const d = new Date(sec * 1000), z = (n) => String(n).padStart(2, "0");
+    return `${z(d.getDate())}.${z(d.getMonth() + 1)}.${d.getFullYear()} - ${z(d.getHours())}.${z(d.getMinutes())}.${z(d.getSeconds())}`;
+  }
   function row(t, isNew) {
     const d = document.createElement("div");
     d.className = "row" + (isNew ? " new" : "");
     d.dataset.m = t.market;
     if (filter && t.market !== filter) d.style.display = "none";
-    const time = new Date(t.time * 1000).toISOString().slice(11, 19);
+    const sym = esc(t.symbol);
     const what = t.side === "BUY"
-      ? `${esc(short(t.trader))} paid <span class="amt">${fmt(t.pros)} PROS</span> → ${fmt(t.tokens)} ${esc(t.symbol)}`
-      : `${esc(short(t.trader))} sold ${fmt(t.tokens)} ${esc(t.symbol)} → <span class="amt">${fmt(t.pros)} PROS</span>`;
-    d.innerHTML = `<span class="time">${time}</span><span class="${t.side}">${t.side}</span><span class="sym">${esc(t.symbol)}</span>` +
-      `<span class="what">${what} <span class="dim">@ ${Number(t.price).toPrecision(4)}</span> <a href="${t.url}" target="_blank" rel="noopener">tx</a></span>`;
+      ? `${esc(short(t.trader))} paid <span class="amt">${fmt(t.pros)} PROS</span> → received <span class="amt">${fmt(t.tokens)} ${sym}</span>`
+      : `${esc(short(t.trader))} sold <span class="amt">${fmt(t.tokens)} ${sym}</span> → received <span class="amt">${fmt(t.pros)} PROS</span>`;
+    d.innerHTML =
+      `<div class="l1"><span class="time">${stamp(t.time)}</span> <span class="${t.side}">${t.side}</span></div>` +
+      `<div class="l2 sym">${sym}</div>` +
+      `<div class="l3 what">${what} <a href="${t.url}" target="_blank" rel="noopener">tx</a> ` +
+      `<span class="dim">- current price ${sym} ${Number(t.price).toPrecision(4)} PROS</span></div>`;
     return d;
   }
+
   function sys(text) {
     const d = document.createElement("div");
     d.className = "sys";
