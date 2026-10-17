@@ -20,4 +20,6 @@ export const config = {
     .map((s) => s.trim().replace(/^@/, "").toLowerCase())
     .filter(Boolean),
   adminContact: env.TELEGRAM_ADMIN_CONTACT ?? "@daolog",
+  /** Bot username (without @), shown on the public feed. */
+  telegramBotUsername: (env.TELEGRAM_BOT_USERNAME ?? "prospeMonitor_bot").replace(/^@/, ""),
 };

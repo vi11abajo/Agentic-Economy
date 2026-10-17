@@ -114,7 +114,7 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
   let next = opt.fromBlock ?? (saved ? BigInt(saved.nextBlock) : BigInt(chain.latestBlock) - confirmations);
   const seen = new Set<string>(saved?.seen ?? []);
 
-  console.log(paint("bold", `Watching ${markets.size} Prosper curve(s) for buys and sells`));
+  console.log(paint("cobalt", paint("bold", `Watching ${markets.size} Prosper curve(s) for buys and sells`)));
   for (const m of markets.values()) {
     console.log(paint("muted", `  ${m.symbol.padEnd(10)} market ${m.market} · pToken ${m.pToken}${m.minPros ? ` · ≥ ${m.minPros} ${NATIVE}` : ""}`));
   }
@@ -122,6 +122,12 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
 
   let reportedTotal = 0;
   let stopping = false;
+  // In a terminal the idle status is one line updated in place; in logs/pipes it is one line per poll.
+  let idleShown = false;
+  const clearIdle = () => {
+    if (idleShown) process.stdout.write("\r\x1b[2K");
+    idleShown = false;
+  };
   process.on("SIGINT", () => {
     stopping = true;
   });
@@ -151,6 +157,7 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
         reported++;
         reportedTotal++;
         appendFileSync(opt.log, `${JSON.stringify({ n: reportedTotal, ...trade })}\n`);
+        clearIdle();
         printTrade(reportedTotal, trade);
         if (opt.maxEvents && reportedTotal >= opt.maxEvents) stopping = true;
         if (stopping) break;
@@ -158,9 +165,15 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
       next = to + 1n;
       saveState(opt.state, { markets: ids, nextBlock: next.toString(), seen: [...seen].slice(-KEEP_SEEN) });
     }
-    if (!stopping && reported === 0) process.stdout.write(paint("muted", `  · block ${fmt(safe)} — no new trades\n`));
+    if (!stopping && reported === 0) {
+      if (color) {
+        process.stdout.write(`\r\x1b[2K${paint("muted", `  · block ${fmt(safe)} · watching, no new trades yet…`)}`);
+        idleShown = true;
+      } else process.stdout.write(`  · block ${fmt(safe)} — no new trades\n`);
+    }
     if (!stopping) await sleep(interval);
   }
+  clearIdle();
   console.log(paint("green", `\n✓ stopped · ${reportedTotal} trade(s) reported · resumes at block ${fmt(next)} · ${mcp.calls} MCP calls`));
 }
 
@@ -197,7 +210,7 @@ function printTrade(n: number, t: Trade): void {
   const what = t.side === "BUY"
     ? `paid ${num(t.pros)} ${NATIVE} → got ${num(t.tokens)} ${t.token}`
     : `sold ${num(t.tokens)} ${t.token} → got ${num(t.pros)} ${NATIVE}`;
-  console.log(`${paint("bold", `#${n}`)} ${side} ${paint("cobalt", paint("bold", t.token))}  ${paint("muted", `block ${fmt(BigInt(t.block))} · ${time}`)}`);
+  console.log(`${paint("muted", paint("bold", `#${n}`))} ${side} ${paint("cobalt", paint("bold", t.token))}  ${paint("muted", `block ${fmt(BigInt(t.block))} · ${time}`)}`);
   console.log(`    ${short(t.trader)}  ${what}`);
   console.log(paint("muted", `    price ${t.price.toPrecision(4)} ${NATIVE}/${t.token} · fee ${num(t.fee)} ${NATIVE} · tx ${t.tx}`));
 }

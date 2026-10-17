@@ -16,7 +16,9 @@ const db = openDb(config.dbPath);
 const indexer = new Indexer(db);
 const feedHtml = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "public", "feed.html"), "utf8")
   .replaceAll("{{BASE}}", config.basePath)
-  .replaceAll("{{PUBLIC_URL}}", config.publicUrl);
+  .replaceAll("{{PUBLIC_URL}}", config.publicUrl)
+  .replaceAll("{{BOT}}", config.telegramBotUsername)
+  .replaceAll("{{ADMIN}}", config.adminContact);
 
 // ---- per-IP fixed-window rate limit (Cloudflare passes the client IP in CF-Connecting-IP)
 const buckets = new Map<string, { count: number; start: number }>();
