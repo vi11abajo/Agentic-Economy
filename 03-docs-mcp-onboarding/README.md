@@ -13,7 +13,7 @@ follow that path instead of "what is the chain ID".
 
 | # | What I was trying to do | Exact query to `@Pharos Docs MCP` | Answer (short) | Verdict |
 |---|---|---|---|---|
-| 0 | Understand the site I just joined | *I just signed up on ai.pharos.xyz. What is this site, and what can I do here?* | no answer — after ~180 s: "Something went wrong. Please try again." (twice, on two accounts; [screenshot](log/q00-timeout.png)) | ✗ gap 1 |
+| 0 | Understand the site I just joined | *I just signed up on ai.pharos.xyz. What is this site, and what can I do here?* | the chat shows "Something went wrong. Please try again." after ~180 s (twice, on two accounts; [screenshot](log/q00-timeout.png)); the reply lands in the history later: "`ai.pharos.xyz` **is not explicitly documented** as a specific site…", then Anvita Flow, cut off mid-list ([screenshot](log/q00-late-reply.png)) | ✗ gap 1 |
 | 1 | Pick the tool for my monitor | *I want my agent to react to every buy on a bonding-curve token launched on Pharos mainnet. Which Pharos MCP tool should it poll, and how many blocks can one call cover?* | `get_logs`, filter by address + event topic, max **1,000 blocks** per call, page in 1,000-block windows; endpoint `mcp.pharos.xyz/mcp`, 120 req/min | ✓ correct |
 | 2 | Get the trade time | *Do logs from Pharos MCP include the block time, or does my bot need an extra call per block to know when a trade happened?* | "**No — get_logs does not include the block timestamp**"; call `get_block` per distinct block and cache | ✗ gap 2 (wrong) |
 | 3 | Find the contracts to index | *Is there an official list of launchpad or DEX factory contracts on Pharos mainnet that I could index, like FaroSwap or a token launchpad?* | No — the docs only list infrastructure contracts (Create2Deployer, Multicall3, Safe, Permit2…); "go to the explorer / project Discord" | ✗ gap 3 |
@@ -27,16 +27,18 @@ the capability is missing.
 
 ## Gaps, evidence and suggested fixes
 
-**1. The docs don't know ai.pharos.xyz — and the agent times out instead of saying so.**
-Query 0 never returned (≈180 s, then "Something went wrong"), on two different accounts. A direct call to the Docs
+**1. The docs don't know ai.pharos.xyz — and the chat errors out on the question.**
+Query 0 ended with "Something went wrong" after ≈180 s, on two different accounts. The reply did arrive later
+(visible in the history after a reload) and confirms the gap — "`ai.pharos.xyz` is not explicitly documented as a
+specific site" — but it is cut off mid-list ("**Chat with your Steward Agent"). A direct call to the Docs
 MCP endpoint (`docs.pharos.xyz/~gitbook/mcp`, `askQuestion` "What is ai.pharos.xyz and what can I do there?")
 answers that the docs only describe Anvita Flow at `flow.anvita.xyz` "so I can't confirm that exact domain's
 purpose" ([log/direct-docs-mcp.txt](log/direct-docs-mcp.txt)). The site itself has the same kind of drift: its
 llms.txt page shows `https://www.pharos.xyz/agent-center/llms.txt`, which returns **404**
 (`docs.pharos.xyz/llms.txt` → 200).
 *Fix:* add an "ai.pharos.xyz" page — what the hub is, the agents (`@Pharos Docs MCP`, `@Pharos MCP`,
-`@pharos-skill-engine`), the Guardian agent and credits, and how it relates to Anvita Flow; make the chat agent fail
-fast with "not in the docs" instead of a timeout; fix the llms.txt URL.
+`@pharos-skill-engine`), the Guardian agent and credits, and how it relates to Anvita Flow; make the chat answer
+"not in the docs" fast instead of timing out the UI; fix the llms.txt URL.
 
 **2. "get_logs does not include the block timestamp" is wrong.**
 Live Pharos MCP `get_logs` returns `blockTimestamp` on every log (`npm run verify`: 25/25 logs). Following the
