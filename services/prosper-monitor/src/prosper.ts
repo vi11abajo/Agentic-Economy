@@ -53,7 +53,22 @@ export interface MarketRow {
   decimals: number;
   createdBlock: number;
   createdTime: number;
+  /** Market phase from the contract's phase(): 0 on curve, 1 migrating, 2 graduated (FaroSwap), 3 curve only (failed). */
+  phase?: number | null;
 }
+
+export const ON_CURVE = 0;
+export const PHASE_LABEL: Record<number, string> = { 0: "on curve", 1: "migrating", 2: "graduated", 3: "curve only" };
+
+/** Reads the market's phase() through Pharos Chain MCP (selector 0xb1c9fe6e, found in the market implementation). */
+export async function readPhase(mcp: PharosMcp, market: string): Promise<number> {
+  const { result } = await mcp.call<{ result: Hex }>("eth_call", {
+    transaction: { to: market, data: encodeFunctionData({ abi: phaseAbi, functionName: "phase" }) },
+    block: "latest",
+  });
+  return Number(decodeFunctionResult({ abi: phaseAbi, functionName: "phase", data: result }));
+}
+const phaseAbi = parseAbi(["function phase() view returns (uint8)"]);
 
 export interface TradeRow {
   id: string; // txHash:logIndex

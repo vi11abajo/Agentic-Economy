@@ -57,7 +57,7 @@
 <div class="wrap">
   <div class="term">
     <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
-      <span class="t">prosper-monitor — Pharos mainnet · Prosper bonding curves</span></div>
+      <span class="t">prosper-monitor — Pharos mainnet · Prosper tokens on the bonding curve</span></div>
     <div class="head">
       <div class="prompt">monitor@pharos:~$ <b>tail -f prosper/trades</b> <span class="cursor"></span></div>
       <div class="status" id="status">connecting…</div>
@@ -66,7 +66,7 @@
     <div id="log"></div>
   </div>
   <div class="help">
-    <p>Every buy and sell on <a style="color:var(--cobalt)" href="https://app.pros-per.xyz" target="_blank" rel="noopener">Prosper</a> curves, indexed live through Pharos Chain MCP.</p>
+    <p>Every buy and sell of <a style="color:var(--cobalt)" href="https://app.pros-per.xyz" target="_blank" rel="noopener">Prosper</a> tokens that are still <b>on the bonding curve</b> (graduated and curve-only tokens are left out), indexed live through Pharos Chain MCP.</p>
     <p>Use it from an AI agent (MCP): <code>claude mcp add --transport http prosper-monitor {{PUBLIC_URL}}/mcp</code></p>
     <p>JSON: <code>{{BASE}}/trades.json?limit=50</code> · Telegram alerts: by whitelist.</p>
   </div>
@@ -123,7 +123,7 @@
       const lag = s.head - s.indexedTo;
       statusEl.innerHTML = `<span class="${s.live ? "live" : "sync"}">● ${s.live ? "live" : "syncing history"}</span>` +
         `<span>block ${Number(s.indexedTo).toLocaleString("en-US")}</span><span>lag ${lag} blocks</span>` +
-        `<span>${s.markets} curves</span><span>source: Pharos Chain MCP</span>`;
+        `<span>${s.markets} tokens on curve</span><span>source: Pharos Chain MCP</span>`;
     });
     es.addEventListener("markets", (e) => {
       for (const m of JSON.parse(e.data)) {
@@ -136,6 +136,13 @@
     es.addEventListener("market", (e) => {
       const m = JSON.parse(e.data);
       sys(`new curve: ${m.symbol} (${m.name})`);
+    });
+    es.addEventListener("phase", (e) => {
+      const m = JSON.parse(e.data);
+      sys(`${m.symbol} is ${m.label} — left the curve, removed from the monitor`);
+      filters.querySelector(`[data-m="${m.market}"]`)?.remove();
+      for (const r of log.querySelectorAll(`.row[data-m="${m.market}"]`)) r.remove();
+      if (filter === m.market) setFilter("");
     });
     es.addEventListener("history", (e) => {
       log.innerHTML = "";

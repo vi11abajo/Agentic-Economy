@@ -69,6 +69,16 @@ export function startTelegram(db: Db, indexer: Indexer): void {
     return send(chatId, help);
   };
 
+  indexer.on("phase", (m: { symbol: string; market: string; label: string }) => {
+    const notified = new Set<number>();
+    for (const s of db.subsByMarket(m.market)) {
+      if (s.market !== m.market || notified.has(s.chatId)) continue;
+      notified.add(s.chatId);
+      void send(s.chatId, `ℹ️ <b>${m.symbol}</b> is ${m.label} — it left the bonding curve and is no longer monitored.`);
+      db.delSub(s.chatId, m.market);
+    }
+  });
+
   indexer.on("trade", (t: TradeRow) => {
     for (const s of db.subsByMarket(t.market)) {
       if (!allowed(s.username) || t.pros < (s.minPros || 0)) continue;

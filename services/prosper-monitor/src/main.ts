@@ -52,6 +52,9 @@ indexer.on("trade", (t: TradeRow) => {
 indexer.on("market", (m) => {
   for (const res of streams) sse(res, "market", m);
 });
+indexer.on("phase", (m) => {
+  for (const res of streams) sse(res, "phase", { symbol: m.symbol, market: m.market, label: m.label });
+});
 setInterval(() => {
   for (const res of streams) sse(res, "status", indexer.status);
 }, 10_000).unref();
@@ -91,7 +94,7 @@ const http = createServer(async (req, res) => {
       res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-cache", connection: "keep-alive", "x-accel-buffering": "no" });
       sse(res, "status", indexer.status);
       sse(res, "markets", indexer.allMarkets().map((m) => ({ symbol: m.symbol, name: m.name, market: m.market, slug: m.vault.slice(-6).toLowerCase() })));
-      sse(res, "history", db.trades({ limit: 60 }).reverse().map(feedTrade));
+      sse(res, "history", db.trades({ markets: indexer.onCurveIds(), limit: 60 }).reverse().map(feedTrade));
       streams.add(res);
       const ping = setInterval(() => res.write(": ping\n\n"), 25_000);
       req.on("close", () => {
@@ -105,7 +108,9 @@ const http = createServer(async (req, res) => {
       if (!allow(req, res)) return;
       const token = url.searchParams.get("market") ?? undefined;
       res.writeHead(200, { "content-type": "application/json" });
-      return res.end(JSON.stringify(db.trades({ market: token?.toLowerCase(), limit: Number(url.searchParams.get("limit") ?? 50) }).map(feedTrade)));
+      const onCurve = indexer.onCurveIds();
+      const market = token && onCurve.includes(token.toLowerCase()) ? token.toLowerCase() : undefined;
+      return res.end(JSON.stringify(db.trades({ market, markets: market ? undefined : onCurve, limit: Number(url.searchParams.get("limit") ?? 50) }).map(feedTrade)));
     }
     if (path === `${base}/mcp`) {
       if (!allow(req, res)) return;

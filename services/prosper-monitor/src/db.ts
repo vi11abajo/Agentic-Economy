@@ -23,11 +23,19 @@ export function openDb(path: string) {
     CREATE TABLE IF NOT EXISTS subscriptions (
       chatId INTEGER, username TEXT, market TEXT, minPros REAL, PRIMARY KEY (chatId, market));
   `);
+  // v2: curve phase (0 = on curve). Added to existing databases in place.
+  try {
+    db.exec("ALTER TABLE markets ADD COLUMN phase INTEGER");
+  } catch {
+    // column already exists
+  }
 
   const stmt = {
     getMeta: db.prepare("SELECT value FROM meta WHERE key = ?"),
     setMeta: db.prepare("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value"),
-    upsertMarket: db.prepare(`INSERT OR REPLACE INTO markets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`),
+    upsertMarket: db.prepare(`INSERT OR REPLACE INTO markets
+      (market, pToken, vault, creator, symbol, name, decimals, createdBlock, createdTime, phase) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
+    setPhase: db.prepare("UPDATE markets SET phase = ? WHERE market = ?"),
     markets: db.prepare("SELECT * FROM markets ORDER BY createdBlock"),
     insertTrade: db.prepare(`INSERT OR IGNORE INTO trades VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
     addSub: db.prepare("INSERT OR REPLACE INTO subscriptions VALUES (?, ?, ?, ?)"),
@@ -41,15 +49,17 @@ export function openDb(path: string) {
     meta: (key: string) => (stmt.getMeta.get(key) as { value: string } | undefined)?.value,
     setMeta: (key: string, value: string) => stmt.setMeta.run(key, value),
     upsertMarket: (m: MarketRow) =>
-      stmt.upsertMarket.run(m.market, m.pToken, m.vault, m.creator, m.symbol, m.name, m.decimals, m.createdBlock, m.createdTime),
+      stmt.upsertMarket.run(m.market, m.pToken, m.vault, m.creator, m.symbol, m.name, m.decimals, m.createdBlock, m.createdTime, m.phase ?? null),
+    setPhase: (market: string, phase: number) => stmt.setPhase.run(phase, market),
     markets: () => stmt.markets.all() as unknown as MarketRow[],
     /** Returns true when the trade was new (not a duplicate). */
     insertTrade: (t: TradeRow) =>
       Number(stmt.insertTrade.run(t.id, t.market, t.symbol, t.side, t.trader, t.pros, t.tokens, t.fee, t.price, t.block, t.time, t.tx).changes) > 0,
-    trades: (f: { market?: string; trader?: string; side?: string; minPros?: number; sinceTime?: number; afterBlock?: number; limit?: number }) => {
+    trades: (f: { market?: string; markets?: string[]; trader?: string; side?: string; minPros?: number; sinceTime?: number; afterBlock?: number; limit?: number }) => {
       const where: string[] = [];
       const args: (string | number)[] = [];
       if (f.market) { where.push("market = ?"); args.push(f.market); }
+      if (f.markets) { where.push(`market IN (${f.markets.map(() => "?").join(",") || "''"})`); args.push(...f.markets); }
       if (f.trader) { where.push("lower(trader) = ?"); args.push(f.trader.toLowerCase()); }
       if (f.side) { where.push("side = ?"); args.push(f.side); }
       if (f.minPros) { where.push("pros >= ?"); args.push(f.minPros); }

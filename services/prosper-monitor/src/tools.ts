@@ -12,7 +12,7 @@ export function createMcpServer(db: Db, indexer: Indexer): McpServer {
     { name: "prosper-monitor", version: "1.0.0" },
     {
       instructions:
-        "Live data for Prosper (pros-per.xyz) bonding-curve tokens on Pharos mainnet: every pToken market, every buy and sell, " +
+        "Live data for Prosper (pros-per.xyz) tokens that are still ON the bonding curve on Pharos mainnet (graduated and curve-only tokens are excluded): every buy and sell, " +
         "volumes and prices. Data is indexed from Pharos Chain MCP. Tokens can be given by symbol (pMusk), market or pToken " +
         "address, or the vault suffix from the app URL (sxss-46f0d8 -> 46f0d8). Amounts are in PROS (native token).",
     },
@@ -46,7 +46,7 @@ export function createMcpServer(db: Db, indexer: Indexer): McpServer {
 
   server.registerTool(
     "list_markets",
-    { title: "List Prosper markets", description: "All Prosper bonding-curve markets with token, addresses, PROS raised on the curve and 24h activity." },
+    { title: "List Prosper markets", description: "Prosper tokens currently ON the bonding curve (graduated and curve-only tokens are excluded), with addresses, PROS raised on the curve and 24h activity." },
     async () => {
       const day = Math.floor(Date.now() / 1000) - 86400;
       return json(indexer.allMarkets().map((m) => {
@@ -78,7 +78,7 @@ export function createMcpServer(db: Db, indexer: Indexer): McpServer {
     async (a) => {
       const m = resolve(a.token);
       return json(db.trades({
-        market: m?.market, trader: a.trader, side: a.side, minPros: a.min_pros, limit: a.limit,
+        market: m?.market, markets: m ? undefined : indexer.onCurveIds(), trader: a.trader, side: a.side, minPros: a.min_pros, limit: a.limit,
         sinceTime: a.hours ? Math.floor(Date.now() / 1000 - a.hours * 3600) : undefined,
       }).map(tradeOut));
     },
