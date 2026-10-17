@@ -4,51 +4,90 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>prosper-monitor · live Prosper curve trades on Pharos</title>
-<meta name="description" content="Every buy and sell on Prosper bonding curves on Pharos, live. Indexed through Pharos Chain MCP." />
+<meta name="description" content="Every buy and sell of Prosper tokens on the bonding curve (Pharos), live. Indexed through Pharos Chain MCP." />
 <style>
-  :root { --bg: #07080d; --panel: #0d0f18; --line: #1a1d2b; --text: #d6d9e4; --muted: #6c7187; --cobalt: #5b67ff;
-          --buy: #3ddc84; --sell: #ff5c6c; --amber: #f5c451; }
+  :root {
+    --bg: #05060a; --panel: #0b0d15; --panel2: #0f1220; --line: #1a1e2e; --line2: #232840;
+    --text: #dfe3ee; --muted: #6f7590; --faint: #3a3f57; --cobalt: #6c78ff;
+    --buy: #34d27a; --buy-bg: rgba(52,210,122,.12); --sell: #ff5a6a; --sell-bg: rgba(255,90,106,.12); --amber: #f5c451;
+  }
   * { box-sizing: border-box; }
   html, body { margin: 0; background: var(--bg); color: var(--text); }
-  body { font: 14px/1.55 "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas, "Liberation Mono", monospace; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
-  .term { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0,0,0,.45); }
-  .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: #0a0c14; }
-  .bar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
-  .bar .t { margin-left: 8px; color: var(--muted); font-size: 12.5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-  .head { padding: 14px 16px 8px; }
-  .prompt { color: var(--buy); }
+  body {
+    font: 14px/1.5 "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas, "Liberation Mono", monospace;
+    background:
+      radial-gradient(1200px 500px at 15% -10%, rgba(30,43,250,.18), transparent 60%),
+      radial-gradient(900px 400px at 100% 0%, rgba(52,210,122,.06), transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  .wrap { width: min(1600px, 96vw); margin: 0 auto; padding: 22px 0 40px; }
+
+  .term { background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px solid var(--line2);
+          border-radius: 14px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.03); }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-bottom: 1px solid var(--line); background: rgba(5,6,10,.6); }
+  .bar i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .bar .t { margin-left: 10px; color: var(--muted); font-size: 12.5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+  .head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 16px 20px 10px; }
+  .prompt { color: var(--buy); font-size: 15px; }
   .prompt b { color: var(--cobalt); font-weight: 600; }
-  .status { color: var(--muted); margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; }
-  .status .live { color: var(--buy); }
-  .status .sync { color: var(--amber); }
-  .filters { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 16px 10px; }
-  .chip { border: 1px solid var(--line); background: transparent; color: var(--muted); font: inherit; font-size: 12.5px;
-          padding: 3px 9px; border-radius: 6px; cursor: pointer; }
-  .chip.on { color: var(--text); border-color: var(--cobalt); background: rgba(91,103,255,.12); }
-  #log { height: 62vh; min-height: 360px; overflow-y: auto; padding: 4px 16px 14px; border-top: 1px solid var(--line); }
-  .row { padding: 7px 0; border-bottom: 1px solid #12141f; }
-  .row .l3 { overflow-wrap: anywhere; }
-  .row .time { color: var(--muted); }
-  .row.new { animation: flash 1.6s ease-out; }
-  @keyframes flash { from { background: rgba(91,103,255,.22); } to { background: transparent; } }
-  .BUY { color: var(--buy); font-weight: 700; }
-  .SELL { color: var(--sell); font-weight: 700; }
-  .sym { color: var(--cobalt); font-weight: 700; overflow: hidden; text-overflow: ellipsis; }
-  .what { overflow: hidden; text-overflow: ellipsis; }
-  .what a { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--muted); }
-  .what .amt { color: var(--text); font-weight: 700; }
-  .dim { color: var(--muted); }
-  .sys { color: var(--muted); padding: 3px 0; }
-  .cursor { display: inline-block; width: 8px; height: 15px; background: var(--buy); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+  .cursor { display: inline-block; width: 9px; height: 16px; background: var(--buy); vertical-align: -3px; animation: blink 1s steps(1) infinite; margin-left: 4px; }
   @keyframes blink { 50% { opacity: 0; } }
-  .help { margin-top: 18px; color: var(--muted); font-size: 12.5px; }
-  .help code { color: var(--text); background: #11131e; border: 1px solid var(--line); padding: 2px 6px; border-radius: 5px; overflow-wrap: anywhere; }
-  .help p { margin: 6px 0; }
-  @media (max-width: 640px) {
+
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stat { border: 1px solid var(--line2); background: rgba(255,255,255,.02); border-radius: 8px; padding: 5px 11px; font-size: 12px; color: var(--muted); }
+  .stat b { color: var(--text); font-weight: 600; }
+  .pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 600; }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+  .pill.live { color: var(--buy); background: var(--buy-bg); }
+  .pill.sync { color: var(--amber); background: rgba(245,196,81,.1); }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 7px; padding: 4px 20px 14px; }
+  .chip { border: 1px solid var(--line2); background: transparent; color: var(--muted); font: inherit; font-size: 12.5px;
+          padding: 4px 11px; border-radius: 999px; cursor: pointer; transition: all .15s; }
+  .chip:hover { color: var(--text); border-color: var(--faint); }
+  .chip.on { color: #fff; border-color: var(--cobalt); background: rgba(108,120,255,.16); }
+
+  #log { height: 68vh; min-height: 420px; overflow-y: auto; padding: 10px 20px 18px; border-top: 1px solid var(--line);
+         scrollbar-width: thin; scrollbar-color: var(--line2) transparent; }
+  .sys { color: var(--muted); padding: 6px 2px; font-size: 12.5px; }
+
+  .row { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 2px 24px; margin: 8px 0; padding: 11px 16px 11px 18px;
+         background: rgba(255,255,255,.018); border: 1px solid var(--line); border-radius: 10px; }
+  .row::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; }
+  .row.BUY::before { background: var(--buy); box-shadow: 0 0 12px var(--buy); }
+  .row.SELL::before { background: var(--sell); box-shadow: 0 0 12px var(--sell); }
+  .row.new { animation: flash 2s ease-out; }
+  @keyframes flash { from { background: rgba(108,120,255,.20); border-color: var(--cobalt); } to { background: rgba(255,255,255,.018); } }
+
+  .l1 { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12.5px; }
+  .side { font-weight: 700; font-size: 11.5px; letter-spacing: .06em; padding: 2px 9px; border-radius: 5px; }
+  .side.BUY { color: var(--buy); background: var(--buy-bg); }
+  .side.SELL { color: var(--sell); background: var(--sell-bg); }
+  .l2 { grid-column: 1 / -1; color: var(--cobalt); font-weight: 700; font-size: 17px; letter-spacing: .01em; }
+  .l3 { color: var(--text); overflow-wrap: anywhere; align-self: end; }
+  .l3 .who { color: var(--muted); }
+  .l3 .amt { font-weight: 700; color: #fff; }
+  .l3 .arrow { color: var(--faint); margin: 0 6px; }
+  .l3 a { color: var(--cobalt); text-decoration: none; border: 1px solid var(--line2); border-radius: 5px; padding: 0 6px; margin-left: 8px; font-size: 12px; }
+  .l3 a:hover { border-color: var(--cobalt); }
+  .price { align-self: end; text-align: right; color: var(--muted); white-space: nowrap; font-size: 12.5px; }
+  .price b { color: var(--text); font-weight: 600; }
+
+  .help { margin-top: 18px; color: var(--muted); font-size: 12.5px; display: grid; gap: 6px; }
+  .help code { color: var(--text); background: #0d0f1a; border: 1px solid var(--line2); padding: 2px 7px; border-radius: 6px; overflow-wrap: anywhere; }
+  .help a { color: var(--cobalt); }
+
+  @media (max-width: 760px) {
     body { font-size: 12.5px; }
-    #log { height: 66vh; }
+    .wrap { width: 100%; padding: 0 0 24px; }
+    .term { border-radius: 0; border-left: 0; border-right: 0; }
+    .row { grid-template-columns: 1fr; }
+    .price { text-align: left; white-space: normal; }
+    #log { height: 70vh; padding: 8px 12px 14px; }
+    .head, .filters { padding-left: 12px; padding-right: 12px; }
+    .help { padding: 0 12px; }
   }
 </style>
 </head>
@@ -58,63 +97,68 @@
     <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
       <span class="t">prosper-monitor — Pharos mainnet · Prosper tokens on the bonding curve</span></div>
     <div class="head">
-      <div class="prompt">monitor@pharos:~$ <b>tail -f prosper/trades</b> <span class="cursor"></span></div>
-      <div class="status" id="status">connecting…</div>
+      <div class="prompt">monitor@pharos:~$ <b>tail -f prosper/trades</b><span class="cursor"></span></div>
+      <div class="stats" id="stats"><span class="pill sync">connecting</span></div>
     </div>
     <div class="filters" id="filters"><button class="chip on" data-m="">all tokens</button></div>
     <div id="log"></div>
   </div>
   <div class="help">
-    <p>Every buy and sell of <a style="color:var(--cobalt)" href="https://app.pros-per.xyz" target="_blank" rel="noopener">Prosper</a> tokens that are still <b>on the bonding curve</b> (graduated and curve-only tokens are left out), indexed live through Pharos Chain MCP.</p>
-    <p>Use it from an AI agent (MCP): <code>claude mcp add --transport http prosper-monitor {{PUBLIC_URL}}/mcp</code></p>
-    <p>JSON: <code>{{BASE}}/trades.json?limit=50</code> · Telegram alerts: by whitelist.</p>
+    <span>Every buy and sell of <a href="https://app.pros-per.xyz" target="_blank" rel="noopener">Prosper</a> tokens that are still <b>on the bonding curve</b> — graduated and curve-only tokens are left out. Indexed live through Pharos Chain MCP. Times are UTC.</span>
+    <span>Use it from an AI agent (MCP): <code>claude mcp add --transport http prosper-monitor {{PUBLIC_URL}}/mcp</code></span>
+    <span>JSON: <code>{{BASE}}/trades.json?limit=50</code> · Telegram alerts: by whitelist.</span>
   </div>
 </div>
 <script>
 (() => {
   const BASE = "{{BASE}}";
   const log = document.getElementById("log");
-  const statusEl = document.getElementById("status");
+  const statsEl = document.getElementById("stats");
   const filters = document.getElementById("filters");
   let filter = "";
   const fmt = (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: n >= 1000 ? 0 : n >= 1 ? 4 : 6 });
   const short = (a) => a.slice(0, 6) + "…" + a.slice(-4);
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const atBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+  const atBottom = () => log.scrollHeight - log.scrollTop - log.clientHeight < 60;
 
-  // Local date/time of the trade: dd.mm.yyyy - hh.mm.ss
+  // UTC date/time of the trade: dd.mm.yyyy - hh.mm.ss UTC
   function stamp(sec) {
     const d = new Date(sec * 1000), z = (n) => String(n).padStart(2, "0");
-    return `${z(d.getDate())}.${z(d.getMonth() + 1)}.${d.getFullYear()} - ${z(d.getHours())}.${z(d.getMinutes())}.${z(d.getSeconds())}`;
+    return `${z(d.getUTCDate())}.${z(d.getUTCMonth() + 1)}.${d.getUTCFullYear()} - ${z(d.getUTCHours())}.${z(d.getUTCMinutes())}.${z(d.getUTCSeconds())} UTC`;
   }
   function row(t, isNew) {
     const d = document.createElement("div");
-    d.className = "row" + (isNew ? " new" : "");
+    d.className = `row ${t.side}` + (isNew ? " new" : "");
     d.dataset.m = t.market;
     if (filter && t.market !== filter) d.style.display = "none";
     const sym = esc(t.symbol);
+    const arrow = '<span class="arrow">→</span>';
     const what = t.side === "BUY"
-      ? `${esc(short(t.trader))} paid <span class="amt">${fmt(t.pros)} PROS</span> → received <span class="amt">${fmt(t.tokens)} ${sym}</span>`
-      : `${esc(short(t.trader))} sold <span class="amt">${fmt(t.tokens)} ${sym}</span> → received <span class="amt">${fmt(t.pros)} PROS</span>`;
+      ? `<span class="who">${esc(short(t.trader))}</span> paid <span class="amt">${fmt(t.pros)} PROS</span>${arrow}received <span class="amt">${fmt(t.tokens)} ${sym}</span>`
+      : `<span class="who">${esc(short(t.trader))}</span> sold <span class="amt">${fmt(t.tokens)} ${sym}</span>${arrow}received <span class="amt">${fmt(t.pros)} PROS</span>`;
     d.innerHTML =
-      `<div class="l1"><span class="time">${stamp(t.time)}</span> <span class="${t.side}">${t.side}</span></div>` +
-      `<div class="l2 sym">${sym}</div>` +
-      `<div class="l3 what">${what} <a href="${t.url}" target="_blank" rel="noopener">tx</a> ` +
-      `<span class="dim">- current price ${sym} ${Number(t.price).toPrecision(4)} PROS</span></div>`;
+      `<div class="l1"><span>${stamp(t.time)}</span><span class="side ${t.side}">${t.side}</span></div>` +
+      `<div class="l2">${sym}</div>` +
+      `<div class="l3">${what}<a href="${t.url}" target="_blank" rel="noopener">tx ↗</a></div>` +
+      `<div class="price">current price ${sym} <b>${Number(t.price).toPrecision(4)} PROS</b></div>`;
     return d;
   }
-
   function sys(text) {
     const d = document.createElement("div");
     d.className = "sys";
     d.textContent = "# " + text;
     log.appendChild(d);
   }
+  function counts() {
+    const el = document.getElementById("shown");
+    if (el) el.textContent = log.querySelectorAll(".row").length;
+  }
   function add(t, isNew) {
     const stick = atBottom();
     log.appendChild(row(t, isNew));
     while (log.children.length > 500) log.removeChild(log.firstChild);
     if (stick || !isNew) log.scrollTop = log.scrollHeight;
+    counts();
   }
   function setFilter(m) {
     filter = m;
@@ -128,10 +172,13 @@
     const es = new EventSource(BASE + "/stream");
     es.addEventListener("status", (e) => {
       const s = JSON.parse(e.data);
-      const lag = s.head - s.indexedTo;
-      statusEl.innerHTML = `<span class="${s.live ? "live" : "sync"}">● ${s.live ? "live" : "syncing history"}</span>` +
-        `<span>block ${Number(s.indexedTo).toLocaleString("en-US")}</span><span>lag ${lag} blocks</span>` +
-        `<span>${s.markets} tokens on curve</span><span>source: Pharos Chain MCP</span>`;
+      statsEl.innerHTML =
+        `<span class="pill ${s.live ? "live" : "sync"}">${s.live ? "live" : "syncing history"}</span>` +
+        `<span class="stat">block <b>${Number(s.indexedTo).toLocaleString("en-US")}</b></span>` +
+        `<span class="stat">lag <b>${Math.max(0, s.head - s.indexedTo)}</b> blocks</span>` +
+        `<span class="stat"><b>${s.markets}</b> tokens on curve</span>` +
+        `<span class="stat"><b id="shown">${log.querySelectorAll(".row").length}</b> trades shown</span>` +
+        `<span class="stat">source <b>Pharos Chain MCP</b></span>`;
     });
     es.addEventListener("markets", (e) => {
       for (const m of JSON.parse(e.data)) {
@@ -151,6 +198,7 @@
       filters.querySelector(`[data-m="${m.market}"]`)?.remove();
       for (const r of log.querySelectorAll(`.row[data-m="${m.market}"]`)) r.remove();
       if (filter === m.market) setFilter("");
+      counts();
     });
     es.addEventListener("history", (e) => {
       log.innerHTML = "";
@@ -159,7 +207,7 @@
       for (const t of rows) add(t, false);
     });
     es.addEventListener("trade", (e) => add(JSON.parse(e.data), true));
-    es.onerror = () => { statusEl.innerHTML = '<span class="sync">● reconnecting…</span>'; };
+    es.onerror = () => { statsEl.innerHTML = '<span class="pill sync">reconnecting…</span>'; };
   }
   connect();
 })();
