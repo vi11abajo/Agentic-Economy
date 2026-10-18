@@ -1,35 +1,34 @@
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import {
-  decodeEventLog,
   decodeFunctionResult,
   encodeFunctionData,
-  formatUnits,
   getAddress,
   isAddress,
   parseAbi,
-  toEventSelector,
   type Address,
   type Hex,
 } from "viem";
 import { PHAROS_MCP_URL, PharosMcp } from "@agentic-economy/pharos-mcp";
-
-// Prosper (pros-per.xyz) bonding-curve markets on Pharos Pacific Mainnet. Every buy or sell on a curve emits
-// one of these events from the market contract (signatures matched by topic hash against on-chain logs).
-const curveEvents = parseAbi([
-  "event Bought(address indexed router, address indexed trader, uint256 grossIn, uint256 netIn, uint256 pTokenOut, uint256 fee)",
-  "event Sold(address indexed router, address indexed trader, uint256 pTokenIn, uint256 grossOut, uint256 netOut, uint256 fee, bool toNative)",
-]);
-// ProsperFactory emits one event per new market: topics = (vault, creator, pToken), data = (market, buyback).
-const PROSPER_FACTORY = "0xEfdbb0eA7647B0e21AEf7A3b7a5D6A632c3116C8";
-const MARKET_CREATED_TOPIC = "0x6d679d9dcb91cccb2f253f24f8f9b53871eac50c475cb8335cfdd93a32212865";
-
-const BOUGHT = toEventSelector(curveEvents[0]);
-const SOLD = toEventSelector(curveEvents[1]);
-const NATIVE = "PROS"; // curves are priced in the native token (paid in, or WPROS/PROS out)
-const QUOTE_DECIMALS = 18;
-const EXPLORER = "https://www.pharosscan.xyz";
-const MAX_LOG_RANGE = 1000n; // Pharos MCP get_logs limit (inclusive)
-const KEEP_SEEN = 5000;
+import {
+  BOUGHT,
+  fmt,
+  hex,
+  KEEP_SEEN,
+  MAX_LOG_RANGE,
+  MARKET_CREATED_TOPIC,
+  NATIVE,
+  num,
+  pickNewTrades,
+  PROSPER_FACTORY,
+  short,
+  SOLD,
+  windowEnd,
+  type Config,
+  type Market,
+  type RpcLog,
+  type State,
+  type Trade,
+} from "./curve.js";
 
 const viewAbi = parseAbi([
   "function pToken() view returns (address)",
@@ -39,39 +38,6 @@ const viewAbi = parseAbi([
 ]);
 
 const C = { cobalt: "\x1b[38;2;30;43;250m", muted: "\x1b[38;2;107;107;107m", green: "\x1b[38;2;5;150;105m", red: "\x1b[38;2;220;38;38m", bold: "\x1b[1m", reset: "\x1b[0m" };
-
-interface MarketConfig {
-  name?: string;
-  market: string;
-  /** Only report trades of at least this many PROS (optional). */
-  minPros?: number;
-}
-interface Config {
-  intervalSec?: number;
-  confirmations?: number;
-  markets: MarketConfig[];
-}
-interface Market extends MarketConfig {
-  market: Address;
-  pToken: Address;
-  symbol: string;
-  decimals: number;
-}
-interface State {
-  markets: string[];
-  nextBlock: string;
-  seen: string[];
-}
-interface RpcLog {
-  address: Hex;
-  topics: Hex[];
-  data: Hex;
-  blockNumber: Hex;
-  blockTimestamp?: Hex;
-  transactionHash: Hex;
-  logIndex: Hex;
-  removed?: boolean;
-}
 
 let color = process.stdout.isTTY ?? false;
 const paint = (c: keyof typeof C, s: string) => (color ? `${C[c]}${s}${C.reset}` : s);
@@ -137,7 +103,7 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
     const safe = head - confirmations;
     let reported = 0;
     while (next <= safe && !stopping) {
-      const to = next + MAX_LOG_RANGE - 1n < safe ? next + MAX_LOG_RANGE - 1n : safe;
+      const to = windowEnd(next, safe);
       // One MCP query covers every configured curve: address list + (Bought OR Sold).
       const logs = await mcp.call<RpcLog[]>("get_logs", {
         address: ids,
@@ -145,18 +111,11 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
         fromBlock: hex(next),
         toBlock: hex(to),
       });
-      for (const log of logs.sort(byPosition)) {
-        if (log.removed) continue;
-        const id = `${log.transactionHash}:${Number(BigInt(log.logIndex))}`;
-        if (seen.has(id)) continue;
-        seen.add(id);
-        const market = markets.get(log.address.toLowerCase());
-        if (!market) continue;
-        const trade = decodeTrade(log, market);
-        if (market.minPros && Number(trade.pros) < market.minPros) continue;
+      for (const trade of pickNewTrades(logs, markets, seen)) {
         reported++;
         reportedTotal++;
-        appendFileSync(opt.log, `${JSON.stringify({ n: reportedTotal, ...trade })}\n`);
+        appendFileSync(opt.log, `${JSON.stringify({ n: reportedTotal, ...trade })}
+`);
         clearIdle();
         printTrade(reportedTotal, trade);
         if (opt.maxEvents && reportedTotal >= opt.maxEvents) stopping = true;
@@ -175,33 +134,6 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
   }
   clearIdle();
   console.log(paint("green", `\n✓ stopped · ${reportedTotal} trade(s) reported · resumes at block ${fmt(next)} · ${mcp.calls} MCP calls`));
-}
-
-type Trade = ReturnType<typeof decodeTrade>;
-
-function decodeTrade(log: RpcLog, m: Market) {
-  const ev = decodeEventLog({ abi: curveEvents, data: log.data, topics: log.topics as [Hex, ...Hex[]] });
-  const a = ev.args as Record<string, bigint | string | boolean>;
-  const isBuy = ev.eventName === "Bought";
-  const pros = isBuy ? (a.grossIn as bigint) : (a.netOut as bigint);
-  const tokens = isBuy ? (a.pTokenOut as bigint) : (a.pTokenIn as bigint);
-  const net = isBuy ? (a.netIn as bigint) : (a.grossOut as bigint);
-  return {
-    side: isBuy ? "BUY" : "SELL",
-    token: m.symbol,
-    name: m.name,
-    market: m.market,
-    trader: getAddress(a.trader as string),
-    pros: formatUnits(pros, QUOTE_DECIMALS),
-    tokens: formatUnits(tokens, m.decimals),
-    fee: formatUnits(a.fee as bigint, QUOTE_DECIMALS),
-    // Curve price of this trade, before fees: PROS per one pToken.
-    price: tokens > 0n ? Number(formatUnits(net, QUOTE_DECIMALS)) / Number(formatUnits(tokens, m.decimals)) : 0,
-    block: Number(BigInt(log.blockNumber)),
-    time: log.blockTimestamp ? new Date(Number(BigInt(log.blockTimestamp)) * 1000).toISOString() : undefined,
-    tx: log.transactionHash,
-    url: `${EXPLORER}/tx/${log.transactionHash}`,
-  };
 }
 
 function printTrade(n: number, t: Trade): void {
@@ -238,7 +170,7 @@ async function discover(mcp: PharosMcp, opt: Options): Promise<void> {
   console.log(paint("muted", `Prosper markets created in the last ${fmt(blocks)} blocks (ProsperFactory ${PROSPER_FACTORY}, via Pharos Chain MCP):`));
   let found = 0;
   for (let a = from; a <= head; a += MAX_LOG_RANGE) {
-    const b = a + MAX_LOG_RANGE - 1n < head ? a + MAX_LOG_RANGE - 1n : head;
+    const b = windowEnd(a, head);
     const logs = await mcp.call<RpcLog[]>("get_logs", {
       address: PROSPER_FACTORY,
       topics: [MARKET_CREATED_TOPIC],
@@ -344,29 +276,6 @@ function loadState(file: string, ids: string[]): State | undefined {
 
 function saveState(file: string, s: State): void {
   writeFileSync(file, JSON.stringify(s));
-}
-
-function byPosition(a: RpcLog, b: RpcLog): number {
-  const d = BigInt(a.blockNumber) - BigInt(b.blockNumber);
-  return d !== 0n ? (d < 0n ? -1 : 1) : Number(BigInt(a.logIndex) - BigInt(b.logIndex));
-}
-
-function hex(n: bigint): Hex {
-  return `0x${n.toString(16)}`;
-}
-
-function fmt(n: bigint): string {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-function num(s: string): string {
-  const v = Number(s);
-  const digits = v >= 1000 ? 0 : v >= 1 ? 4 : 6;
-  return v.toLocaleString("en-US", { maximumFractionDigits: digits });
-}
-
-function short(a: string): string {
-  return `${a.slice(0, 6)}…${a.slice(-4)}`;
 }
 
 function sleep(ms: number): Promise<void> {

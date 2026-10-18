@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "verify": "node dist/verify-gaps.js"
+    "verify": "node dist/verify-gaps.js",
+    "test": "node --test \"dist/**/*.test.js\""
   },
   "dependencies": {
     "@agentic-economy/pharos-mcp": "1.0.0"

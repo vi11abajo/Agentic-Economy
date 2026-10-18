@@ -1,6 +1,7 @@
 // Re-checks, against the live services, every docs gap found during the Docs MCP onboarding (see README.md).
 // Read-only, no keys. Usage: npm run verify
 import { PharosMcp } from "@agentic-economy/pharos-mcp";
+import { rpcProviders } from "./parse.js";
 
 const RPC = "https://rpc.pharos.xyz";
 const USDC = "0xc879c018db60520f4355c26ed1a6d572cdac1815";
@@ -51,7 +52,7 @@ async function main(): Promise<void> {
 
   // Gap 5 — the Docs MCP agent recommended QuickNode; the RPC page lists only ZAN, Nirvana and Alchemy.
   const rpcPage = await (await fetch("https://docs.pharos.xyz/tooling-and-infrastructure/rpc.md")).text();
-  const providers = [...rpcPage.matchAll(/^\* (.+ RPC)$/gm)].map((m) => m[1]);
+  const providers = rpcProviders(rpcPage);
   line(!/quicknode/i.test(rpcPage), `docs RPC providers: ${providers.join(", ")} — QuickNode is not among them`);
 }
 

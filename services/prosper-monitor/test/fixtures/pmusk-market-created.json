@@ -1,0 +1,22 @@
+{
+ "source": "Pharos Chain MCP get_logs, ProsperFactory MarketCreated at block 20372512 (pMusk)",
+ "logs": [
+  {
+   "address": "0xefdbb0ea7647b0e21aef7a3b7a5d6a632c3116c8",
+   "blockHash": "0xaf9a53219d01eb8813953cc2646d30e4729ddb140a71f0d224791bd927eb30c7",
+   "blockNumber": "0x136dc20",
+   "blockTimestamp": "0x6ad1cefc",
+   "data": "0x0000000000000000000000005c3e0e4b1be0851dcbc5f6a5cc04d799acbe8b7f000000000000000000000000eb9fba59296a55d09e35a5cea532b1f7f9f613ce",
+   "logIndex": "0xb",
+   "removed": false,
+   "topics": [
+    "0x6d679d9dcb91cccb2f253f24f8f9b53871eac50c475cb8335cfdd93a32212865",
+    "0x000000000000000000000000b1acbc5186f2136904e9bd8e2a1d7120ac46f0d8",
+    "0x85c86c731c58d3ae6ac203259e46b14a1cf687e8846e452f65a7a3d3b93b3e98",
+    "0x000000000000000000000000e318ac4113324841265d270dc2393f1bf742a7f8"
+   ],
+   "transactionHash": "0xc4e059313575876aa308fd9c72d28419f1e82332d5948f3cc48141060196df04",
+   "transactionIndex": "0x0"
+  }
+ ]
+}
