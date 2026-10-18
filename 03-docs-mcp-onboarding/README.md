@@ -103,10 +103,3 @@ npm run verify --workspace 03-docs-mcp-onboarding
 
 `npm test` keeps the log honest: every query in the table above must be the exact query saved in `log/`, and
 every quoted reply must appear word for word in the saved reply ([`src/log.test.ts`](src/log.test.ts)).
-
-## Requirements checklist
-
-- [x] Step-by-step log of what I tried, the exact questions asked to Docs MCP and the answers (table + [`log/`](log))
-- [x] At least 3 concrete gaps, each with the exact query (6 gaps above)
-- [x] A suggested fix for each gap
-- [x] Ends with what I built/ran (live monitor + hosted MCP server)

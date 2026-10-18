@@ -152,10 +152,3 @@ In plain words
 `npm test` replays the real MCP session in [`sample-trace.jsonl`](sample-trace.jsonl) through
 `readContract` (no network) and checks every decoded value against the sample output, plus the error paths:
 wrong chain, no contract code, a reverted call, block pinning ([`src/contract.test.ts`](src/contract.test.ts)).
-
-## Requirements checklist
-
-- [x] Reads at least 3 different values from one contract via Chain MCP — the agent reads name, totalSupply, owner and a balance from plain-English prompts ([transcript](agent/TRANSCRIPT.md)); the script reads 13 values + 2 proxy slots ([trace](sample-trace.jsonl))
-- [x] Shows the contract address and the block number the data was read at (plus block time and hash in `--json`)
-- [x] Formats raw values for humans: decimals applied, addresses labelled
-- [x] README: contract choice, how to run (agent and script), sample output and agent transcript

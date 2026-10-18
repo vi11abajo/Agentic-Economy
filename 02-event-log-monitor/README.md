@@ -92,10 +92,3 @@ The same Chain MCP log monitoring runs 24/7 as a small service
 ([`test/fixtures/pmusk-demo-logs.json`](test/fixtures/pmusk-demo-logs.json)): event signatures, decoding of the
 buy and the sell, chain ordering, no duplicates across polls, re-org (`removed`) logs, `minPros`, and the
 1,000-block window ([`src/curve.test.ts`](src/curve.test.ts)).
-
-## Requirements checklist
-
-- [x] Chain MCP log queries filtered by contract address and event signature (`get_logs`, market addresses + `Bought`/`Sold` topics)
-- [x] Runs continuously (polling, block by block) and reports only new events, with no duplicates (`txHash:logIndex` + saved cursor)
-- [x] Decodes each event into readable fields (trader, amounts with decimals, price, fee, tx hash, block, time)
-- [x] Demonstrated catching live events (see the sample output and the video)
