@@ -1,0 +1,15 @@
+$ foghorn "My agent wants to charge 1 cent per call with x402 on Pharos mainnet. Which asset address goes into the payment requirements?" --verify
+For Pharos Pacific Mainnet, set the payment requirement’s `asset` to the USDC contract address:
+
+0xc879c018db60520f4355c26ed1a6d572cdac1815
+
+For $0.01 USDC, use `amount: "10000"` (USDC has 6 decimals) and network `eip155:1672`. See x402 Pacific Mainnet.
+
+Sources
+  1. x402 Pacific Mainnet  https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet
+  2. x402 Atlantic Testnet  https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet
+  3. x402  https://docs.pharos.xyz/developer-guide/x402
+
+Checked on Pharos mainnet (chain 1672, block 20,681,601, via Pharos Chain MCP)
+  ✓ 0xc879…1815: contract on mainnet, symbol() = USDC
+(exit code 0)

@@ -1,0 +1,20 @@
+The maximum depends on which endpoint you’re using:
+
+* **Public JSON-RPC with rate limiting enabled:** **100 blocks** per `eth_getLogs` request.
+* **Fallback cap:** **10,000 blocks**.
+* **Pharos MCP `get_logs` tool:** **1,000 blocks** per call.
+
+The RPC limits are documented in [JSON-RPC API Methods](/api-and-sdk/json-rpc-methods); the MCP limit is documented in [Pharos MCP](/tooling-and-infrastructure/mcp).
+
+# Sources
+
+- [JSON-RPC API Methods](https://docs.pharos.xyz/api-and-sdk/json-rpc-methods)
+- [Node Debugging & Configuration](https://docs.pharos.xyz/node-and-validator-guide/node-debugging-and-configuration)
+- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)
+- [Block Explorer](https://docs.pharos.xyz/tooling-and-infrastructure/block-explorer)
+- [Node Configuration](https://docs.pharos.xyz/node-and-validator-guide/validator-node-deployment/node-configuration)
+- [eth_getProof — Storage State Verification (SPV)](https://docs.pharos.xyz/api-and-sdk/eth-getproof)
+- [Rollback Blocks](https://docs.pharos.xyz/node-and-validator-guide/rollback-blocks)
+- [FAQs](https://docs.pharos.xyz/getting-started/faqs)
+- [Gas Model](https://docs.pharos.xyz/getting-started/gas-model)
+- [Circle CCTP](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/circle-cctp)

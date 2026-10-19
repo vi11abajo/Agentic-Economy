@@ -1,0 +1,16 @@
+$ foghorn "I want gasless onboarding with ERC-4337 smart accounts on Pharos mainnet. Which EntryPoint should my bundler target?" --verify
+For Pharos Pacific Mainnet, target the canonical ERC-4337 EntryPoint v0.7:
+
+`0x0000000071727De22E5E9d8BAf0edAc6f37da032`
+
+Pharos also lists a v0.6 EntryPoint at `0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789`; use it only if your smart-account stack specifically requires v0.6. See Canonical Contracts.
+
+Sources
+  1. Canonical Contracts  https://docs.pharos.xyz/getting-started/canonical-contracts
+  2. x402 Pacific Mainnet  https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet
+  3. About Pharos  https://docs.pharos.xyz/introduction/readme
+
+Checked on Pharos mainnet (chain 1672, block 20,681,551, via Pharos Chain MCP)
+  ✓ 0x0000…a032: contract on mainnet
+  ✓ 0x5ff1…2789: contract on mainnet
+(exit code 0)

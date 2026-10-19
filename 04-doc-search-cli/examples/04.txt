@@ -1,0 +1,11 @@
+$ foghorn "Does Pharos mainnet support EIP-7702, so an EOA can delegate to a smart account code?" --verify
+No answer in the Pharos docs for this.
+Docs MCP: "I can’t confirm EIP-7702 support on Pharos Pacific Mainnet from the available docs."
+
+Closest pages
+  1. x402 Pacific Mainnet  https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet
+  2. Pharos MCP  https://docs.pharos.xyz/tooling-and-infrastructure/mcp
+  3. Validator Accountability  https://docs.pharos.xyz/node-and-validator-guide/validator-accountability
+
+Nothing to verify on-chain: there is no answer to check.
+(exit code 2)

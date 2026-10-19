@@ -1,0 +1,13 @@
+$ foghorn "How many blocks can a single eth_getLogs call span on the public Pharos RPC before it gets rejected?" --verify
+Use a maximum of 100 blocks per `eth_getLogs` call on the rate-limited public RPC. The documented
+fallback cap is 10,000 blocks when rate limiting isn’t enabled. See JSON-RPC API Methods.
+
+Sources
+  1. JSON-RPC API Methods  https://docs.pharos.xyz/api-and-sdk/json-rpc-methods
+  2. Rollback Blocks  https://docs.pharos.xyz/node-and-validator-guide/rollback-blocks
+  3. Block Explorer  https://docs.pharos.xyz/tooling-and-infrastructure/block-explorer
+
+Checked on Pharos mainnet (chain 1672, block 20,681,576, via Pharos Chain MCP)
+  ✗ 100 blocks per get_logs call: the real limit is 1,000 blocks (1,001 get rejected)
+  ✗ 10,000 blocks per get_logs call: the real limit is 1,000 blocks (1,001 get rejected)
+(exit code 0)

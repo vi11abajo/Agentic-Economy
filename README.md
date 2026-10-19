@@ -20,6 +20,7 @@ npm test   # unit tests on recorded Pharos MCP data, no network; CI runs them on
 | 01 | Read Contract State | Chain MCP | Easy | [`01-read-contract-state`](01-read-contract-state) |
 | 02 | Event/Log Monitor: Prosper curve buys and sells | Chain MCP | Easy | [`02-event-log-monitor`](02-event-log-monitor) |
 | 03 | Docs MCP Onboarding: ai.pharos.xyz through the Docs MCP agent | Developer Docs MCP | Easy | [`03-docs-mcp-onboarding`](03-docs-mcp-onboarding) |
+| 04 | Doc-Search CLI: `foghorn`, sourced answers checked on-chain | Developer Docs MCP | Easy | [`04-doc-search-cli`](04-doc-search-cli) |
 
 ## Shared code
 

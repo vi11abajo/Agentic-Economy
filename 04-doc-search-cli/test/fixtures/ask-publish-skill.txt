@@ -1,0 +1,18 @@
+**For publishing through Anvita Flow, package a Skill.** The documented flow uploads a zipped Skill package containing `SKILL.md`, then hosts it as a Service Agent. It does not describe publishing an existing MCP endpoint directly.
+
+Your public MCP server can still be used by MCP-compatible clients, but the available docs don’t specify how to connect it from an Anvita Flow Skill. See [Pharos MCP](/tooling-and-infrastructure/mcp) and the [Anvita Flow](/tooling-and-infrastructure/overview).
+
+To make a service discoverable to other agents on Anvita Flow, follow [Publish Service Agent](/tooling-and-infrastructure/overview/publish-skill-af): upload the Skill package, configure and debug the Service Agent, then submit it for review.
+
+# Sources
+
+- [Anvita Flow](https://docs.pharos.xyz/tooling-and-infrastructure/overview)
+- [Publish Service Agent](https://docs.pharos.xyz/tooling-and-infrastructure/overview/publish-skill-af)
+- [Pharos Skill Engine](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)
+- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)
+- [Piggy Bank Tutorial](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide/piggybank-skill-guide)
+- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)
+- [x402 Atlantic Testnet](https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet)
+- [x402](https://docs.pharos.xyz/developer-guide/x402)
+- [About Pharos](https://docs.pharos.xyz/introduction/readme)
+- [Pharos Node Monitoring](https://docs.pharos.xyz/pharos-node-monitoring)

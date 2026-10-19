@@ -1,0 +1,19 @@
+I cannot find information about the `llms.txt` URL in the docs.
+
+# Sources
+
+- [Publish Service Agent](https://docs.pharos.xyz/tooling-and-infrastructure/overview/publish-skill-af)
+- [Anvita Flow](https://docs.pharos.xyz/tooling-and-infrastructure/overview)
+- [Pharos Skill Engine](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)
+- [Piggy Bank Tutorial](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide/piggybank-skill-guide)
+- [x402](https://docs.pharos.xyz/developer-guide/x402)
+- [EVM](https://docs.pharos.xyz/resources/evm)
+- [x402 Atlantic Testnet](https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet)
+- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)
+- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)
+- [LayerZero](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/layerzero)
+- [Pharos Network Snapshots](https://docs.pharos.xyz/node-and-validator-guide/pharos-network-snapshots)
+- [Node Debugging & Configuration](https://docs.pharos.xyz/node-and-validator-guide/node-debugging-and-configuration)
+- [Alchemy RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/alchemy)
+- [Goldsky](https://docs.pharos.xyz/tooling-and-infrastructure/indexing/goldsky)
+- [About Pharos](https://docs.pharos.xyz/introduction/readme)

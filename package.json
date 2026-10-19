@@ -9,6 +9,7 @@
     "01-read-contract-state",
     "02-event-log-monitor",
     "03-docs-mcp-onboarding",
+    "04-doc-search-cli",
     "services/prosper-monitor"
   ],
   "scripts": {
