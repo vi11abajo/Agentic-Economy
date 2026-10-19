@@ -57,9 +57,12 @@ allowlisted ("contact the Pharos team").
 *Fix:* document how to make a Skill that's just a thin wrapper around your MCP server, with a small `SKILL.md`
 example, plus how to get console access. Or let people register a remote MCP URL as a Service Agent.
 
-**5. The agent adds providers that aren't in the docs.**
-Answer 6 recommends "Alchemy, **QuickNode**, ZAN", but the RPC page lists only **ZAN, Nirvana and Alchemy**
-(`npm run verify`). A docs agent shouldn't bring in providers the docs don't list for Pharos.
+**5. The agent recommends a provider that doesn't list Pharos.**
+Answer 6 recommends "Alchemy, **QuickNode**, ZAN", but the RPC page lists only **ZAN, Nirvana and Alchemy**.
+I also checked QuickNode itself (2026-10-19): Pharos isn't in their docs index (`quicknode.com/docs/llms.txt`),
+`quicknode.com/docs/pharos` is a 404, and `quicknode.com/chains/pharos` is just the generic page they show for any
+unknown slug. So as far as public info goes, QuickNode doesn't offer Pharos and someone following this answer would
+hit a dead end. `npm run verify` checks both sides. (Private or enterprise deals can't be checked from outside.)
 *Fix:* take provider lists only from the RPC Infrastructure page, and mention the Nirvana dev key, since that's
 the documented way to get more than 120/min.
 

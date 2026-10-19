@@ -54,6 +54,13 @@ async function main(): Promise<void> {
   const rpcPage = await (await fetch("https://docs.pharos.xyz/tooling-and-infrastructure/rpc.md")).text();
   const providers = rpcProviders(rpcPage);
   line(!/quicknode/i.test(rpcPage), `docs RPC providers: ${providers.join(", ")}, no QuickNode`);
+
+  // ...and QuickNode's own public docs don't list Pharos either.
+  const ua = { headers: { "user-agent": "Mozilla/5.0" } };
+  const qnIndex = await (await fetch("https://www.quicknode.com/docs/llms.txt", ua)).text();
+  const qnPage = (await fetch("https://www.quicknode.com/docs/pharos", ua)).status;
+  line(!/pharos/i.test(qnIndex) && qnPage === 404,
+    `QuickNode docs: ${/pharos/i.test(qnIndex) ? "mention" : "no mention of"} Pharos in docs/llms.txt, quicknode.com/docs/pharos → ${qnPage}`);
 }
 
 main().catch((err) => {
