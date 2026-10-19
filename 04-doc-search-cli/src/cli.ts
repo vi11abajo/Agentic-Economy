@@ -7,8 +7,8 @@ import { DocsMcp } from "./docs.js";
 import { extractClaims, hasClaims, verifyClaims, MAINNET_CHAIN_ID, type Check } from "./verify.js";
 import { createInterface } from "node:readline/promises";
 import { HELP, parseArgs, type AskOptions } from "./args.js";
-import { loadSettings, saveSettings, settingsPath } from "./settings.js";
-import { ASKING, VERIFYING, startSpinner } from "./spinner.js";
+import { displayPath, loadSettings, saveSettings, settingsPath } from "./settings.js";
+import { ASKING, VERIFYING, startSpinner, type Spinner } from "./spinner.js";
 
 let color = process.stdout.isTTY ?? false;
 const C = { cobalt: "\x1b[38;2;30;43;250m", muted: "\x1b[38;2;107;107;107m", green: "\x1b[38;2;5;150;105m", red: "\x1b[38;2;220;38;38m", amber: "\x1b[38;2;180;83;9m", bold: "\x1b[1m", reset: "\x1b[0m" };
@@ -29,8 +29,8 @@ async function main(): Promise<number> {
   }
   if (cmd.kind === "settings") {
     const on = loadSettings().verify;
-    console.log(`On-chain verify is ${paint("bold", on ? "on" : "off")}${cmd.setVerify !== undefined ? " now" : ""}.`);
-    console.log(paint("muted", `Saved in ${settingsPath()}. --verify or --no-verify change it for one question.`));
+    console.log(`On-chain verify is ${paint("cobalt", paint("bold", on ? "on" : "off"))}${cmd.setVerify !== undefined ? " now" : ""}.`);
+    console.log(paint("muted", `Saved in ${displayPath(settingsPath())}. --verify or --no-verify change it for one question.`));
     return 0;
   }
 
@@ -49,19 +49,20 @@ async function main(): Promise<number> {
     options = { ...cmd.options, question };
   }
 
+  const spinner = startSpinner(ASKING);
   const docs = new DocsMcp();
-  await docs.connect();
   try {
-    if (cmd.kind === "search") return await search(docs, cmd.words);
-    if (cmd.kind === "page") return await page(docs, cmd.url);
-    return await ask(docs, options!, options!.verify ?? loadSettings().verify);
+    await docs.connect();
+    if (cmd.kind === "search") return await search(docs, cmd.words, spinner);
+    if (cmd.kind === "page") return await page(docs, cmd.url, spinner);
+    return await ask(docs, options!, options!.verify ?? loadSettings().verify, spinner);
   } finally {
+    spinner.stop();
     await docs.close();
   }
 }
 
-async function ask(docs: DocsMcp, opt: AskOptions, verify: boolean): Promise<number> {
-  const spinner = startSpinner(ASKING);
+async function ask(docs: DocsMcp, opt: AskOptions, verify: boolean, spinner: Spinner): Promise<number> {
   let answer: ReturnType<typeof parseAnswer>;
   let noAnswer: boolean;
   let pages: Source[];
@@ -110,8 +111,7 @@ async function ask(docs: DocsMcp, opt: AskOptions, verify: boolean): Promise<num
   return 0;
 }
 
-async function search(docs: DocsMcp, words: string): Promise<number> {
-  const spinner = startSpinner(ASKING);
+async function search(docs: DocsMcp, words: string, spinner: Spinner): Promise<number> {
   const pages = parseSearch(await docs.search(words).finally(() => spinner.stop()));
   if (!pages.length) {
     console.log(paint("amber", "No matching pages."));
@@ -121,15 +121,14 @@ async function search(docs: DocsMcp, words: string): Promise<number> {
   return 0;
 }
 
-async function page(docs: DocsMcp, url: string): Promise<number> {
-  const spinner = startSpinner(ASKING);
+async function page(docs: DocsMcp, url: string, spinner: Spinner): Promise<number> {
   console.log(wrap(plain(await docs.page(url).finally(() => spinner.stop()))));
   return 0;
 }
 
 function printSources(title: string, sources: Source[], n: number): void {
   if (!sources.length) return;
-  console.log(`\n${paint("bold", title)}`);
+  console.log(`\n${paint("cobalt", paint("bold", title))}`);
   sources.slice(0, n).forEach((s, i) => console.log(`  ${i + 1}. ${s.title}  ${paint("cobalt", s.url)}`));
 }
 
@@ -138,7 +137,7 @@ function printChecks(v: { block: number; checks: Check[] } | undefined): void {
     console.log(paint("muted", "\nNothing to verify on-chain: no addresses, chain IDs or block limits in this answer."));
     return;
   }
-  console.log(`\n${paint("bold", "Checked on Pharos mainnet")} ${paint("muted", `(chain ${MAINNET_CHAIN_ID}, block ${v.block.toLocaleString("en-US")}, via Pharos Chain MCP)`)}`);
+  console.log(`\n${paint("cobalt", paint("bold", "Checked on Pharos mainnet"))} ${paint("muted", `(chain ${MAINNET_CHAIN_ID}, block ${v.block.toLocaleString("en-US")}, via Pharos Chain MCP)`)}`);
   for (const c of v.checks) {
     const mark = c.status === "ok" ? paint("green", "✓") : c.status === "wrong" ? paint("red", "✗") : paint("amber", "!");
     console.log(`  ${mark} ${c.claim}: ${paint("muted", c.detail)}`);

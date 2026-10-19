@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "./args.js";
-import { loadSettings, saveSettings, settingsPath } from "./settings.js";
+import { displayPath, loadSettings, saveSettings, settingsPath } from "./settings.js";
 import { ASKING, pick, startSpinner } from "./spinner.js";
 
 describe("command line", () => {
@@ -78,6 +78,12 @@ describe("saved setting", () => {
     writeFileSync(file, "{not json");
     assert.equal(loadSettings(file).verify, false);
     rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("shows the home folder as ~ in messages", () => {
+    assert.equal(displayPath("/home/me/.config/rtfm/config.json", "/home/me"), "~/.config/rtfm/config.json");
+    assert.equal(displayPath("/opt/rtfm.json", "/home/me"), "/opt/rtfm.json");
+    assert.equal(displayPath("demo/.rec/config.json", "/home/me"), "demo/.rec/config.json");
   });
 
   it("lives in the usual config folder, or wherever RTFM_CONFIG says", () => {

@@ -45,6 +45,8 @@ describe("reading Docs MCP replies", () => {
     assert.equal(isNoAnswer("I can't answer that question from the available docs."), true);
     assert.equal(isNoAnswer("The docs don't define bananas as a time unit."), true);
     assert.equal(isNoAnswer("The docs do not indicate that Pharos Pacific Mainnet supports EIP-7702."), true);
+    assert.equal(isNoAnswer("EIP-7702 support on Pharos Pacific Mainnet is not confirmed in the available docs."), true);
+    assert.equal(isNoAnswer("The Pharos docs do not confirm EIP-7702 support on Pacific Mainnet."), true);
   });
 
   it("keeps a partial answer that has sources", () => {

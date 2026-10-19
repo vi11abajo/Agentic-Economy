@@ -16,6 +16,11 @@ export function settingsPath(env: NodeJS.ProcessEnv = process.env, platform = pr
   return join(base, "rtfm", "config.json");
 }
 
+/** The path for messages: the home folder shown as ~, so it doesn't spell out the user's name. */
+export function displayPath(path: string, home = homedir()): string {
+  return path.startsWith(home) ? `~${path.slice(home.length)}` : path;
+}
+
 export function loadSettings(path = settingsPath()): Settings {
   if (!existsSync(path)) return { ...DEFAULTS };
   try {

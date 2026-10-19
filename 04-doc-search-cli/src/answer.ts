@@ -33,6 +33,10 @@ const NO_ANSWER = [
   /\b(?:is not|isn't|are not|aren't) (?:explicitly )?(?:documented|covered|mentioned|related)\b/i,
   /\bno (?:information|mention|documentation)\b/i,
   /\bnot (?:in|covered by|part of|related to) the (?:pharos )?(?:docs|documentation)\b/i,
+  // The agent words a miss differently every time ("is not confirmed in the available docs", "the docs do not
+  // indicate …"), so also catch any negation close to the word docs/documentation in the opening sentence.
+  /\b(?:not|no|cannot|can't|isn't|aren't|doesn't|don't)\b[^.;:]{0,80}\b(?:docs|documentation|documented)\b/i,
+  /\b(?:docs|documentation)\b[^.;:]{0,40}\b(?:not|cannot|can't|doesn't|don't)\b/i,
 ];
 
 /**
