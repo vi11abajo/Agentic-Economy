@@ -93,11 +93,12 @@ npm run verify --workspace 03-docs-mcp-onboarding
 ```
 
 ```text
-✓ Pharos MCP get_logs: 37/37 logs carry blockTimestamp (docs: "get_logs does not include the block timestamp")
-  rpc.pharos.xyz eth_getLogs over 101 blocks: ok (6 logs)
+✓ Pharos MCP get_logs: 31/31 logs carry blockTimestamp (docs: "get_logs does not include the block timestamp")
+  rpc.pharos.xyz eth_getLogs over 101 blocks: ok (15 logs)
   rpc.pharos.xyz eth_getLogs over 1001 blocks: rejected (param error; The block range is too large. Consider narrowing it down to within 1,000 blocks.)
 ✓ llms.txt: www.pharos.xyz/agent-center/llms.txt → 404, docs.pharos.xyz/llms.txt → 200
 ✓ docs RPC providers: ZAN RPC, Nirvana RPC, Alchemy RPC, no QuickNode
+✓ QuickNode docs: no mention of Pharos in docs/llms.txt, quicknode.com/docs/pharos → 404
 ```
 
 ## Tests
