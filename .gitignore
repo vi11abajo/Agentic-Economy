@@ -5,3 +5,4 @@ dist/
 .npm-cache/
 .monitor-state.json
 trades.jsonl
+.test-tmp/

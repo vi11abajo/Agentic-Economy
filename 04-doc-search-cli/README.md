@@ -17,34 +17,112 @@ Two things it does on top of a plain wrapper:
   `symbol()` return, is it the mainnet chain ID, how many blocks does `get_logs` really accept. Each fact gets
   ✓, ✗ or ! (can't be checked on mainnet, e.g. a testnet address).
 
-## Install
+## Quick start
 
-From the repo root (one install for all tasks):
+You need [Node.js](https://nodejs.org) 20 or newer and git. No keys, no wallet. Check Node with:
 
 ```bash
-npm install
-npm run build
-npx --no-install rtfm "how do I verify a contract on Pharos?"
+node -v
 ```
 
-This works anywhere inside the repo (`--no-install` makes sure npx runs this local command and never downloads
-some other package called rtfm). To get a plain `rtfm` command everywhere, run `npm link` in
-`04-doc-search-cli`. No keys needed.
+**1. Get the code and build it.** One time for all tasks in this repo, about a minute:
+
+```bash
+git clone https://github.com/vi11abajo/Agentic-Economy.git
+```
+
+```bash
+cd Agentic-Economy
+```
+
+```bash
+npm ci
+```
+
+```bash
+npm run build
+```
+
+**2. Go to the CLI folder:**
+
+```bash
+cd 04-doc-search-cli
+```
+
+**3. Ask something.** The docs agent takes 20 to 40 seconds to answer, `--verify` adds a few seconds of chain
+checks:
+
+```bash
+npx --no-install rtfm "How many blocks can a single eth_getLogs call span on the public Pharos RPC?" --verify
+```
+
+`--no-install` makes npx run this local command and never download some other package called rtfm. Run it
+from inside `04-doc-search-cli`: right after a fresh `npm ci` the command isn't linked in the repo root yet.
+
+**4. Make `rtfm` a normal command** so you can drop the `npx --no-install`. Once, from `04-doc-search-cli`:
+
+```bash
+npm link
+```
+
+Now from any folder, quotes are optional:
+
+```bash
+rtfm how do I confirm a transaction from the cli
+```
+
+To remove it again:
+
+```bash
+npm unlink -g rtfm
+```
+
+Or skip the global link and add a shell alias instead (fix the path if you cloned somewhere else):
+
+```bash
+echo "alias rtfm='node $HOME/Agentic-Economy/04-doc-search-cli/dist/cli.js'" >> ~/.bashrc && source ~/.bashrc
+```
+
+**5. Turn on-chain checks on for every question** (saved, so you don't have to add `--verify` each time):
+
+```bash
+rtfm --verify-on
+```
+
+Turn them off again with `rtfm --verify-off`, see the current setting with `rtfm --verify-status`. For one question
+`--verify` or `--no-verify` still wins over the setting.
+
+**About quotes.** The shell reads the line before rtfm sees it, so a question with an apostrophe (`what's`,
+`don't`) or with `! & | ; < >` needs quotes. In zsh a `?` needs them too (or `alias rtfm='noglob rtfm'`). The easy
+way around all of that: run just `rtfm`, it asks `Ask:` and takes the question exactly as you type it. That's one
+question and then it exits, not a chat.
+
+While it waits, one line shows a random phrase and the seconds so far ("Dusting off the manuals… 12s"). It goes
+to stderr and only to a real terminal, so `--json` and piped output stay clean.
+
+The wording of answers changes a little from run to run, they come from the docs agent.
 
 ## Usage
 
 ```text
-rtfm "<question>" [--verify] [--full] [--sources N] [--json]
-rtfm search "<words>"              list matching doc pages
+rtfm <question> [--verify | --no-verify] [--full] [--sources N] [--json]
+rtfm                                ask one question at an "Ask:" prompt (no quoting needed)
+rtfm --verify-on | --verify-off     check answers on-chain by default, or stop (saved)
+rtfm --verify-status                show that setting
+rtfm search <words>                 list matching doc pages
 rtfm page <docs.pharos.xyz URL>     print a whole page
 
 --verify     check addresses, chain IDs and block limits from the answer on Pharos mainnet
+--no-verify  skip the check for this question even if --verify-on is set
 --full       print the whole answer instead of the first few paragraphs
 --sources N  how many source links to show (default 3)
 --json       machine-readable output
 
 Exit codes: 0 answered, 2 the docs have no answer, 1 error.
 ```
+
+The setting lives in `~/.config/rtfm/config.json` (`%APPDATA%\rtfm\config.json` on Windows), or wherever
+`RTFM_CONFIG` points.
 
 ## Examples
 
@@ -148,4 +226,6 @@ Code: [`src/cli.ts`](src/cli.ts), [`src/answer.ts`](src/answer.ts), [`src/verify
 
 `npm test` runs on real Docs MCP replies saved in [`test/fixtures/`](test/fixtures): splitting answers from
 sources, spotting "no answer" without false alarms, plain-text output, finding claims, and the on-chain checks
-against a fake chain with a 1,000-block limit ([`src/rtfm.test.ts`](src/rtfm.test.ts)).
+against a fake chain with a 1,000-block limit ([`src/rtfm.test.ts`](src/rtfm.test.ts)). Plus the command line
+(questions without quotes, `--verify-on/off`, the saved setting) and the waiting line
+([`src/cli-options.test.ts`](src/cli-options.test.ts)).

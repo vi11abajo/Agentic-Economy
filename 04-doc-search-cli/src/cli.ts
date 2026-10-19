@@ -5,26 +5,10 @@ import { PharosMcp } from "@agentic-economy/pharos-mcp";
 import { concise, isNoAnswer, parseAnswer, parseSearch, plain, firstSentence, type Source } from "./answer.js";
 import { DocsMcp } from "./docs.js";
 import { extractClaims, hasClaims, verifyClaims, MAINNET_CHAIN_ID, type Check } from "./verify.js";
-
-const HELP = `Usage:
-  rtfm "<question>" [--verify] [--full] [--sources N] [--json]
-  rtfm search "<words>"              list matching doc pages
-  rtfm page <docs.pharos.xyz URL>     print a whole page
-
-  --verify     check addresses, chain IDs and block limits from the answer on Pharos mainnet (Pharos Chain MCP)
-  --full       print the whole answer instead of the first few paragraphs
-  --sources N  how many source links to show (default 3)
-  --json       machine-readable output
-
-Exit codes: 0 answered, 2 the docs have no answer, 1 error.`;
-
-interface Options {
-  question: string;
-  verify: boolean;
-  full: boolean;
-  sources: number;
-  json: boolean;
-}
+import { createInterface } from "node:readline/promises";
+import { HELP, parseArgs, type AskOptions } from "./args.js";
+import { loadSettings, saveSettings, settingsPath } from "./settings.js";
+import { ASKING, VERIFYING, startSpinner } from "./spinner.js";
 
 let color = process.stdout.isTTY ?? false;
 const C = { cobalt: "\x1b[38;2;30;43;250m", muted: "\x1b[38;2;107;107;107m", green: "\x1b[38;2;5;150;105m", red: "\x1b[38;2;220;38;38m", amber: "\x1b[38;2;180;83;9m", bold: "\x1b[1m", reset: "\x1b[0m" };
@@ -34,40 +18,75 @@ async function main(): Promise<number> {
   const argv = process.argv.slice(2);
   if (argv.includes("--color")) color = true;
   if (argv.includes("--no-color")) color = false;
-  const args = argv.filter((a) => a !== "--color" && a !== "--no-color");
-  if (!args.length || args[0] === "-h" || args[0] === "--help") {
+  const cmd = parseArgs(argv.filter((a) => a !== "--color" && a !== "--no-color"));
+
+  if (cmd.kind === "help") {
     console.log(HELP);
-    return args.length ? 0 : 1;
+    return cmd.code;
+  }
+  if ((cmd.kind === "ask" || cmd.kind === "settings") && cmd.setVerify !== undefined) {
+    saveSettings({ ...loadSettings(), verify: cmd.setVerify });
+  }
+  if (cmd.kind === "settings") {
+    const on = loadSettings().verify;
+    console.log(`On-chain verify is ${paint("bold", on ? "on" : "off")}${cmd.setVerify !== undefined ? " now" : ""}.`);
+    console.log(paint("muted", `Saved in ${settingsPath()}. --verify or --no-verify change it for one question.`));
+    return 0;
+  }
+
+  let options: AskOptions | undefined;
+  if (cmd.kind === "ask") options = cmd.options;
+  if (cmd.kind === "prompt") {
+    // Bare `rtfm`: read one question as typed, so apostrophes and ? need no quoting. Not a chat: one question, then exit.
+    if (!process.stdin.isTTY) {
+      console.log(HELP);
+      return 1;
+    }
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    const question = (await rl.question(paint("cobalt", "Ask: "))).trim();
+    rl.close();
+    if (!question) return 1;
+    options = { ...cmd.options, question };
   }
 
   const docs = new DocsMcp();
   await docs.connect();
   try {
-    if (args[0] === "search") return await search(docs, args.slice(1).join(" "));
-    if (args[0] === "page") return await page(docs, args[1]);
-    return await ask(docs, parseOptions(args));
+    if (cmd.kind === "search") return await search(docs, cmd.words);
+    if (cmd.kind === "page") return await page(docs, cmd.url);
+    return await ask(docs, options!, options!.verify ?? loadSettings().verify);
   } finally {
     await docs.close();
   }
 }
 
-async function ask(docs: DocsMcp, opt: Options): Promise<number> {
-  const answer = parseAnswer(await docs.ask(opt.question));
-  const noAnswer = isNoAnswer(answer.body);
-  const text = plain(answer.body);
-  // With no answer, the sources askQuestion lists are just whatever it looked at; a search is more useful.
-  const pages = noAnswer ? parseSearch(await docs.search(opt.question)) : answer.sources;
-  const claims = extractClaims(answer.body);
+async function ask(docs: DocsMcp, opt: AskOptions, verify: boolean): Promise<number> {
+  const spinner = startSpinner(ASKING);
+  let answer: ReturnType<typeof parseAnswer>;
+  let noAnswer: boolean;
+  let pages: Source[];
   let verified: { block: number; checks: Check[] } | undefined;
-  if (opt.verify && !noAnswer && hasClaims(claims)) {
-    const chain = new PharosMcp("rtfm");
-    await chain.connect();
-    try {
-      verified = await verifyClaims(chain, claims);
-    } finally {
-      await chain.close();
+  try {
+    answer = parseAnswer(await docs.ask(opt.question));
+    noAnswer = isNoAnswer(answer.body);
+    // With no answer, the sources askQuestion lists are just whatever it looked at; a search is more useful.
+    pages = noAnswer ? parseSearch(await docs.search(opt.question)) : answer.sources;
+    const claims = extractClaims(answer.body);
+    if (verify && !noAnswer && hasClaims(claims)) {
+      spinner.phase(VERIFYING);
+      const chain = new PharosMcp("rtfm");
+      await chain.connect();
+      try {
+        verified = await verifyClaims(chain, claims);
+      } finally {
+        await chain.close();
+      }
     }
+  } finally {
+    spinner.stop();
   }
+  const text = plain(answer.body);
+  const claims = extractClaims(answer.body);
 
   if (opt.json) {
     console.log(JSON.stringify({ question: opt.question, answered: !noAnswer, answer: noAnswer ? null : text,
@@ -79,7 +98,7 @@ async function ask(docs: DocsMcp, opt: Options): Promise<number> {
     console.log(paint("amber", paint("bold", "No answer in the Pharos docs for this.")));
     console.log(paint("muted", `Docs MCP: "${firstSentence(text)}"`));
     printSources("Closest pages", pages, opt.sources);
-    if (opt.verify) console.log(paint("muted", "\nNothing to verify on-chain: there is no answer to check."));
+    if (verify) console.log(paint("muted", "\nNothing to verify on-chain: there is no answer to check."));
     return 2;
   }
 
@@ -87,13 +106,13 @@ async function ask(docs: DocsMcp, opt: Options): Promise<number> {
   console.log(wrap(shown.text));
   if (shown.trimmed) console.log(paint("muted", "… (shortened, use --full for the whole answer)"));
   printSources("Sources", pages, opt.sources);
-  if (opt.verify) printChecks(verified);
+  if (verify) printChecks(verified);
   return 0;
 }
 
 async function search(docs: DocsMcp, words: string): Promise<number> {
-  if (!words) throw new Error('Usage: rtfm search "<words>"');
-  const pages = parseSearch(await docs.search(words));
+  const spinner = startSpinner(ASKING);
+  const pages = parseSearch(await docs.search(words).finally(() => spinner.stop()));
   if (!pages.length) {
     console.log(paint("amber", "No matching pages."));
     return 2;
@@ -102,9 +121,9 @@ async function search(docs: DocsMcp, words: string): Promise<number> {
   return 0;
 }
 
-async function page(docs: DocsMcp, url?: string): Promise<number> {
-  if (!url || !/^https:\/\/docs\.pharos\.xyz\//.test(url)) throw new Error("Usage: rtfm page https://docs.pharos.xyz/...");
-  console.log(wrap(plain(await docs.page(url))));
+async function page(docs: DocsMcp, url: string): Promise<number> {
+  const spinner = startSpinner(ASKING);
+  console.log(wrap(plain(await docs.page(url).finally(() => spinner.stop()))));
   return 0;
 }
 
@@ -143,23 +162,6 @@ function wrap(text: string, width = Math.min(process.stdout.columns || 100, 110)
       return [...out, cur].join("\n");
     })
     .join("\n");
-}
-
-function parseOptions(args: string[]): Options {
-  const o: Options = { question: "", verify: false, full: false, sources: 3, json: false };
-  const words: string[] = [];
-  for (let i = 0; i < args.length; i++) {
-    const a = args[i];
-    if (a === "--verify") o.verify = true;
-    else if (a === "--full") o.full = true;
-    else if (a === "--json") o.json = true;
-    else if (a === "--sources") o.sources = Math.max(1, Number(args[++i]) || 3);
-    else if (a.startsWith("--")) throw new Error(`Unknown option ${a}\n\n${HELP}`);
-    else words.push(a);
-  }
-  o.question = words.join(" ").trim();
-  if (!o.question) throw new Error(HELP);
-  return o;
 }
 
 main().then(

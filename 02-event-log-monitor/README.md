@@ -15,6 +15,56 @@ bonding curve (a `market` contract) until it graduates. Every trade on a curve e
 There's no verified source for these contracts, so I recovered the signatures from the topic hashes of real logs.
 The field names are my guess from the values (`gross - fee = net` holds on every trade I've seen).
 
+## Quick start
+
+You need [Node.js](https://nodejs.org) 20 or newer and git. No keys, no wallet. Check Node with:
+
+```bash
+node -v
+```
+
+**1. Get the code and build it.** One time for all tasks in this repo, about a minute:
+
+```bash
+git clone https://github.com/vi11abajo/Agentic-Economy.git
+```
+
+```bash
+cd Agentic-Economy
+```
+
+```bash
+npm ci
+```
+
+```bash
+npm run build
+```
+
+**2. Replay the two trades from the video** (a pMusk buy and sell, about 10 seconds, then it stops):
+
+```bash
+npm start --workspace 02-event-log-monitor -- --config demo/markets-demo.json --from-block 20506720 --max-events 2
+```
+
+**3. Watch live.** Follows every curve in [`markets.json`](markets.json) and prints each new buy or sell as it
+happens. Prosper trades come in bursts, so a quiet minute is normal. Stop with Ctrl+C, the next start picks up
+where it stopped:
+
+```bash
+npm start --workspace 02-event-log-monitor
+```
+
+**4. Find a token you saw in the app** and add it (lists curves created in the last ~60,000 blocks):
+
+```bash
+npm run discover --workspace 02-event-log-monitor -- --blocks 60000
+```
+
+```bash
+npm run add --workspace 02-event-log-monitor -- 0xMARKET --name "My token"
+```
+
 ## How it works
 
 1. **Config.** [`markets.json`](markets.json) lists the curves to watch, as many as you want:
@@ -32,7 +82,7 @@ The field names are my guess from the values (`gross - fee = net` holds on every
 
 ## Run
 
-From the repo root: `npm install && npm run build`. Then in this folder:
+After the Quick start setup, from inside `02-event-log-monitor`:
 
 ```bash
 npm start                                    # watch every curve in markets.json until Ctrl+C

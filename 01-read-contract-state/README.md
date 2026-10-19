@@ -8,6 +8,58 @@ explains it in plain words. I did it two ways:
 2. **Script** (`src/`): a TypeScript MCP client that reads the same values, formats them and double-checks
    what the agent said.
 
+## Quick start
+
+You need [Node.js](https://nodejs.org) 20 or newer and git. No keys, no wallet. Check Node with:
+
+```bash
+node -v
+```
+
+**1. Get the code and build it.** One time for all tasks in this repo, about a minute:
+
+```bash
+git clone https://github.com/vi11abajo/Agentic-Economy.git
+```
+
+```bash
+cd Agentic-Economy
+```
+
+```bash
+npm ci
+```
+
+```bash
+npm run build
+```
+
+**2. Read USDC at the latest block** (about 15 seconds, 18 MCP calls paced under the server limit):
+
+```bash
+npm start --workspace 01-read-contract-state
+```
+
+**3. Reproduce the sample exactly.** Same block and holder as [`sample-output.txt`](sample-output.txt), so the
+output should match it line for line:
+
+```bash
+npm start --workspace 01-read-contract-state -- --block 20399245 --holder 0x40836f8f1bd7e13d99a4cc9de5c0b80a83109819
+```
+
+**4. Any other contract**, for example WPROS:
+
+```bash
+npm start --workspace 01-read-contract-state -- --contract 0x52c48d4213107b20bc583832b0d951fb9ca8f0b0
+```
+
+All options are listed under [Run](#run) below. The agent part needs the Claude Code CLI (`claude`), signed in,
+and bash (Git Bash works on Windows):
+
+```bash
+bash 01-read-contract-state/agent/run-agent.sh
+```
+
 ## Contract
 
 **USDC on Pharos Pacific Mainnet**, `0xC879C018dB60520F4355C26eD1a6D572cdAC1815`
@@ -73,14 +125,7 @@ on every RPC node behind the MCP server.
 
 ### Run
 
-From the repo root (one install for all tasks):
-
-```bash
-npm install
-npm run build
-```
-
-Then in this folder:
+After the Quick start setup, from inside `01-read-contract-state`:
 
 ```bash
 npm start                                   # USDC, latest block

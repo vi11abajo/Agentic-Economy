@@ -7,10 +7,61 @@ from [ai.pharos.xyz](https://ai.pharos.xyz): Pharos Chain MCP, Developer Docs MC
 
 One folder per task. Everything is TypeScript (Node 20+) with one shared install (npm workspaces).
 
+## Quick start
+
+You need [Node.js](https://nodejs.org) 20 or newer and git. No keys, no wallet. Check Node with:
+
 ```bash
-npm install
+node -v
+```
+
+**1. Get the code and build it.** One time for all tasks in this repo, about a minute:
+
+```bash
+git clone https://github.com/vi11abajo/Agentic-Economy.git
+```
+
+```bash
+cd Agentic-Economy
+```
+
+```bash
+npm ci
+```
+
+```bash
 npm run build
-npm test   # unit tests on recorded Pharos MCP data, no network; CI runs them on every push
+```
+
+**2. Run a task.** Each task folder has its own Quick start with the exact commands. The short version, from
+the `Agentic-Economy` folder:
+
+```bash
+npm start --workspace 01-read-contract-state
+```
+
+```bash
+npm start --workspace 02-event-log-monitor
+```
+
+```bash
+npm run verify --workspace 03-docs-mcp-onboarding
+```
+
+```bash
+cd 04-doc-search-cli && npx --no-install rtfm "how do I verify a contract on Pharos?"
+```
+
+**Tests** (offline, on recorded Pharos MCP data, the same ones CI runs on every push):
+
+```bash
+npm test
+```
+
+**No Node on the machine?** Run everything in Docker instead, for example task 04:
+
+```bash
+docker run --rm -it node:22 bash -c "git clone -q https://github.com/vi11abajo/Agentic-Economy.git && cd Agentic-Economy && npm ci --silent && npm run build --silent && cd 04-doc-search-cli && npx --no-install rtfm 'Does Pharos mainnet support EIP-7702?' --verify"
 ```
 
 ## Tasks

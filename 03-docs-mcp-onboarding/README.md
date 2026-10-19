@@ -8,6 +8,46 @@ community help. Every answer below is the agent's real reply, copied from the ch
 **My goal:** build an agent that reacts to every buy on a bonding-curve token on Pharos mainnet, and let other
 agents call it. That's the kind of thing I'd actually ask the docs, so I asked that instead of "what's the chain ID".
 
+## Quick start
+
+You need [Node.js](https://nodejs.org) 20 or newer and git. No keys, no wallet. Check Node with:
+
+```bash
+node -v
+```
+
+**1. Get the code and build it.** One time for all tasks in this repo, about a minute:
+
+```bash
+git clone https://github.com/vi11abajo/Agentic-Economy.git
+```
+
+```bash
+cd Agentic-Economy
+```
+
+```bash
+npm ci
+```
+
+```bash
+npm run build
+```
+
+**2. Re-check every gap against the live services** (about 6 seconds, read-only):
+
+```bash
+npm run verify --workspace 03-docs-mcp-onboarding
+```
+
+**3. Check that the log quotes the agent word for word:**
+
+```bash
+npm test --workspace 03-docs-mcp-onboarding
+```
+
+The log itself is plain text in [`log/`](log), nothing to run.
+
 ## Log
 
 | # | What I wanted | Exact query to `@Pharos Docs MCP` | Answer (short) | Result |
@@ -86,7 +126,7 @@ Using answers 1, 3 and 6 (and the fix for 2), the monitor from task 02 is runnin
 
 ## Check it yourself
 
-From the repo root: `npm install && npm run build`, then:
+After the Quick start setup, from the `Agentic-Economy` folder:
 
 ```bash
 npm run verify --workspace 03-docs-mcp-onboarding
