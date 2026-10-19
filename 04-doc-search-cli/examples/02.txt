@@ -1,4 +1,4 @@
-$ foghorn "How many blocks can a single eth_getLogs call span on the public Pharos RPC before it gets rejected?" --verify
+$ rtfm "How many blocks can a single eth_getLogs call span on the public Pharos RPC before it gets rejected?" --verify
 Use a maximum of 100 blocks per `eth_getLogs` call on the rate-limited public RPC. The documented
 fallback cap is 10,000 blocks when rate limiting isn’t enabled. See JSON-RPC API Methods.
 

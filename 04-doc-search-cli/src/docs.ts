@@ -12,7 +12,7 @@ export interface DocsSource {
 }
 
 export class DocsMcp implements DocsSource {
-  private readonly client = new Client({ name: "foghorn", version: "1.0.0" });
+  private readonly client = new Client({ name: "rtfm", version: "1.0.0" });
 
   async connect(): Promise<void> {
     await this.client.connect(new StreamableHTTPClientTransport(new URL(DOCS_MCP_URL)));

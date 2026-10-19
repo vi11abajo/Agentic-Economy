@@ -1,4 +1,4 @@
-$ foghorn "Does Pharos mainnet support EIP-7702, so an EOA can delegate to a smart account code?" --verify
+$ rtfm "Does Pharos mainnet support EIP-7702, so an EOA can delegate to a smart account code?" --verify
 No answer in the Pharos docs for this.
 Docs MCP: "I can’t confirm EIP-7702 support on Pharos Pacific Mainnet from the available docs."
 

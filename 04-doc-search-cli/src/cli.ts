@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// foghorn: ask the Pharos docs from the terminal (Developer Docs MCP), get a short answer with sources,
+// rtfm: ask the Pharos docs from the terminal (Developer Docs MCP), get a short answer with sources,
 // and optionally check the answer's facts on mainnet (Pharos Chain MCP).
 import { PharosMcp } from "@agentic-economy/pharos-mcp";
 import { concise, isNoAnswer, parseAnswer, parseSearch, plain, firstSentence, type Source } from "./answer.js";
@@ -7,9 +7,9 @@ import { DocsMcp } from "./docs.js";
 import { extractClaims, hasClaims, verifyClaims, MAINNET_CHAIN_ID, type Check } from "./verify.js";
 
 const HELP = `Usage:
-  foghorn "<question>" [--verify] [--full] [--sources N] [--json]
-  foghorn search "<words>"              list matching doc pages
-  foghorn page <docs.pharos.xyz URL>     print a whole page
+  rtfm "<question>" [--verify] [--full] [--sources N] [--json]
+  rtfm search "<words>"              list matching doc pages
+  rtfm page <docs.pharos.xyz URL>     print a whole page
 
   --verify     check addresses, chain IDs and block limits from the answer on Pharos mainnet (Pharos Chain MCP)
   --full       print the whole answer instead of the first few paragraphs
@@ -60,7 +60,7 @@ async function ask(docs: DocsMcp, opt: Options): Promise<number> {
   const claims = extractClaims(answer.body);
   let verified: { block: number; checks: Check[] } | undefined;
   if (opt.verify && !noAnswer && hasClaims(claims)) {
-    const chain = new PharosMcp("foghorn");
+    const chain = new PharosMcp("rtfm");
     await chain.connect();
     try {
       verified = await verifyClaims(chain, claims);
@@ -92,7 +92,7 @@ async function ask(docs: DocsMcp, opt: Options): Promise<number> {
 }
 
 async function search(docs: DocsMcp, words: string): Promise<number> {
-  if (!words) throw new Error('Usage: foghorn search "<words>"');
+  if (!words) throw new Error('Usage: rtfm search "<words>"');
   const pages = parseSearch(await docs.search(words));
   if (!pages.length) {
     console.log(paint("amber", "No matching pages."));
@@ -103,7 +103,7 @@ async function search(docs: DocsMcp, words: string): Promise<number> {
 }
 
 async function page(docs: DocsMcp, url?: string): Promise<number> {
-  if (!url || !/^https:\/\/docs\.pharos\.xyz\//.test(url)) throw new Error("Usage: foghorn page https://docs.pharos.xyz/...");
+  if (!url || !/^https:\/\/docs\.pharos\.xyz\//.test(url)) throw new Error("Usage: rtfm page https://docs.pharos.xyz/...");
   console.log(wrap(plain(await docs.page(url))));
   return 0;
 }

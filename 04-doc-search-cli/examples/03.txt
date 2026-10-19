@@ -1,4 +1,4 @@
-$ foghorn "My agent wants to charge 1 cent per call with x402 on Pharos mainnet. Which asset address goes into the payment requirements?" --verify
+$ rtfm "My agent wants to charge 1 cent per call with x402 on Pharos mainnet. Which asset address goes into the payment requirements?" --verify
 For Pharos Pacific Mainnet, set the payment requirement’s `asset` to the USDC contract address:
 
 0xc879c018db60520f4355c26ed1a6d572cdac1815

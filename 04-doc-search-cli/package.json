@@ -1,11 +1,11 @@
 {
-  "name": "foghorn",
+  "name": "rtfm",
   "version": "1.0.0",
-  "description": "foghorn: ask the Pharos docs from your terminal (Developer Docs MCP), get a short sourced answer, check its facts on mainnet",
+  "description": "rtfm: reads the Pharos docs for you from your terminal (Developer Docs MCP), get a short sourced answer, check its facts on mainnet",
   "type": "module",
   "private": true,
   "bin": {
-    "foghorn": "dist/cli.js"
+    "rtfm": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",

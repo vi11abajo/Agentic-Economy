@@ -1,17 +1,18 @@
 # 04 · Doc-Search CLI (Developer Docs MCP · Easy)
 
-**foghorn** asks the Pharos docs a question from your terminal and gives you a short answer with links to the
-pages it came from. It runs on the Developer Docs MCP (`https://docs.pharos.xyz/~gitbook/mcp`).
+**rtfm** reads the manual so you don't have to. Ask the Pharos docs a question from your terminal and get a
+short answer with links to the pages it came from. It runs on the Developer Docs MCP
+(`https://docs.pharos.xyz/~gitbook/mcp`).
 
-Pharos is a lighthouse, so the CLI is its foghorn: you ask into the fog, it answers.
+And since the manual is sometimes wrong (see task 03), it can also check the answer against the chain.
 
 Two things it does on top of a plain wrapper:
 
-- **It says so when the docs don't know.** If the Docs MCP can't answer, foghorn doesn't print a made-up answer.
+- **It says so when the docs don't know.** If the Docs MCP can't answer, rtfm doesn't print a made-up answer.
   It tells you there's no answer in the docs, shows what the Docs MCP said, lists the closest pages from a docs
   search and exits with code 2, so scripts can tell.
 - **`--verify` checks the answer on the chain.** In task 03 I found answers where the docs were just wrong. With
-  `--verify`, foghorn pulls the checkable facts out of the answer (contract addresses, chain IDs, block limits)
+  `--verify`, rtfm pulls the checkable facts out of the answer (contract addresses, chain IDs, block limits)
   and checks them on Pharos mainnet through Pharos Chain MCP: is there a contract at that address and what does
   `symbol()` return, is it the mainnet chain ID, how many blocks does `get_logs` really accept. Each fact gets
   ✓, ✗ or ! (can't be checked on mainnet, e.g. a testnet address).
@@ -23,18 +24,19 @@ From the repo root (one install for all tasks):
 ```bash
 npm install
 npm run build
-npx foghorn "how do I verify a contract on Pharos?"
+npx --no-install rtfm "how do I verify a contract on Pharos?"
 ```
 
-`npx foghorn` works anywhere inside the repo. To get a plain `foghorn` command everywhere, run `npm link` in
+This works anywhere inside the repo (`--no-install` makes sure npx runs this local command and never downloads
+some other package called rtfm). To get a plain `rtfm` command everywhere, run `npm link` in
 `04-doc-search-cli`. No keys needed.
 
 ## Usage
 
 ```text
-foghorn "<question>" [--verify] [--full] [--sources N] [--json]
-foghorn search "<words>"              list matching doc pages
-foghorn page <docs.pharos.xyz URL>     print a whole page
+rtfm "<question>" [--verify] [--full] [--sources N] [--json]
+rtfm search "<words>"              list matching doc pages
+rtfm page <docs.pharos.xyz URL>     print a whole page
 
 --verify     check addresses, chain IDs and block limits from the answer on Pharos mainnet
 --full       print the whole answer instead of the first few paragraphs
@@ -52,7 +54,7 @@ changes a bit from run to run.
 **1. A contract address, confirmed on-chain**
 
 ```text
-$ foghorn "I want gasless onboarding with ERC-4337 smart accounts on Pharos mainnet. Which EntryPoint should my bundler target?" --verify
+$ rtfm "I want gasless onboarding with ERC-4337 smart accounts on Pharos mainnet. Which EntryPoint should my bundler target?" --verify
 For Pharos Pacific Mainnet, target the canonical ERC-4337 EntryPoint v0.7:
 
 `0x0000000071727De22E5E9d8BAf0edAc6f37da032`
@@ -72,11 +74,11 @@ Checked on Pharos mainnet (chain 1672, block 20,681,551, via Pharos Chain MCP)
 
 **2. The docs give the wrong limit, the chain corrects it**
 
-The docs say 100 blocks (10,000 as a fallback). The chain accepts up to 1,000, and 1,001 gets rejected. foghorn
+The docs say 100 blocks (10,000 as a fallback). The chain accepts up to 1,000, and 1,001 gets rejected. rtfm
 finds the real number with a few `get_logs` calls.
 
 ```text
-$ foghorn "How many blocks can a single eth_getLogs call span on the public Pharos RPC before it gets rejected?" --verify
+$ rtfm "How many blocks can a single eth_getLogs call span on the public Pharos RPC before it gets rejected?" --verify
 Use a maximum of 100 blocks per `eth_getLogs` call on the rate-limited public RPC. The documented
 fallback cap is 10,000 blocks when rate limiting isn’t enabled. See JSON-RPC API Methods.
 
@@ -94,7 +96,7 @@ Checked on Pharos mainnet (chain 1672, block 20,681,576, via Pharos Chain MCP)
 **3. A token address, checked with `symbol()`**
 
 ```text
-$ foghorn "My agent wants to charge 1 cent per call with x402 on Pharos mainnet. Which asset address goes into the payment requirements?" --verify
+$ rtfm "My agent wants to charge 1 cent per call with x402 on Pharos mainnet. Which asset address goes into the payment requirements?" --verify
 For Pharos Pacific Mainnet, set the payment requirement’s `asset` to the USDC contract address:
 
 0xc879c018db60520f4355c26ed1a6d572cdac1815
@@ -114,7 +116,7 @@ Checked on Pharos mainnet (chain 1672, block 20,681,601, via Pharos Chain MCP)
 **4. Not in the docs, nothing to verify**
 
 ```text
-$ foghorn "Does Pharos mainnet support EIP-7702, so an EOA can delegate to a smart account code?" --verify
+$ rtfm "Does Pharos mainnet support EIP-7702, so an EOA can delegate to a smart account code?" --verify
 No answer in the Pharos docs for this.
 Docs MCP: "I can’t confirm EIP-7702 support on Pharos Pacific Mainnet from the available docs."
 
@@ -129,7 +131,7 @@ Nothing to verify on-chain: there is no answer to check.
 
 ## How it works
 
-1. `askQuestion` on the Docs MCP. The reply is markdown that ends with a list of source links; foghorn splits
+1. `askQuestion` on the Docs MCP. The reply is markdown that ends with a list of source links; rtfm splits
    the two, turns the markdown into plain text and keeps the first few paragraphs (`--full` shows everything).
 2. If the first sentence says the docs don't cover it ("I cannot find…", "I can't confirm…", "the documentation
    does not…"), it's treated as no answer. Only the first sentence counts, so an answer like "It has to be a
@@ -146,4 +148,4 @@ Code: [`src/cli.ts`](src/cli.ts), [`src/answer.ts`](src/answer.ts), [`src/verify
 
 `npm test` runs on real Docs MCP replies saved in [`test/fixtures/`](test/fixtures): splitting answers from
 sources, spotting "no answer" without false alarms, plain-text output, finding claims, and the on-chain checks
-against a fake chain with a 1,000-block limit ([`src/foghorn.test.ts`](src/foghorn.test.ts)).
+against a fake chain with a 1,000-block limit ([`src/rtfm.test.ts`](src/rtfm.test.ts)).
