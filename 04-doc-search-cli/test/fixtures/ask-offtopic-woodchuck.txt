@@ -1,0 +1,1 @@
+I can help with building on Pharos from the terminal, but this question isn’t covered by the docs.

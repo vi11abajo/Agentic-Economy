@@ -211,10 +211,13 @@ Nothing to verify on-chain: there is no answer to check.
 
 1. `askQuestion` on the Docs MCP. The reply is markdown that ends with a list of source links; rtfm splits
    the two, turns the markdown into plain text and keeps the first few paragraphs (`--full` shows everything).
-2. If the first sentence says the docs don't cover it ("I cannot find…", "I can't confirm…", "the documentation
-   does not…"), it's treated as no answer. Only the first sentence counts, so an answer like "It has to be a
-   Skill. Anvita Flow does not provide…" still counts as an answer. In that case the sources shown are from
-   `searchDocumentation`, which is more useful than the pages the agent happened to look at.
+2. It's treated as no answer if the reply has no source at all, or if its first sentence says the docs don't
+   cover it ("I cannot find…", "I can't confirm…", "the docs do not indicate…", "isn't related to…"). The
+   no-source rule matters because the agent words it differently every time: for the same off-topic question
+   I got "I cannot find…", "I can't answer that…" and "I cannot help with that.", never with a source. Only the
+   first sentence counts for the wording, so an answer like "It has to be a Skill. Anvita Flow does not
+   provide…" still counts as an answer. For a miss, the pages shown come from `searchDocumentation`, which is
+   more useful than the pages the agent happened to look at.
 3. `--verify` reads the facts with regexes and checks them with Pharos Chain MCP: `get_chain_info`,
    `get_code`, `eth_call` (`symbol()`/`name()`) and `get_logs` on N and N+1 blocks. If a limit is wrong it finds
    the real one by doubling and then bisecting, about a dozen calls.

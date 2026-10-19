@@ -1,0 +1,14 @@
+Pharos Pacific Mainnet’s block time is **under 1 second**. The docs don’t define “bananas” as a time unit. [x402 Pacific Mainnet](/developer-guide/x402/x402-pacific-mainnet)
+
+# Sources
+
+- [Pacific Mainnet](https://docs.pharos.xyz/getting-started/network/pacific-mainnet)
+- [About Pharos](https://docs.pharos.xyz/introduction/readme)
+- [Pharos Network Snapshots](https://docs.pharos.xyz/node-and-validator-guide/pharos-network-snapshots)
+- [Why Pharos](https://docs.pharos.xyz/introduction/why-pharos)
+- [Node Debugging & Configuration](https://docs.pharos.xyz/node-and-validator-guide/node-debugging-and-configuration)
+- [Network](https://docs.pharos.xyz/getting-started/network)
+- [Alchemy RPC](https://docs.pharos.xyz/tooling-and-infrastructure/rpc/alchemy)
+- [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet)
+- [Vision & Mission](https://docs.pharos.xyz/introduction/vision-and-mission)
+- [Node Management](https://docs.pharos.xyz/node-and-validator-guide/node-management)

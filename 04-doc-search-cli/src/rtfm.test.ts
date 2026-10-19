@@ -34,6 +34,25 @@ describe("reading Docs MCP replies", () => {
     assert.equal(isNoAnswer("There’s no documented Pharos precompile for reading a previous block’s timestamp."), true);
   });
 
+  it("treats off-topic questions as no answer, however the agent words it", () => {
+    const woodchuck = parseAnswer(fixture("ask-offtopic-woodchuck.txt"));
+    const swallow = parseAnswer(fixture("ask-offtopic-swallow.txt"));
+    assert.equal(woodchuck.sources.length, 0);
+    assert.equal(isNoAnswer(woodchuck), true, "isn't covered by the docs, no sources");
+    assert.equal(isNoAnswer(swallow), true, "can't answer that question, no sources");
+    // The wording alone is caught too, for replies that do list (irrelevant) sources.
+    assert.equal(isNoAnswer("This question isn't related to that documentation."), true);
+    assert.equal(isNoAnswer("I can't answer that question from the available docs."), true);
+    assert.equal(isNoAnswer("The docs don't define bananas as a time unit."), true);
+    assert.equal(isNoAnswer("The docs do not indicate that Pharos Pacific Mainnet supports EIP-7702."), true);
+  });
+
+  it("keeps a partial answer that has sources", () => {
+    const bananas = parseAnswer(fixture("ask-offtopic-bananas.txt"));
+    assert.ok(bananas.sources.length > 0);
+    assert.equal(isNoAnswer(bananas), false, "block time under 1 second is a real answer, bananas aside");
+  });
+
   it("doesn't mistake a real answer for a miss", () => {
     assert.equal(isNoAnswer(GETLOGS.body), false);
     assert.equal(isNoAnswer(X402.body), false);

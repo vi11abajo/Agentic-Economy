@@ -68,7 +68,7 @@ async function ask(docs: DocsMcp, opt: AskOptions, verify: boolean): Promise<num
   let verified: { block: number; checks: Check[] } | undefined;
   try {
     answer = parseAnswer(await docs.ask(opt.question));
-    noAnswer = isNoAnswer(answer.body);
+    noAnswer = isNoAnswer(answer);
     // With no answer, the sources askQuestion lists are just whatever it looked at; a search is more useful.
     pages = noAnswer ? parseSearch(await docs.search(opt.question)) : answer.sources;
     const claims = extractClaims(answer.body);

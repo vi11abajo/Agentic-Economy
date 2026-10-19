@@ -27,15 +27,21 @@ export function parseSearch(raw: string): Source[] {
 // The docs agent says it plainly when the docs don't have it. Only the opening sentence counts, so an answer
 // like "It has to be a Skill. Anvita Flow does not provide …" is not mistaken for a miss.
 const NO_ANSWER = [
-  /\bI (?:cannot|can't|could not|couldn't|was unable to) (?:find|confirm)\b/i,
+  /\bI (?:cannot|can't|could not|couldn't|was unable to) (?:find|confirm|answer)\b/i,
   /\b(?:there is|there's) no documented\b/i,
-  /\b(?:the )?(?:pharos )?(?:documentation|docs) (?:does not|doesn't|do not|don't) (?:publish|document|cover|mention|include|contain|describe|say|provide|list)\b/i,
-  /\bis not (?:explicitly )?(?:documented|covered|mentioned)\b/i,
+  /\b(?:the )?(?:pharos )?(?:documentation|docs) (?:does not|doesn't|do not|don't) (?:publish|document|cover|mention|include|contain|describe|say|provide|list|define|indicate|state|specify|confirm|show)\b/i,
+  /\b(?:is not|isn't|are not|aren't) (?:explicitly )?(?:documented|covered|mentioned|related)\b/i,
   /\bno (?:information|mention|documentation)\b/i,
-  /\bnot (?:in|covered by|part of) the (?:pharos )?(?:docs|documentation)\b/i,
+  /\bnot (?:in|covered by|part of|related to) the (?:pharos )?(?:docs|documentation)\b/i,
 ];
 
-export function isNoAnswer(body: string): boolean {
+/**
+ * True when the docs have no answer: the agent says so in its opening sentence, or it gives no source at all.
+ * An answer the agent can't point to a docs page for isn't an answer from the docs, however it's worded.
+ */
+export function isNoAnswer(answer: Answer | string): boolean {
+  const { body, sources } = typeof answer === "string" ? { body: answer, sources: undefined } : answer;
+  if (sources && sources.length === 0) return true;
   const opening = firstSentence(plain(body)).replace(/[‘’]/g, "'");
   return opening.length === 0 || NO_ANSWER.some((re) => re.test(opening));
 }
