@@ -10,16 +10,16 @@ Token
   Total supply     41,609,740.342546 USDC  (raw 41609740342546)
   Pegged to        USD
   Code version     2
-  Status           Active — transfers are not paused
+  Status           Active, transfers work
 
 Who controls it
-  0x9F8Ea09770Dc38fc61f5a62031b3BE0526D54D92  Owner — can reassign every role below
-  0x908EA62d2529F31347d71992954E540A8d169603  Master Minter — decides who may mint new tokens
-  0x828409Db274caD94AC10db6D54aeCa1Dbe00e237  Pauser — can freeze all transfers
-  0xbA8Cd4958d4105Aaa23b00c645573F53fCd59486  Blacklister — can block individual addresses
-  (not assigned)                              Rescuer — can recover tokens sent to the contract by mistake
-  0x46f958BdEFfD33495E058873cDd114c79Ec13F1b  Proxy admin — can upgrade the contract code
-  0xC35BEcB283fEC66626220467265F6d3B3f8cEae8  Implementation — the contract code currently in use
+  0x9F8Ea09770Dc38fc61f5a62031b3BE0526D54D92  Owner: can reassign every role below
+  0x908EA62d2529F31347d71992954E540A8d169603  Master Minter: decides who may mint new tokens
+  0x828409Db274caD94AC10db6D54aeCa1Dbe00e237  Pauser: can freeze all transfers
+  0xbA8Cd4958d4105Aaa23b00c645573F53fCd59486  Blacklister: can block individual addresses
+  (not assigned)                              Rescuer: can recover tokens sent to the contract by mistake
+  0x46f958BdEFfD33495E058873cDd114c79Ec13F1b  Proxy admin: can upgrade the contract code
+  0xC35BEcB283fEC66626220467265F6d3B3f8cEae8  Implementation: the contract code currently in use
 
 Balances
   0x40836f8F1bD7e13d99a4cc9DE5C0B80A83109819  1,311,134 USDC

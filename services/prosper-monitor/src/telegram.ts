@@ -14,7 +14,7 @@ type Markup = { inline_keyboard: { text: string; callback_data: string }[][] };
 
 export function startTelegram(db: Db, indexer: Indexer): void {
   if (!config.telegramToken) {
-    console.log("[telegram] TELEGRAM_BOT_TOKEN not set — bot disabled");
+    console.log("[telegram] TELEGRAM_BOT_TOKEN not set, bot disabled");
     return;
   }
   const api = (method: string, body: Record<string, unknown>) =>
@@ -52,9 +52,9 @@ export function startTelegram(db: Db, indexer: Indexer): void {
       return send(chatId, `The admin is not reachable through the bot yet. Please write to ${config.adminContact} directly.`);
     }
     const last = pending.get(u);
-    if (last && Date.now() - last < REQUEST_COOLDOWN_MS) return send(chatId, "Your request is already with the admin — you will get a message here once it is reviewed.");
+    if (last && Date.now() - last < REQUEST_COOLDOWN_MS) return send(chatId, "Your request is already with the admin. You'll get a message here once it's reviewed.");
     pending.set(u, Date.now());
-    const name = esc([from.first_name, from.last_name].filter(Boolean).join(" ") || "—");
+    const name = esc([from.first_name, from.last_name].filter(Boolean).join(" ") || "-");
     await send(admin, `🔑 <b>Access request</b>\n@${esc(u)} · ${name} · id ${from.id}`, {
       inline_keyboard: [[
         { text: "✅ Approve", callback_data: `ok:${chatId}:${u}` },
@@ -92,11 +92,11 @@ export function startTelegram(db: Db, indexer: Indexer): void {
     }
   };
   const help =
-    "<b>Prosper curve alerts</b> — every buy and sell on Prosper bonding curves (Pharos).\n\n" +
-    "/tokens — list tokens\n/watch &lt;token|all&gt; [min PROS] — alert me\n/unwatch &lt;token|all&gt;\n/list — my alerts\n\n" +
+    "<b>Prosper curve alerts</b>: every buy and sell on Prosper bonding curves (Pharos).\n\n" +
+    "/tokens: list tokens\n/watch &lt;token|all&gt; [min PROS]: alert me\n/unwatch &lt;token|all&gt;\n/list: my alerts\n\n" +
     `Live feed: ${config.publicUrl}`;
   const adminHelp =
-    "\n\n<b>Admin</b>\n/users — whitelist\n/grant @user — add\n/revoke @user — remove and stop alerts\n" +
+    "\n\n<b>Admin</b>\n/users: whitelist\n/grant @user: add\n/revoke @user: remove and stop alerts\n" +
     "Access requests arrive here with Approve / Deny buttons.";
 
   const handle = async (chatId: number, from: TgUser | undefined, text: string) => {
@@ -107,7 +107,7 @@ export function startTelegram(db: Db, indexer: Indexer): void {
     if (!allowed(username)) {
       if (cmd === "/request" && from) return requestAccess(chatId, from);
       await send(chatId,
-        `Hi! Alerts are available by whitelist only.\nYour username: ${username ? "@" + esc(username) : "(not set — add one in Telegram settings)"}\n\n` +
+        `Hi! Alerts are available by whitelist only.\nYour username: ${username ? "@" + esc(username) : "(not set, add one in Telegram settings)"}\n\n` +
         `Press the button to ask the admin for access.\n\nThe public live feed is open to everyone: ${config.publicUrl}`,
         requestButton);
       return;
@@ -115,7 +115,7 @@ export function startTelegram(db: Db, indexer: Indexer): void {
     if (cmd === "/start" || cmd === "/help") return send(chatId, isAdmin(username) ? help + adminHelp : help);
     if (isAdmin(username) && cmd === "/users") {
       const env = config.allowedUsernames, extra = granted().filter((u) => !env.includes(u));
-      return send(chatId, `<b>Whitelist</b>\nfrom .env: ${env.map((u) => "@" + u).join(", ") || "—"}\napproved in bot: ${extra.map((u) => "@" + u).join(", ") || "—"}`);
+      return send(chatId, `<b>Whitelist</b>\nfrom .env: ${env.map((u) => "@" + u).join(", ") || "none"}\napproved in bot: ${extra.map((u) => "@" + u).join(", ") || "none"}`);
     }
     if (isAdmin(username) && (cmd === "/grant" || cmd === "/revoke")) {
       const u = args[0]?.replace(/^@/, "").toLowerCase();
@@ -163,7 +163,7 @@ export function startTelegram(db: Db, indexer: Indexer): void {
     for (const s of db.subsByMarket(m.market)) {
       if (s.market !== m.market || notified.has(s.chatId)) continue;
       notified.add(s.chatId);
-      void send(s.chatId, `ℹ️ <b>${m.symbol}</b> is ${m.label} — it left the bonding curve and is no longer monitored.`);
+      void send(s.chatId, `ℹ️ <b>${m.symbol}</b> is ${m.label}. It left the bonding curve, so it's no longer monitored.`);
       db.delSub(s.chatId, m.market);
     }
   });
@@ -193,7 +193,7 @@ export function startTelegram(db: Db, indexer: Indexer): void {
     api("setMyDescription", {
       description:
         "Alerts for every buy and sell of Prosper tokens that are still on the bonding curve (Pharos mainnet), " +
-        "indexed live through Pharos Chain MCP.\n\nAccess by whitelist — ask " + config.adminContact + ".\n" +
+        "indexed live through Pharos Chain MCP.\n\nAccess by whitelist, ask " + config.adminContact + ".\n" +
         "Public live feed: " + config.publicUrl,
     }),
   ]).then((r) => r.forEach((x) => !x.ok && console.error(`[telegram] profile: ${x.description}`)))

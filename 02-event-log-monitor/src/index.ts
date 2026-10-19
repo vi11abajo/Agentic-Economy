@@ -128,7 +128,7 @@ async function watch(mcp: PharosMcp, opt: Options): Promise<void> {
       if (color) {
         process.stdout.write(`\r\x1b[2K${paint("muted", `  · block ${fmt(safe)} · watching, no new trades yet…`)}`);
         idleShown = true;
-      } else process.stdout.write(`  · block ${fmt(safe)} — no new trades\n`);
+      } else process.stdout.write(`  · block ${fmt(safe)}: no new trades\n`);
     }
     if (!stopping) await sleep(interval);
   }
@@ -195,7 +195,7 @@ async function resolveMarket(mcp: PharosMcp, market: string): Promise<Market & {
       transaction: { to, data: encodeFunctionData({ abi: viewAbi, functionName: fn }) },
       block: "latest",
     });
-    if (!result || result === "0x") throw new Error(`${to} has no ${fn}() — is it a Prosper market?`);
+    if (!result || result === "0x") throw new Error(`${to} has no ${fn}(), is it a Prosper market?`);
     return decodeFunctionResult({ abi: viewAbi, functionName: fn, data: result }) as T;
   };
   const pToken = getAddress(await call<string>(addr, "pToken"));

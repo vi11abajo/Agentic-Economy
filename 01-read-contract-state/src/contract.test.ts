@@ -1,4 +1,4 @@
-// Replays the real Pharos Chain MCP session recorded in sample-trace.jsonl (block 20,399,245) — no network.
+// Replays the real Pharos Chain MCP session recorded in sample-trace.jsonl (block 20,399,245), no network.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";

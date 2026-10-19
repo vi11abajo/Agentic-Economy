@@ -1,4 +1,4 @@
-# Agent transcript — Claude Code + Pharos Chain MCP
+# Agent transcript: Claude Code + Pharos Chain MCP
 
 ## 01-install
 

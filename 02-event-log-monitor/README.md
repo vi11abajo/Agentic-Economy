@@ -1,48 +1,48 @@
 # 02 · Event/Log Monitor (Chain MCP · Easy)
 
-A continuous monitor that watches **Prosper bonding curves** on Pharos Pacific Mainnet and reports **every buy and
-sell** as it happens — for one token or many. Everything is read through **Pharos Chain MCP**
-(`https://mcp.pharos.xyz/mcp`); no dApp API, no indexer.
+A monitor that keeps running and prints **every buy and sell on Prosper bonding curves** (Pharos Pacific
+Mainnet) as it happens, for one token or many. All data comes from **Pharos Chain MCP**
+(`https://mcp.pharos.xyz/mcp`). No dApp API, no indexer.
 
-[Prosper](https://app.pros-per.xyz) is a launchpad on Pharos: each vault gets a pToken that trades on its own
+[Prosper](https://app.pros-per.xyz) is a launchpad on Pharos. Each vault gets a pToken that trades on its own
 bonding curve (a `market` contract) until it graduates. Every trade on a curve emits one event from that market:
 
-| Event (matched against on-chain logs by topic hash) | Fields |
+| Event (matched to on-chain logs by topic hash) | Fields |
 |---|---|
 | `Bought(address indexed router, address indexed trader, uint256 grossIn, uint256 netIn, uint256 pTokenOut, uint256 fee)` | PROS paid (gross / after fee), pTokens received, fee |
 | `Sold(address indexed router, address indexed trader, uint256 pTokenIn, uint256 grossOut, uint256 netOut, uint256 fee, bool toNative)` | pTokens sold, PROS received (gross / after fee), fee |
 
-The signatures were recovered from the topic hashes of real logs (no verified source available); the field names
-are inferred from the values (`gross − fee = net` holds on every trade seen).
+There's no verified source for these contracts, so I recovered the signatures from the topic hashes of real logs.
+The field names are my guess from the values (`gross - fee = net` holds on every trade I've seen).
 
 ## How it works
 
-1. **Config** — [`markets.json`](markets.json) lists the curves to watch (any number):
+1. **Config.** [`markets.json`](markets.json) lists the curves to watch, as many as you want:
    ```json
    { "intervalSec": 3, "confirmations": 3,
      "markets": [ { "name": "SPACE X Strategy (sxss)", "market": "0x5c3E…8B7F", "minPros": 0 } ] }
    ```
-   For each market the monitor reads its `pToken()` and the token's `symbol()/name()/decimals()` with `eth_call`.
-2. **One log query for all curves** — every poll calls MCP `get_logs` with `address: [all markets]` and
-   `topics: [[Bought, Sold]]` over the new blocks (≤ 1000 per call, 3 blocks behind the head).
-3. **Only new events, no duplicates** — events are keyed `txHash:logIndex`; the next block and recent keys are
-   saved in `.monitor-state.json`, so a restart resumes exactly where it stopped.
-4. **Readable output** — side, token, trader, PROS paid/received, pTokens, curve price (PROS per pToken), fee,
-   block, time, tx hash; every trade is also appended to `trades.jsonl`.
+   For each market it reads `pToken()` and the token's `symbol()/name()/decimals()` with `eth_call`.
+2. **One log query for all curves.** Each poll calls MCP `get_logs` with `address: [all markets]` and
+   `topics: [[Bought, Sold]]` over the new blocks (up to 1000 per call, 3 blocks behind the head).
+3. **Only new events, no duplicates.** Events are keyed by `txHash:logIndex`. The next block and recent keys are
+   saved in `.monitor-state.json`, so after a restart it picks up exactly where it stopped.
+4. **Readable output.** Side, token, trader, PROS paid or received, pTokens, curve price (PROS per pToken), fee,
+   block, time and tx hash. Every trade is also appended to `trades.jsonl`.
 
 ## Run
 
-From the repository root: `npm install && npm run build`. Then in this folder:
+From the repo root: `npm install && npm run build`. Then in this folder:
 
 ```bash
-npm start                                    # watch every curve in markets.json, forever (Ctrl+C to stop)
-npm start -- --from-block 20372512           # replay history from a block, then keep watching live
-npm run add -- 0xMARKET --name "My token" --min 10   # add a curve (validated via MCP); only trades ≥ 10 PROS
-npm run discover -- --blocks 60000           # list curves created recently (ProsperFactory events via MCP)
+npm start                                    # watch every curve in markets.json until Ctrl+C
+npm start -- --from-block 20372512           # replay from a block, then keep watching live
+npm run add -- 0xMARKET --name "My token" --min 10   # add a curve (checked via MCP), only trades of 10+ PROS
+npm run discover -- --blocks 60000           # list recently created curves (ProsperFactory events via MCP)
 ```
 
-To follow a token you see in the app (`…?vault=sxss-46f0d8`), run `discover` — the `vault …46f0d8` column is the
-same suffix — and `add` its market. Read-only, no keys.
+To follow a token you see in the app (`…?vault=sxss-46f0d8`), run `discover`. The `vault …46f0d8` column is the
+same suffix, then `add` its market. Read-only, no keys.
 
 ## Sample output
 
@@ -59,7 +59,7 @@ Watching 4 Prosper curve(s) for buys and sells
     0x5f1A…2784  sold 41,527 pPeng → got 0.39204 PROS
 ```
 
-pMusk history (its whole curve so far):
+pMusk history (the whole curve at that point):
 
 ```text
 #1 BUY  pMusk  block 20,393,489 · 12:43:39 UTC
@@ -73,22 +73,23 @@ pMusk history (its whole curve so far):
     0x4f6d…C793  paid 5 PROS → got 647,939 pMusk
 ```
 
-Cross-check: the net amounts 9.9 + 4.95 + 49.5 + 4.95 = **69.3 PROS** — exactly the "Graduation progress 69.3 /
-20,000 PROS" the Prosper app shows for this curve; the price rises with each buy, as a bonding curve should.
+Sanity check: the net amounts 9.9 + 4.95 + 49.5 + 4.95 = **69.3 PROS**, which is exactly the "Graduation
+progress 69.3 / 20,000 PROS" the Prosper app showed for this curve. And the price goes up with each buy, like
+a bonding curve should.
 
-## Live demo (hosted)
+## Hosted version
 
-The same Chain MCP log monitoring runs 24/7 as a small service
-([`services/prosper-monitor`](../services/prosper-monitor)) for every Prosper token still on its bonding curve:
+The same monitoring runs 24/7 as a small service ([`services/prosper-monitor`](../services/prosper-monitor))
+for every Prosper token that is still on its curve:
 
-- Live feed (decoded trades with block, trader, amounts, price, tx): https://mcp.pharosfdv.xyz/prosper-monitor
+- Live feed (trades with block, trader, amounts, price, tx): https://mcp.pharosfdv.xyz/prosper-monitor
 - JSON: https://mcp.pharosfdv.xyz/prosper-monitor/trades.json?limit=50
-- Telegram alerts per token (whitelist), and an MCP endpoint for AI agents:
+- Telegram alerts per token (whitelist) and an MCP endpoint for AI agents:
   `claude mcp add --transport http prosper-monitor https://mcp.pharosfdv.xyz/prosper-monitor/mcp`
 
 ## Tests
 
-`npm test` runs on the real `get_logs` result of the two trades caught in the video
-([`test/fixtures/pmusk-demo-logs.json`](test/fixtures/pmusk-demo-logs.json)): event signatures, decoding of the
-buy and the sell, chain ordering, no duplicates across polls, re-org (`removed`) logs, `minPros`, and the
-1,000-block window ([`src/curve.test.ts`](src/curve.test.ts)).
+`npm test` uses the real `get_logs` result for the two trades caught in the video
+([`test/fixtures/pmusk-demo-logs.json`](test/fixtures/pmusk-demo-logs.json)). It checks the event signatures,
+decoding of the buy and the sell, chain order, no duplicates across polls, re-org (`removed`) logs, `minPros`
+and the 1000-block window ([`src/curve.test.ts`](src/curve.test.ts)).

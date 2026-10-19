@@ -59,13 +59,13 @@ export const SLOTS = {
 };
 
 export const ROLE_LABELS: Record<string, string> = {
-  owner: "Owner — can reassign every role below",
-  masterMinter: "Master Minter — decides who may mint new tokens",
-  pauser: "Pauser — can freeze all transfers",
-  blacklister: "Blacklister — can block individual addresses",
-  rescuer: "Rescuer — can recover tokens sent to the contract by mistake",
-  proxyAdmin: "Proxy admin — can upgrade the contract code",
-  implementation: "Implementation — the contract code currently in use",
+  owner: "Owner: can reassign every role below",
+  masterMinter: "Master Minter: decides who may mint new tokens",
+  pauser: "Pauser: can freeze all transfers",
+  blacklister: "Blacklister: can block individual addresses",
+  rescuer: "Rescuer: can recover tokens sent to the contract by mistake",
+  proxyAdmin: "Proxy admin: can upgrade the contract code",
+  implementation: "Implementation: the contract code currently in use",
 };
 
 export async function readContract(mcp: McpCaller, args: ReadArgs) {

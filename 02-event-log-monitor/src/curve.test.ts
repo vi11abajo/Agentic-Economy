@@ -75,7 +75,7 @@ describe("pickNewTrades", () => {
     assert.deepEqual(trades.map((t) => t.side), ["BUY", "SELL"]);
   });
 
-  it("reports each log once — within a page and across polls", () => {
+  it("reports each log once, within a page and across polls", () => {
     const seen = new Set<string>();
     assert.equal(pickNewTrades([BUY_LOG, BUY_LOG, SELL_LOG], markets(), seen).length, 2);
     assert.equal(pickNewTrades([BUY_LOG, SELL_LOG], markets(), seen).length, 0, "second poll over the same blocks");

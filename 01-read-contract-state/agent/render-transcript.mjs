@@ -6,7 +6,7 @@ import { join } from "node:path";
 
 const dir = process.argv[2] ?? "transcripts";
 const files = readdirSync(dir).filter((f) => f.endsWith(".jsonl")).sort();
-const out = ["# Agent transcript — Claude Code + Pharos Chain MCP", ""];
+const out = ["# Agent transcript: Claude Code + Pharos Chain MCP", ""];
 
 for (const file of files) {
   const events = readFileSync(join(dir, file), "utf8").trim().split("\n").map((l) => JSON.parse(l));

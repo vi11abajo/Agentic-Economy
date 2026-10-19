@@ -41,7 +41,7 @@ export class Indexer extends EventEmitter {
     return m && m.phase === ON_CURVE ? m : undefined;
   }
 
-  /** Markets currently on the bonding curve (phase 0) — the only ones the monitor follows. */
+  /** Markets currently on the bonding curve (phase 0). These are the only ones the monitor follows. */
   allMarkets(): MarketRow[] {
     return this.onCurve();
   }

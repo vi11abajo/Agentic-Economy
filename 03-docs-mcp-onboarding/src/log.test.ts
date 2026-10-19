@@ -26,7 +26,7 @@ describe("onboarding log", () => {
   it("quotes the agent's replies word for word", () => {
     const quotes: [number, string][] = [
       [1, "get_logs is capped at 1000 blocks per call"],
-      [2, "No — get_logs does not include the block timestamp."],
+      [2, "get_logs does not include the block timestamp."],
       [3, "The Pharos documentation does not publish an official list of launchpad or DEX factory contracts"],
       [4, "It has to be a Skill. Anvita Flow does not provide a way to register or proxy an externally-hosted MCP server URL."],
       [5, "Contract address (Pacific Mainnet)\t0xc879c018db60520f4355c26ed1a6d572cdac1815"],

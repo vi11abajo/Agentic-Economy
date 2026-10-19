@@ -118,7 +118,7 @@
 <div class="wrap">
   <div class="term">
     <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
-      <span class="t">prosper-monitor — Pharos mainnet · Prosper tokens on the bonding curve</span></div>
+      <span class="t">prosper-monitor · Pharos mainnet · Prosper tokens on the bonding curve</span></div>
     <div class="head">
       <div class="prompt">monitor@pharos:~$ <b>tail -f prosper/trades</b><span class="cursor"></span></div>
       <div class="stats" id="stats"><span class="pill sync">connecting</span></div>
@@ -127,7 +127,7 @@
     <div id="log"></div>
   </div>
   <div class="help">
-    <span>Every buy and sell of <a href="https://app.pros-per.xyz" target="_blank" rel="noopener">Prosper</a> tokens that are still <b>on the bonding curve</b> — graduated and curve-only tokens are left out. Indexed live through Pharos Chain MCP. Times are UTC.</span>
+    <span>Every buy and sell of <a href="https://app.pros-per.xyz" target="_blank" rel="noopener">Prosper</a> tokens that are still <b>on the bonding curve</b>. Graduated and curve-only tokens are left out. Indexed live through Pharos Chain MCP. Times are UTC.</span>
   </div>
   <div class="cards">
     <section class="card tg">
@@ -253,7 +253,7 @@
     });
     es.addEventListener("phase", (e) => {
       const m = JSON.parse(e.data);
-      sys(`${m.symbol} is ${m.label} — left the curve, removed from the monitor`);
+      sys(`${m.symbol} is ${m.label}, it left the curve and was removed from the monitor`);
       filters.querySelector(`[data-m="${m.market}"]`)?.remove();
       for (const r of log.querySelectorAll(`.row[data-m="${m.market}"]`)) r.remove();
       if (filter === m.market) setFilter("");

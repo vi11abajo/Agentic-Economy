@@ -51,7 +51,7 @@ function printReport(r: Report): void {
   line("Total supply", `${fmt(token.totalSupplyRaw)}  (raw ${token.totalSupplyRaw ?? "n/a"})`);
   if (token.currency) line("Pegged to", token.currency);
   if (token.version) line("Code version", token.version);
-  if (token.paused !== undefined) line("Status", token.paused ? "PAUSED — transfers are frozen" : "Active — transfers are not paused");
+  if (token.paused !== undefined) line("Status", token.paused ? "PAUSED, transfers are frozen" : "Active, transfers work");
 
   // A role function that exists but returns the zero address means "role not assigned".
   const roleEntries = Object.entries(r.roles).filter(([, addr]) => addr !== undefined);
