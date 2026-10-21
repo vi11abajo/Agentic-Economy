@@ -72,6 +72,7 @@ docker run --rm -it node:22 bash -c "git clone -q https://github.com/vi11abajo/A
 | 02 | Event/Log Monitor: Prosper curve buys and sells | Chain MCP | Easy | [`02-event-log-monitor`](02-event-log-monitor) |
 | 03 | Docs MCP Onboarding: ai.pharos.xyz through the Docs MCP agent | Developer Docs MCP | Easy | [`03-docs-mcp-onboarding`](03-docs-mcp-onboarding) |
 | 04 | Doc-Search CLI: `rtfm`, sourced answers checked on-chain | Developer Docs MCP | Easy | [`04-doc-search-cli`](04-doc-search-cli) |
+| 05 | Threshold Guardian: `trenchscope`, on-chain buy and sell checks for Prosper curve tokens | SkillEngine | Medium | [`05-trenchscope`](05-trenchscope) |
 
 ## Shared code
 

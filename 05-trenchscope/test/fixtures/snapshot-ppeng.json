@@ -1,0 +1,57 @@
+{
+ "market": "0xe534Dadb1E32A9DF075ffcAE0D636fF472A040db",
+ "token": "0xc927DEf5467B85876310f1ef80d1C276b8f8a3AA",
+ "name": "Penguin",
+ "symbol": "pPeng",
+ "block": 20835530,
+ "timestamp": 1792586554,
+ "phase": 0,
+ "endsAt": 1793278030,
+ "reserve": 791.9407749320793,
+ "target": 20000,
+ "spot": 0.00000916401960155749,
+ "supply": 1000000000,
+ "prosUsd": 0.6086175565880582,
+ "prosUsdAge": 865,
+ "holders": [
+  {
+   "address": "0xe534dadb1e32a9df075ffcae0d636ff472a040db",
+   "balance": 634513313.7952722,
+   "isContract": true,
+   "createdBlock": 20307769
+  },
+  {
+   "address": "0xc8f6d453d3c3cea8a046f6d4ab683b0c4db9a4d5",
+   "balance": 200000000,
+   "isContract": true,
+   "createdBlock": 17515661
+  },
+  {
+   "address": "0xe7368221de15a7c5e0a50a95317b06e6d08c3861",
+   "balance": 91605932.29170093,
+   "isContract": false
+  },
+  {
+   "address": "0x158432eed50e944b4148d46b5e7df5d083706811",
+   "balance": 70000000,
+   "isContract": true,
+   "createdBlock": 17515634
+  },
+  {
+   "address": "0x0c3d630521ee84f0f54c86bafff36db26e851588",
+   "balance": 3361341.632329033,
+   "isContract": false
+  },
+  {
+   "address": "0x97ac402a98c33ca0194bc51377159c635ce2f672",
+   "balance": 519412.2806977461,
+   "isContract": false
+  }
+ ],
+ "protocol": [
+  "0xefdbb0ea7647b0e21aef7a3b7a5d6a632c3116c8",
+  "0xe534dadb1e32a9df075ffcae0d636ff472a040db",
+  "0xc8f6d453d3c3cea8a046f6d4ab683b0c4db9a4d5",
+  "0x158432eed50e944b4148d46b5e7df5d083706811"
+ ]
+}

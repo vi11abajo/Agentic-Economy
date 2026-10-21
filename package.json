@@ -10,6 +10,7 @@
     "02-event-log-monitor",
     "03-docs-mcp-onboarding",
     "04-doc-search-cli",
+    "05-trenchscope",
     "services/prosper-monitor"
   ],
   "scripts": {

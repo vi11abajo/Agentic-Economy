@@ -1,0 +1,67 @@
+{
+ "market": "0x5c3E0e4B1BE0851DCbC5F6a5cc04d799AcbE8B7F",
+ "token": "0xE318ac4113324841265d270Dc2393f1Bf742A7f8",
+ "name": "Musk",
+ "symbol": "pMusk",
+ "block": 20835527,
+ "timestamp": 1792586552,
+ "phase": 0,
+ "endsAt": 1793344508,
+ "reserve": 40.89106420265629,
+ "target": 20000,
+ "spot": 0.000007587666025971903,
+ "supply": 1000000000,
+ "prosUsd": 0.6086175565880582,
+ "prosUsdAge": 863,
+ "holders": [
+  {
+   "address": "0x5c3e0e4b1be0851dcbc5f6a5cc04d799acbe8b7f",
+   "balance": 724581644.9767655,
+   "isContract": true,
+   "createdBlock": 20372512
+  },
+  {
+   "address": "0xc8f6d453d3c3cea8a046f6d4ab683b0c4db9a4d5",
+   "balance": 200000000,
+   "isContract": true,
+   "createdBlock": 17515661
+  },
+  {
+   "address": "0x158432eed50e944b4148d46b5e7df5d083706811",
+   "balance": 70000000,
+   "isContract": true,
+   "createdBlock": 17515634
+  },
+  {
+   "address": "0x2b578bdcf252b2d379c6b9c3caea10b5563a2a8c",
+   "balance": 2149316.627165944,
+   "isContract": false
+  },
+  {
+   "address": "0xcb9c9da4d9a8ccecbe2ea82452e54232b243835b",
+   "balance": 1317199.6633416116,
+   "isContract": false
+  },
+  {
+   "address": "0xd8fbe5e0bd9f71593107274f3845e97c447f13c3",
+   "balance": 657306.4989707684,
+   "isContract": false
+  },
+  {
+   "address": "0x4f6d6bdba8e101b4de03cbf426ac2505afc2c793",
+   "balance": 647938.9147513702,
+   "isContract": false
+  },
+  {
+   "address": "0x64f8e935ae722ac549d9ec4f080944c04b4678a6",
+   "balance": 646593.3190047474,
+   "isContract": false
+  }
+ ],
+ "protocol": [
+  "0xefdbb0ea7647b0e21aef7a3b7a5d6a632c3116c8",
+  "0x5c3e0e4b1be0851dcbc5f6a5cc04d799acbe8b7f",
+  "0xc8f6d453d3c3cea8a046f6d4ab683b0c4db9a4d5",
+  "0x158432eed50e944b4148d46b5e7df5d083706811"
+ ]
+}
