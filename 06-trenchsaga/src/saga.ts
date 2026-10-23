@@ -92,7 +92,10 @@ export interface SagaState<C> {
   status: "running" | "done" | "compensating" | "compensated" | "stuck";
   steps: { name: string; title: string; state: StepState; summary?: string; txs: string[]; pending?: Pending }[];
   ctx: C;
+  /** Why the saga stopped going forward. */
   error?: string;
+  /** Why the rollback itself stopped (status stuck); cleared when a resume finishes it. */
+  stuck?: string;
 }
 
 /** Transactions sent for one nonce that haven't produced a receipt yet (the original and its replacements). */
@@ -173,7 +176,7 @@ export class Saga<C> {
           this.log(rec.name, summary === null ? "skipped" : "verified", { summary });
         } catch (e) {
           this.state.status = "stuck";
-          this.state.error = `compensation ${rec.name}: ${(e as Error).message}`;
+          this.state.stuck = `compensation ${rec.name}: ${(e as Error).message}`;
           this.log(rec.name, "compensation failed", { error: (e as Error).message });
           return;
         }
@@ -182,6 +185,7 @@ export class Saga<C> {
       this.log(st.name, "compensated");
     }
     this.state.status = "compensated";
+    this.state.stuck = undefined;
     this.log("-", "saga compensated");
   }
 
@@ -189,7 +193,34 @@ export class Saga<C> {
   private async execute(step: Step<C>, rec: { name: string; txs: string[]; pending?: Pending }): Promise<string | null> {
     const sabotage = this.faults.failAt === step.name;
     let replaceNonce: number | undefined;
+    let readErrors = 0;
     for (let attempt = 1; ; attempt++) {
+      try {
+        const done = await this.attempt(step, rec, attempt, sabotage, replaceNonce);
+        if (done.kind === "finished") return done.summary;
+        replaceNonce = done.replaceNonce;
+      } catch (e) {
+        if (e instanceof PermanentFailure) throw e;
+        // Reading the chain failed (RPC limit, dropped connection): that says nothing about the step itself.
+        // Whatever was sent stays in rec.pending and is checked first on the next round, so nothing is sent twice.
+        const reason = (e as Error).message.split("\n")[0].slice(0, 120);
+        if (++readErrors > 5) throw new PermanentFailure(`the chain can't be read: ${reason}`);
+        this.log(rec.name, "chain read failed, checking again", { reason });
+        await new Promise((r) => setTimeout(r, 2_000));
+        attempt--; // not a new attempt
+      }
+    }
+  }
+
+  private async attempt(
+    step: Step<C>,
+    rec: { name: string; txs: string[]; pending?: Pending },
+    attempt: number,
+    sabotage: boolean,
+    replaceNonceIn: number | undefined,
+  ): Promise<{ kind: "finished"; summary: string | null } | { kind: "again"; replaceNonce?: number }> {
+    let replaceNonce = replaceNonceIn;
+    {
       // A transaction from an earlier attempt (or an earlier run of the program) may still land: check it first.
       if (rec.pending) {
         let r: Receipt | null = null;
@@ -197,7 +228,7 @@ export class Saga<C> {
         if (r) {
           replaceNonce = undefined; // that nonce is used now
           const outcome = await this.settle(step, rec, r);
-          if (outcome !== "retry") return outcome;
+          if (outcome !== "retry") return { kind: "finished", summary: outcome };
         } else {
           replaceNonce = rec.pending.nonce;
         }
@@ -208,7 +239,7 @@ export class Saga<C> {
       if (!tx) {
         const summary = await step.verify(this.state.ctx, this.chain, null);
         this.log(rec.name, "nothing to send", { summary });
-        return null;
+        return { kind: "finished", summary: null };
       }
       // The sabotaged attempt is sent unsimulated so the revert really happens on chain.
       if (!(sabotage && attempt === 1)) {
@@ -232,8 +263,7 @@ export class Saga<C> {
         hash = await this.chain.send(tx, nonce, fees);
       } catch (e) {
         this.log(rec.name, "node refused the transaction", { attempt, reason: (e as Error).message.split("\n")[0] });
-        replaceNonce = undefined;
-        continue;
+        return { kind: "again" };
       }
       rec.txs.push(hash);
       rec.pending = { nonce, hashes: [...(rec.pending?.nonce === nonce ? rec.pending.hashes : []), hash] };
@@ -241,11 +271,11 @@ export class Saga<C> {
       const r = await this.chain.waitReceipt(hash, this.policy.receiptTimeoutMs);
       if (!r) {
         this.log(rec.name, "not mined in time, will replace", { attempt, tx: hash, waitedSec: this.policy.receiptTimeoutMs / 1000 });
-        continue; // rec.pending stays: the next attempt checks it once more, then replaces it
+        return { kind: "again", replaceNonce: nonce }; // rec.pending stays: checked once more, then replaced
       }
       const outcome = await this.settle(step, rec, r);
-      if (outcome !== "retry") return outcome;
-      replaceNonce = undefined;
+      if (outcome !== "retry") return { kind: "finished", summary: outcome };
+      return { kind: "again" };
     }
   }
 

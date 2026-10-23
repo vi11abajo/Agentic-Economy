@@ -37,7 +37,12 @@ class FakeChain implements Chain {
     if (outcome !== "timeout") this.receipts.set(hash, { r, visibleAfter: outcome === "late" ? 1 : 0 });
     return hash;
   }
+  readFailures = 0;
   async waitReceipt(hash: Hex) {
+    if (this.readFailures > 0) {
+      this.readFailures--;
+      throw new Error("cu limit exceeded; Request too fast per second");
+    }
     const x = this.receipts.get(hash);
     if (!x) return null;
     const seen = this.checks.get(hash) ?? 0;
@@ -148,6 +153,16 @@ describe("retry policy: transient failures", () => {
     assert.deepEqual(state.ctx.done, ["a", "b"]);
   });
 
+  it("a failed chain read while waiting is not a failed step: it checks again, without sending twice", async () => {
+    const chain = new FakeChain({});
+    chain.readFailures = 1; // the RPC refuses the first receipt read (seen live on Pharos: "Request too fast")
+    const { saga, events, state } = run([step("a"), step("b")], chain);
+    assert.equal(await saga.run(), "done");
+    assert.equal(chain.sent.length, 2, "one transaction per step");
+    assert.ok(ev(events).includes("a:chain read failed, checking again"));
+    assert.deepEqual(state.ctx.done, ["a", "b"]);
+  });
+
   it("gives up after maxAttempts", async () => {
     const chain = new FakeChain({ b: ["timeout", "timeout", "timeout"] });
     const { saga, state } = run([step("a"), step("b")], chain);
@@ -193,7 +208,7 @@ describe("rollback: permanent failures", () => {
     const chain = new FakeChain({}, (s) => s !== "c" && s !== "au");
     const { saga, state } = run([step("a"), step("b"), step("c")], chain);
     assert.equal(await saga.run(), "stuck");
-    assert.match(state.error!, /compensation a\/undo/);
+    assert.match(state.stuck!, /compensation a\/undo/);
     assert.deepEqual(state.ctx.undone, ["b"]);
   });
 });

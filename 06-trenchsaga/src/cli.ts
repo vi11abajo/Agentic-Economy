@@ -83,7 +83,7 @@ function echo(e: Record<string, unknown>) {
 
 function renderStatus(s: SagaState<RotationCtx>): string {
   const mark: Record<string, string> = { pending: "·", running: "▶", skipped: "–", verified: "✓", failed: "✗", compensating: "↺", compensated: "↩" };
-  const lines = [`saga ${s.id} · ${s.kind} · ${s.status.toUpperCase()}${s.error ? ` · ${s.error}` : ""}`];
+  const lines = [`saga ${s.id} · ${s.kind} · ${s.status.toUpperCase()}${s.error ? ` · failed at ${s.error}` : ""}${s.stuck ? ` · rollback stopped at ${s.stuck}` : ""}`];
   s.steps.forEach((st, i) => {
     lines.push(`  ${mark[st.state] ?? "?"} ${i + 1}. ${st.name.padEnd(8)} ${st.state.padEnd(12)} ${st.summary ?? st.title}`);
     for (const h of st.txs) lines.push(`       ${EXPLORER}/tx/${h}`);

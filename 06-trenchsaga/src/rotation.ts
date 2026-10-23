@@ -17,8 +17,10 @@ export interface Token {
 
 /** Reads the chain needs to build and check the steps. */
 export interface Reader {
-  tokenBalance(token: Address, owner: Address): Promise<bigint>;
-  allowance(token: Address, owner: Address, spender: Address): Promise<bigint>;
+  /** at: read at that block (verification reads before and after the receipt's block, so a lagging RPC
+   *  node behind a load balancer can't make a done step look undone). */
+  tokenBalance(token: Address, owner: Address, at?: bigint): Promise<bigint>;
+  allowance(token: Address, owner: Address, spender: Address, at?: bigint): Promise<bigint>;
   quoteSell(market: Address, tokens: bigint): Promise<bigint>; // net WPROS out
   quoteBuy(market: Address, pros: bigint): Promise<bigint>; // tokens out
   now(): Promise<bigint>; // latest block timestamp
@@ -37,6 +39,7 @@ export interface RotationCtx {
   wprosBefore?: bigint;
   prosOut?: bigint;
   wprosBeforeUnwrap?: bigint;
+  leftover?: bigint;
   unwrapped?: bigint;
   buyValue?: bigint;
   bBefore?: bigint;
@@ -72,8 +75,8 @@ export function rotationSteps(r: Reader): Step<RotationCtx>[] {
       if (now === (c.prevAllowance ?? 0n)) return null;
       return { to: c.a!.token, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [ROUTER, c.prevAllowance ?? 0n] }) };
     },
-    async verify(c) {
-      const now = await r.allowance(c.a!.token, c.me, ROUTER);
+    async verify(c, _chain, rc) {
+      const now = await r.allowance(c.a!.token, c.me, ROUTER, rc?.block);
       if (now !== (c.prevAllowance ?? 0n)) throw new Error(`allowance is ${now}, expected ${c.prevAllowance}`);
       return `router allowance for ${c.a!.symbol} back to ${c.prevAllowance ?? 0n}`;
     },
@@ -82,16 +85,20 @@ export function rotationSteps(r: Reader): Step<RotationCtx>[] {
   const unwrapLeftover: Action<RotationCtx> = {
     name: "unwrap-leftover",
     async plan(c) {
-      if (c.unwrapped !== undefined || !c.prosOut) return null; // already PROS
+      if (!c.prosOut) return null; // the sale never happened
+      // Look at the wallet, not at what the saga remembers: the unwrap may have gone through even if the
+      // saga never got to verify it.
       c.wprosBeforeUnwrap = await r.tokenBalance(WPROS, c.me);
-      return { to: WPROS, data: encodeFunctionData({ abi: wprosAbi, functionName: "withdraw", args: [c.prosOut] }) };
+      const left = c.wprosBeforeUnwrap < c.prosOut ? c.wprosBeforeUnwrap : c.prosOut;
+      if (left === 0n) return null;
+      c.leftover = left;
+      return { to: WPROS, data: encodeFunctionData({ abi: wprosAbi, functionName: "withdraw", args: [left] }) };
     },
     async verify(c, _chain, rc) {
-      if (!rc) return "nothing to unwrap";
-      const after = await r.tokenBalance(WPROS, c.me);
-      if (c.wprosBeforeUnwrap! - after !== c.prosOut!) throw new Error("WPROS balance didn't drop by the unwrapped amount");
-      c.unwrapped = c.prosOut;
-      return `unwrapped ${pros(c.prosOut!)}`;
+      if (!rc) return "the sale's WPROS is already PROS";
+      const drop = (await r.tokenBalance(WPROS, c.me, rc.block - 1n)) - (await r.tokenBalance(WPROS, c.me, rc.block));
+      if (drop !== c.leftover!) throw new Error(`WPROS balance dropped by ${drop}, expected ${c.leftover}`);
+      return `unwrapped ${pros(c.leftover!)}`;
     },
   };
 
@@ -107,8 +114,8 @@ export function rotationSteps(r: Reader): Step<RotationCtx>[] {
     async verify(c, _chain, rc) {
       if (!rc) return "nothing to buy back";
       const ev = tradeEvent(rc, c.a!.market, c.me, "Bought");
-      const after = await r.tokenBalance(c.a!.token, c.me);
-      if (after - c.aBefore! !== (ev.pTokenOut as bigint)) throw new Error(`${c.a!.symbol} balance doesn't match the Bought event`);
+      const gain = (await r.tokenBalance(c.a!.token, c.me, rc.block)) - (await r.tokenBalance(c.a!.token, c.me, rc.block - 1n));
+      if (gain !== (ev.pTokenOut as bigint)) throw new Error(`${c.a!.symbol} balance grew by ${gain}, the Bought event says ${ev.pTokenOut}`);
       c.rebought = ev.pTokenOut as bigint;
       return `bought back ${amt(c.rebought, c.a!.symbol)} for ${pros(c.prosOut!)} (sold ${amt(c.sellAmount, c.a!.symbol)}; the gap is the curve's 1% fee each way)`;
     },
@@ -125,7 +132,7 @@ export function rotationSteps(r: Reader): Step<RotationCtx>[] {
         return { to: c.a!.token, data: encodeFunctionData({ abi: erc20Abi, functionName: "approve", args: [ROUTER, c.sellAmount] }) };
       },
       async verify(c, _chain, rc) {
-        const now = await r.allowance(c.a!.token, c.me, ROUTER);
+        const now = await r.allowance(c.a!.token, c.me, ROUTER, rc?.block);
         if (now < c.sellAmount) throw new Error(`allowance ${now} is below ${c.sellAmount}`);
         return rc ? `router may take ${amt(c.sellAmount, c.a!.symbol)}` : "router was already approved";
       },
@@ -144,8 +151,8 @@ export function rotationSteps(r: Reader): Step<RotationCtx>[] {
       },
       async verify(c, _chain, rc) {
         const ev = tradeEvent(rc!, c.a!.market, c.me, "Sold");
-        const after = await r.tokenBalance(WPROS, c.me);
-        if (after - c.wprosBefore! !== (ev.netOut as bigint)) throw new Error("WPROS balance doesn't match the Sold event");
+        const gain = (await r.tokenBalance(WPROS, c.me, rc!.block)) - (await r.tokenBalance(WPROS, c.me, rc!.block - 1n));
+        if (gain !== (ev.netOut as bigint)) throw new Error(`WPROS balance grew by ${gain}, the Sold event says ${ev.netOut}`);
         c.prosOut = ev.netOut as bigint;
         return `sold ${amt(ev.pTokenIn as bigint, c.a!.symbol)} for ${pros(c.prosOut)} (WPROS)`;
       },
@@ -158,9 +165,9 @@ export function rotationSteps(r: Reader): Step<RotationCtx>[] {
         c.wprosBeforeUnwrap = await r.tokenBalance(WPROS, c.me);
         return { to: WPROS, data: encodeFunctionData({ abi: wprosAbi, functionName: "withdraw", args: [c.prosOut!] }) };
       },
-      async verify(c) {
-        const after = await r.tokenBalance(WPROS, c.me);
-        if (c.wprosBeforeUnwrap! - after !== c.prosOut!) throw new Error("WPROS balance didn't drop by the unwrapped amount");
+      async verify(c, _chain, rc) {
+        const drop = (await r.tokenBalance(WPROS, c.me, rc!.block - 1n)) - (await r.tokenBalance(WPROS, c.me, rc!.block));
+        if (drop !== c.prosOut!) throw new Error(`WPROS balance dropped by ${drop}, expected ${c.prosOut}`);
         c.unwrapped = c.prosOut;
         return `unwrapped ${pros(c.unwrapped!)}`;
       },
@@ -188,8 +195,8 @@ export function buyStep(r: Reader, title: string, value: (c: RotationCtx) => big
     },
     async verify(c, _chain, rc) {
       const ev = tradeEvent(rc!, c.b.market, c.me, "Bought");
-      const after = await r.tokenBalance(c.b.token, c.me);
-      if (after - c.bBefore! !== (ev.pTokenOut as bigint)) throw new Error(`${c.b.symbol} balance doesn't match the Bought event`);
+      const gain = (await r.tokenBalance(c.b.token, c.me, rc!.block)) - (await r.tokenBalance(c.b.token, c.me, rc!.block - 1n));
+      if (gain !== (ev.pTokenOut as bigint)) throw new Error(`${c.b.symbol} balance grew by ${gain}, the Bought event says ${ev.pTokenOut}`);
       c.boughtB = ev.pTokenOut as bigint;
       return `bought ${amt(c.boughtB, c.b.symbol)} for ${pros(c.buyValue!)}`;
     },

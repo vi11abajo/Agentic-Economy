@@ -13,7 +13,8 @@ import { CHAIN_ID, RPC_URL, erc20Abi, marketAbi } from "./prosper.js";
 import type { Reader } from "./rotation.js";
 import type { Chain, Fees, Receipt, TxSpec } from "./saga.js";
 
-const RATE_LIMIT = /too fast|cu limit|429|rate limit|fetch failed|ECONNRESET|socket hang up/i;
+// Rate limits and dropped connections, and a node behind the load balancer that hasn't got a block yet.
+const RATE_LIMIT = /too fast|cu limit|429|rate limit|fetch failed|ECONNRESET|socket hang up|header not found|unknown block|block not found|missing trie node/i;
 
 /** RPC hiccups (rate limits, dropped connections) are retried right here, they are not saga failures. */
 export async function rpc<T>(fn: () => Promise<T>, tries = 6): Promise<T> {
@@ -60,12 +61,17 @@ export function pharosChain(client: PublicClient, account: Account): Chain {
       return wallet.sendTransaction({ to: tx.to, data: tx.data, value: tx.value, gas, nonce, type: "eip1559", ...fees, chain: pharos });
     },
     async waitReceipt(hash: Hex, timeoutMs: number): Promise<Receipt | null> {
-      try {
-        const r = await client.waitForTransactionReceipt({ hash, timeout: timeoutMs, pollingInterval: 1_000 });
-        return { hash, status: r.status, block: r.blockNumber, logs: r.logs, gasUsed: r.gasUsed, effectiveGasPrice: r.effectiveGasPrice };
-      } catch (e) {
-        if (/timed out|could not be found|not found/i.test(short(e))) return null;
-        throw e;
+      // Plain polling with our own rate-limit retries: viem's waiter also reads blocks, and on the public RPC
+      // those reads hit the per-second limit.
+      const until = Date.now() + timeoutMs;
+      for (;;) {
+        const r = await rpc(() => client.getTransactionReceipt({ hash })).catch((e) => {
+          if (/could not be found|not found/i.test(short(e))) return null;
+          throw e;
+        });
+        if (r) return { hash, status: r.status, block: r.blockNumber, logs: r.logs, gasUsed: r.gasUsed, effectiveGasPrice: r.effectiveGasPrice };
+        if (Date.now() >= until) return null;
+        await new Promise((res) => setTimeout(res, 1_000));
       }
     },
     pendingNonce: () => rpc(() => client.getTransactionCount({ address: account.address, blockTag: "pending" })),
@@ -78,9 +84,10 @@ export function pharosChain(client: PublicClient, account: Account): Chain {
 
 export function pharosReader(client: PublicClient): Reader {
   return {
-    tokenBalance: (token: Address, owner: Address) => rpc(() => client.readContract({ address: token, abi: erc20Abi, functionName: "balanceOf", args: [owner] })),
-    allowance: (token: Address, owner: Address, spender: Address) =>
-      rpc(() => client.readContract({ address: token, abi: erc20Abi, functionName: "allowance", args: [owner, spender] })),
+    tokenBalance: (token: Address, owner: Address, at?: bigint) =>
+      rpc(() => client.readContract({ address: token, abi: erc20Abi, functionName: "balanceOf", args: [owner], blockNumber: at })),
+    allowance: (token: Address, owner: Address, spender: Address, at?: bigint) =>
+      rpc(() => client.readContract({ address: token, abi: erc20Abi, functionName: "allowance", args: [owner, spender], blockNumber: at })),
     quoteSell: async (market: Address, tokens: bigint) => (await rpc(() => client.readContract({ address: market, abi: marketAbi, functionName: "quoteSell", args: [tokens] })))[2],
     quoteBuy: async (market: Address, value: bigint) => (await rpc(() => client.readContract({ address: market, abi: marketAbi, functionName: "quoteBuy", args: [value] })))[3],
     now: async () => (await rpc(() => client.getBlock())).timestamp,
