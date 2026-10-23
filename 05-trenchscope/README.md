@@ -60,11 +60,10 @@ Both are optional.
 
 - **Public address** (`wallet=0x...`): needed for sell checks. trenchscope reads your bag, and finds what you
   paid from your own Prosper trades if you bought by hand.
-- **Key**: only if you want trenchscope to send the trade itself. Put `PRIVATE_KEY=0x...` (or
-  `MNEMONIC="..."`) into the `.env` file in the trenchscope data folder (`setup` prints where it is). Never paste
-  it into the chat. Without a key the agent tells you the verdict and you trade on Prosper yourself.
-- Even with a key, every trade needs your yes in the chat. The skill re-checks everything right before it
-  sends, and refuses `--execute` when advice was flagged and you didn't approve it.
+- **Key**: trenchscope has an execution module that sends the buy or sell through the Prosper router when a
+  `PRIVATE_KEY=0x...` (or `MNEMONIC="..."`) is in the `.env` file in its data folder (`setup` prints where it
+  is). You put it there yourself, never into the chat. Without a key it only advises: the agent tells you the
+  verdict and you trade on Prosper yourself. With a key, every trade still needs your yes in the chat.
 
 ## Quick start
 
@@ -132,6 +131,11 @@ Real runs on mainnet, in [`examples/`](examples):
   outside wallet holding 9.16% of the supply.
 - [`03-buy-nope-after-config-change.txt`](examples/03-buy-nope-after-config-change.txt): the same pMusk check
   after lowering `max_fdv_usd` to $4k: now NOPE.
+- [`04-sell-hold-penguin-whale.txt`](examples/04-sell-hold-penguin-whale.txt): sell check for the biggest
+  Penguin bag (a public holder, about 755 PROS). It found the wallet's entry cost from its 4 Prosper buys: no
+  rule fires, HOLD. The slippage advice already flags that dumping the whole bag would cost 10%.
+- [`05-sell-exit-after-stop-loss-change.txt`](examples/05-sell-exit-after-stop-loss-change.txt): the same bag
+  after tightening `stop_loss_pct` to 1%: EXIT, and because of the slippage advice the agent has to ask first.
 
 ## How it's built
 
