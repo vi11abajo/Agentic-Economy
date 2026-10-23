@@ -35,6 +35,7 @@ Use the absolute path of this skill's `scripts/trenchscope.mjs` if you run it fr
 | `config` / `config set k=v ...` | Shows / changes thresholds (`10k`, `5%`, `48h`, `2d`, `off` all work) |
 | `buy <market or token> <PROS>` | Buy check for that size |
 | `sell <market or token>` | Sell check for the user's bag (needs their public wallet address) |
+| `sell <market or token> --wallet 0x...` | Sell check for any public wallet, without changing the saved one ("what if I were that holder") |
 | `track <market or token> [--cost <PROS>]` | Start watching a bag the user bought by hand |
 | `positions`, `log` | Known bags, last runs |
 

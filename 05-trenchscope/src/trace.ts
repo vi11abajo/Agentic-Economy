@@ -1,5 +1,5 @@
-// The decision trace: every check with its value, its limit, pass/fail and where the number came from,
-// then the verdict. Plain text the agent can paste into the chat as is.
+// The decision trace: every check with its value, its limit and pass/fail, then the verdict. Plain text the
+// agent can paste into the chat as is. Where each number came from is in --json and in runs.jsonl.
 import type { MarketSnapshot } from "./chain.js";
 import type { Check, Decision } from "./checks.js";
 import { short } from "./prosper.js";
@@ -24,7 +24,7 @@ export function utc(ts: number): string {
 }
 
 export function renderTrace(s: MarketSnapshot, d: Decision, title: string): string {
-  const rows = d.checks.map((c) => [c.advisory ? `${c.label} (advice)` : c.label, c.value, c.limit, mark(c, d.side), c.source]);
+  const rows = d.checks.map((c) => [c.advisory ? `${c.label} (advice)` : c.label, c.value, c.limit, mark(c, d.side)]);
   const w = [0, 1, 2].map((i) => Math.max(...rows.map((r) => r[i].length), ["check", "value", "limit"][i].length));
   const line = (r: string[]) => `  ${r[0].padEnd(w[0])}  ${r[1].padEnd(w[1])}  ${r[2].padEnd(w[2])}  ${r[3]}`;
   const out = [
@@ -32,7 +32,7 @@ export function renderTrace(s: MarketSnapshot, d: Decision, title: string): stri
     dim(`market ${short(s.market)} · token ${short(s.token)} · block ${s.block.toLocaleString("en-US")} · ${utc(s.timestamp)}`),
     "",
     dim(line(["check", "value", "limit", "result"])),
-    ...rows.map((r) => `${line(r)}  ${dim(r[4])}`),
+    ...rows.map(line),
     "",
   ];
   const v = d.verdict;

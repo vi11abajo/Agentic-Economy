@@ -1,14 +1,14 @@
 trenchscope · buy check · 1 PROS · Musk (pMusk)
-market 0x5c3E…8B7F · token 0xE318…A7f8 · block 20,835,859 · 2026-10-21 12:47:15 UTC
+market 0x5c3E…8B7F · token 0xE318…A7f8 · block 21,034,176 · 2026-10-23 14:59:11 UTC
 
   check                  value                          limit                 result
-  FDV                    $4,618                         <= $10,000            ✓ pass  quoteBuy x supply x Chainlink PROS/USD
-  holders                5                              >= 4 (bag >= 1 PROS)  ✓ pass  pharosscan holders, Prosper wallets from the creation tx excluded
-  top holder             0.21% (0x2b57…2a8c)            <= 5%                 ✓ pass  pharosscan holders, Prosper wallets from the creation tx excluded
-  time left              8.8d                           >= 2d                 ✓ pass  market endsAt() vs block time
-  progress               0.20% (40.891 PROS of 20,000)  <= 50%                ✓ pass  WPROS in the curve / graduation target
-  price impact (advice)  0.01% on 1.000 PROS            <= 3%                 ok  quoteBuy on your size vs a tiny quote
+  FDV                    $5,213                         <= $10,000            ✓ pass
+  holders                5                              >= 4 (bag >= 1 PROS)  ✓ pass
+  top holder             0.72% (0x2b57…2a8c)            <= 5%                 ✓ pass
+  time left              6.7d                           >= 2d                 ✓ pass
+  progress               0.40% (79.591 PROS of 20,000)  <= 50%                ✓ pass
+  price impact (advice)  0.01% on 1.000 PROS            <= 3%                 ok
 
 VERDICT  APE: all 5 checks pass
 
-No key in .env, so trenchscope won't buy. The user can buy it on Prosper: market 0x5c3E0e4B1BE0851DCbC5F6a5cc04d799AcbE8B7F, 1 PROS (about 130,458 pMusk).
+No key in .env, so trenchscope won't buy. The user can buy it on Prosper: market 0x5c3E0e4B1BE0851DCbC5F6a5cc04d799AcbE8B7F, 1 PROS (about 129,138 pMusk).

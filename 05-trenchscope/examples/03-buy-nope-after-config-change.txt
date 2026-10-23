@@ -1,12 +1,12 @@
 trenchscope · buy check · 1 PROS · Musk (pMusk)
-market 0x5c3E…8B7F · token 0xE318…A7f8 · block 20,835,874 · 2026-10-21 12:47:27 UTC
+market 0x5c3E…8B7F · token 0xE318…A7f8 · block 21,034,185 · 2026-10-23 14:59:19 UTC
 
   check                  value                          limit                 result
-  FDV                    $4,618                         <= $4,000             ✗ fail  quoteBuy x supply x Chainlink PROS/USD
-  holders                5                              >= 4 (bag >= 1 PROS)  ✓ pass  pharosscan holders, Prosper wallets from the creation tx excluded
-  top holder             0.21% (0x2b57…2a8c)            <= 5%                 ✓ pass  pharosscan holders, Prosper wallets from the creation tx excluded
-  time left              8.8d                           >= 2d                 ✓ pass  market endsAt() vs block time
-  progress               0.20% (40.891 PROS of 20,000)  <= 50%                ✓ pass  WPROS in the curve / graduation target
-  price impact (advice)  0.01% on 1.000 PROS            <= 3%                 ok  quoteBuy on your size vs a tiny quote
+  FDV                    $5,213                         <= $4,000             ✗ fail
+  holders                5                              >= 4 (bag >= 1 PROS)  ✓ pass
+  top holder             0.72% (0x2b57…2a8c)            <= 5%                 ✓ pass
+  time left              6.7d                           >= 2d                 ✓ pass
+  progress               0.40% (79.591 PROS of 20,000)  <= 50%                ✓ pass
+  price impact (advice)  0.01% on 1.000 PROS            <= 3%                 ok
 
-VERDICT  NOPE: FDV $4,618, limit <= $4,000
+VERDICT  NOPE: FDV $5,213, limit <= $4,000

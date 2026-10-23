@@ -1,12 +1,12 @@
 trenchscope · buy check · 1 PROS · Penguin (pPeng)
-market 0xe534…40db · token 0xc927…a3AA · block 20,835,867 · 2026-10-21 12:47:21 UTC
+market 0xe534…40db · token 0xc927…a3AA · block 21,034,180 · 2026-10-23 14:59:14 UTC
 
   check                  value                         limit                 result
-  FDV                    $5,577                        <= $10,000            ✓ pass  quoteBuy x supply x Chainlink PROS/USD
-  holders                3                             >= 4 (bag >= 1 PROS)  ✗ fail  pharosscan holders, Prosper wallets from the creation tx excluded
-  top holder             9.16% (0xe736…3861)           <= 5%                 ✗ fail  pharosscan holders, Prosper wallets from the creation tx excluded
-  time left              8.0d                          >= 2d                 ✓ pass  market endsAt() vs block time
-  progress               3.96% (791.9 PROS of 20,000)  <= 50%                ✓ pass  WPROS in the curve / graduation target
-  price impact (advice)  0.01% on 1.000 PROS           <= 3%                 ok  quoteBuy on your size vs a tiny quote
+  FDV                    $6,232                        <= $10,000            ✓ pass
+  holders                3                             >= 4 (bag >= 1 PROS)  ✗ fail
+  top holder             9.16% (0xe736…3861)           <= 5%                 ✗ fail
+  time left              5.9d                          >= 2d                 ✓ pass
+  progress               3.96% (791.9 PROS of 20,000)  <= 50%                ✓ pass
+  price impact (advice)  0.01% on 1.000 PROS           <= 3%                 ok
 
 VERDICT  NOPE: holders 3, limit >= 4 (bag >= 1 PROS); top holder 9.16% (0xe736…3861), limit <= 5%

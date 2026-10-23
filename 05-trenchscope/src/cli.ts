@@ -24,7 +24,7 @@ const HELP = `trenchscope: on-chain checks for Prosper bonding-curve tokens on P
   trenchscope config                     show your thresholds
   trenchscope config set k=v [k=v ...]   change them (10k, 5%, 48h, 2d, off all work)
   trenchscope buy <market|token> <PROS>  check a buy of that size: APE or NOPE
-  trenchscope sell <market|token>        check your bag: EXIT or HOLD
+  trenchscope sell <market|token> [--wallet 0x...]   check your bag (or any public wallet's): EXIT or HOLD
   trenchscope track <market|token> [--cost <PROS>]   start watching a bag you bought by hand
   trenchscope positions                  bags trenchscope knows about
   trenchscope log [--last N]             the last runs from the log
@@ -37,13 +37,14 @@ Data lives in ${displayPath(homeDir())} (config.json, positions.json, runs.jsonl
 
 function flags(argv: string[]) {
   const pos: string[] = [];
-  const f = { execute: false, approve: false, json: false, cost: undefined as number | undefined, last: 10 };
+  const f = { execute: false, approve: false, json: false, cost: undefined as number | undefined, last: 10, wallet: undefined as string | undefined };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--execute") f.execute = true;
     else if (a === "--approve") f.approve = true;
     else if (a === "--json") f.json = true;
     else if (a === "--cost") f.cost = Number(argv[++i]);
+    else if (a === "--wallet") f.wallet = argv[++i];
     else if (a === "--last") f.last = Number(argv[++i]);
     else if (a.startsWith("--")) throw new Exit(2, `Unknown option ${a}`);
     else pos.push(a);
@@ -108,7 +109,7 @@ function cmdConfig(pos: string[], json: boolean) {
     console.log(configTable(c));
     for (const side of ["buy", "sell"] as const) {
       const n = decisionChecks(side, c).length;
-      console.log(`${side}: ${n} check(s) on${n < MIN_CHECKS ? `, needs at least ${MIN_CHECKS}` : ""}${side === "sell" && !c.wallet ? ", and a wallet address" : ""}`);
+      console.log(`${side}: ${n} check(s) on${n < MIN_CHECKS ? `, needs at least ${MIN_CHECKS}` : ""}${side === "sell" && !c.wallet ? " (no wallet saved: pass --wallet 0x... or set wallet=0x...)" : ""}`);
     }
     return;
   }
@@ -193,7 +194,9 @@ async function bagOf(pos: string[], f: ReturnType<typeof flags>["f"], c: Config 
   if (pos.length !== 1 || !isAddress(pos[0], { strict: false })) throw new Exit(2, "Usage: trenchscope sell|track <market or token address>");
   const home = homeDir();
   const acct = safeSigner(loadEnv(home));
-  const me = (c?.wallet ?? acct?.address ?? null) as Address | null;
+  // --wallet looks at any public address for this one run without touching the saved setting.
+  if (f.wallet !== undefined && !isAddress(f.wallet, { strict: false })) throw new Exit(2, "--wallet must be a public 0x address");
+  const me = (f.wallet ?? c?.wallet ?? acct?.address ?? null) as Address | null;
   if (!me) throw new Exit(2, "Sell checks need your public wallet address. Ask the user for it and save it: trenchscope config set wallet=0x...");
   const client = makeClient();
   const s = await snapshot(client, pos[0]);

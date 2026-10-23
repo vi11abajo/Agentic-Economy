@@ -1,11 +1,13 @@
+(first check of this bag: entry cost 764.6 PROS from 4 Prosper trade(s) of this wallet; liquidity and holder rules count from now (block 21,034,184))
+
 trenchscope · sell check · 91,605,932 pPeng in 0xe736…3861 · Penguin (pPeng)
-market 0xe534…40db · token 0xc927…a3AA · block 21,032,195 · 2026-10-23 14:27:54 UTC
+market 0xe534…40db · token 0xc927…a3AA · block 21,034,184 · 2026-10-23 14:59:18 UTC
 
   check              value                                       limit              result
-  P&L                -1.2% (755.1 PROS now vs 764.6 PROS paid)   TP +50% / SL -25%  · quiet  quoteSell on your bag vs your entry
-  liquidity drain    0.0% (791.9 PROS now, 791.9 PROS at entry)  < 30% drop         · quiet  WPROS in the curve vs at entry
-  holder exodus      2 now, 2 at entry                           < 2 left           · quiet  pharosscan holders, Prosper wallets from the creation tx excluded
-  whale              0.34% (0x0c3d…1588)                         <= 5%              · quiet  pharosscan holders, Prosper wallets from the creation tx excluded
-  slippage (advice)  10.05% incl. 1% fee                         <= 5%              ! ask  quoteSell on the whole bag vs spot
+  P&L                -1.2% (755.1 PROS now vs 764.6 PROS paid)   TP +50% / SL -25%  · quiet
+  liquidity drain    0.0% (791.9 PROS now, 791.9 PROS at entry)  < 30% drop         · quiet
+  holder exodus      2 now, 2 at entry                           < 2 left           · quiet
+  whale              0.34% (0x0c3d…1588)                         <= 5%              · quiet
+  slippage (advice)  10.05% incl. 1% fee                         <= 5%              ! ask
 
 VERDICT  HOLD: no exit signal

@@ -115,6 +115,7 @@ elsewhere. Set `TRENCHSCOPE_HOME` to use another folder.
 | `config`, `config set k=v ...` | show or change settings (`10k`, `5%`, `48h`, `2d`, `off`) |
 | `buy <market or token> <PROS>` | buy check for that size: APE or NOPE |
 | `sell <market or token>` | sell check for your bag: EXIT or HOLD |
+| `sell <market or token> --wallet 0x...` | the same for any public wallet, without changing your saved one |
 | `track <market or token> [--cost <PROS>]` | start watching a bag you bought by hand |
 | `positions`, `log [--last N]` | bags it knows, the last runs |
 
