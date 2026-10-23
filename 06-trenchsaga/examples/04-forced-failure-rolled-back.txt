@@ -1,0 +1,48 @@
+$ trenchsaga log rotate-20261023-214849
+  21:48:49  approve                  start: Approve the Prosper router to take A
+  21:48:51  approve                  sending (attempt 1, nonce 497, max fee 20 gwei)
+  21:48:52  approve                  sent (attempt 1) https://www.pharosscan.xyz/tx/0x7a66d7139c717c14badbfe85a006aef47d527ddd4e455330238c3f3a58742ad7
+  21:48:55  approve                  confirmed (block 21,061,553) https://www.pharosscan.xyz/tx/0x7a66d7139c717c14badbfe85a006aef47d527ddd4e455330238c3f3a58742ad7
+  21:48:55  approve                  verified: router may take 997 pPeng
+  21:48:55  sell                     start: Sell A on its curve for WPROS
+  21:48:57  sell                     sending (attempt 1, nonce 498, max fee 20 gwei)
+  21:48:58  sell                     sent (attempt 1) https://www.pharosscan.xyz/tx/0x6698ae227988d51d3e790d5155bff2f7ff201ab982265142e6da83c9cc958969
+  21:49:01  sell                     confirmed (block 21,061,561) https://www.pharosscan.xyz/tx/0x6698ae227988d51d3e790d5155bff2f7ff201ab982265142e6da83c9cc958969
+  21:49:02  sell                     verified: sold 997 pPeng for 0.009044 PROS (WPROS)
+  21:49:02  unwrap                   start: Unwrap WPROS to PROS
+  21:49:04  unwrap                   sending (attempt 1, nonce 499, max fee 20 gwei)
+  21:49:04  unwrap                   sent (attempt 1) https://www.pharosscan.xyz/tx/0x390aec46062d111096f5adb436a84c4613f72538d6437dd569aabc3db63c87eb
+  21:49:07  unwrap                   confirmed (block 21,061,567) https://www.pharosscan.xyz/tx/0x390aec46062d111096f5adb436a84c4613f72538d6437dd569aabc3db63c87eb
+  21:49:08  unwrap                   verified: unwrapped 0.009044 PROS
+  21:49:08  buy                      start: Buy B on its curve with the PROS
+  21:49:10  buy                      sending (attempt 1, nonce 500, max fee 20 gwei, sabotaged on purpose: minOut x10)
+  21:49:10  buy                      sent (attempt 1) https://www.pharosscan.xyz/tx/0x936b6b6896d65d39e6566a12b22269fbd3a62febfa66539d36ba270a041e9135
+  21:49:13  buy                      reverted (block 21,061,574): Slippage(): the curve would give less than minOut https://www.pharosscan.xyz/tx/0x936b6b6896d65d39e6566a12b22269fbd3a62febfa66539d36ba270a041e9135
+  21:49:15  buy                      simulation fails on fresh state (attempt 2): Slippage(): the curve would give less than minOut
+  21:49:15  buy                      failed: can't succeed on the current state: Slippage(): the curve would give less than minOut
+  21:49:15  unwrap                   nothing to undo: buying A back needs PROS, so the PROS stays as it is
+  21:49:15  sell                     compensating
+  21:49:16  sell/unwrap-leftover     nothing to send: the sale's WPROS is already PROS
+  21:49:16  sell/unwrap-leftover     skipped
+  21:49:19  sell/buy-back            sending (attempt 1, nonce 501, max fee 20 gwei)
+  21:49:20  sell/buy-back            sent (attempt 1) https://www.pharosscan.xyz/tx/0x28880df88a351af61289f7911cb244fe89d98d2f3d55bc58f473378c10b28e9f
+  21:49:22  sell/buy-back            confirmed (block 21,061,585) https://www.pharosscan.xyz/tx/0x28880df88a351af61289f7911cb244fe89d98d2f3d55bc58f473378c10b28e9f
+  21:49:24  sell/buy-back            verified: bought back 977 pPeng for 0.009044 PROS (sold 997 pPeng; the gap is the curve's 1% fee each way)
+  21:49:24  sell                     compensated
+  21:49:24  approve                  compensating
+  21:49:24  approve/restore-allowance nothing to send: router allowance for pPeng back to 0
+  21:49:24  approve/restore-allowance skipped
+  21:49:24  approve                  compensated
+  21:49:24  -                        saga compensated
+
+$ trenchsaga status rotate-20261023-214849
+saga rotate-20261023-214849 · rotate · COMPENSATED · failed at buy: can't succeed on the current state: Slippage(): the curve would give less than minOut
+  ↩ 1. approve  compensated  router may take 997 pPeng
+       https://www.pharosscan.xyz/tx/0x7a66d7139c717c14badbfe85a006aef47d527ddd4e455330238c3f3a58742ad7
+  ↩ 2. sell     compensated  sold 997 pPeng for 0.009044 PROS (WPROS)
+       https://www.pharosscan.xyz/tx/0x6698ae227988d51d3e790d5155bff2f7ff201ab982265142e6da83c9cc958969
+       https://www.pharosscan.xyz/tx/0x28880df88a351af61289f7911cb244fe89d98d2f3d55bc58f473378c10b28e9f
+  ↩ 3. unwrap   compensated  unwrapped 0.009044 PROS
+       https://www.pharosscan.xyz/tx/0x390aec46062d111096f5adb436a84c4613f72538d6437dd569aabc3db63c87eb
+  ✗ 4. buy      failed       Buy B on its curve with the PROS
+       https://www.pharosscan.xyz/tx/0x936b6b6896d65d39e6566a12b22269fbd3a62febfa66539d36ba270a041e9135

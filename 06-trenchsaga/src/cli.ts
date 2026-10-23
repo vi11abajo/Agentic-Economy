@@ -77,7 +77,7 @@ function echo(e: Record<string, unknown>) {
   if (e.sabotage) bits.push("sabotaged on purpose: minOut x10");
   if (e.block) bits.push(`block ${Number(e.block).toLocaleString("en-US")}`);
   if (e.waitedSec) bits.push(`waited ${e.waitedSec}s`);
-  const detail = e.summary ?? e.reason ?? e.error ?? e.because ?? e.title ?? "";
+  const detail = String(e.summary ?? e.reason ?? e.error ?? e.because ?? e.title ?? "").split("\n")[0];
   console.log(`  ${new Date(String(e.at)).toISOString().slice(11, 19)}  ${step.padEnd(24)} ${ev}${bits.length ? ` (${bits.join(", ")})` : ""}${detail ? `: ${detail}` : ""}${tx}`);
 }
 

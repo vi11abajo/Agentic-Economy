@@ -45,6 +45,8 @@ export interface Chain {
   waitReceipt(hash: Hex, timeoutMs: number): Promise<Receipt | null>;
   pendingNonce(): Promise<number>;
   baseFee(): Promise<bigint>;
+  /** Why a mined transaction reverted (decoded custom error), when the chain can tell. */
+  whyReverted?(hash: Hex): Promise<string>;
 }
 
 export interface Action<C> {
@@ -283,7 +285,8 @@ export class Saga<C> {
   private async settle(step: Step<C>, rec: { name: string; pending?: Pending }, r: Receipt): Promise<string | "retry"> {
     rec.pending = undefined;
     if (r.status === "reverted") {
-      this.log(rec.name, "reverted", { tx: r.hash, block: Number(r.block) });
+      const reason = this.chain.whyReverted ? await this.chain.whyReverted(r.hash).catch(() => undefined) : undefined;
+      this.log(rec.name, "reverted", { tx: r.hash, block: Number(r.block), reason });
       return "retry";
     }
     this.log(rec.name, "confirmed", { tx: r.hash, block: Number(r.block), gasUsed: Number(r.gasUsed) });

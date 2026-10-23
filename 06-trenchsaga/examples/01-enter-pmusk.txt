@@ -1,0 +1,12 @@
+$ trenchsaga log enter-20261023-211734
+  21:17:34  buy                      start: Buy pMusk with PROS
+  21:17:36  buy                      sending (attempt 1, nonce 479, max fee 20 gwei)
+  21:17:37  buy                      sent (attempt 1) https://www.pharosscan.xyz/tx/0x8463e715790a7c6f365cbae795b28911705e3188196ff327b2b1ff610570b002
+  21:17:39  buy                      confirmed (block 21,059,387) https://www.pharosscan.xyz/tx/0x8463e715790a7c6f365cbae795b28911705e3188196ff327b2b1ff610570b002
+  21:17:39  buy                      verified: bought 1,290 pMusk for 0.01000 PROS
+  21:17:39  -                        saga done
+
+$ trenchsaga status enter-20261023-211734
+saga enter-20261023-211734 · enter · DONE
+  ✓ 1. buy      verified     bought 1,290 pMusk for 0.01000 PROS
+       https://www.pharosscan.xyz/tx/0x8463e715790a7c6f365cbae795b28911705e3188196ff327b2b1ff610570b002

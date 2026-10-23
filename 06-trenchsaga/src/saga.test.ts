@@ -5,6 +5,8 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import type { Hex } from "viem";
 import { Saga, newState, type Chain, type Fees, type Receipt, type SagaState, type Step, type TxSpec } from "./saga.js";
 import { fromJson, parseEnv, toJson } from "./store.js";
+import { revertReason } from "./chain.js";
+import { encodeErrorResult, parseAbi } from "viem";
 
 type Outcome = "ok" | "revert" | "timeout" | "refuse" | "late"; // late: not mined in time, but mined on the next check
 
@@ -241,5 +243,18 @@ describe("the key", () => {
     const pk = generatePrivateKey();
     const env = parseEnv(`# trenchsaga\nPRIVATE_KEY=${pk}\n`);
     assert.equal(privateKeyToAccount(env.PRIVATE_KEY as Hex).address.length, 42);
+  });
+});
+
+describe("revert reasons", () => {
+  it("names Prosper's Slippage() from the data of a real reverted buy (tx 0x8a8b…96f9)", () => {
+    const err = { message: "Execution reverted", cause: { message: "RPC Request failed", data: "0x7dd37f70" } };
+    assert.equal(revertReason(err), "Slippage(): the curve would give less than minOut");
+  });
+
+  it("decodes Error(string) and shows unknown selectors as they are", () => {
+    const data = encodeErrorResult({ abi: parseAbi(["error Error(string)"]), errorName: "Error", args: ["too late"] });
+    assert.equal(revertReason({ cause: { data } }), 'Error("too late")');
+    assert.equal(revertReason({ cause: { data: "0xdeadbeef" } }), "custom error 0xdeadbeef");
   });
 });

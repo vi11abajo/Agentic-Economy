@@ -1,0 +1,49 @@
+# Recorded with the first version of trenchsaga, before the two fixes this run led to (see README). Its status
+# line shows the rollback error in place of the original cause: the unwrap step lost its receipt read to an RPC
+# rate limit. The current version keeps the cause and the rollback error apart.
+
+$ trenchsaga log rotate-20261023-211827
+  21:18:27  approve                  start: Approve the Prosper router to take A
+  21:18:29  approve                  sending (attempt 1, nonce 484, max fee 1 gwei (underpriced on purpose))
+  21:18:30  approve                  node refused the transaction (attempt 1): Invalid parameters were provided to the RPC method.
+  21:18:31  approve                  simulation passes on fresh state, retrying (attempt 2)
+  21:18:32  approve                  sending (attempt 2, nonce 484, max fee 30 gwei)
+  21:18:33  approve                  sent (attempt 2) https://www.pharosscan.xyz/tx/0xd938217b73ee92cc311f70b5d14f76db89420d1501b00e453160d62cbe9e35c1
+  21:18:36  approve                  confirmed (block 21,059,452) https://www.pharosscan.xyz/tx/0xd938217b73ee92cc311f70b5d14f76db89420d1501b00e453160d62cbe9e35c1
+  21:18:37  approve                  verified: router may take 1,059 pPeng
+  21:18:37  sell                     start: Sell A on its curve for WPROS
+  21:18:40  sell                     sending (attempt 1, nonce 485, max fee 20 gwei)
+  21:18:40  sell                     sent (attempt 1) https://www.pharosscan.xyz/tx/0x74289522b65367b8b25f8a3b6514f033d431f80fd3d3747158512e004b2be20b
+  21:18:43  sell                     confirmed (block 21,059,459) https://www.pharosscan.xyz/tx/0x74289522b65367b8b25f8a3b6514f033d431f80fd3d3747158512e004b2be20b
+  21:18:44  sell                     verified: sold 1,059 pPeng for 0.009606 PROS (WPROS)
+  21:18:44  unwrap                   start: Unwrap WPROS to PROS
+  21:18:45  unwrap                   sending (attempt 1, nonce 486, max fee 20 gwei)
+  21:18:46  unwrap                   sent (attempt 1) https://www.pharosscan.xyz/tx/0x8de6ada386c0b905ac56f9a7beb8e4573f7a9535f88b39526414ce83cba3edb5
+  21:18:47  unwrap                   failed: RPC Request failed.
+  21:18:47  sell                     compensating
+  21:18:49  sell/unwrap-leftover     simulation fails on fresh state (attempt 1): Execution reverted for an unknown reason.
+  21:18:49  sell/unwrap-leftover     compensation failed: can't succeed on the current state: Execution reverted for an unknown reason.
+  21:20:34  sell                     compensating
+  21:20:35  sell/unwrap-leftover     nothing to send: the sale's WPROS is already PROS
+  21:20:35  sell/unwrap-leftover     skipped
+  21:20:37  sell/buy-back            sending (attempt 1, nonce 487, max fee 20 gwei)
+  21:20:38  sell/buy-back            sent (attempt 1) https://www.pharosscan.xyz/tx/0xa7fae71ec5b2ddb09c4df9115609d0c03a877e0d81993881d20bf8b152536415
+  21:20:41  sell/buy-back            confirmed (block 21,059,592) https://www.pharosscan.xyz/tx/0xa7fae71ec5b2ddb09c4df9115609d0c03a877e0d81993881d20bf8b152536415
+  21:20:41  sell/buy-back            verified: bought back 1,038 pPeng for 0.009606 PROS (sold 1,059 pPeng; the gap is the curve's 1% fee each way)
+  21:20:41  sell                     compensated
+  21:20:41  approve                  compensating
+  21:20:42  approve/restore-allowance nothing to send: router allowance for pPeng back to 0
+  21:20:42  approve/restore-allowance skipped
+  21:20:42  approve                  compensated
+  21:20:42  -                        saga compensated
+
+$ trenchsaga status rotate-20261023-211827
+saga rotate-20261023-211827 · rotate · COMPENSATED · failed at compensation sell/unwrap-leftover: can't succeed on the current state: Execution reverted for an unknown reason.
+  ↩ 1. approve  compensated  router may take 1,059 pPeng
+       https://www.pharosscan.xyz/tx/0xd938217b73ee92cc311f70b5d14f76db89420d1501b00e453160d62cbe9e35c1
+  ↩ 2. sell     compensated  sold 1,059 pPeng for 0.009606 PROS (WPROS)
+       https://www.pharosscan.xyz/tx/0x74289522b65367b8b25f8a3b6514f033d431f80fd3d3747158512e004b2be20b
+       https://www.pharosscan.xyz/tx/0xa7fae71ec5b2ddb09c4df9115609d0c03a877e0d81993881d20bf8b152536415
+  ✗ 3. unwrap   failed       Unwrap WPROS to PROS
+       https://www.pharosscan.xyz/tx/0x8de6ada386c0b905ac56f9a7beb8e4573f7a9535f88b39526414ce83cba3edb5
+  · 4. buy      pending      Buy B on its curve with the PROS

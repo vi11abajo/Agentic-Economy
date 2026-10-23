@@ -1,6 +1,7 @@
 // The real chain behind the saga: Pharos mainnet through viem, signing with the key from .env.
 import {
   createPublicClient,
+  decodeAbiParameters,
   createWalletClient,
   defineChain,
   http,
@@ -29,6 +30,43 @@ export async function rpc<T>(fn: () => Promise<T>, tries = 6): Promise<T> {
   }
 }
 
+/**
+ * Custom errors seen in the Prosper router, market and pToken bytecode (and Slippage(), returned by a live
+ * reverted buy), plus the standard ones. Names come from the 4byte/openchain signature databases.
+ */
+export const KNOWN_ERRORS: Record<string, string> = {
+  "0x7dd37f70": "Slippage(): the curve would give less than minOut",
+  "0x1ab7da6b": "DeadlineExpired()",
+  "0x9db8d5b1": "InvalidMarket()",
+  "0x5274afe7": "SafeERC20FailedOperation(address)",
+  "0x3ee5aeb5": "ReentrancyGuardReentrantCall()",
+  "0xd92e233d": "ZeroAddress()",
+  "0xd6bda275": "FailedCall()",
+  "0xe450d38c": "ERC20InsufficientBalance(address,uint256,uint256)",
+  "0xfb8f41b2": "ERC20InsufficientAllowance(address,uint256,uint256)",
+};
+
+/** Finds the revert data in a viem error chain and names it. */
+export function revertReason(e: unknown): string {
+  let data: string | undefined;
+  for (let x = e as Record<string, unknown> | undefined, i = 0; x && i < 10 && !data; x = x.cause as Record<string, unknown>, i++) {
+    const d = x.data as unknown;
+    if (typeof d === "string" && d.startsWith("0x")) data = d;
+    else if (d && typeof d === "object" && typeof (d as { data?: unknown }).data === "string") data = (d as { data: string }).data;
+  }
+  if (!data || data.length < 10) return short(e) || "reverted without a reason";
+  const sel = data.slice(0, 10).toLowerCase();
+  if (sel === "0x08c379a0") {
+    try {
+      return `Error("${decodeAbiParameters([{ type: "string" }], `0x${data.slice(10)}`)[0]}")`;
+    } catch {
+      return "Error(string)";
+    }
+  }
+  if (sel === "0x4e487b71") return `Panic(0x${BigInt(`0x${data.slice(10, 74) || "0"}`).toString(16)})`;
+  return KNOWN_ERRORS[sel] ?? `custom error ${sel}`;
+}
+
 const url = () => process.env.TRENCHSAGA_RPC || RPC_URL;
 export const pharos = defineChain({
   id: CHAIN_ID,
@@ -53,7 +91,17 @@ export function pharosChain(client: PublicClient, account: Account): Chain {
         return { ok: true };
       } catch (e) {
         if (RATE_LIMIT.test(short(e))) throw e;
-        return { ok: false, reason: short(e) };
+        return { ok: false, reason: revertReason(e) };
+      }
+    },
+    async whyReverted(hash: Hex) {
+      // Replay the transaction on the state right before its block to get the revert data back.
+      const tx = await rpc(() => client.getTransaction({ hash }));
+      try {
+        await rpc(() => client.call({ account: tx.from, to: tx.to!, data: tx.input, value: tx.value, blockNumber: tx.blockNumber! - 1n }));
+        return "reverted (the replay passes, so the state changed in between)";
+      } catch (e) {
+        return revertReason(e);
       }
     },
     async send(tx: TxSpec, nonce: number, fees: Fees): Promise<Hex> {
