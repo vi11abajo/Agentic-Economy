@@ -1,0 +1,37 @@
+$ trenchsaga log rotate-20261023-222103
+  22:21:03  approve                  start: Approve the Prosper router to take A
+  22:21:05  approve                  sending (attempt 1, nonce 502, max fee 1 gwei (your start fee))
+  22:21:05  approve                  node refused the transaction (attempt 1): Invalid parameters were provided to the RPC method.
+  22:21:05  approve                  start fee refused, using the normal fee from now on
+  22:21:06  approve                  simulation passes on fresh state, retrying (attempt 2)
+  22:21:07  approve                  sending (attempt 2, nonce 502, max fee 30 gwei)
+  22:21:07  approve                  sent (attempt 2) https://www.pharosscan.xyz/tx/0x29ddf351c79edb28c7e87b4957a7f3149fca768e3d9892db5b82287de30b01f0
+  22:21:09  approve                  confirmed (block 21,063,783) https://www.pharosscan.xyz/tx/0x29ddf351c79edb28c7e87b4957a7f3149fca768e3d9892db5b82287de30b01f0
+  22:21:09  approve                  verified: router may take 977 pPeng
+  22:21:09  sell                     start: Sell A on its curve for WPROS
+  22:21:11  sell                     sending (attempt 1, nonce 503, max fee 20 gwei)
+  22:21:12  sell                     sent (attempt 1) https://www.pharosscan.xyz/tx/0x07f24706c754c1942abd79aedfed87eddb63e270f2760c3e3a8bb115c3821271
+  22:21:15  sell                     confirmed (block 21,063,789) https://www.pharosscan.xyz/tx/0x07f24706c754c1942abd79aedfed87eddb63e270f2760c3e3a8bb115c3821271
+  22:21:16  sell                     verified: sold 977 pPeng for 0.008864 PROS (WPROS)
+  22:21:16  unwrap                   start: Unwrap WPROS to PROS
+  22:21:17  unwrap                   sending (attempt 1, nonce 504, max fee 20 gwei)
+  22:21:18  unwrap                   sent (attempt 1) https://www.pharosscan.xyz/tx/0x094f8f3e827f33ae3b6ba7c569d0a945bda9bb23b97b4247bb1918b77b4e3a5f
+  22:21:21  unwrap                   confirmed (block 21,063,796) https://www.pharosscan.xyz/tx/0x094f8f3e827f33ae3b6ba7c569d0a945bda9bb23b97b4247bb1918b77b4e3a5f
+  22:21:22  unwrap                   verified: unwrapped 0.008864 PROS
+  22:21:22  buy                      start: Buy B on its curve with the PROS
+  22:21:23  buy                      sending (attempt 1, nonce 505, max fee 20 gwei)
+  22:21:24  buy                      sent (attempt 1) https://www.pharosscan.xyz/tx/0xd57845a0e7d30785a8e8d8f595632f8848d7191e0e1503814fcda8930f699273
+  22:21:27  buy                      confirmed (block 21,063,803) https://www.pharosscan.xyz/tx/0xd57845a0e7d30785a8e8d8f595632f8848d7191e0e1503814fcda8930f699273
+  22:21:28  buy                      verified: bought 1,143 pMusk for 0.008864 PROS
+  22:21:28  -                        saga done
+
+$ trenchsaga status rotate-20261023-222103
+saga rotate-20261023-222103 · rotate · DONE
+  ✓ 1. approve  verified     router may take 977 pPeng
+       https://www.pharosscan.xyz/tx/0x29ddf351c79edb28c7e87b4957a7f3149fca768e3d9892db5b82287de30b01f0
+  ✓ 2. sell     verified     sold 977 pPeng for 0.008864 PROS (WPROS)
+       https://www.pharosscan.xyz/tx/0x07f24706c754c1942abd79aedfed87eddb63e270f2760c3e3a8bb115c3821271
+  ✓ 3. unwrap   verified     unwrapped 0.008864 PROS
+       https://www.pharosscan.xyz/tx/0x094f8f3e827f33ae3b6ba7c569d0a945bda9bb23b97b4247bb1918b77b4e3a5f
+  ✓ 4. buy      verified     bought 1,143 pMusk for 0.008864 PROS
+       https://www.pharosscan.xyz/tx/0xd57845a0e7d30785a8e8d8f595632f8848d7191e0e1503814fcda8930f699273

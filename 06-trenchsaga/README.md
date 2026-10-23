@@ -68,37 +68,48 @@ middle token, and the allowance is back to what it was.
 ## Real runs on Pharos mainnet
 
 All from a test wallet with 0.1 PROS, each buy capped at 0.01 PROS. Full logs in [`examples/`](examples).
-Runs 2 and 3 were made with the first version's demo switches (`--fail-at`, `--drop-at`); they are replaced now
-by the real-life options `--min-out` and `--start-fee`, which reach the same two failures without a "break it"
-switch.
 
-**1. A successful rotation** pMusk → Penguin ([`02-rotation-done.txt`](examples/02-rotation-done.txt)):
+**From the video**, asked in plain words to a Claude Code agent with the skill installed:
 
-- approve [0x0da7…76b1](https://www.pharosscan.xyz/tx/0x0da76b1eeb2c892f3ab3a8f69f1e6d15229d46f30315af8064c99d1a7c3376b1)
-- sell 1,290 pMusk for 0.009801 WPROS [0xbc4b…2234](https://www.pharosscan.xyz/tx/0xbc4bb6456f026df69d5c57d2f0f4e20059c46bfe0eed35b28b9829cf0b9c2234)
-- unwrap [0xd475…301d](https://www.pharosscan.xyz/tx/0xd475a5953761f46e41caca6d40caa48afab6f255440200af27ee0c04cef4301d)
-- buy 1,059 pPeng [0x6882…1ddb](https://www.pharosscan.xyz/tx/0x6882b0984059217862f405edf7402d9995fd6837fbd8d89d54281032d2911ddb)
+**1. "Try 1 gwei gas first": refused, retried, done** (pPeng → pMusk with `--start-fee 1`,
+[`05-rotation-start-fee-refused-then-done.txt`](examples/05-rotation-start-fee-refused-then-done.txt)).
+The node refused the 1 gwei approve at once, the saga resent it with the same nonce at 30 gwei and ran the
+rest at the normal fee:
 
-**2. A forced failure, rolled back** Penguin → pMusk with `--fail-at buy`
-([`04-forced-failure-rolled-back.txt`](examples/04-forced-failure-rolled-back.txt)). The demo switch sends the
-buy with an impossible `minOut` (10x the quote) and without the usual simulation, so it really reverts on
-chain:
+- approve [0x29dd…01f0](https://www.pharosscan.xyz/tx/0x29ddf351c79edb28c7e87b4957a7f3149fca768e3d9892db5b82287de30b01f0)
+- sell 977 pPeng for 0.008864 WPROS [0x07f2…1271](https://www.pharosscan.xyz/tx/0x07f24706c754c1942abd79aedfed87eddb63e270f2760c3e3a8bb115c3821271)
+- unwrap [0x094f…3a5f](https://www.pharosscan.xyz/tx/0x094f8f3e827f33ae3b6ba7c569d0a945bda9bb23b97b4247bb1918b77b4e3a5f)
+- buy 1,143 pMusk [0xd578…9273](https://www.pharosscan.xyz/tx/0xd57845a0e7d30785a8e8d8f595632f8848d7191e0e1503814fcda8930f699273)
 
-- approve, sell, unwrap go through, then the buy reverts with `Slippage()`
-  [0x936b…9135](https://www.pharosscan.xyz/tx/0x936b6b6896d65d39e6566a12b22269fbd3a62febfa66539d36ba270a041e9135)
-- re-simulated on fresh state: still `Slippage()`, so it's permanent
-- rollback: unwrap has nothing to undo, Penguin bought back
-  [0x2888…e9f](https://www.pharosscan.xyz/tx/0x28880df88a351af61289f7911cb244fe89d98d2f3d55bc58f473378c10b28e9f),
+**2. "Only if I get at least 2,000": not met, rolled back** (pMusk → pPeng with `--min-out 2000`,
+[`06-min-out-not-met-rolled-back.txt`](examples/06-min-out-not-met-rolled-back.txt)). The plan already warned
+that the curve gave about 939 pPeng; the user said go anyway:
+
+- approve [0x9a4d…dd4c](https://www.pharosscan.xyz/tx/0x9a4d8c606fd56d5bdcb722af17194638e4db6b58d394bcfa584f6833f454dd4c),
+  sell 1,143 pMusk for 0.008687 WPROS [0xebb9…fb64](https://www.pharosscan.xyz/tx/0xebb9fad6910dc3699a6de2d4ead05af19dcb5859cf1b9100b442695bdfbcfb64),
+  unwrap [0x00df…3788](https://www.pharosscan.xyz/tx/0x00df827ebce74a2c9fdd590bc65732d1eab7c8e31516c46009c9949845bb3788)
+- buy: simulated on fresh state, `Slippage()`. Permanent, so no buy transaction was sent
+- rollback: unwrap has nothing to undo, pMusk bought back (1,120)
+  [0x7353…b8da](https://www.pharosscan.xyz/tx/0x7353df33cca952ba8054e6d7c33f06c856e3034ddfb53c77123b77900678b8da),
   the allowance was already back to 0 (the sale used it up)
 
-**3. A refused transaction, and a real recovery** ([`03-underpriced-then-stuck-then-resumed.txt`](examples/03-underpriced-then-stuck-then-resumed.txt)):
-the approve was sent at 1 gwei with `--drop-at approve`, the node refused it, and the saga resent it at 30 gwei
-[0xd938…35c1](https://www.pharosscan.xyz/tx/0xd938217b73ee92cc311f70b5d14f76db89420d1501b00e453160d62cbe9e35c1).
-Then the RPC rate limit hit while waiting for the unwrap receipt, my first version took it for a failed step
-and started rolling back, and its "unwrap what's left" found no WPROS (the unwrap had gone through) and stopped
-as `stuck`, sending nothing more. After the fixes, `resume` finished the rollback: Penguin bought back
-[0xa7fa…6415](https://www.pharosscan.xyz/tx/0xa7fae71ec5b2ddb09c4df9115609d0c03a877e0d81993881d20bf8b152536415).
-Not planned, but a good test of the stuck state and of resume.
+**Earlier runs**, made with the first version (its demo switches `--fail-at` and `--drop-at` were replaced by
+the real-life options above):
+
+- A clean rotation pMusk → pPeng ([`02-rotation-done.txt`](examples/02-rotation-done.txt)), and a first bag
+  ([`01-enter-pmusk.txt`](examples/01-enter-pmusk.txt)).
+- A revert on chain ([`04-forced-failure-rolled-back.txt`](examples/04-forced-failure-rolled-back.txt)): the buy
+  was sent unsimulated with 10x the quote as `minOut` and reverted with `Slippage()`
+  [0x936b…9135](https://www.pharosscan.xyz/tx/0x936b6b6896d65d39e6566a12b22269fbd3a62febfa66539d36ba270a041e9135);
+  re-simulated, still `Slippage()`, rolled back: Penguin bought back
+  [0x2888…e9f](https://www.pharosscan.xyz/tx/0x28880df88a351af61289f7911cb244fe89d98d2f3d55bc58f473378c10b28e9f).
+  That's where the decoded reason comes from.
+- A real recovery ([`03-underpriced-then-stuck-then-resumed.txt`](examples/03-underpriced-then-stuck-then-resumed.txt)):
+  the RPC rate limit hit while waiting for the unwrap receipt, the first version took it for a failed step and
+  started rolling back, and its "unwrap what's left" found no WPROS (the unwrap had gone through) and stopped as
+  `stuck`, sending nothing more. After the fixes, `resume` finished the rollback: Penguin bought back
+  [0xa7fa…6415](https://www.pharosscan.xyz/tx/0xa7fae71ec5b2ddb09c4df9115609d0c03a877e0d81993881d20bf8b152536415).
+  Not planned, but a good test of the stuck state and of resume.
 
 ## Quick start
 
@@ -171,5 +182,6 @@ npm test -w 06-trenchsaga
 The engine runs on a scripted fake chain: steps strictly in order, the state saved on every transition, a
 replacement keeping its nonce and paying more, a refused send resent, a revert retried when the fresh
 simulation passes, a late receipt used instead of sending twice, a failed chain read not failing the step,
-giving up after `max_attempts`, the rollback in reverse order, the demo failure really reaching the chain, a
+giving up after `max_attempts`, the rollback in reverse order, a step that can't succeed never being sent, the user's floor going
+into the buy's minOut, a
 stuck rollback, resume after a crash, and decoding `Slippage()` from the data of the real reverted buy.

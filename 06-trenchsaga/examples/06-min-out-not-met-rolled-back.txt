@@ -1,0 +1,44 @@
+$ trenchsaga log rotate-20261023-222239
+  22:22:39  approve                  start: Approve the Prosper router to take A
+  22:22:40  approve                  sending (attempt 1, nonce 506, max fee 20 gwei)
+  22:22:41  approve                  sent (attempt 1) https://www.pharosscan.xyz/tx/0x9a4d8c606fd56d5bdcb722af17194638e4db6b58d394bcfa584f6833f454dd4c
+  22:22:44  approve                  confirmed (block 21,063,895) https://www.pharosscan.xyz/tx/0x9a4d8c606fd56d5bdcb722af17194638e4db6b58d394bcfa584f6833f454dd4c
+  22:22:44  approve                  verified: router may take 1,143 pMusk
+  22:22:44  sell                     start: Sell A on its curve for WPROS
+  22:22:46  sell                     sending (attempt 1, nonce 507, max fee 20 gwei)
+  22:22:46  sell                     sent (attempt 1) https://www.pharosscan.xyz/tx/0xebb9fad6910dc3699a6de2d4ead05af19dcb5859cf1b9100b442695bdfbcfb64
+  22:22:49  sell                     confirmed (block 21,063,901) https://www.pharosscan.xyz/tx/0xebb9fad6910dc3699a6de2d4ead05af19dcb5859cf1b9100b442695bdfbcfb64
+  22:22:50  sell                     verified: sold 1,143 pMusk for 0.008687 PROS (WPROS)
+  22:22:50  unwrap                   start: Unwrap WPROS to PROS
+  22:22:51  unwrap                   sending (attempt 1, nonce 508, max fee 20 gwei)
+  22:22:51  unwrap                   sent (attempt 1) https://www.pharosscan.xyz/tx/0x00df827ebce74a2c9fdd590bc65732d1eab7c8e31516c46009c9949845bb3788
+  22:22:54  unwrap                   confirmed (block 21,063,907) https://www.pharosscan.xyz/tx/0x00df827ebce74a2c9fdd590bc65732d1eab7c8e31516c46009c9949845bb3788
+  22:22:55  unwrap                   verified: unwrapped 0.008687 PROS
+  22:22:55  buy                      start: Buy B on its curve with the PROS
+  22:22:56  buy                      simulation fails on fresh state (attempt 1): Slippage(): the curve would give less than minOut
+  22:22:56  buy                      failed: can't succeed on the current state: Slippage(): the curve would give less than minOut
+  22:22:56  unwrap                   nothing to undo: buying A back needs PROS, so the PROS stays as it is
+  22:22:56  sell                     compensating
+  22:22:56  sell/unwrap-leftover     nothing to send: the sale's WPROS is already PROS
+  22:22:56  sell/unwrap-leftover     skipped
+  22:22:58  sell/buy-back            sending (attempt 1, nonce 509, max fee 20 gwei)
+  22:22:59  sell/buy-back            sent (attempt 1) https://www.pharosscan.xyz/tx/0x7353df33cca952ba8054e6d7c33f06c856e3034ddfb53c77123b77900678b8da
+  22:23:01  sell/buy-back            confirmed (block 21,063,916) https://www.pharosscan.xyz/tx/0x7353df33cca952ba8054e6d7c33f06c856e3034ddfb53c77123b77900678b8da
+  22:23:02  sell/buy-back            verified: bought back 1,120 pMusk for 0.008687 PROS (sold 1,143 pMusk; the gap is the curve's 1% fee each way)
+  22:23:02  sell                     compensated
+  22:23:02  approve                  compensating
+  22:23:03  approve/restore-allowance nothing to send: router allowance for pMusk back to 0
+  22:23:03  approve/restore-allowance skipped
+  22:23:03  approve                  compensated
+  22:23:03  -                        saga compensated
+
+$ trenchsaga status rotate-20261023-222239
+saga rotate-20261023-222239 · rotate · COMPENSATED · failed at buy: can't succeed on the current state: Slippage(): the curve would give less than minOut
+  ↩ 1. approve  compensated  router may take 1,143 pMusk
+       https://www.pharosscan.xyz/tx/0x9a4d8c606fd56d5bdcb722af17194638e4db6b58d394bcfa584f6833f454dd4c
+  ↩ 2. sell     compensated  sold 1,143 pMusk for 0.008687 PROS (WPROS)
+       https://www.pharosscan.xyz/tx/0xebb9fad6910dc3699a6de2d4ead05af19dcb5859cf1b9100b442695bdfbcfb64
+       https://www.pharosscan.xyz/tx/0x7353df33cca952ba8054e6d7c33f06c856e3034ddfb53c77123b77900678b8da
+  ↩ 3. unwrap   compensated  unwrapped 0.008687 PROS
+       https://www.pharosscan.xyz/tx/0x00df827ebce74a2c9fdd590bc65732d1eab7c8e31516c46009c9949845bb3788
+  ✗ 4. buy      failed       Buy B on its curve with the PROS
