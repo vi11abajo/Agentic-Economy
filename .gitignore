@@ -6,3 +6,5 @@ dist/
 .monitor-state.json
 trades.jsonl
 .test-tmp/
+.env.*
+*-home/

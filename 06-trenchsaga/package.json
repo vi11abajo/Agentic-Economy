@@ -1,0 +1,20 @@
+{
+  "name": "trenchsaga",
+  "version": "1.0.0",
+  "description": "trenchsaga: a Pharos skill that rotates a Prosper curve bag from one token to another as a saga, with retries and a clean rollback",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "trenchsaga": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

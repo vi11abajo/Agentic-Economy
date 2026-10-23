@@ -11,6 +11,7 @@
     "03-docs-mcp-onboarding",
     "04-doc-search-cli",
     "05-trenchscope",
+    "06-trenchsaga",
     "services/prosper-monitor"
   ],
   "scripts": {
