@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import type { Hex } from "viem";
-import { Saga, newState, type Chain, type Fees, type Receipt, type SagaState, type Step, type TxSpec } from "./saga.js";
+import { Saga, newState, type Chain, type Fees, type Options, type Receipt, type SagaState, type Step, type TxSpec } from "./saga.js";
 import { fromJson, parseEnv, toJson } from "./store.js";
 import { revertReason } from "./chain.js";
-import { encodeErrorResult, parseAbi } from "viem";
+import { buyStep, type Reader, type RotationCtx } from "./rotation.js";
+import { routerAbi } from "./prosper.js";
+import { decodeFunctionData, encodeErrorResult, parseAbi } from "viem";
 
 type Outcome = "ok" | "revert" | "timeout" | "refuse" | "late"; // late: not mined in time, but mined on the next check
 
@@ -86,11 +88,11 @@ function step(name: string, opts: { undo?: boolean; badVerify?: boolean } = {}):
   };
 }
 
-function run(steps: Step<Ctx>[], chain: FakeChain, faults = {}, state?: SagaState<Ctx>) {
+function run(steps: Step<Ctx>[], chain: FakeChain, options: Options = {}, state?: SagaState<Ctx>) {
   const events: Record<string, unknown>[] = [];
   const saves: string[] = [];
   const s = state ?? newState<Ctx>("t", "test", steps, { done: [], undone: [] });
-  const saga = new Saga(steps, s, chain, { maxAttempts: 3, receiptTimeoutMs: 1, feeMultiplier: 2n }, faults, (e) => events.push(e), (st) => saves.push(st.status));
+  const saga = new Saga(steps, s, chain, { maxAttempts: 3, receiptTimeoutMs: 1, feeMultiplier: 2n }, options, (e) => events.push(e), (st) => saves.push(st.status));
   return { saga, events, saves, state: s };
 }
 const ev = (events: Record<string, unknown>[]) => events.map((e) => `${e.step}:${e.event}`);
@@ -128,15 +130,22 @@ describe("retry policy: transient failures", () => {
     assert.ok(ev(events).includes("b:not mined in time, will replace"));
   });
 
-  it("an underpriced send the node refuses is sent again at a fair fee", async () => {
-    const chain = new FakeChain({ b: ["refuse", "ok"] });
-    const { saga, events } = run([step("a"), step("b")], chain, { dropAt: "b" });
+  it("a start fee the node refuses: resent at the normal fee, and the rest of the saga skips the cheap try", async () => {
+    // Live on Pharos: a 1 gwei max fee is refused at once ("Invalid parameters were provided to the RPC method").
+    const chain = new FakeChain({ a: ["refuse", "ok"] });
+    const { saga, events } = run([step("a"), step("b")], chain, { startFee: 1_000_000_000n });
     assert.equal(await saga.run(), "done");
-    assert.ok(ev(events).includes("b:node refused the transaction"));
-    const sending = events.filter((e) => e.step === "b" && e.event === "sending");
-    assert.equal(sending[0].underpriced, true);
-    assert.equal(sending[0].maxFeeGwei, 1);
-    assert.equal(sending[1].maxFeeGwei, 30, "base 10 gwei x 2, plus one base for the second attempt");
+    assert.ok(ev(events).includes("a:node refused the transaction"));
+    assert.ok(ev(events).includes("a:start fee refused, using the normal fee from now on"));
+    const sending = events.filter((e) => e.event === "sending").map((e) => [e.step, e.maxFeeGwei]);
+    assert.deepEqual(sending, [["a", 1], ["a", 30], ["b", 20]], "1 gwei, then base x2 plus a bump, then b straight at base x2");
+  });
+
+  it("a start fee the node accepts is used for every step", async () => {
+    const chain = new FakeChain({});
+    const { saga } = run([step("a"), step("b")], chain, { startFee: 15_000_000_000n });
+    assert.equal(await saga.run(), "done");
+    assert.deepEqual(chain.sent.map((x) => x.fees.maxFeePerGas), [15_000_000_000n, 15_000_000_000n]);
   });
 
   it("a revert is retried when the step simulates fine on fresh state (the state moved, not the step)", async () => {
@@ -191,12 +200,11 @@ describe("rollback: permanent failures", () => {
     assert.equal(events.find((e) => e.event === "nothing to undo")?.because, "nothing to give back");
   });
 
-  it("the demo failure is a real revert: sent without simulating, then judged on fresh state", async () => {
-    const chain = new FakeChain({ c: ["revert"] }, (s) => s !== "c");
-    const { saga, events, state } = run([step("a"), step("b"), step("c")], chain, { failAt: "c" });
+  it("a step that can't succeed from the start is never sent, and the done steps are undone", async () => {
+    const chain = new FakeChain({}, (s) => s !== "c");
+    const { saga, state } = run([step("a"), step("b"), step("c")], chain);
     assert.equal(await saga.run(), "compensated");
-    assert.equal(chain.sent.filter((x) => x.step === "c").length, 1, "the sabotaged attempt reached the chain");
-    assert.equal(events.find((e) => e.step === "c" && e.event === "sending")?.sabotage, true);
+    assert.equal(chain.sent.filter((x) => x.step === "c").length, 0, "no gas spent on a known revert");
     assert.deepEqual(state.ctx.undone, ["b", "a"]);
   });
 
@@ -256,5 +264,32 @@ describe("revert reasons", () => {
     const data = encodeErrorResult({ abi: parseAbi(["error Error(string)"]), errorName: "Error", args: ["too late"] });
     assert.equal(revertReason({ cause: { data } }), 'Error("too late")');
     assert.equal(revertReason({ cause: { data: "0xdeadbeef" } }), "custom error 0xdeadbeef");
+  });
+});
+
+describe("the user's floor for the buy (--min-out)", () => {
+  const reader: Reader = {
+    tokenBalance: async () => 0n,
+    allowance: async () => 0n,
+    quoteSell: async () => 0n,
+    quoteBuy: async () => 1_000n * 10n ** 18n, // the curve gives 1,000 B
+    now: async () => 1_000n,
+  };
+  const ctx = (minBuyOut?: bigint): RotationCtx => ({
+    me: "0x000000000000000000000000000000000000dEaD",
+    b: { market: "0x0000000000000000000000000000000000000002", token: "0x0000000000000000000000000000000000000003", symbol: "B" },
+    sellAmount: 0n, slippageBps: 200, maxBuy: 10n ** 16n, enterValue: 10n ** 16n, minBuyOut,
+  });
+  const minOutOf = async (c: RotationCtx) => {
+    const tx = await buyStep(reader, "buy", (x) => x.enterValue!).plan(c, {} as Chain);
+    return decodeFunctionData({ abi: routerAbi, data: tx!.data }).args[1] as bigint;
+  };
+
+  it("without a floor, minOut is the quote less the slippage limit", async () => {
+    assert.equal(await minOutOf(ctx()), 980n * 10n ** 18n);
+  });
+
+  it("a floor above that goes into the transaction as minOut", async () => {
+    assert.equal(await minOutOf(ctx(2_000n * 10n ** 18n)), 2_000n * 10n ** 18n);
   });
 });

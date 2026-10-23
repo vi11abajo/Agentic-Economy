@@ -1,0 +1,1 @@
+looks good, go. try 1 gwei gas first, it's pharos, should be enough

@@ -25,9 +25,16 @@ Run with Node 20+ from this skill's folder: `node scripts/trenchsaga.mjs <comman
 | `status [id]`, `log [id]` | which step a saga is in (latest by default), and its journal |
 | `resume [id]` | continues an interrupted or stuck saga from where it stopped |
 
-A and B are Prosper market addresses (pToken addresses work too). Demo switches, only when the user asks for a
-demo: `--fail-at <step>` makes that step fail for real (impossible minOut), `--drop-at <step>` sends its first
-attempt underpriced. Exit codes: 0 done, 1 error, 2 bad input or no key, 3 rolled back (or stuck).
+A and B are Prosper market addresses (pToken addresses work too). Options for `plan` and `rotate`:
+
+- `--min-out N`: the user's floor, "only if I get at least N of B". It becomes the buy's minOut. If the curve
+  can't give that, the buy can't go through and the rotation is rolled back to A. `plan` warns when the current
+  quote is below the floor.
+- `--start-fee G`: try a max fee of G gwei first ("try the cheapest gas"). If the node refuses it, the step is
+  resent at the normal fee and the rest of the saga uses the normal fee. Pharos' base fee is a flat 10 gwei.
+- `--amount N`: sell only N of A (default: all of it).
+
+Exit codes: 0 done, 1 error, 2 bad input or no key, 3 rolled back (or stuck).
 
 ## How to run a rotation with the user
 
@@ -41,7 +48,8 @@ attempt underpriced. Exit codes: 0 done, 1 error, 2 bad input or no key, 3 rolle
    - "refused" or "not mined in time" followed by a new send: a transient failure, retried (a replacement
      keeps the nonce, so it can't happen twice);
    - "reverted" with "simulation passes on fresh state": the price moved between sending and mining, retried;
-   - "simulation fails on fresh state": permanent. The steps already done were undone in reverse order: name
+   - "start fee refused": the node didn't take the cheap fee, the step went out at the normal one;
+   - "simulation fails on fresh state": permanent (for example the curve can't meet the user's `--min-out`). The steps already done were undone in reverse order: name
      them and link the undo transactions. Buying A back returns a bit less A (the curve's 1% fee each way);
    - `stuck`: an undo couldn't be done. Show `status`, say which undo stopped and why, and offer `resume`.
 

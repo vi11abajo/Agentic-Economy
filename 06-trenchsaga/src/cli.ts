@@ -7,7 +7,7 @@ import { formatEther, getAddress, isAddress, parseEther, type Address } from "vi
 import { pharosChain, pharosReader, publicClient, resolveToken, rpc } from "./chain.js";
 import { EXPLORER } from "./prosper.js";
 import { buyStep, pros, rotationSteps, type RotationCtx } from "./rotation.js";
-import { Saga, newState, type Faults, type SagaState, type Step } from "./saga.js";
+import { Saga, newState, type Options, type SagaState, type Step } from "./saga.js";
 import { DEFAULTS, displayPath, homeDir, journal, listSagas, loadSettings, loadState, readJournal, saveSettings, saveState, signer, type Settings } from "./store.js";
 
 class Exit extends Error {
@@ -28,21 +28,21 @@ const HELP = `trenchsaga: rotate a Prosper curve bag from one token to another, 
   trenchsaga log [id]                      the saga's journal, every transition
 
   A and B are Prosper market addresses (or pToken addresses). --amount is how many A tokens to sell
-  (default: all). Demo switches: --fail-at <step> makes that step fail for real (impossible minOut),
-  --drop-at <step> sends its first attempt underpriced (1 gwei), so it has to be replaced.
+  (default: all). --min-out N: buy B only if you get at least N of it, otherwise the rotation is rolled back.
+  --start-fee G: try a max fee of G gwei first; if the node refuses it, the saga goes on at the normal fee.
 
 Data lives in ${displayPath(homeDir())}: config.json, .env (the key, you put it there), sagas/, saga.jsonl.`;
 
 function parse(argv: string[]) {
   const pos: string[] = [];
-  const f = { yes: false, amount: undefined as string | undefined, failAt: undefined as string | undefined, dropAt: undefined as string | undefined, json: false };
+  const f = { yes: false, amount: undefined as string | undefined, minOut: undefined as string | undefined, startFee: undefined as string | undefined, json: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--yes") f.yes = true;
     else if (a === "--json") f.json = true;
     else if (a === "--amount") f.amount = argv[++i];
-    else if (a === "--fail-at") f.failAt = argv[++i];
-    else if (a === "--drop-at") f.dropAt = argv[++i];
+    else if (a === "--min-out") f.minOut = argv[++i];
+    else if (a === "--start-fee") f.startFee = argv[++i];
     else if (a.startsWith("--")) throw new Exit(2, `Unknown option ${a}`);
     else pos.push(a);
   }
@@ -73,8 +73,7 @@ function echo(e: Record<string, unknown>) {
   const bits: string[] = [];
   if (e.attempt) bits.push(`attempt ${e.attempt}`);
   if (e.nonce !== undefined) bits.push(`nonce ${e.nonce}`);
-  if (e.maxFeeGwei !== undefined) bits.push(`max fee ${e.maxFeeGwei} gwei${e.underpriced ? " (underpriced on purpose)" : ""}${e.replacing ? ", replacing" : ""}`);
-  if (e.sabotage) bits.push("sabotaged on purpose: minOut x10");
+  if (e.maxFeeGwei !== undefined) bits.push(`max fee ${e.maxFeeGwei} gwei${e.startFee ? " (your start fee)" : ""}${e.replacing ? ", replacing" : ""}`);
   if (e.block) bits.push(`block ${Number(e.block).toLocaleString("en-US")}`);
   if (e.waitedSec) bits.push(`waited ${e.waitedSec}s`);
   const detail = String(e.summary ?? e.reason ?? e.error ?? e.because ?? e.title ?? "").split("\n")[0];
@@ -99,17 +98,34 @@ async function build(home: string, s: Settings) {
   return { acct, client, chain, reader };
 }
 
+function options(f: ReturnType<typeof parse>["f"]): Options {
+  if (f.startFee === undefined) return {};
+  const g = Number(f.startFee);
+  if (!(g > 0)) throw new Exit(2, "--start-fee is a fee in gwei, like 1");
+  return { startFee: BigInt(Math.round(g * 1e9)) };
+}
+
 function policy(s: Settings) {
   return { maxAttempts: s.max_attempts, receiptTimeoutMs: s.receipt_timeout_sec * 1000, feeMultiplier: 2n };
 }
 
-async function runSaga(home: string, s: Settings, steps: Step<RotationCtx>[], state: SagaState<RotationCtx>, faults: Faults, chain: ReturnType<typeof pharosChain>) {
-  for (const k of [faults.failAt, faults.dropAt]) if (k && !steps.some((x) => x.name === k)) throw new Exit(2, `No step called "${k}" (steps: ${steps.map((x) => x.name).join(", ")})`);
-  const saga = new Saga(steps, state, chain, policy(s), faults, journal(home, echo), (st) => saveState(home, st as SagaState<unknown>));
-  console.log(`saga ${state.id}: ${steps.map((x) => x.name).join(" → ")}${faults.failAt ? ` · demo: ${faults.failAt} will fail` : ""}${faults.dropAt ? ` · demo: ${faults.dropAt} sent underpriced first` : ""}`);
+async function runSaga(home: string, s: Settings, steps: Step<RotationCtx>[], state: SagaState<RotationCtx>, options: Options, chain: ReturnType<typeof pharosChain>) {
+  const saga = new Saga(steps, state, chain, policy(s), options, journal(home, echo), (st) => saveState(home, st as SagaState<unknown>));
+  console.log(`saga ${state.id}: ${steps.map((x) => x.name).join(" → ")}${options.startFee ? ` · trying ${Number(options.startFee) / 1e9} gwei first` : ""}`);
   const status = await saga.run();
   console.log(`\n${renderStatus(saga.state)}`);
   return status === "done" ? 0 : 3;
+}
+
+function minLine(minOut: string | undefined, quote: bigint, sym: string): string {
+  if (!minOut) return "";
+  const want = parseEther(minOut);
+  const q = Number(formatEther(quote)).toLocaleString("en-US", { maximumFractionDigits: 0 });
+  return want > quote
+    ? `  your floor: at least ${Number(minOut).toLocaleString("en-US")} ${sym}. The curve gives about ${q} now, so unless the price moves the buy can't go through and the rotation will be rolled back
+`
+    : `  your floor: at least ${Number(minOut).toLocaleString("en-US")} ${sym} (the curve gives about ${q} now)
+`;
 }
 
 async function cmdPlanOrRotate(pos: string[], f: ReturnType<typeof parse>["f"], execute: boolean) {
@@ -132,14 +148,15 @@ async function cmdPlanOrRotate(pos: string[], f: ReturnType<typeof parse>["f"], 
   2. sell      ${formatEther(sellAmount)} ${a.symbol} → about ${pros(out)} as WPROS (quote now)
   3. unwrap    that WPROS → PROS
   4. buy       ${b.symbol} with ${pros(buyWith)}${out > maxBuy ? ` (capped by max_buy_pros ${s.max_buy_pros}; the rest stays as PROS)` : ""} → about ${Number(formatEther(getB)).toLocaleString("en-US", { maximumFractionDigits: 0 })} ${b.symbol}
-  if a step fails for good, the done steps are undone in reverse: buy ${a.symbol} back, restore the allowance
+${minLine(f.minOut, getB, b.symbol)}${f.startFee ? `  fees: tries ${f.startFee} gwei first, the normal fee if the node refuses it
+` : ""}  if a step fails for good, the done steps are undone in reverse: buy ${a.symbol} back, restore the allowance
   slippage limit ${s.slippage_pct}%, up to ${s.max_attempts} attempts per step, ${s.receipt_timeout_sec}s to get mined · wallet has ${pros(native)} for gas`);
   if (!execute) return 0;
   if (!f.yes) throw new Exit(2, "Not sent: rotate needs --yes, after the user said yes in the chat.");
-  const ctx: RotationCtx = { me: acct.address, a, b, sellAmount, slippageBps: Math.round(s.slippage_pct * 100), maxBuy };
+  const ctx: RotationCtx = { me: acct.address, a, b, sellAmount, slippageBps: Math.round(s.slippage_pct * 100), maxBuy, minBuyOut: f.minOut ? parseEther(f.minOut) : undefined };
   const steps = rotationSteps(reader);
   const id = `rotate-${new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15)}`;
-  return runSaga(home, s, steps, newState(id, "rotate", steps, ctx), { failAt: f.failAt, dropAt: f.dropAt }, chain);
+  return runSaga(home, s, steps, newState(id, "rotate", steps, ctx), options(f), chain);
 }
 
 async function cmdEnter(pos: string[], f: ReturnType<typeof parse>["f"]) {
@@ -156,7 +173,7 @@ async function cmdEnter(pos: string[], f: ReturnType<typeof parse>["f"]) {
   const ctx: RotationCtx = { me: acct.address, b, sellAmount: 0n, slippageBps: Math.round(s.slippage_pct * 100), maxBuy, enterValue: value };
   const steps = [buyStep(reader, `Buy ${b.symbol} with PROS`, (c) => c.enterValue!)];
   const id = `enter-${new Date().toISOString().replace(/[-:]/g, "").replace("T", "-").slice(0, 15)}`;
-  return runSaga(home, s, steps, newState(id, "enter", steps, ctx), { failAt: f.failAt, dropAt: f.dropAt }, chain);
+  return runSaga(home, s, steps, newState(id, "enter", steps, ctx), options(f), chain);
 }
 
 function pickId(home: string, id?: string) {

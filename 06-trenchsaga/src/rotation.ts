@@ -35,6 +35,8 @@ export interface RotationCtx {
   maxBuy: bigint;
   /** enter saga: PROS to spend on B. */
   enterValue?: bigint;
+  /** The least B the user accepts for the buy ("only if I get at least N"). */
+  minBuyOut?: bigint;
   prevAllowance?: bigint;
   wprosBefore?: bigint;
   prosOut?: bigint;
@@ -48,7 +50,6 @@ export interface RotationCtx {
   rebought?: bigint;
 }
 
-const SABOTAGE_GAS = 600_000n; // a sabotaged call reverts in estimation, so it gets a fixed limit
 export const pros = (wei: bigint) => `${Number(formatEther(wei)).toPrecision(4)} PROS`;
 export const amt = (wei: bigint, sym: string) => `${Math.round(Number(formatEther(wei))).toLocaleString("en-US")} ${sym}`;
 const less = (x: bigint, bps: number) => (x * BigInt(10_000 - bps)) / 10_000n;
@@ -141,13 +142,10 @@ export function rotationSteps(r: Reader): Step<RotationCtx>[] {
     {
       name: "sell",
       title: "Sell A on its curve for WPROS",
-      async plan(c, _chain, { sabotage }) {
+      async plan(c) {
         const out = await r.quoteSell(c.a!.market, c.sellAmount);
-        c.wprosBefore = await r.tokenBalance(WPROS, c.me);
         const deadline = (await r.now()) + 300n;
-        const minOut = sabotage ? out * 10n : less(out, c.slippageBps);
-        const tx: TxSpec = { to: ROUTER, data: encodeFunctionData({ abi: routerAbi, functionName: "sellInner", args: [c.a!.market, c.sellAmount, minOut, deadline, false] }) };
-        return sabotage ? { ...tx, gas: SABOTAGE_GAS } : tx;
+        return { to: ROUTER, data: encodeFunctionData({ abi: routerAbi, functionName: "sellInner", args: [c.a!.market, c.sellAmount, less(out, c.slippageBps), deadline, false] }) };
       },
       async verify(c, _chain, rc) {
         const ev = tradeEvent(rc!, c.a!.market, c.me, "Sold");
@@ -183,15 +181,15 @@ export function buyStep(r: Reader, title: string, value: (c: RotationCtx) => big
   return {
     name: "buy",
     title,
-    async plan(c, _chain, { sabotage }) {
+    async plan(c) {
       const v = value(c) < c.maxBuy ? value(c) : c.maxBuy;
       c.buyValue = v;
       const out = await r.quoteBuy(c.b.market, v);
-      c.bBefore = await r.tokenBalance(c.b.token, c.me);
       const deadline = (await r.now()) + 300n;
-      const minOut = sabotage ? out * 10n : less(out, c.slippageBps);
-      const tx: TxSpec = { to: ROUTER, value: v, data: encodeFunctionData({ abi: routerAbi, functionName: "buyInnerNative", args: [c.b.market, minOut, deadline] }) };
-      return sabotage ? { ...tx, gas: SABOTAGE_GAS } : tx;
+      // The user's own floor ("only if I get at least N") wins over the slippage limit when it is higher.
+      const floor = less(out, c.slippageBps);
+      const minOut = c.minBuyOut !== undefined && c.minBuyOut > floor ? c.minBuyOut : floor;
+      return { to: ROUTER, value: v, data: encodeFunctionData({ abi: routerAbi, functionName: "buyInnerNative", args: [c.b.market, minOut, deadline] }) };
     },
     async verify(c, _chain, rc) {
       const ev = tradeEvent(rc!, c.b.market, c.me, "Bought");

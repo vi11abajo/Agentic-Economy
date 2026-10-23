@@ -52,7 +52,7 @@ export interface Chain {
 export interface Action<C> {
   name: string;
   /** Builds the transaction from the current state, or returns null when there is nothing to do. */
-  plan(ctx: C, chain: Chain, opts: { sabotage: boolean }): Promise<TxSpec | null>;
+  plan(ctx: C, chain: Chain): Promise<TxSpec | null>;
   /** Checks the result on chain (receipt events and balances), records what it needs in ctx, and returns a
    *  one-line summary. Throws when the chain doesn't show what the step was supposed to do. */
   verify(ctx: C, chain: Chain, receipt: Receipt | null): Promise<string>;
@@ -73,10 +73,11 @@ export interface Policy {
   feeMultiplier: bigint;
 }
 
-/** Demo switches. failAt makes a step fail for real; dropAt sends its first attempt underpriced. */
-export interface Faults {
-  failAt?: string;
-  dropAt?: string;
+/** Run options set by the user. */
+export interface Options {
+  /** Try this max fee first (for example 1 gwei, "the cheapest that works"). If the node refuses it, the step
+   *  is resent at the normal fee and the rest of the saga uses the normal fee straight away. */
+  startFee?: bigint;
 }
 
 export type StepState =
@@ -110,7 +111,6 @@ export type Journal = (event: Record<string, unknown>) => void;
 
 export class PermanentFailure extends Error {}
 
-const UNDERPRICED = 1_000_000_000n; // 1 gwei: under Pharos' 10 gwei base fee
 
 export class Saga<C> {
   constructor(
@@ -118,7 +118,7 @@ export class Saga<C> {
     public state: SagaState<C>,
     private chain: Chain,
     private policy: Policy,
-    private faults: Faults,
+    private options: Options,
     private journal: Journal,
     private save: (s: SagaState<C>) => void,
   ) {}
@@ -193,12 +193,11 @@ export class Saga<C> {
 
   /** One step (or compensation action) with the retry policy. Returns the summary, or null if skipped. */
   private async execute(step: Step<C>, rec: { name: string; txs: string[]; pending?: Pending }): Promise<string | null> {
-    const sabotage = this.faults.failAt === step.name;
     let replaceNonce: number | undefined;
     let readErrors = 0;
     for (let attempt = 1; ; attempt++) {
       try {
-        const done = await this.attempt(step, rec, attempt, sabotage, replaceNonce);
+        const done = await this.attempt(step, rec, attempt, replaceNonce);
         if (done.kind === "finished") return done.summary;
         replaceNonce = done.replaceNonce;
       } catch (e) {
@@ -218,7 +217,6 @@ export class Saga<C> {
     step: Step<C>,
     rec: { name: string; txs: string[]; pending?: Pending },
     attempt: number,
-    sabotage: boolean,
     replaceNonceIn: number | undefined,
   ): Promise<{ kind: "finished"; summary: string | null } | { kind: "again"; replaceNonce?: number }> {
     let replaceNonce = replaceNonceIn;
@@ -237,34 +235,36 @@ export class Saga<C> {
       }
       if (attempt > this.policy.maxAttempts) throw new PermanentFailure(`gave up after ${this.policy.maxAttempts} attempts`);
 
-      const tx = await step.plan(this.state.ctx, this.chain, { sabotage });
+      const tx = await step.plan(this.state.ctx, this.chain);
       if (!tx) {
         const summary = await step.verify(this.state.ctx, this.chain, null);
         this.log(rec.name, "nothing to send", { summary });
         return { kind: "finished", summary: null };
       }
-      // The sabotaged attempt is sent unsimulated so the revert really happens on chain.
-      if (!(sabotage && attempt === 1)) {
-        const sim = await this.chain.simulate(tx);
-        if (!sim.ok) {
-          this.log(rec.name, "simulation fails on fresh state", { attempt, reason: sim.reason });
-          throw new PermanentFailure(`can't succeed on the current state: ${sim.reason}`);
-        }
-        if (attempt > 1) this.log(rec.name, "simulation passes on fresh state, retrying", { attempt });
+      const sim = await this.chain.simulate(tx);
+      if (!sim.ok) {
+        this.log(rec.name, "simulation fails on fresh state", { attempt, reason: sim.reason });
+        throw new PermanentFailure(`can't succeed on the current state: ${sim.reason}`);
       }
+      if (attempt > 1) this.log(rec.name, "simulation passes on fresh state, retrying", { attempt });
 
       const base = await this.chain.baseFee();
-      const underpriced = this.faults.dropAt === step.name && attempt === 1;
-      const fees: Fees = underpriced
-        ? { maxFeePerGas: UNDERPRICED, maxPriorityFeePerGas: 0n }
+      const cheap = this.options.startFee !== undefined && attempt === 1 && replaceNonce === undefined;
+      const fees: Fees = cheap
+        ? { maxFeePerGas: this.options.startFee!, maxPriorityFeePerGas: 0n }
         : { maxFeePerGas: base * this.policy.feeMultiplier + BigInt(attempt - 1) * base, maxPriorityFeePerGas: BigInt(attempt - 1) * 1_000_000_000n };
       const nonce = replaceNonce ?? (await this.chain.pendingNonce());
-      this.log(rec.name, "sending", { attempt, nonce, maxFeeGwei: Number(fees.maxFeePerGas) / 1e9, replacing: replaceNonce !== undefined, underpriced, sabotage: sabotage && attempt === 1 });
+      this.log(rec.name, "sending", { attempt, nonce, maxFeeGwei: Number(fees.maxFeePerGas) / 1e9, replacing: replaceNonce !== undefined, startFee: cheap });
       let hash: Hex;
       try {
         hash = await this.chain.send(tx, nonce, fees);
       } catch (e) {
         this.log(rec.name, "node refused the transaction", { attempt, reason: (e as Error).message.split("\n")[0] });
+        if (cheap) {
+          // The node won't take the cheap fee: stop trying it for the rest of this saga.
+          this.options.startFee = undefined;
+          this.log(rec.name, "start fee refused, using the normal fee from now on", { baseFeeGwei: Number(base) / 1e9 });
+        }
         return { kind: "again" };
       }
       rec.txs.push(hash);

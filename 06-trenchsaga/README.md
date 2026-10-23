@@ -68,6 +68,9 @@ middle token, and the allowance is back to what it was.
 ## Real runs on Pharos mainnet
 
 All from a test wallet with 0.1 PROS, each buy capped at 0.01 PROS. Full logs in [`examples/`](examples).
+Runs 2 and 3 were made with the first version's demo switches (`--fail-at`, `--drop-at`); they are replaced now
+by the real-life options `--min-out` and `--start-fee`, which reach the same two failures without a "break it"
+switch.
 
 **1. A successful rotation** pMusk → Penguin ([`02-rotation-done.txt`](examples/02-rotation-done.txt)):
 
@@ -144,9 +147,10 @@ node .claude/skills/trenchsaga/scripts/trenchsaga.mjs rotate 0x5c3E0e4B1BE0851DC
 | `status [id]`, `log [id]` | which step a saga is in, and its journal |
 | `resume [id]` | continues an interrupted saga |
 
-Demo switches: `--fail-at <step>` makes that step fail for real (an impossible `minOut`, sent unsimulated),
-`--drop-at <step>` sends its first attempt at 1 gwei. Exit codes: 0 done, 1 error, 2 bad input or no key,
-3 rolled back (or stuck while rolling back).
+Options for `plan` and `rotate`: `--min-out N` buys B only if you get at least N of it (otherwise the
+rotation is rolled back to A; `plan` warns when the current quote is below it), `--start-fee G` tries a max
+fee of G gwei first and goes on at the normal fee if the node refuses it. Exit codes: 0 done, 1 error, 2 bad
+input or no key, 3 rolled back (or stuck while rolling back).
 
 ## How it's built
 
