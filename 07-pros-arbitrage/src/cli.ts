@@ -20,7 +20,8 @@ class Exit extends Error {
 const HELP = `prosArbitrage: PROS on Faroswap (Pharos) vs OKX, Bitget and MEXC. Acts only when it pays after all costs.
 
   prosarb scan [--size USD] [--top N] [--json]   one scan of every source, every route, and the decision
-  prosarb watch [--every SEC] [--count N]        scan again and again (default every 60 s)
+  prosarb watch [--every SEC] [--count N] [--full]  scan again and again (default every 60 s): one line
+                                                 per scan, the whole scan for an ACT or with --full
   prosarb config                                 show the settings
   prosarb config set k=v [k=v ...]               min_net_usd, min_net_pct, sizes_usd=50,200,1000,
                                                  rebalance=on|off, okx.taker_pct, mexc.withdraw_pros, ...
@@ -30,7 +31,7 @@ Every scan is appended to ${displayPath(join(homeDir(), "scans.jsonl"))}. Nothin
 
 function flags(argv: string[]) {
   const pos: string[] = [];
-  const f = { json: false, size: undefined as number | undefined, top: 8, every: 60, count: Infinity, last: 10, only: undefined as Exchange[] | undefined };
+  const f = { json: false, full: false, size: undefined as number | undefined, top: 8, every: 60, count: Infinity, last: 10, only: undefined as Exchange[] | undefined };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const num = () => {
@@ -39,6 +40,7 @@ function flags(argv: string[]) {
       return n;
     };
     if (a === "--json") f.json = true;
+    else if (a === "--full") f.full = true;
     else if (a === "--size") f.size = num();
     else if (a === "--top") f.top = num();
     else if (a === "--every") f.every = num();
@@ -95,12 +97,20 @@ function logScan(home: string, sc: Scan): string {
   return f;
 }
 
-async function once(s: Settings, f: ReturnType<typeof flags>["f"], home: string) {
+/** One line per scan for watch: when, the decision, the best route and its numbers. */
+export function oneLine(sc: Scan): string {
+  const b = sc.decision.best;
+  const what = b ? `${b.route} at $${b.sizeUsd}: gross ${pct(b.grossPct)}, costs ${usd(b.feesUsd + b.slippageUsd + b.gasUsd + b.rebalanceUsd)}, net ${usd(b.netUsd)} (${pct(b.netPct)})` : sc.decision.reason;
+  return `${utc(sc.at)}  block ${sc.block.toLocaleString("en-US")}  ${sc.decision.action}  ${what}`;
+}
+
+async function once(s: Settings, f: ReturnType<typeof flags>["f"], home: string, compact = false) {
   const settings = f.size ? { ...s, sizes_usd: [f.size] } : s;
   const sc = await scan(client(), settings);
   logScan(home, sc);
   if (f.json) console.log(JSON.stringify({ ...sc, routes: sc.routes.map(({ legs: _l, ...r }) => r) }, null, 2));
-  else console.log(render(sc, f.top));
+  else if (compact && sc.decision.action === "SKIP") console.log(oneLine(sc));
+  else console.log(render(sc, f.top)); // the whole scan for scan, watch --full, and any ACT
   return sc;
 }
 
@@ -119,13 +129,18 @@ export async function main(argv: string[]): Promise<number> {
         await once(load(home), f, home);
         return 0;
       case "watch": {
+        // One line per SKIP (the whole scan with --full, and always for an ACT), then a short summary.
+        let acts = 0;
+        let done = 0;
         for (let i = 0; i < f.count; i++) {
-          if (i > 0) {
-            console.log(`\n(next scan in ${f.every}s, Ctrl+C to stop)\n`);
-            await new Promise((r) => setTimeout(r, f.every * 1000));
+          if (i > 0) await new Promise((r) => setTimeout(r, f.every * 1000));
+          const sc = await once(load(home), f, home, !f.full).catch((e) => console.error(`scan failed: ${(e as Error).message.split("\n")[0]}`));
+          if (sc) {
+            done++;
+            if (sc.decision.action === "ACT") acts++;
           }
-          await once(load(home), f, home).catch((e) => console.error(`scan failed: ${(e as Error).message.split("\n")[0]}`));
         }
+        if (Number.isFinite(f.count)) console.log(`\n${done} scan(s), ${acts} ACT, ${done - acts} SKIP. Every scan is in ${displayPath(join(home, "scans.jsonl"))}.`);
         return 0;
       }
       case "config": {

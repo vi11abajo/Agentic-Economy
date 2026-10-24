@@ -20,7 +20,7 @@ Run with Node 20+ from this skill's folder: `node scripts/prosarb.mjs <command>`
 | Command | What it does |
 |---|---|
 | `scan [--size USD] [--top N]` | one scan: every source, every route at every size, and the decision |
-| `watch [--every SEC] [--count N]` | scan again and again (default every 60 s) |
+| `watch [--every SEC] [--count N] [--full]` | scan again and again (default every 60 s): one line per scan, the whole scan for an ACT (or every scan with `--full`), and a summary at the end |
 | `config`, `config set k=v ...` | `min_net_usd`, `min_net_pct`, `sizes_usd=50,200,1000`, `rebalance=on/off`, `okx.taker_pct`, `bitget.withdraw_pros`, ... |
 | `log [--last N]` | the last scans from the log, with their decisions |
 
@@ -41,6 +41,7 @@ Run with Node 20+ from this skill's folder: `node scripts/prosarb.mjs <command>`
 ## How to talk about it
 
 1. Run `scan` (or `scan --size N` if the user names a size) and paste the output as is in a code block.
+   For `watch`, paste its lines as they are too; never retype a scan from memory.
 2. Explain the decision in plain words: which route was best, how big the gross spread was, which cost ate it.
    For a SKIP, say what would have to change (a wider spread, a bigger or smaller size, cheaper fees).
 3. For an ACT, say clearly that nothing was sent: the DEX swap was simulated on the live pool and the exchange

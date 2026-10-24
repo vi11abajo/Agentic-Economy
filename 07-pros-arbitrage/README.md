@@ -130,6 +130,8 @@ node .claude/skills/pros-arbitrage/scripts/prosarb.mjs scan
 node .claude/skills/pros-arbitrage/scripts/prosarb.mjs watch --every 60
 ```
 
+`watch` prints one line per scan (the whole scan for an ACT, or for every scan with `--full`).
+
 ```bash
 node .claude/skills/pros-arbitrage/scripts/prosarb.mjs config set min_net_usd=0.5 sizes_usd=100,500
 ```
