@@ -25,6 +25,9 @@ function dexVenue(c: PublicClient, p: Pool, o: Oracles, s: Settings): Venue {
   const feeRate = p.fee / 1_000_000;
   const gasUsd = (gas: bigint) => Number(gas + BigInt(s.dex_overhead_gas)) * o.baseFeeGwei * 1e-9 * o.prosUsd;
   const mid = p.mid * o.usdcUsd;
+  // A pool with little liquidity around the current price can return almost nothing for a big swap: that size
+  // doesn't fit in the pool. Seen live: the 0.05% pool once paid next to nothing for $1,000 of PROS.
+  const fits = (pricePaid: number) => Math.abs(pricePaid / mid - 1) * 100 <= s.max_dex_impact_pct;
   return {
     id,
     kind: "dex",
@@ -37,7 +40,7 @@ function dexVenue(c: PublicClient, p: Pool, o: Oracles, s: Settings): Venue {
       const r = await simulateSwap(c, p, USDC, usdcIn);
       const pros = Number(formatUnits(r.out, 18));
       return {
-        pros, usd, feeUsd: usd * feeRate, gasUsd: gasUsd(r.swapGas), complete: r.out > 0n,
+        pros, usd, feeUsd: usd * feeRate, gasUsd: gasUsd(r.swapGas), complete: r.out > 0n && fits(usd / pros),
         prepared: { venue: id, type: "swap", pool: p.address, tokenIn: "USDC", amountIn: formatUnits(usdcIn, 6), expectedOut: `${pros} WPROS`, minOut: `${pros * (1 - SLIPPAGE_GUARD)} WPROS`, simulatedGas: Number(r.swapGas), simulated: "eth_call on the live pool, not sent" },
       };
     },
@@ -46,7 +49,7 @@ function dexVenue(c: PublicClient, p: Pool, o: Oracles, s: Settings): Venue {
       const r = await simulateSwap(c, p, WPROS, wIn);
       const usdc = Number(formatUnits(r.out, 6));
       return {
-        pros: prosAmt, usd: usdc * o.usdcUsd, feeUsd: prosAmt * mid * feeRate, gasUsd: gasUsd(r.swapGas), complete: r.out > 0n,
+        pros: prosAmt, usd: usdc * o.usdcUsd, feeUsd: prosAmt * mid * feeRate, gasUsd: gasUsd(r.swapGas), complete: r.out > 0n && fits((usdc * o.usdcUsd) / prosAmt),
         prepared: { venue: id, type: "swap", pool: p.address, tokenIn: "WPROS", amountIn: prosAmt, expectedOut: `${usdc} USDC`, minOut: `${usdc * (1 - SLIPPAGE_GUARD)} USDC`, simulatedGas: Number(r.swapGas), simulated: "eth_call on the live pool, not sent" },
       };
     },

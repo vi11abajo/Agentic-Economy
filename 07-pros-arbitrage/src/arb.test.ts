@@ -86,7 +86,19 @@ describe("net profit after fees, slippage, gas and the rebalance", () => {
     const thin: Venue = { ...venue("bitget", "cex", 0.6, 0.6, 0.1), async buy(usd) { return { ...(await venue("bitget", "cex", 0.6, 0.6, 0.1).buy(usd)), complete: false }; } };
     const r = await route(thin, venue("dex", "dex", 0.7, 0.7, 0.01), 200);
     assert.equal(r.ok, false);
+    assert.equal(r.note, "bitget book too thin for $200");
     assert.equal(decide([r], DEFAULTS).action, "SKIP");
+  });
+});
+
+describe("a pool that can't take the size", () => {
+  it("is never chosen, however good its mid price looks (seen live: +2.07% gross, almost nothing paid out)", async () => {
+    const shallow: Venue = { ...venue("faroswap-0.05%", "dex", 0.68, 0.68, 0.05), async sell(pros) { return { ...(await venue("x", "dex", 0.68, 0.68, 0.05).sell(pros)), usd: 0.01, complete: false }; } };
+    const r = await route(venue("okx", "cex", 0.666, 0.665, 0.1), shallow, 1000);
+    assert.ok(r.grossPct > 2);
+    assert.equal(r.ok, false);
+    assert.equal(r.note, "faroswap-0.05% pool too thin for $1000");
+    assert.equal(decide([r], DEFAULTS).reason, "no route can be filled at these sizes");
   });
 });
 

@@ -25,6 +25,8 @@ export interface Settings {
   min_pool_usdc: number;
   /** A venue more than this % off Chainlink PROS/USD is treated as bad data for that scan. */
   max_oracle_gap_pct: number;
+  /** A pool swap that fills more than this % worse than the pool's mid price counts as "can't fill this size". */
+  max_dex_impact_pct: number;
   exchanges: Record<Exchange, ExchangeFees>;
 }
 
@@ -36,6 +38,7 @@ export const DEFAULTS: Settings = {
   dex_overhead_gas: 61_000,
   min_pool_usdc: 1_000,
   max_oracle_gap_pct: 5,
+  max_dex_impact_pct: 20,
   exchanges: {
     okx: { taker_pct: 0.1, withdraw_pros: 0.00027, deposit_pros: 0 },
     bitget: { taker_pct: 0.1, withdraw_pros: 0.149, deposit_pros: 0 },

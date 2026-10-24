@@ -15,8 +15,9 @@ no keys.
 | Chainlink on Pharos | PROS/USD, USDC/USD, USDT/USD | `latestRoundData()`; USDC and USDT are converted to USD with them, and every source is compared with PROS/USD |
 
 A pool with less than `min_pool_usdc` (1,000 by default) is left out: the 1% pool holds about 58 USDC. A source
-more than `max_oracle_gap_pct` (5%) off Chainlink is treated as bad data for that scan. Both are said in the
-output.
+more than `max_oracle_gap_pct` (5%) off Chainlink is treated as bad data for that scan, and a pool swap that fills
+more than `max_dex_impact_pct` (20%) worse than the pool's mid means that pool can't take that size. All of it is
+said in the output.
 
 ## Exact DEX quotes without a quoter
 
@@ -93,6 +94,22 @@ $0.107, gas $0.001, rebalance $0.000, net -$0.345 (-0.173%). Below the threshold
 
 The PROS market is well arbitraged most of the time: spreads of a few hundredths of a percent against
 0.1-0.4% of costs. That is the normal case, and the scan says exactly which cost is in the way.
+
+## Two hours of real scans
+
+I left `watch` running from 23:43 to 02:30 UTC on 2026-10-23/24: 121 scans, one a minute, every one logged.
+One line per scan (time, block, best route, size, gross, each cost, net, decision) is in
+[`examples/watch-2026-10-24-summary.tsv`](examples/watch-2026-10-24-summary.tsv).
+
+- **121 SKIP, 0 ACT.** In 12 scans the best route was in profit, but never above the $1 / 0.1% threshold.
+- **The closest call** ([`examples/scan-best-of-2h.json`](examples/scan-best-of-2h.json), the full logged scan):
+  buy $1,000 of PROS on Bitget, sell it into the Faroswap 0.01% pool. Gross +0.443% ($4.43), then fees $1.10,
+  slippage $2.64 (the depth of Bitget's book and the pool's price impact at that size), gas $0.001, the Bitget
+  withdrawal $0.10: net +$0.595 (+0.059%). Most of the spread at the top of the book wasn't there for $1,000.
+- **A pool that looked like an opportunity and wasn't**: in the same scan the 0.05% pool showed +2.07% gross, but
+  selling into it paid next to nothing: it holds little liquidity around the current price. That route was never
+  chosen, and now such a leg is marked "pool too thin" outright: a swap that fills more than `max_dex_impact_pct`
+  (20%) worse than the pool's mid counts as "can't fill this size".
 
 ## Quick start
 

@@ -60,7 +60,10 @@ export function costRoute(buyAt: Venue, sellAt: Venue, sizeUsd: number, buy: Leg
   const netUsd = sell.usd - buy.usd - gasUsd - rebalanceUsd;
   const slippageUsd = grossUsd - feesUsd - gasUsd - rebalanceUsd - netUsd;
   const base = { route, buyAt: buyAt.id, sellAt: sellAt.id, sizeUsd, grossPct, grossUsd, feesUsd, slippageUsd, gasUsd, rebalanceUsd, netUsd, netPct: (netUsd / sizeUsd) * 100, legs: { buy, sell } };
-  if (!buy.complete || !sell.complete) return { ...base, ok: false, note: `${!buy.complete ? buyAt.id : sellAt.id} can't fill $${sizeUsd}` };
+  if (!buy.complete || !sell.complete) {
+    const who = !buy.complete ? buyAt : sellAt;
+    return { ...base, ok: false, note: who.kind === "dex" ? `${who.id} pool too thin for $${sizeUsd}` : `${who.id} book too thin for $${sizeUsd}` };
+  }
   return { ...base, ok: true };
 }
 
