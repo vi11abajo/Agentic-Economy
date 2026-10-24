@@ -74,6 +74,7 @@ docker run --rm -it node:22 bash -c "git clone -q https://github.com/vi11abajo/A
 | 04 | Doc-Search CLI: `rtfm`, sourced answers checked on-chain | Developer Docs MCP | Easy | [`04-doc-search-cli`](04-doc-search-cli) |
 | 05 | Threshold Guardian: `trenchscope`, on-chain buy and sell checks for Prosper curve tokens | SkillEngine | Medium | [`05-trenchscope`](05-trenchscope) |
 | 06 | Saga Executor: `trenchsaga`, a Prosper bag rotation with retries and rollback | SkillEngine | Hard | [`06-trenchsaga`](06-trenchsaga) |
+| 07 | Arbitrage Scanner: `prosArbitrage`, PROS on Faroswap vs OKX, Bitget and MEXC, net of every cost | SkillEngine | Hard | [`07-pros-arbitrage`](07-pros-arbitrage) |
 
 ## Shared code
 

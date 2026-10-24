@@ -1,0 +1,22 @@
+{
+  "name": "pros-arbitrage",
+  "version": "1.0.0",
+  "description": "prosArbitrage: a Pharos skill that scans PROS prices on Faroswap and on OKX, Bitget and MEXC, nets out every cost and only acts (simulated) when it still pays",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "prosarb": "dist/cli.js"
+  },
+  "scripts": {
+    "compile": "node compile.mjs",
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "solc": "0.8.36"
+  }
+}

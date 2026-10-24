@@ -12,6 +12,7 @@
     "04-doc-search-cli",
     "05-trenchscope",
     "06-trenchsaga",
+    "07-pros-arbitrage",
     "services/prosper-monitor"
   ],
   "scripts": {
