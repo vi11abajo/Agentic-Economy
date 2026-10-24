@@ -133,6 +133,13 @@ export async function scan(c: PublicClient, s: Settings, only?: { exchanges?: Ex
       }
     }
   }
+  // Say which venues couldn't take which sizes, so a price that looks too good has its reason next to it.
+  const thin = new Map<string, Set<number>>();
+  for (const r of routes) {
+    const m = r.note?.match(/^(\S+) (pool|book) too thin/);
+    if (m) thin.set(`${m[1]} ${m[2]}`, (thin.get(`${m[1]} ${m[2]}`) ?? new Set()).add(r.sizeUsd));
+  }
+  for (const [who, sizes] of thin) skipped.push(`${who} too thin for ${[...sizes].sort((x, y) => x - y).map((x) => `$${x}`).join(", ")}`);
   if (venues.length < 2) skipped.push(`only ${venues.length} usable source(s): nothing to compare`);
   return { at: new Date().toISOString(), block: o.block, oracles: o, sources, skipped, routes, decision: decide(routes, s) };
 }
