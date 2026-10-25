@@ -19,9 +19,9 @@ export HOWTO_HOME="$DEMO_DIR/home"
 export HOWTO_ENV_FILE="${KEY_ENV:?set KEY_ENV to the .env with the wallet key}"
 export DISABLE_TELEMETRY=1 npm_config_fund=false npm_config_update_notifier=false npm_config_audit=false
 export npm_config_cache="${npm_config_cache:-$PWD/../../../.npm-cache}"   # keep npx downloads next to the project
-STYLE="This is a live chat shown in a terminal. Keep replies short, in plain text: no headings, no bold, no tables of your own. When howto prints an answer, a dry run or a run result, paste the whole output as is in one code block: never shorten it or leave lines out. Write plan files into this folder. Install skills with the skills CLI, for this project only: npx skills add <url> -a claude-code -y --copy (never -g). Writing into .claude by hand needs an approval nobody can give here."
-ALLOWED=(Skill Read Write WebFetch Bash)   # the agent only ever runs inside the empty workspace folder
-DENIED=(PowerShell Edit NotebookEdit Task Agent TodoWrite WebSearch)
+STYLE="This is a live chat shown in a terminal. Keep replies short, in plain text: no headings, no bold, no tables of your own. When howto prints an answer, a dry run or a run result, paste the whole output as is in one code block: never shorten it or leave lines out. Give howto the plan steps on stdin (howto steps N - with a heredoc), do not write files. Install skills with the skills CLI, for this project only: npx skills add <url> -a claude-code -y --copy (never -g). Writing into .claude by hand needs an approval nobody can give here."
+ALLOWED=(Skill Read WebFetch Bash)   # the agent only ever runs inside the empty workspace folder
+DENIED=(PowerShell Write Edit NotebookEdit Task Agent TodoWrite WebSearch)
 
 ev() { echo "$(date +%s%3N) $1" >> "$EVENTS"; }
 pause() { sleep "$(awk -v a="$1" -v b="$2" -v r="$RANDOM" 'BEGIN { printf "%.3f", a + (b - a) * r / 32767 }')"; }

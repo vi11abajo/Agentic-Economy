@@ -25,7 +25,7 @@ const HELP = `pharos-howto: "how do I do X on Pharos?" from the docs, then done 
   howto ask "<how do I ...>"          ask the Docs MCP; starts a plan with the answer and its sources
   howto search "<query>" --plan N     search the docs; the pages found count as sources of plan N
   howto page <docs url> --plan N      read a whole docs page; it counts as a source of plan N
-  howto steps N <steps.json>          attach the steps to plan N (each one cites a source of the plan)
+  howto steps N <steps.json | ->      attach the steps to plan N (each one cites a source of the plan); - reads stdin
   howto run N                         do the reads, prepare the transactions; nothing is sent
   howto run N --from <address>        a dry run as that address, when there is no key yet
   howto run N --yes                   the same, then sign with the key in .env, send, and check the result
@@ -56,6 +56,16 @@ export interface Deps {
   docs: () => Promise<DocsSource>;
   chain: () => Promise<Chain>;
   out: (s: string) => void;
+}
+
+/** Whether a signing key is there (its address only), so the agent knows if it can send. */
+function keyStatus(home: string): string {
+  try {
+    const a = signer(home);
+    return a ? `Signing key: found (signer ${a.address}).` : `Signing key: none yet. The user puts PRIVATE_KEY=0x... into ${displayPath(join(home, ".env"))} themselves.`;
+  } catch (e) {
+    return `Signing key: ${(e as Error).message}`;
+  }
 }
 
 const short = (u: string) => u.replace(/^https?:\/\//, "");
@@ -110,6 +120,7 @@ export async function main(argv: string[], deps?: Partial<Deps>): Promise<number
       case "help":
       case "--help":
         d.out(HELP);
+        d.out(keyStatus(d.home));
         return 0;
 
       case "ask": {
@@ -160,7 +171,7 @@ export async function main(argv: string[], deps?: Partial<Deps>): Promise<number
         if (!pos[1]) throw new Exit(2, `howto steps ${p.id} <steps.json>`);
         let parsed: { goal?: string; steps: Step[] } | Step[];
         try {
-          parsed = JSON.parse(readFileSync(pos[1], "utf8"));
+          parsed = JSON.parse(readFileSync(pos[1] === "-" ? 0 : pos[1], "utf8")); // "-": the steps come on stdin
         } catch (e) {
           throw new Exit(2, `Can't read ${pos[1]}: ${(e as Error).message}`);
         }

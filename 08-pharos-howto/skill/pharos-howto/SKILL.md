@@ -20,7 +20,7 @@ Run with Node 20+ from this skill's folder: `node scripts/howto.mjs <command>` (
 |---|---|
 | `ask "<how do I ...>"` | asks the Docs MCP, starts plan N with the answer and its sources; exit 3 = not in the docs |
 | `search "<query>" --plan N`, `page <docs url> --plan N` | reads more of the docs; what it reads becomes a source of plan N |
-| `steps N <steps.json>` | attaches your steps to plan N; refused if a step cites a page not read for the plan |
+| `steps N <steps.json>`, `steps N -` | attaches your steps to plan N (from a file or stdin); refused if a step cites a page not read for the plan |
 | `run N` | does the reads and prepares the transactions; nothing is sent |
 | `run N --yes` | the same, then signs with the key in .env, sends through the Chain MCP, waits, checks |
 | `verify N` | checks the last run's transactions again (one that was mined late) |
@@ -38,10 +38,10 @@ Run with Node 20+ from this skill's folder: `node scripts/howto.mjs <command>` (
 3. **Read what the plan needs.** When the user asks you to do it after a how-question, keep using that plan N.
    If the answer leaves out a detail you need (an address, a signature, a number), get it with `page` or
    `search` with `--plan N`. Only pages read for the plan can be cited.
-4. **Write the plan** as a steps.json file in your working folder (schema below). Each step cites the docs page
-   it comes from. Give every step the checks that would prove it worked, taken from what the docs claim (a
-   status, an event, a balance change, how the fee is charged). Then `steps N <file>`. Tell the user the plan:
-   the steps, with their source next to each.
+4. **Write the plan** as JSON (schema below), in a file or straight on stdin: `steps N - <<'EOF' ... EOF`.
+   Each step cites the docs page it comes from. Give every step the checks that would prove it worked, taken
+   from what the docs claim (a status, an event, a balance change, how the fee is charged). Then attach it with
+   `steps N`. Tell the user the plan: the steps, with their source next to each.
 5. **Dry run.** `run N` does the reads and prepares any transaction. Paste what it printed: target, call, value,
    gas limit, fees, worst-case cost. Ask the user plainly whether to sign and send it.
 6. **Only after a clear yes:** `run N --yes`. Never add `--yes` on your own.
@@ -53,10 +53,10 @@ documented steps and say clearly that this part is the user's to do.
 
 ## The key
 
-`run --yes` signs with `PRIVATE_KEY` (or `MNEMONIC`) from `.env` in the data folder (`howto --help` prints the
-folder). The user puts it there themselves. Never ask for a key, never read or print the .env, never pass a key
-on a command line. `wallet` shows the signer's address and PROS. Without a key, `run N --from <address>` previews
-what would be prepared.
+`howto --help` says whether a key is there (the signer's address only). `run --yes` signs with `PRIVATE_KEY` (or
+`MNEMONIC`) from `.env` in the data folder (`howto --help` prints the folder). The user puts it there themselves.
+Never ask for a key, never read or print the .env, never pass a key on a command line. `wallet` shows the signer's
+address and PROS. Without a key, `run N --from <address>` previews what would be prepared.
 
 ## steps.json
 
