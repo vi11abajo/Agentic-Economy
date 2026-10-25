@@ -1,0 +1,27 @@
+To avoid overpaying, **estimate the gas limit and check the current gas price before sending**. Don’t set an arbitrarily high limit: Pharos’s [Gas Model](/getting-started/gas-model) says fees are charged based on the gas limit at inclusion, and gas refunds don’t reduce that charge.
+
+With Foundry, estimate the transaction and check the current price:
+
+```bash
+cast estimate <recipient> --value 0.1ether --rpc-url $RPC
+cast gas-price --rpc-url $RPC
+```
+
+For a contract call, estimate using the contract address and method instead. Set the limit a little above the estimate so the transaction has room to execute, but avoid a large buffer. The Pharos guide gives **20%** as an example buffer; for cost control, don’t add more than needed.
+
+Pharos supports EIP-1559 fees, with a dynamic base fee and a priority fee. Your wallet or library can populate those values; review them before confirming. See [Gas Model](/getting-started/gas-model) and the [Pharos Skill Engine](/tooling-and-infrastructure/pharos-skill-engine-guide) for estimation commands.
+
+# Sources
+
+- [Gas Model](https://docs.pharos.xyz/getting-started/gas-model)
+- [FAQs](https://docs.pharos.xyz/getting-started/faqs)
+- [Get PROS Gas](https://docs.pharos.xyz/getting-started/get-pros-gas)
+- [Pharos Skill Engine](https://docs.pharos.xyz/tooling-and-infrastructure/pharos-skill-engine-guide)
+- [Pharos MCP](https://docs.pharos.xyz/tooling-and-infrastructure/mcp)
+- [About Pharos](https://docs.pharos.xyz/introduction/readme)
+- [Why Pharos](https://docs.pharos.xyz/introduction/why-pharos)
+- [Foundry](https://docs.pharos.xyz/developer-guide/foundry)
+- [Hardhat](https://docs.pharos.xyz/developer-guide/hardhat)
+- [Safe MultiSig](https://docs.pharos.xyz/tooling-and-infrastructure/wallets/safe)
+- [JSON-RPC API Methods](https://docs.pharos.xyz/api-and-sdk/json-rpc-methods)
+- [Circle CCTP](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/circle-cctp)

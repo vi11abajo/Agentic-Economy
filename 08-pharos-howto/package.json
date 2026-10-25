@@ -1,0 +1,22 @@
+{
+  "name": "pharos-howto",
+  "version": "1.0.0",
+  "description": "pharos-howto: answers \"how do I do X on Pharos\" from the Developer Docs MCP with sources, then does X through the Chain MCP and checks the result on chain",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "howto": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "@agentic-economy/pharos-mcp": "1.0.0",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
