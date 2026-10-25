@@ -1,1 +1,0 @@
-how do i send a transaction on pharos without overpaying for gas? try it with a tiny transfer to myself

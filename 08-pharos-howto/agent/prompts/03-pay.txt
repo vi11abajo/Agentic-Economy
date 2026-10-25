@@ -1,1 +1,0 @@
-ok, i swapped it myself. now how do i pay someone in usdc from my agent's wallet? send 0.01 usdc to {{0x89Ba8B984A709a1f02350dbd58b3e730119bb2Aa}}

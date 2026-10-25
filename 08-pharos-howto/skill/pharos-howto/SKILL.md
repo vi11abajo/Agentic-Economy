@@ -29,12 +29,15 @@ Run with Node 20+ from this skill's folder: `node scripts/howto.mjs <command>` (
 ## How to handle a request
 
 1. **Docs first, always.** Run `ask` with the user's question in their words before doing anything else. Show
-   the answer short and list the sources it gives.
+   the answer short and list the sources it gives. If the user only asks how (no "do it", no amount or
+   address yet), stop here: explain the documented steps with their sources and offer to do it. Go on to the
+   plan when they ask you to do it.
 2. **Not in the docs (exit 3):** tell the user the docs don't cover it, show the closest pages, and stop. Don't
    fill the gap from general knowledge, don't improvise steps. If only part is covered, do that part and name
    the part that isn't.
-3. **Read what the plan needs.** If the answer leaves out a detail you need (an address, a signature, a number),
-   get it with `page` or `search` with `--plan N`. Only pages read for the plan can be cited.
+3. **Read what the plan needs.** When the user asks you to do it after a how-question, keep using that plan N.
+   If the answer leaves out a detail you need (an address, a signature, a number), get it with `page` or
+   `search` with `--plan N`. Only pages read for the plan can be cited.
 4. **Write the plan** as a steps.json file in your working folder (schema below). Each step cites the docs page
    it comes from. Give every step the checks that would prove it worked, taken from what the docs claim (a
    status, an event, a balance change, how the fee is charged). Then `steps N <file>`. Tell the user the plan:
