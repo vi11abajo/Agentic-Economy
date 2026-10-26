@@ -33,7 +33,7 @@ function fakeDocs(answer: string): () => Promise<DocsSource> {
 }
 
 /** Mines every transaction it is sent in block 101, charging gas used x 10 gwei (what mainnet does). */
-function fakeChain(me: Address) {
+function fakeChain(me: Address, o: { failBroadcastAfterMining?: boolean } = {}) {
   const sent: Hex[] = [];
   const receipts = new Map<Hex, Receipt>();
   const native = { 100: parseEther("1"), 101: parseEther("1") } as Record<number, bigint>;
@@ -63,6 +63,7 @@ function fakeChain(me: Address) {
         logs.push({ address: USDC, topics: encodeEventTopics({ abi: erc20, eventName: "Transfer", args: { from: me, to } }) as Hex[], data: pad(`0x${amount.toString(16)}`) });
       }
       receipts.set(hash, { hash, status: "success", block: 101n, from: me, to: tx.to!, gasUsed, effectiveGasPrice: 10_000_000_000n, logs });
+      if (o.failBroadcastAfterMining) throw new Error("send_raw_transaction gave no hash");
       return hash;
     },
     receipt: async (h) => receipts.get(h) ?? null,
@@ -75,13 +76,13 @@ function fakeChain(me: Address) {
   return { chain, sent };
 }
 
-function setup(answer = fixture("ask-gas.txt")) {
+function setup(answer = fixture("ask-gas.txt"), chainOpts: { failBroadcastAfterMining?: boolean } = {}) {
   const home = mkdtempSync(join(tmpdir(), "howto-"));
   mkdirSync(home, { recursive: true });
   const key = generatePrivateKey();
   writeFileSync(join(home, ".env"), `PRIVATE_KEY=${key}\n`);
   const me = privateKeyToAccount(key).address;
-  const fc = fakeChain(me);
+  const fc = fakeChain(me, chainOpts);
   const lines: string[] = [];
   const deps = { home, docs: fakeDocs(answer), chain: async () => fc.chain, out: (s: string) => lines.push(s) };
   const plan = (id = "1") => JSON.parse(readFileSync(join(home, "plans", `${id}.json`), "utf8")) as Plan;
@@ -192,6 +193,17 @@ describe("doing it", () => {
     await main(["steps", "1", t.steps(body)], t.deps);
     assert.equal(await main(["run", "1", "--yes"], t.deps), 0, t.lines.join("\n"));
     assert.ok(t.plan().runs[0].results[0].checks.every((c) => c.ok));
+  });
+
+  it("finds the transaction on chain when the broadcast call errors, and doesn't send it twice", async () => {
+    const t = setup(fixture("ask-gas.txt"), { failBroadcastAfterMining: true });
+    await main(["ask", "q"], t.deps);
+    await main(["steps", "1", t.steps(gasPlan("gas_used"))], t.deps);
+    assert.equal(await main(["run", "1", "--yes"], t.deps), 0, t.lines.join("\n"));
+    assert.equal(t.fc.sent.length, 1);
+    const r = t.plan().runs[0].results[1];
+    assert.equal(r.hash, keccak256(t.fc.sent[0]));
+    assert.ok(r.checks.every((c) => c.ok));
   });
 
   it("won't send more PROS than max_pros_per_tx", async () => {

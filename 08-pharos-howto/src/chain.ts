@@ -95,7 +95,7 @@ export class ChainMcp implements Chain {
 
   async sendRaw(raw: Hex) {
     const r = await this.call_<Record<string, unknown>>("send_raw_transaction", { rawTransaction: raw });
-    const h = (r.transactionHash ?? r.hash ?? r.result) as Hex | undefined;
+    const h = (r.txHash ?? r.transactionHash ?? r.hash ?? r.result) as Hex | undefined; // the hosted MCP answers {txHash}
     if (!h) throw new Error(`send_raw_transaction gave no hash: ${JSON.stringify(r).slice(0, 200)}`);
     return h;
   }

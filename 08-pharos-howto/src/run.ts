@@ -162,10 +162,17 @@ async function doTx(chain: Chain, tx: TxSpec, expect: Expect[], o: RunOptions): 
 
   const raw = await o.account.signTransaction!({ chainId: PHAROS_CHAIN_ID, type: "eip1559", to, data, value, gas, maxFeePerGas, maxPriorityFeePerGas: priority, nonce });
   const local = keccak256(raw);
-  const hash = await chain.sendRaw(raw).catch((e) => {
-    throw new Error(`broadcast failed: ${(e as Error).message.split("\n")[0]}`);
-  });
-  const receipt = await waitReceipt(chain, hash ?? local, o.settings.receipt_timeout_sec * 1000, o.pollMs ?? 2000);
+  // The hash is known before broadcasting. If the broadcast call errors, the transaction may still have gone
+  // out, so look for it on chain before calling it a failure, and never send it again.
+  let hash: Hex = local;
+  let broadcastError: string | undefined;
+  try {
+    hash = await chain.sendRaw(raw);
+  } catch (e) {
+    broadcastError = (e as Error).message.split("\n")[0];
+  }
+  const receipt = await waitReceipt(chain, hash, (broadcastError ? 20 : o.settings.receipt_timeout_sec) * 1000, o.pollMs ?? 2000);
+  if (!receipt && broadcastError) return { prepared, error: `broadcast failed and the transaction isn't on chain: ${broadcastError}` };
   if (!receipt) return { prepared, hash, error: `not mined within ${o.settings.receipt_timeout_sec}s, check it later with: howto verify` };
   const checks: Check[] = [];
   for (const e of expect) checks.push(...(await receiptChecks(chain, e, receipt, value, from, gas)));
