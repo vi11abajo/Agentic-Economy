@@ -130,6 +130,15 @@ export function evaluate(obs: Observation[], rule: Rule, emaIn?: EmaInput): Row[
         fired = pending.fired;
       } else {
         sp.mark = "spike confirmed";
+        // The spike completed the streak and it held: the trend is confirmed here, at the observation that showed
+        // it held, whatever this observation's own move is.
+        const total = ((sp.obs.close - streakStart) / streakStart) * 100;
+        const bigEnough = rule.type !== "consecutive" || Math.abs(total) >= rule.min_move_pct;
+        if (sp.streak >= rule.n && !fired && bigEnough) {
+          row.trigger = true;
+          row.detail = `the ${sp.changePct!.toFixed(2)}% move of the previous observation held`;
+          fired = true;
+        }
       }
       pending = null;
     }

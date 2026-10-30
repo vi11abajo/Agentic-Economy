@@ -66,6 +66,14 @@ describe("the trend rule", () => {
     assert.equal(rows.findIndex((r) => r.trigger), 35);
   });
 
+  it("a spike that completes the streak and holds confirms the trend on the next observation, even if that one ticks up", () => {
+    const rows = evaluate(series([...calm(), 100.0, 99.9, 97.5, 97.6]), rule());
+    assert.equal(rows[34].mark, "spike confirmed");
+    assert.equal(rows[35].trigger, true);
+    assert.equal(rows[35].mark, "against");
+    assert.match(rows[35].detail!, /previous observation held/);
+  });
+
   it("the EMA rule needs every timeframe below a falling EMA, n times in a row", () => {
     const down = Array.from({ length: 40 }, (_, i) => 100 - i * 0.5);
     const rows = evaluate(series(down), rule({ type: "ema" }));

@@ -65,6 +65,10 @@ for prompt_file in prompts/*.txt; do
   if [[ -n "${STOP_AFTER:-}" && "$name" > "${STOP_AFTER}~" ]]; then break; fi   # free dry run: only the first turns
   prompt="$(cat "$prompt_file")"
   [[ "$name" != 01-* ]] && echo
+  if [[ -f "prompts/$name.pause" && -z "${ONLY:-}" ]]; then  # the user is away for a while before this turn
+    ev "pause $name"
+    sleep "$(cat "prompts/$name.pause")"
+  fi
   ev "type $name"
   say "$prompt"
   ev "sent $name"
