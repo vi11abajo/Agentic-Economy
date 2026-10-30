@@ -1,0 +1,1 @@
+watch PROS on 15-minute candles, load the last two weeks, and tell me when it's been falling three times in a row

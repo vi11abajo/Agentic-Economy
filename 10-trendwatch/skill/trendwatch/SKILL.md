@@ -53,6 +53,7 @@ again. `--on-trigger "<command>"` runs a command once per new live signal, with 
 3. Explain a signal in plain words: when it was confirmed, at what price, after how many observations. A
    "signal in the loaded history" is one found in data loaded just now (a new watch, or after a long stop), not a
    fresh one.
-4. To keep watching, run `watch` (or `observe` on a schedule). Restarting is safe: the next run loads what it
-   missed and nothing is stored twice.
+4. To keep watching, run `watch` (or `observe` on a schedule). In a chat, give `watch` a `--count` (e.g.
+   `--every 60 --count 5` for "a few minutes") so it ends and you can report back. Restarting is safe: the next run
+   loads what it missed and nothing is stored twice.
 5. Don't change the rule on your own; change it with `set` only when the user asks.
