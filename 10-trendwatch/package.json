@@ -1,0 +1,22 @@
+{
+  "name": "trendwatch",
+  "version": "1.0.0",
+  "description": "trendwatch: a skill with memory that watches a price (any OKX instrument or a pool on Pharos), keeps every observation on disk and signals only once a trend holds over several observations",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "trendwatch": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "@agentic-economy/pharos-mcp": "1.0.0",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
