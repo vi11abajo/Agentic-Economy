@@ -14,6 +14,7 @@
     "06-trenchsaga",
     "07-pros-arbitrage",
     "08-pharos-howto",
+    "09-preflight",
     "services/prosper-monitor"
   ],
   "scripts": {

@@ -1,0 +1,22 @@
+{
+  "name": "preflight",
+  "version": "1.0.0",
+  "description": "preflight: simulates a Pharos transaction before it is sent (success or revert with the reason, gas cost, balances before and after) and refuses to send one that fails",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "preflight": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "@agentic-economy/pharos-mcp": "1.0.0",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
