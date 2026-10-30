@@ -49,6 +49,19 @@ had a gas limit of 10,000,000 and used 175,141. The sender paid exactly 175,141 
 the 0.1 PROS the limit would cost. So on mainnet the fee is charged on the gas used, and the run reports that
 step as a failure against the plan, with both numbers. That's what checking against the plan is for.
 
+## A real run on Pharos mainnet
+
+On 2026-10-26 I gave a fresh Claude Code agent the skill's GitHub link and asked it four "how do I..." questions,
+each followed by "now do it" (this is the run in the video). All of it went through the Docs MCP and the hosted
+Chain MCP, with a small test wallet:
+
+| Question | What the agent did | Result |
+|---|---|---|
+| how do I swap PROS for USDC on Pharos? | `ask` came back `NOT IN THE DOCS` (token addresses, no DEX or router); it stopped and said so | nothing planned, nothing sent |
+| how do I pay someone in USDC from my agent's wallet? then: send 0.01 USDC to 0x89Ba... | plan from Token Registry, dry run, my yes, `run --yes` | [`0x3984…a7b9`](https://www.pharosscan.xyz/tx/0x3984929b8c08534449c28736234170d7a9ae9927162eb5618034739bedf0a7b9): success, Transfer event, recipient +0.01 and sender -0.01 USDC, every check OK |
+| how do I check that a USDC payment actually arrived? then: check the one you just sent | the docs' steps as reads: receipt, the Transfer log, the balance | `OUTCOME success`, reads only |
+| how do I send a transaction without overpaying for gas? then: try it with a tiny transfer to myself | plan from the Gas Model page (estimate + 20%), with a check on how the fee is charged | [`0xbfa8…248e`](https://www.pharosscan.xyz/tx/0xbfa8d57e1454c40dfc2592b29e4b065e4c6a1d715746ae908c2386e8c0e8248e): sent, but `fee charged on the gas limit` FAIL: paid 0.00021 PROS (21,000 used x 10 gwei), not 0.000252 for the 25,200 limit |
+
 ## Quick start
 
 You need [Node.js](https://nodejs.org) 20 or newer and an agent that supports skills (I tested with Claude
