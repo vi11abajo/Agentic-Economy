@@ -26,7 +26,8 @@ by its signature, or raw call data another tool prepared.
    sender's PROS also loses the expected gas.
 5. **GO or NO-GO.** NO-GO when the simulation reverts or fails, when the wallet can't cover the value plus the
    worst-case gas, or when it sends more PROS than `max_pros_per_tx`. Warnings (still GO): an unlimited
-   approval, a call with data to an address that has no code, PROS sent to yourself.
+   approval, a call with data to an address that has no code, PROS or a token sent to yourself (the balance
+   stays, only the gas is spent).
 
 ## Blocking
 

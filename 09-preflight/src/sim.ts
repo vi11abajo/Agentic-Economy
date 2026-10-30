@@ -123,6 +123,7 @@ export function effects(root: Frame) {
   const native = new Map<string, bigint>();
   const tokens = new Map<string, bigint>(); // `${token}|${holder}` -> delta
   const approvals = new Map<string, bigint>(); // `${token}|${owner}|${spender}` -> new allowance
+  const selfTransfers = new Set<string>(); // `${token}|${holder}`: a transfer from an address to itself
   const add = (m: Map<string, bigint>, k: string, v: bigint) => m.set(k, (m.get(k) ?? 0n) + v);
   for (const f of frames(root)) {
     if (f.error) continue;
@@ -137,6 +138,7 @@ export function effects(root: Frame) {
         const amount = decodeAbiParameters([{ type: "uint256" }], l.data)[0];
         add(tokens, `${l.address.toLowerCase()}|${topicAddr(l.topics[1]).toLowerCase()}`, -amount);
         add(tokens, `${l.address.toLowerCase()}|${topicAddr(l.topics[2]).toLowerCase()}`, amount);
+        if (same(l.topics[1], l.topics[2])) selfTransfers.add(`${l.address.toLowerCase()}|${topicAddr(l.topics[1]).toLowerCase()}`);
       } else if ((same(l.topics[0], DEPOSIT) || same(l.topics[0], WITHDRAWAL)) && l.topics.length === 2) {
         const amount = decodeAbiParameters([{ type: "uint256" }], l.data)[0];
         add(tokens, `${l.address.toLowerCase()}|${topicAddr(l.topics[1]).toLowerCase()}`, same(l.topics[0], DEPOSIT) ? amount : -amount);
@@ -145,7 +147,7 @@ export function effects(root: Frame) {
       }
     }
   }
-  return { native, tokens, approvals };
+  return { native, tokens, approvals, selfTransfers };
 }
 
 /** Token balance changes in a mined transaction's logs, keyed like effects().tokens. */
@@ -193,7 +195,7 @@ export async function simulate(chain: Chain, tx: TxRequest, o: SimOptions): Prom
     const t = await chain.trace(tx, block);
     r.traced = !!t;
     if (!t) r.warnings.push("no call trace from the RPC, so only the sender's PROS is shown");
-    const fx = t ? effects(t) : { native: new Map<string, bigint>(), tokens: new Map<string, bigint>(), approvals: new Map<string, bigint>() };
+    const fx = t ? effects(t) : { native: new Map<string, bigint>(), tokens: new Map<string, bigint>(), approvals: new Map<string, bigint>(), selfTransfers: new Set<string>() };
     const cache = new Map<string, Token>();
     // PROS: the sender always (value and gas), everyone else the trace moves PROS to or from.
     const pros = new Map(fx.native);
@@ -205,9 +207,12 @@ export async function simulate(chain: Chain, tx: TxRequest, o: SimOptions): Prom
     }
     for (const [k, d] of fx.tokens) {
       const [token, holder] = k.split("|") as [Address, Address];
-      if (d === 0n) continue;
+      // A zero change is left out, except the sender's own transfer to itself: that row shows it stays the same.
+      if (d === 0n && !fx.selfTransfers.has(k)) continue;
+      const tk = await tokenInfo(chain, token, cache);
       const before = await balanceOf(chain, token, holder, block);
-      r.changes.push({ kind: "token", token: await tokenInfo(chain, token, cache), holder, before, after: before + d });
+      r.changes.push({ kind: "token", token: tk, holder, before, after: before + d });
+      if (fx.selfTransfers.has(k) && same(holder, tx.from)) r.warnings.push(`sending ${tk.symbol} to yourself: the balance stays the same, only the gas is spent`);
     }
     for (const [k, v] of fx.approvals) {
       const [token, owner, spender] = k.split("|") as [Address, Address, Address];

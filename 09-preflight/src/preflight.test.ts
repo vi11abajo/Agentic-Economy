@@ -177,6 +177,14 @@ describe("check and send", () => {
     assert.match(t.lines.join("\n"), /not enough PROS/);
   });
 
+  it("shows a token transfer to yourself as no change, with a warning", async () => {
+    const t = setup();
+    assert.equal(await main(["check", "token", "USDC", t.me, "1"], t.deps), 0);
+    const out = t.lines.join("\n");
+    assert.match(out, /USDC you\s+5 USDC -> 5 USDC {2}\(\+0\)/);
+    assert.match(out, /WARNING {5}sending USDC to yourself/);
+  });
+
   it("warns about an unlimited approval", async () => {
     const t = setup();
     assert.equal(await main(["check", "approve", "USDC", BOB, "max"], t.deps), 0);
