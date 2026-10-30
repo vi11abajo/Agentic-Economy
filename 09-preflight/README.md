@@ -67,6 +67,21 @@ to the market, the pMusk coming back, gas 235,260. The same buy with a minimum o
 reverts with Prosper's `Slippage()` and is NO-GO. An unlimited USDC approval is GO with
 `WARNING unlimited approval`.
 
+## A real send, and a blocked one (the run in the video)
+
+On 2026-10-30 a fresh Claude Code agent installed the skill from GitHub and was asked, in plain words, what a
+transaction would do before sending it:
+
+- "what happens if i send 0.005 usdc to my own wallet?": GO, gas estimate 52,649 (0.00053 PROS), USDC
+  2.953684 -> 2.953684 with `WARNING sending USDC to yourself`. After "yes, send it", `send --yes` simulated
+  again (GO), sent
+  [`0xaa53…3eda`](https://www.pharosscan.xyz/tx/0xaa5396746d458df1eb6d29bad48fc47b00e060a16cd3b059cb9e88ad9b513eda)
+  and compared: status success AS SIMULATED, USDC +0 AS SIMULATED, gas used 37,435 (under the estimate).
+- "and what if i send 10 usdc?": `REVERT: Error("ERC20: transfer amount exceeds balance")`, NO-GO. "send it
+  anyway": the agent ran `send --yes`, preflight simulated again and printed `BLOCKED`; nothing was signed.
+- "give 0x89Ba… unlimited approval on my usdc": GO with `WARNING unlimited approval`; "make it just 1 usdc":
+  allowance 0 -> 1 USDC, no warning. Neither was sent.
+
 ## Quick start
 
 You need [Node.js](https://nodejs.org) 20 or newer and an agent that supports skills (I tested with Claude
