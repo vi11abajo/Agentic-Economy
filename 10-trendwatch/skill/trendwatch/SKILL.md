@@ -50,9 +50,9 @@ again. `--on-trigger "<command>"` runs a command once per new live signal, with 
    how much, put it in `--n` and `--min-move`. Never go below 3.
 2. After `add` (or `observe`), paste the output as is. When asked what was seen, run `history` and paste it: it
    shows each observation, the streak, spikes that were ignored, and `<== TREND CONFIRMED` where it fired.
-3. Explain a signal in plain words: when it was confirmed, at what price, after how many observations. A
-   "signal in the loaded history" is one found in data loaded just now (a new watch, or after a long stop), not a
-   fresh one.
+3. Explain a signal in plain words: when it was confirmed, at what price, after how many observations. Signals
+   "found in the loaded history" come from data loaded just now (a new watch, or after a long stop), not fresh
+   ones; `SIGNAL` lines are fresh.
 4. To keep watching, run `watch` (or `observe` on a schedule). In a chat, give `watch` a `--count` (e.g.
    `--every 60 --count 5` for "a few minutes") so it ends and you can report back. Restarting is safe: the next run
    loads what it missed and nothing is stored twice.

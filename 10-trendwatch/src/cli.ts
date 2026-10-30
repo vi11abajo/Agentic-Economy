@@ -114,10 +114,16 @@ async function observe(d: Deps, w: Watch): Promise<string[]> {
   // A signal is live when it was confirmed by the newest observations; older ones were found in the history that
   // was just loaded (a new watch, or a restart after a long stop). Those are recorded, but on_trigger is for live ones.
   const step = w.source.startsWith("okx:") ? BAR_MS[w.bar] : (w.every_blocks ?? 900) * 1000;
-  for (const s of fresh) {
-    const live = Date.parse(s.at) >= d.now() - 2 * step;
-    out.push(`  ${live ? "SIGNAL" : "signal in the loaded history"} ${w.name}: trend confirmed at ${utc(Date.parse(s.at))}, close ${fmt(s.close)}, ${s.streak} in a row`);
-    if (live && w.on_trigger) {
+  const isLive = (s: { at: string }) => Date.parse(s.at) >= d.now() - 2 * step;
+  const old = fresh.filter((s) => !isLive(s));
+  if (old.length) {
+    // Loading a long history can turn up dozens; the latest three say enough, history lists them all.
+    out.push(`  ${old.length} signal(s) found in the loaded history${old.length > 3 ? ", the latest:" : ":"}`);
+    for (const s of old.slice(-3)) out.push(`    trend confirmed at ${utc(Date.parse(s.at))}, close ${fmt(s.close)}, ${s.streak} in a row`);
+  }
+  for (const s of fresh.filter(isLive)) {
+    out.push(`  SIGNAL ${w.name}: trend confirmed at ${utc(Date.parse(s.at))}, close ${fmt(s.close)}, ${s.streak} in a row`);
+    if (w.on_trigger) {
       const code = d.run(w.on_trigger, { TRENDWATCH_WATCH: w.name, TRENDWATCH_SOURCE: w.source, TRENDWATCH_AT: s.at, TRENDWATCH_CLOSE: String(s.close), TRENDWATCH_KEY: s.key });
       out.push(`  on_trigger ran, exit ${code}`);
     }
