@@ -1,0 +1,20 @@
+{
+  "name": "harborpilot",
+  "version": "1.0.0",
+  "description": "harborpilot: one interface over the Pharos Harbor vaults. Reads every venue, routes a deposit to the best one for the user's conditions and says why, prepares and sends deposits, withdrawals and a Morpho loan",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "harborpilot": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

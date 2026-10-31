@@ -16,6 +16,7 @@
     "08-pharos-howto",
     "09-preflight",
     "10-trendwatch",
+    "11-harborpilot",
     "services/prosper-monitor"
   ],
   "scripts": {
