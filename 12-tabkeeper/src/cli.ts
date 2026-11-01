@@ -9,7 +9,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { formatEther, formatUnits, type Account, type PublicClient } from "viem";
-import { buy, pick, probe, reconcile, retry, type BuyResult, type Deps } from "./buyer.js";
+import { buy, findPayment, pick, probe, reconcile, retry, type BuyResult, type Deps } from "./buyer.js";
 import { allow, append, currentTask, parseUsdc, payments, readRows, tasks, usdc, type TaskState } from "./ledger.js";
 import { EIP3009, NETWORK, txUrl, USDC } from "./pharos.js";
 import { account, chainOf, makeClient, signerFor } from "./wallet.js";
@@ -56,7 +56,7 @@ const HELP = `tabkeeper: pays x402 APIs on Pharos with USDC, inside a budget, an
   tabkeeper price <url>                the price an endpoint asks (its 402), and whether this task allows it. Pays nothing
   tabkeeper buy <url> [--for "what it is for"] [--max USDC]
                                        pay and get the data, if the price fits the cap and the budget
-  tabkeeper retry [nonce]              settle payments in flight against the chain; resend one (same payment, no new charge)
+  tabkeeper retry [nonce | tx]         settle payments in flight against the chain; resend one (same payment, no new charge)
   tabkeeper log [--all]                payments of the open task (or all) with price, item, tx and running total
   tabkeeper wallet | config [set k=v ...]
 
@@ -285,7 +285,7 @@ export async function main(argv: string[], c: Ctx): Promise<number> {
         c.out(lines.length ? lines.join("\n") : "Nothing in flight.");
         return 0;
       }
-      const p = payments(readRows(c.home)).get(pos[1]);
+      const p = findPayment(readRows(c.home), pos[1]);
       const r = await retry(d, pos[1]);
       const out = resultLines(r, tasks(readRows(c.home)).get(p?.task ?? "")!, p?.item ?? pos[1]);
       c.out(out.lines.join("\n"));

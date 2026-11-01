@@ -209,6 +209,21 @@ describe("buying", () => {
     assert.equal(w.rows.filter((x) => x.event === "paid").length, 1);
   });
 
+  it("a bought answer resent by its tx hash: same payment, same data, no new charge", async () => {
+    const w = world(PRICES);
+    const t = w.startTask("0.01", "0.005");
+    const r = await buy(w.deps, t, A);
+    assert.equal(r.kind, "bought");
+    if (r.kind !== "bought") return;
+    const again = await retry(w.deps, r.tx.toUpperCase().replace("0X", "0x"));
+    assert.equal(again.kind, "bought");
+    if (again.kind !== "bought") return;
+    assert.equal(again.tx, r.tx);
+    assert.equal(w.signed(), 1);
+    assert.equal(tasks(w.rows).get("t1")!.spent, 2000n);
+    await assert.rejects(retry(w.deps, "0xdead"), /no payment with nonce or tx/);
+  });
+
   it("never reached the seller: the money stays held, then is released once the authorization expires unused", async () => {
     const w = world(PRICES);
     const t = w.startTask("0.003", "0.005");

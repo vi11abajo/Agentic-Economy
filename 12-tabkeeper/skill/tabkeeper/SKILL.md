@@ -26,7 +26,7 @@ Run with Node 20+ from this skill's folder: `node scripts/tabkeeper.mjs <command
 | `buy <url> --for "<why the task needs it>" [--max N]` | pays and prints the data, if the price fits the cap and what is left of the budget |
 | `task` / `task end [--note "..."]` | where the task stands / closes it with every payment, refusal and the total |
 | `log [--all]` | payments: time, price, running total, tx, what was bought |
-| `retry [nonce]` | settles payments in flight against the chain; resends one (the same payment, no new charge) |
+| `retry [nonce or tx]` | settles payments in flight against the chain; resends one (the same payment, no new charge) |
 | `wallet`, `config [set k=v]` | the paying address and balances; settings |
 
 Sellers in the catalog by default: `https://mcp.pharosfdv.xyz/x402` (Harbor data and PROS market).
@@ -37,17 +37,21 @@ Sellers in the catalog by default: `https://mcp.pharosfdv.xyz/x402` (Harbor data
    gave none. Say them back to the user in one line.
 2. Run `catalog`. For each thing the task might need, decide if it is worth its price **for this task**: buy
    only what you will actually use in the answer. Don't buy the same data twice in one task.
-3. `price <url>` shows the price before paying. Then `buy <url> --for "<what the task needs it for>"`. Use
-   `--max N` when the data is only worth N to this task.
+3. `buy <url> --for "<what the task needs it for>"`. Use `--max N` when the data is only worth N to this task.
+   When the user asks for something, call `buy` even if you think it is over a limit: `buy` checks the cap and
+   the budget first, refuses with nothing signed, and the refusal goes into the task's record. `price <url>` only
+   looks and records nothing.
 4. Paste each `buy` result's first lines (BOUGHT, price, tx link, task total) as is in a code block. Use the data
-   below `--- data ---` for the answer; don't paste all of it.
+   below `--- data ---` for the answer; don't paste all of it. Never cut `buy`'s output (no `head`, `tail` or
+   `grep` on it): what is cut was paid for, and getting it back takes a `retry`.
 5. **REFUSED (exit 3)** means nothing was signed. Say why in one line (over the per-call cap, or the budget).
    Over the cap: go on without that data if you can, and say what is missing. **Budget reached: stop buying**,
    finish the answer with what you already bought and say what you couldn't get. Never raise the budget or the
    cap yourself, never start a new task to get around it; only the user can.
 6. **FAILED (exit 4)**: the message says whether money moved (checked on chain). If it says the payment went
    through, run `retry <nonce>`: it resends the same payment, the seller answers it again, and nothing is
-   charged twice. Don't `buy` the same URL again for that.
+   charged twice. Don't `buy` the same URL again for that. The same goes when an answer that was paid for didn't
+   reach the user: `retry <tx hash>` (the tx is on the BOUGHT line and in `log`; nonces are in `log --json`).
 7. At the end run `task end` and paste its table: every payment with price, tx and running total, the refusals,
    and the total spent of the budget.
 

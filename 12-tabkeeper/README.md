@@ -100,7 +100,7 @@ Data lives in `%APPDATA%\tabkeeper` on Windows, `~/.config/tabkeeper` elsewhere,
 | `buy <url> [--for "..."] [--max N]` | pays and prints the data, if the price fits |
 | `task`, `task end [--note]` | where the task stands; close it with every payment and refusal |
 | `log [--all] [--json]` | time, price, running total, tx, what was bought |
-| `retry [nonce]` | settles payments in flight against the chain; resends one, same payment |
+| `retry [nonce or tx]` | settles payments in flight against the chain; resends one, same payment |
 | `wallet`, `config [set k=v]` | address and balances, settings |
 
 Exit codes: 0 ok, 1 error, 2 bad input or no key, 3 refused (nothing signed), 4 payment failed.

@@ -169,9 +169,16 @@ export async function buy(d: Deps, task: TaskState, url: string, o: { item?: str
 }
 
 /** Resend a payment that is in flight or was paid without its data reaching us: same nonce, no new charge. */
-export async function retry(d: Deps, nonce: string): Promise<BuyResult> {
-  const p = payments(d.rows()).get(nonce);
-  if (!p) throw new PayError(`no payment with nonce ${nonce}`);
+/** A payment by its nonce or by the tx hash it settled in. */
+export function findPayment(rows: Row[], id: string) {
+  const all = payments(rows), key = id.toLowerCase();
+  return all.get(id) ?? [...all.values()].find((p) => p.nonce.toLowerCase() === key || p.tx?.toLowerCase() === key);
+}
+
+export async function retry(d: Deps, id: string): Promise<BuyResult> {
+  const p = findPayment(d.rows(), id);
+  if (!p) throw new PayError(`no payment with nonce or tx ${id}`);
+  const nonce = p.nonce;
   if (p.state === "released") throw new PayError("that payment expired unused; buy again for a fresh one");
   if (p.state === "open" && BigInt(Math.floor(d.now() / 1000)) > p.validBefore) {
     await reconcile(d, nonce);
