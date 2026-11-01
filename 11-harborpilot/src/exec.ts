@@ -1,7 +1,7 @@
 // A plan is a list of unsigned transactions. Before anything is signed the whole plan is simulated, step by
 // step, each one on top of what the earlier ones leave behind. Sending signs one step at a time, simulates it
 // again on the live state right before it, and stops at the first one that would fail or did fail.
-import { formatEther, keccak256, type Account, type Address, type Hex, type PublicClient, type StateOverride } from "viem";
+import { decodeEventLog, formatEther, getAddress, keccak256, parseAbi, type Account, type Address, type Hex, type PublicClient, type StateOverride } from "viem";
 import { EXPLORER, mergeOverrides, simulate, type Step } from "./chain.js";
 
 export interface StepCheck {
@@ -17,6 +17,34 @@ export interface SentStep {
   status: "success" | "reverted" | "not mined";
   block?: bigint;
   gasUsed?: bigint;
+  requests?: RequestRef[];
+}
+
+/** An ERC-7540 request filed by a sent transaction. Vaults number them their own way, so the id is kept. */
+export interface RequestRef {
+  vault: Address;
+  type: "deposit" | "redeem";
+  id: string;
+  controller: Address;
+}
+
+const REQUEST_EVENTS = parseAbi([
+  "event DepositRequest(address indexed controller, address indexed owner, uint256 indexed requestId, address sender, uint256 assets)",
+  "event RedeemRequest(address indexed controller, address indexed owner, uint256 indexed requestId, address sender, uint256 shares)",
+]);
+
+/** The deposit and redemption requests in a receipt's logs. */
+export function requestsIn(logs: { address: Address; topics: readonly Hex[]; data: Hex }[]): RequestRef[] {
+  const out: RequestRef[] = [];
+  for (const l of logs) {
+    try {
+      const e = decodeEventLog({ abi: REQUEST_EVENTS, topics: l.topics as [Hex, ...Hex[]], data: l.data });
+      out.push({ vault: getAddress(l.address), type: e.eventName === "DepositRequest" ? "deposit" : "redeem", id: e.args.requestId.toString(), controller: getAddress(e.args.controller) });
+    } catch {
+      // not a request event
+    }
+  }
+  return out;
 }
 
 /** Simulate every step in order from `from`; a step's `after` overrides apply to the steps behind it. */
@@ -80,7 +108,7 @@ export async function sendPlan(client: PublicClient, account: Account, steps: St
       sent.push({ step, hash, status: "not mined" });
       return { sent, stopped: `step ${n} not mined within 90 s; check ${EXPLORER}/tx/${hash} before running again` };
     }
-    sent.push({ step, hash, status: rc.status, block: rc.blockNumber, gasUsed: rc.gasUsed });
+    sent.push({ step, hash, status: rc.status, block: rc.blockNumber, gasUsed: rc.gasUsed, requests: requestsIn(rc.logs) });
     o.log(`      ${rc.status === "success" ? "done" : "REVERTED"}  block ${rc.blockNumber.toLocaleString("en-US")}, gas ${formatEther(rc.gasUsed * rc.effectiveGasPrice)} PROS`);
     if (rc.status !== "success") return { sent, stopped: `step ${n} reverted on chain; nothing more was sent` };
     nonce++;

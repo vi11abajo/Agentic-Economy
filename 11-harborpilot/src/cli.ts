@@ -7,7 +7,7 @@ import { pathToFileURL } from "node:url";
 import { formatEther, formatUnits, getAddress, isAddress, parseEther, parseUnits, type Account, type Address, type PublicClient } from "viem";
 import { position, quote, sharesFor, depositSteps, withdrawSteps, claimSteps, ERC20, type Ctx, type Quote } from "./adapters.js";
 import { blocksAgo, EXPLORER, makeClient, morphoCollateralOverride, pinnedBlock, tokenOverride, USDC, WPROS, withTimeout, type Step } from "./chain.js";
-import { checkPlan, sendPlan, type StepCheck } from "./exec.js";
+import { checkPlan, sendPlan, type RequestRef, type StepCheck } from "./exec.js";
 import { borrowSteps, health, loanOf, marketState, repaySteps, WPROS_MARKET } from "./morpho.js";
 import { DEFAULT_CONDITIONS, rankedApy, route, type Conditions } from "./router.js";
 import { DEFAULTS, type Settings } from "./settings.js";
@@ -70,7 +70,8 @@ function parse(argv: string[]) {
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--yes") f.yes = true;
+    if (a === "--help" || a === "-h") pos.unshift("help");
+    else if (a === "--yes") f.yes = true;
     else if (a === "--json") f.json = true;
     else if (a === "--amount") f.amount = argv[++i];
     else if (a === "--exit-days") f.exitDays = num(argv[++i], a);
@@ -196,6 +197,17 @@ function planText(title: string, checks: StepCheck[]): string[] {
   return lines;
 }
 
+/** Ids of the requests this tool filed in a vault for `user`, from the journal. */
+export function journalRequestIds(rows: Record<string, unknown>[], vault: Address, user: Address): bigint[] {
+  const ids: bigint[] = [];
+  for (const row of rows) {
+    if (row.event !== "sent" || !Array.isArray(row.txs)) continue;
+    for (const tx of row.txs as { requests?: RequestRef[] }[])
+      for (const r of tx.requests ?? []) if (r.vault.toLowerCase() === vault.toLowerCase() && r.controller.toLowerCase() === user.toLowerCase()) ids.push(BigInt(r.id));
+  }
+  return ids;
+}
+
 async function needSigner(d: Deps): Promise<Account> {
   const a = d.account();
   if (!a) throw new Exit(2, `No key. Put PRIVATE_KEY=... into ${displayPath(homeDir())}/.env (or point HARBORPILOT_ENV_FILE at an .env). Without a key, use --from <address> to check a plan.`);
@@ -219,7 +231,7 @@ async function runPlan(d: Deps, from: Address, title: string, steps: Step[], yes
   if (!account || account.address.toLowerCase() !== from.toLowerCase()) throw new Exit(2, "--yes signs with the key in .env, so the plan must be for that wallet (drop --from).");
   d.out("\nSending:");
   const r = await sendPlan(d.client, account, steps, { log: d.out, gasBufferPct: loadSettings(d.home).gas_buffer_pct });
-  journal(d.home, { event: "sent", title, txs: r.sent.map((s) => ({ label: s.step.label, hash: s.hash, status: s.status, block: s.block?.toString() })), stopped: r.stopped });
+  journal(d.home, { event: "sent", title, txs: r.sent.map((s) => ({ label: s.step.label, hash: s.hash, status: s.status, block: s.block?.toString(), requests: s.requests?.length ? s.requests : undefined })), stopped: r.stopped });
   if (r.stopped) {
     d.out(`\nSTOPPED  ${r.stopped}`);
     return 3;
@@ -276,7 +288,8 @@ export async function main(argv: string[], d: Deps): Promise<number> {
       const user = pos[1] ? (isAddress(pos[1], { strict: false }) ? getAddress(pos[1]) : null) : who().from;
       if (!user || user === PROBE) throw new Exit(2, "Whose positions? Give an address, or put a key in .env.");
       const ctx = await context(d.client);
-      const res = await Promise.allSettled(VENUES.map((v) => withTimeout(position(ctx, v, user), s.venue_timeout_ms, v.name)));
+      const rows = readJournal(d.home);
+      const res = await Promise.allSettled(VENUES.map((v) => withTimeout(position(ctx, v, user, journalRequestIds(rows, v.address, user)), s.venue_timeout_ms, v.name)));
       const lines = [`Positions of ${user} at block ${ctx.block.toLocaleString("en-US")}`, ""];
       let held = 0;
       res.forEach((r, i) => {
@@ -292,7 +305,8 @@ export async function main(argv: string[], d: Deps): Promise<number> {
         if (!p.shares && !extra.length) return;
         held++;
         const value = v.kind === "token-only" ? `${fmt(p.assets, 6)} tokens` : `${fmt(p.assets, 6)} USDC`;
-        lines.push(`  ${pad(v.id, 10)} ${formatUnits(p.shares, p.shareDecimals)} shares = ${value}${extra.length ? `; ${extra.join("; ")}` : ""}`);
+        const holding = p.shares ? `${formatUnits(p.shares, p.shareDecimals)} shares = ${value}` : "";
+        lines.push(`  ${pad(v.id, 10)} ${[holding, ...extra].filter(Boolean).join("; ")}`);
       });
       if (!held) lines.push("  nothing in any of the 16 Harbor venues");
       const m = await marketState(ctx);
@@ -360,7 +374,8 @@ export async function main(argv: string[], d: Deps): Promise<number> {
       const ctx = await context(d.client);
       const list = pos[1] ? [venueOf(pos[1])] : VENUES.filter((v) => !["vault-v2", "r25-sync", "token-only"].includes(v.kind));
       const steps: Step[] = [];
-      for (const v of list) steps.push(...claimSteps(v, from, await position(ctx, v, from)));
+      const rows = readJournal(d.home);
+      for (const v of list) steps.push(...claimSteps(v, from, await position(ctx, v, from, journalRequestIds(rows, v.address, from))));
       if (!steps.length) {
         d.out("Nothing is ready to claim.");
         return 0;

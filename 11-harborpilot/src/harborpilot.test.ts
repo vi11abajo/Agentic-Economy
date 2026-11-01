@@ -2,11 +2,11 @@
 // transactions each adapter builds, plan checking, loan math and the RPC retry.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { concat, decodeFunctionData, encodeErrorResult, keccak256, pad, parseAbi, toFunctionSelector, toHex, type Address, type Hex, type PublicClient } from "viem";
+import { concat, decodeFunctionData, encodeErrorResult, getAddress, keccak256, pad, parseAbi, toFunctionSelector, toHex, type Address, type Hex, type PublicClient } from "viem";
 import { annualize, depositSteps, VAULT, withdrawSteps, type Ctx, type Quote } from "./adapters.js";
 import { ERRORS, explainRevert, mergeOverrides, morphoCollateralOverride, rpcRequest, tokenOverride, USDC, type Step } from "./chain.js";
-import { PROBE, quoteAll } from "./cli.js";
-import { checkPlan } from "./exec.js";
+import { journalRequestIds, PROBE, quoteAll } from "./cli.js";
+import { checkPlan, requestsIn } from "./exec.js";
 import { health } from "./morpho.js";
 import { DEFAULT_CONDITIONS, route, type Conditions } from "./router.js";
 import { DEFAULTS } from "./settings.js";
@@ -195,6 +195,30 @@ describe("plan check", () => {
     const withAfter = await checkPlan(client, ME, steps);
     assert.ok(withAfter.every((c) => c.ok));
     assert.deepEqual(seen.slice(-2), [0, 1]);
+  });
+});
+
+describe("requests", () => {
+  // The Axil Pot redemption request sent on 2026-11-01 (tx 0x32f982e7...): a share transfer, then RedeemRequest id 18.
+  const AXIL = "0x921974d7b1a2dbaccaf5ba893a3a1500638cea6b" as Address;
+  const me = pad(ME.toLowerCase() as Hex);
+  const logs = [
+    { address: "0x13282289b8b241cf16eb5b8bad401c7c2fdab0f8" as Address, topics: ["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef", me, pad(AXIL)] as Hex[], data: pad("0x1b7fd136a616bdb7") },
+    { address: AXIL, topics: ["0x1fdc681a13d8c5da54e301c7ce6542dcde4581e4725043fdab2db12ddc574506", me, me, pad("0x12")] as Hex[], data: concat([me, pad("0x1b7fd136a616bdb7")]) },
+  ];
+
+  it("finds the request id in a receipt, whatever number the vault gives it", () => {
+    assert.deepEqual(requestsIn(logs), [{ vault: getAddress(AXIL), type: "redeem", id: "18", controller: ME }]);
+  });
+
+  it("gives positions the ids this wallet filed in that vault, from the journal", () => {
+    const rows = [
+      { event: "plan" },
+      { event: "sent", txs: [{ hash: "0x1" }, { hash: "0x2", requests: requestsIn(logs) }] },
+      { event: "sent", txs: [{ requests: [{ vault: AXIL, type: "redeem", id: "7", controller: "0x0000000000000000000000000000000000000001" }] }] },
+    ];
+    assert.deepEqual(journalRequestIds(rows, AXIL, ME), [18n]);
+    assert.deepEqual(journalRequestIds(rows, USDC, ME), []);
   });
 });
 

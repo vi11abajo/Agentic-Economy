@@ -63,7 +63,10 @@ the load balancer has it):
   Harbor.
 
 Positions (`position`) read the user's shares and value in every venue and, for request vaults, the ERC-7540
-pending and claimable amounts. The Morpho loan is read from `position(id, user)` and converted to debt with
+pending and claimable amounts. Some vaults read a request at id 0, others number every request (Axil Pot's
+redemption on 2026-11-01 got id 18, and id 0 reads as nothing). So when a request is sent, the id is taken from
+the `DepositRequest` / `RedeemRequest` event in the receipt and kept in the journal, and `positions` and `claim`
+read id 0 plus every id the journal holds for that vault and wallet. The Morpho loan is read from `position(id, user)` and converted to debt with
 Morpho's own rounding.
 
 ## Routing

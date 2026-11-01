@@ -324,7 +324,12 @@ export async function quote(ctx: Ctx, v: Venue, from: Address, amount: bigint): 
 }
 
 /** The user's shares, their value and open requests in one venue. */
-export async function position(ctx: Ctx, v: Venue, user: Address): Promise<Position & { claimableDepositRaw?: bigint; claimableRedeemRaw?: bigint }> {
+/**
+ * What `user` holds in a venue. Request vaults are read at request id 0 (ERC-7540 vaults that don't number
+ * requests) and at every id in `requestIds` (vaults that do, such as Axil Pot; the ids come from the receipts
+ * of requests this tool sent).
+ */
+export async function position(ctx: Ctx, v: Venue, user: Address, requestIds: bigint[] = []): Promise<Position & { claimableDepositRaw?: bigint; claimableRedeemRaw?: bigint }> {
   if (v.kind === "token-only") {
     if (v.address === zeroAddress) return { venue: v, shares: 0n, shareDecimals: 18, assets: 0 };
     const dec = await read<number>(ctx, v.address, "decimals");
@@ -336,12 +341,9 @@ export async function position(ctx: Ctx, v: Venue, user: Address): Promise<Posit
   const assets = shares ? human(await read<bigint>(ctx, v.address, "convertToAssets", [shares])) : 0;
   const p: Position & { claimableDepositRaw?: bigint; claimableRedeemRaw?: bigint } = { venue: v, shares, shareDecimals: dec, assets };
   if (v.kind !== "vault-v2" && v.kind !== "r25-sync") {
-    const [pd, cd, pr, cr] = await Promise.all([
-      maybe<bigint>(ctx, v.address, "pendingDepositRequest", [0n, user]),
-      maybe<bigint>(ctx, v.address, "claimableDepositRequest", [0n, user]),
-      maybe<bigint>(ctx, v.address, "pendingRedeemRequest", [0n, user]),
-      maybe<bigint>(ctx, v.address, "claimableRedeemRequest", [0n, user]),
-    ]);
+    const ids = [...new Set([0n, ...requestIds])];
+    const sum = async (fn: string) => (await Promise.all(ids.map((id) => maybe<bigint>(ctx, v.address, fn, [id, user])))).reduce<bigint>((a, b) => a + (b ?? 0n), 0n);
+    const [pd, cd, pr, cr] = await Promise.all([sum("pendingDepositRequest"), sum("claimableDepositRequest"), sum("pendingRedeemRequest"), sum("claimableRedeemRequest")]);
     if (pd) p.pendingDeposit = human(pd);
     if (cd) {
       p.claimableDeposit = human(cd);

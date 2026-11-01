@@ -130,6 +130,8 @@ or no key, 3 blocked (nothing sent).
 - Deposits are in USDC: every Harbor asset that takes deposits on Pharos today takes USDC.
 - Where a vault fills redemptions by hand (an operator), the time to get paid is Harbor's stated schedule, and
   the output says so.
+- Some vaults number their requests (Axil Pot does). `positions` finds those requests when harborpilot filed them
+  (the id is kept from the receipt); a numbered request filed from another app or data folder is not listed.
 - `max_usdc_per_deposit` is 100 and `max_ltv` 30% by default; `config set` changes them.
 
 ## How it's built
