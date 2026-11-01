@@ -1,0 +1,28 @@
+{
+  "name": "tabkeeper",
+  "version": "1.0.0",
+  "description": "tabkeeper: an agent buyer for x402 APIs on Pharos. Reads each price, buys only what the task needs within a budget and a per-call cap, logs every payment with its tx hash, and retries without ever paying twice",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "tabkeeper": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\"",
+    "seller": "node dist/seller/server.js"
+  },
+  "dependencies": {
+    "@x402/core": "2.29.0",
+    "@x402/evm": "2.29.0",
+    "@x402/express": "2.29.0",
+    "@x402/fetch": "2.29.0",
+    "express": "5.3.0",
+    "viem": "2.57.7",
+    "harborpilot": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "esbuild": "0.28.2"
+  }
+}

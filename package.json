@@ -17,6 +17,7 @@
     "09-preflight",
     "10-trendwatch",
     "11-harborpilot",
+    "12-tabkeeper",
     "services/prosper-monitor"
   ],
   "scripts": {
