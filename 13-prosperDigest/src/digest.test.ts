@@ -29,7 +29,7 @@ function setup(opts: { tgFails?: boolean } = {}) {
   const chain = fakeChain(logs, { head: HEAD, t0: T0 });
   const sent: string[] = [];
   const state = { tgFails: !!opts.tgFails, docFailsOnce: false };
-  const net = (async (url: string | URL) => {
+  const net = (async (url: string | URL, init?: RequestInit) => {
     const u = String(url);
     if (u.includes("telegram") && state.tgFails) return new Response(JSON.stringify({ ok: false, description: "Bad Request: chat not found" }), { status: 400 });
     if (u.endsWith("sendDocument") && state.docFailsOnce) {
@@ -37,7 +37,7 @@ function setup(opts: { tgFails?: boolean } = {}) {
       sent.push("tg:sendDocument(failed)");
       return new Response(JSON.stringify({ ok: false, description: "Internal Server Error" }), { status: 500 });
     }
-    sent.push(u.includes("telegram") ? `tg:${u.split("/").pop()}` : "discord");
+    sent.push(u.includes("telegram") ? `tg:${u.split("/").pop()}` : (init?.body as FormData).get("files[0]") ? "discord+file" : "discord");
     return new Response(JSON.stringify({ ok: true, result: {} }), { status: 200 });
   }) as Net;
   const deps: RunDeps = { chain, home, net, now: () => NOW, sleep: async () => {}, scanStart: 0 };

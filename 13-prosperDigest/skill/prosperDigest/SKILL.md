@@ -74,7 +74,7 @@ Key numbers of the period with the previous period's value and change: volume in
 into curves (buys minus sells), trades, traders and new traders (first Prosper trade ever), fees, new markets,
 markets that graduated to FaroSwap, markets on curve. Top 3 events (graduations, the largest trade, the largest
 price move, a new market taking a big share, the largest net buyer) with tx links. Trends once there are 4+
-digests. The full HTML report is attached to the message and kept in the data folder's `reports/`.
+digests. The full HTML report is attached to the Telegram message and kept in the data folder's `reports/`.
 
 Periods are whole UTC days (Monday to Sunday for the weekly default). Data comes from Pharos Chain MCP
 (mcp.pharos.xyz) at the moment the digest is built; between runs nothing runs and nothing is read.

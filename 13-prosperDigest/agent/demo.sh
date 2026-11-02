@@ -72,6 +72,12 @@ for prompt_file in prompts/*.txt; do
     ev "pause $name"
     sleep "$(cat "prompts/$name.pause")"
   fi
+  if [[ -f "prompts/$name.wait" ]]; then  # the user fills this .env line by hand; only "is it filled" is checked
+    key="$(tr -d '\r\n ' < "prompts/$name.wait")"
+    ev "wait $name"
+    until grep -qE "^[[:space:]]*${key}[[:space:]]*=[[:space:]]*[^[:space:]]" "$PROSPERDIGEST_HOME/.env" 2>/dev/null; do sleep 2; done
+    sleep 3
+  fi
   ev "type $name"
   say "$prompt"
   ev "sent $name"

@@ -29,6 +29,7 @@ describe("render", () => {
     assert.equal(p.embeds.length, 2);
     assert.equal(p.embeds[0].fields!.length, 6);
     assert.ok(JSON.stringify(p).length < 6000);
+    assert.ok(p.embeds[1].description!.includes("Top tokens: $K<T> 9,820 · $TOK1 9,520 · $TOK2 9,220"), p.embeds[1].description);
   });
 
   it("html report is standalone and explains the event rules", () => {

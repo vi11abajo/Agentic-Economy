@@ -1,1 +1,0 @@
-both, telegram and discord. i don't have a bot or a webhook yet, help me set them up

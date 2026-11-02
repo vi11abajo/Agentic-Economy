@@ -131,7 +131,8 @@ function saveReports(home: string, dg: Digest): string {
 async function send(d: RunDeps, ch: Channel, s: Secrets, dg: Digest, html: string, note: (s: string) => void): Promise<void> {
   const file = { name: `${reportName(dg)}.html`, body: html };
   const retry = { delaysMs: RETRY_DELAYS_MS, sleep: d.sleep };
-  if (ch === "discord") return withRetry(() => sendDiscord(d.net, s.discordWebhook!, discordPayload(dg), file), retry);
+  // Discord previews an attached text file as raw code, so it gets the embeds only; the HTML report stays in reports/.
+  if (ch === "discord") return withRetry(() => sendDiscord(d.net, s.discordWebhook!, discordPayload(dg)), retry);
   // Telegram takes two calls. The summary is retried on its own; once it is out, only the file is retried, and a
   // file that never goes through doesn't make the summary go out again: the digest reached the user.
   await withRetry(() => sendTelegram(d.net, s, telegramText(dg)), retry);

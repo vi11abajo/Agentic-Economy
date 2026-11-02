@@ -75,7 +75,8 @@ export function discordPayload(d: Digest): object {
         color: 0x23a55a,
         description:
           (d.events.length ? d.events.map((e, i) => `${i + 1}. ${icon(e.kind)} ${e.title}${e.tx ? ` · [tx](${txUrl(e.tx)})` : ""}`).join("\n") : `A quiet ${unit(d.days)}: nothing stood out.`) +
-          (d.trends.length ? `\n\n**Trends**\n${d.trends.map((t) => `• ${t}`).join("\n")}` : ""),
+          (d.trends.length ? `\n\n**Trends**\n${d.trends.map((t) => `• ${t}`).join("\n")}` : "") +
+          (d.tokens.length ? `\n\nTop tokens: ${d.tokens.slice(0, 3).map((t) => `$${t.symbol} ${num(t.volume)}`).join(" · ")}` : ""),
         footer: { text: `Pharos mainnet, blocks ${d.startBlock}-${d.endBlock}` },
       },
     ],

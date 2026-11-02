@@ -74,8 +74,9 @@ entry fires daily and a run with nothing new due is a no-op.
 - **Telegram**: the user's own bot. `sendMessage` with HTML formatting (the summary) and `sendDocument` (the full
   HTML report). The chat id is found by `test`: after the user sends `/start` to the bot, `getUpdates` gives the
   chat, and its id is written into `.env`.
-- **Discord**: the user's webhook. One `multipart/form-data` POST with `payload_json` (two embeds: key numbers,
-  top events and trends) and the HTML report as `files[0]`, with `?wait=true` so the answer confirms the message.
+- **Discord**: the user's webhook. One `multipart/form-data` POST with `payload_json` (two embeds: key numbers;
+  top events, trends and top tokens), with `?wait=true` so the answer confirms the message. No file: Discord shows
+  an attached HTML file as a block of raw code.
 
 Each channel is independent. A send is retried inside the run (after 1, 4 and 10 minutes); if it still fails the
 digest is marked failed for that channel and the catch-up sends it later. Telegram's two calls are retried

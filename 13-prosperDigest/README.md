@@ -20,7 +20,7 @@ How it's built, piece by piece: [ARCHITECTURE.md](ARCHITECTURE.md).
 - **Top 3 events**, scored on one scale: graduations, the largest trade, the largest price move, a new market
   taking a big share of the volume, the largest net buyer. Each event links to its tx on pharosscan.
 - **Trends** once 4 digests exist: streaks of rises or falls, and the gap to the 4-period average.
-- **The full HTML report**, attached to the message and kept in `reports/`: every number with last period's,
+- **The full HTML report**, attached to the Telegram message and kept in `reports/`: every number with last period's,
   tokens by volume with price change and phase, the largest trades, new markets and graduations, and how events
   were picked.
 
@@ -100,7 +100,7 @@ Exit codes: 0 ok, 1 chain or delivery failure, 2 setup needed.
 | Runs on a schedule, weekly by default, configurable | `schedule set`: OS scheduler entries (weekly Monday 09:00 by default, any day/time, daily, every N days) and a catch-up for missed or failed runs |
 | Key metrics with a comparison to the previous period | every number with the previous period's value and change; the previous period comes from history or is read from the chain on the first run |
 | Top 3 notable events | scored candidates, best 3, with tx links; the rules are printed in the HTML report |
-| Delivers to a real channel | the user's own Telegram bot (message + HTML report) and Discord webhook (embeds + HTML report) |
+| Delivers to a real channel | the user's own Telegram bot (message + HTML report) and Discord webhook (two embeds; Discord would show an attached HTML file as raw code, so it gets none) |
 
 ## Limits
 
