@@ -1,0 +1,21 @@
+<b>📊 Prosper Weekly · 2026-W44</b>
+<i>26 Oct - 01 Nov (UTC), vs the previous week</i>
+
+<b>Key numbers</b>
+Volume: <b>592,139 PROS</b> ▲ 1302%
+   buys 298,705 · sells 293,434
+Net into curves: <b>+5,270 PROS</b> ▲ 10715%
+Trades: <b>2,248</b> ▼ 44%
+Traders: <b>874</b> ▼ 26% · new 837
+Fees: <b>5,947 PROS</b> ▲ 1455%
+Markets: <b>+13 new</b> · <b>0 graduated</b> · 17 on curve
+
+<b>Top 3 events</b>
+1. 🐋 0xbA7E…905F bought 5,000 PROS of $ppSUA · <a href="https://www.pharosscan.xyz/tx/0xb8dc43d54b269832491fc59c014f8d949b2ed0870658212d791e2cb27ce43b41">tx</a>
+2. 🆕 New market $ppFAN took 31% of the volume
+3. 🚀 $ppSUA price +28% over the week
+
+<b>Top tokens by volume</b>
+$ppFAN 183,682 · $ppAIV 144,250 · $pant 109,928
+
+<i>Read from Pharos mainnet at 2026-11-02 13:44 UTC, blocks 21,261,543 - 21,888,627</i>
