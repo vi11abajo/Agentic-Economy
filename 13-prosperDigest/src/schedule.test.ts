@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { cronText, launcher, schedulerCommands } from "./schedule.js";
+import { cronText, launcher, schedulerCommands, showSchedule } from "./schedule.js";
 import type { Schedule } from "./store.js";
 
 const weekly: Schedule = { days: 7, weekday: 1, time: "09:00", tz: "UTC", anchor: "2026-01-05" };
@@ -34,6 +34,15 @@ describe("scheduler", () => {
     assert.ok(plists[0].includes("<key>Weekday</key><integer>1</integer>"));
     assert.ok(plists[0].includes("<key>Hour</key><integer>9</integer>"));
     assert.ok(plists[1].includes("<key>StartInterval</key><integer>21600</integer>"));
+  });
+
+  it("windows: shows installed tasks whatever the system language", () => {
+    const exec = ((_: string, args: string[]) => {
+      if (args.includes("prosperDigest")) return '"\\prosperDigest","09.11.2026 09:00:00","\x83\xae\xe2\xae\xa2\xae"\r\n';
+      throw new Error("ERROR: The system cannot find the file specified.");
+    }) as never;
+    const out = showSchedule("win32", "C:\\Users\\u", exec);
+    assert.equal(out, "prosperDigest: next run 09.11.2026 09:00:00\nprosperDigest-catchup: not installed");
   });
 
   it("the launcher quotes paths with spaces and !", () => {

@@ -111,8 +111,11 @@ export function showSchedule(platform: NodeJS.Platform, userHome: string, exec: 
       return ["prosperDigest", "prosperDigest-catchup"]
         .map((tn) => {
           try {
-            const out = String(exec("schtasks", ["/Query", "/TN", tn, "/FO", "LIST"], { encoding: "utf8", stdio: "pipe" }));
-            return out.split(/\r?\n/).filter((l) => /TaskName|Next Run Time|Status/.test(l)).join("\n");
+            // CSV without a header: the same columns (name, next run, status) whatever the Windows language. Only the
+            // first two are shown; the status text comes in the console code page and is not needed.
+            const out = String(exec("schtasks", ["/Query", "/TN", tn, "/FO", "CSV", "/NH"], { encoding: "utf8", stdio: "pipe" }));
+            const next = out.split(/\r?\n/).find((l) => l.trim())?.split('","')[1];
+            return `${tn}: ${next ? `next run ${next}` : "installed"}`;
           } catch {
             return `${tn}: not installed`;
           }
