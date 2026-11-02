@@ -3,7 +3,8 @@ import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { initHome, parseArgs, parseScheduleArgs, statusText } from "./cli.js";
+import { initHome, parseArgs, parseScheduleArgs, scanStartMessage, statusText } from "./cli.js";
+import { emptyRegistry } from "./scan.js";
 import { DEFAULT_CONFIG, saveConfig } from "./store.js";
 
 describe("cli", () => {
@@ -30,6 +31,12 @@ describe("cli", () => {
     writeFileSync(a.envPath, readFileSync(a.envPath, "utf8").replace("PROSPERDIGEST_DISCORD_WEBHOOK=", "PROSPERDIGEST_DISCORD_WEBHOOK=https://d/1/t"));
     assert.equal(initHome(h, "node", "/x/prosperDigest.mjs", "linux").envCreated, false);
     assert.ok(readFileSync(a.envPath, "utf8").includes("https://d/1/t"));
+  });
+
+  it("init tells a first scan from a catch-up of an existing market list", () => {
+    assert.match(scanStartMessage(emptyRegistry(), 1), /every Prosper market since block 17,515,618 and takes about 40 minutes/);
+    const reg = { ...emptyRegistry(), scannedTo: 21_933_123, markets: { a: {} as never, b: {} as never } };
+    assert.equal(scanStartMessage(reg, 1), "market scan: started in the background (pid 1); 2 markets are already known up to block 21,933,123, it only catches up on the blocks since. `prosperDigest status` shows progress.");
   });
 
   it("status says whether a line is filled, never its value", () => {

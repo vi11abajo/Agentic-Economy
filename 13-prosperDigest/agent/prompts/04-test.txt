@@ -1,1 +1,1 @@
-added the webhook to the env, test it
+ok, i made the webhook and pasted it into the env. test it

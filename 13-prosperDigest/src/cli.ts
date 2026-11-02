@@ -14,7 +14,8 @@ import { run, type RunResult } from "./digest.js";
 import { num } from "./format.js";
 import { PharosMcp } from "./mcp.js";
 import { anchorFor, dueAt, lastClosedPeriod } from "./period.js";
-import { extendRegistry, loadRegistry } from "./scan.js";
+import { extendRegistry, loadRegistry, type Registry } from "./scan.js";
+import { SCAN_START } from "./prosper.js";
 import { applySchedule, launcher, showSchedule } from "./schedule.js";
 import { acquireLock, lockOwner, releaseLock } from "./lock.js";
 import { DEFAULT_CONFIG, ENV_KEYS, ensureEnv, homeDir, loadConfig, log, readEnv, readHistory, saveConfig, setEnvValue } from "./store.js";
@@ -84,7 +85,14 @@ export function initHome(home: string, node: string, script: string, platform: N
   return { envPath: env.path, envCreated: env.created };
 }
 
-const fmtTime = (t: number) => new Date(t * 1000).toISOString().slice(0, 16).replace("T", " ") + " UTC";
+export function scanStartMessage(reg: Registry, pid: number): string {
+  const head = `market scan: started in the background (pid ${pid}); `;
+  const tail = " `prosperDigest status` shows progress.";
+  if (reg.scannedTo < SCAN_START) return `${head}the first one reads every Prosper market since block ${num(SCAN_START)} and takes about 40 minutes.${tail}`;
+  return `${head}${Object.keys(reg.markets).length} markets are already known up to block ${num(reg.scannedTo)}, it only catches up on the blocks since.${tail}`;
+}
+
+const fmtTime =(t: number) => new Date(t * 1000).toISOString().slice(0, 16).replace("T", " ") + " UTC";
 
 export function statusText(home: string, o: { head?: number; nowSec: number }): string {
   const c = loadConfig(home), s = readEnv(home), reg = loadRegistry(home);
@@ -157,7 +165,7 @@ async function main(argv: string[]): Promise<number> {
       else {
         const child = spawn(process.execPath, [script, "scan", "--home", home], { detached: true, stdio: "ignore", windowsHide: true });
         child.unref();
-        say(`market scan: started in the background (pid ${child.pid}); the first one reads every Prosper market since block 17,515,618 and takes about 40 minutes. \`prosperDigest status\` shows progress.`);
+        say(scanStartMessage(loadRegistry(home), child.pid ?? 0));
       }
       return 0;
     }
