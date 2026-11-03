@@ -4,6 +4,7 @@ import { writeFileSync } from "node:fs";
 import { parseEther } from "viem";
 import { rpcChain, taped } from "../dist/chain.js";
 import { quoteCurve, quotePool, resolveVenue } from "../dist/market.js";
+import { recentWallets } from "../dist/recipients.js";
 import { probeSwap } from "../dist/testkit.js";
 
 const FIVE = parseEther("5");
@@ -16,13 +17,18 @@ const scenes = {
     console.log("pMusk", musk.phase, await quoteCurve(chain, musk, FIVE));
     await resolveVenue(chain, "pNOPE").catch((e) => console.log("pNOPE", e.message));
   },
+  async recipients(chain, extra) {
+    extra.exclude = ["0x4da5c63c10b505e638b5bf5226df15a1c8cb804a"];
+    for (const w of await recentWallets(chain, 10, { exclude: extra.exclude })) console.log(w.address, w.block);
+  },
 };
 
 const only = process.argv[2];
 for (const [name, scene] of Object.entries(scenes)) {
   if (only && only !== name) continue;
   const tape = {};
-  await scene(taped(rpcChain(), tape));
-  writeFileSync(new URL(`./tapes/${name}.json`, import.meta.url), JSON.stringify({ tape }, null, 1));
+  const extra = {};
+  await scene(taped(rpcChain(), tape), extra);
+  writeFileSync(new URL(`./tapes/${name}.json`, import.meta.url), JSON.stringify({ ...extra, tape }, (_, v) => (typeof v === "bigint" ? `${v}n` : v), 1));
   console.log(name, "->", Object.keys(tape).length, "answers");
 }
