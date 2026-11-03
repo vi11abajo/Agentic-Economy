@@ -86,3 +86,11 @@ describe("check: three Prosper buys", () => {
     assert.match(text, /ready to send/);
   });
 });
+
+describe("check: PROS to a contract", () => {
+  it("refuses, because WPROS would book the PROS for Multicall3, not for anyone the user meant", async () => {
+    const r = await replay("pros-to-contract");
+    assert.equal(r.sendable, false);
+    assert.ok(r.refusals.some((x) => /is a contract/.test(x)), r.refusals.join("; "));
+  });
+});
