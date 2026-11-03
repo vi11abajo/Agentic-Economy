@@ -1,0 +1,22 @@
+{
+  "name": "onego",
+  "version": "1.0.0",
+  "description": "onego: several actions on Pharos mainnet in one transaction from a plain wallet, without giving anyone rights to it",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "onego": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
