@@ -51,6 +51,8 @@ pays); never guess an address.
   delegated through EIP-7702.
 - Amounts are in human units ("0.00001" USDC, "5" PROS). USDC has 6 decimals: smaller amounts are refused, not
   rounded.
+- PROS goes to plain wallets only. A contract may book the PROS for whoever called it, and inside the batch
+  that's Multicall3, so onego refuses PROS sends to any address with code.
 - Things onego refuses, and why (say it in those words): selling a token, swapping USDC or any ERC-20, sending
   p-tokens. All of them need the wallet to approve someone first, and onego never gives anyone rights to it.
 
@@ -65,8 +67,12 @@ pays); never guess an address.
    - every warning (a Prosper curve that failed its goal, a curve taking less PROS than asked);
    - the verdict. If it's NOT sendable, explain each reason and how to fix the plan.
 2. Run `send` only when the user tells you to send, in that turn. Never on your own.
-3. After `send`, give the transaction link and the per-action outcome. If a USDC payment failed inside the
-   batch, its signature stays valid until the time printed; offer `onego cancel <result file>`.
+3. After `send`, give the transaction link and the per-action outcome (amounts are read from the chain after
+   mining). If a USDC payment failed inside the batch, or a send was refused after its check, the signatures
+   stay valid until the time printed; offer `onego cancel <result file>`.
+4. If `send` exits with code 1 (a network error), never run it again straight away: it prints the hash and
+   saves it under `sends/` before broadcasting. Look the hash up on pharosscan first; sending again could pay
+   everyone twice.
 
 ## Failure rules (what the user should know)
 

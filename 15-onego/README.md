@@ -19,7 +19,7 @@ trusting anyone:
 
 | Action | Inside the one transaction | Why nobody gets rights |
 |---|---|---|
-| Send PROS | Multicall3 calls the recipient with `value` | the PROS rides along with the call |
+| Send PROS (to plain wallets) | Multicall3 calls the recipient with `value` | the PROS rides along with the call |
 | Send USDC | `USDC.transferWithAuthorization` (EIP-3009), one off-chain signature per payee | each signature can only pay that amount to that address, for 15 minutes |
 | Buy a graduated Prosper token | wrap PROS to WPROS, pay the V2 pool, `pair.swap(out, to = wallet)` | Multicall3 only spends the WPROS it minted a moment earlier; tokens go straight to the wallet |
 | Buy a Prosper token on its curve | `market.buyNative(minOut, deadline, recipient = wallet)` | the market pays the wallet directly (the router's buy would pay Multicall3, so onego skips it) |
@@ -59,7 +59,10 @@ Proof of the live runs: [Proof](#proof).
 - When a PROS step fails, Multicall3 only says "call failed": onego reruns the simulation with every step
   allowed to fail to find which one, and why.
 - Nothing is sent unless a fresh check right before signing passes, so a moved price or a spent balance stops
-  it first.
+  it first. That check shows the real USDC signatures to the node, so a refused send lists them for `cancel`
+  too.
+- The hash and every signature are saved to disk before broadcasting, and after mining onego reads the
+  balances again: the amounts it reports are the chain's, and anything Multicall3 gained is shouted about.
 
 Example from the tapes: with 0.000055 USDC for ten payments of 0.00001, the first five are paid and the last
 five fail with `ERC20: transfer amount exceeds balance`; the verdict is NOT sendable and says why.
@@ -88,6 +91,8 @@ never takes a key anywhere else and never prints it.
 
 - Only what needs no approve: PROS sends, USDC sends (EIP-3009), Prosper buys with PROS. Selling, swapping an
   ERC-20, or sending p-tokens would need the wallet to approve someone, so onego refuses them and says why.
+- PROS goes to plain wallets only: a contract (WPROS, for one) may credit the PROS to whoever called it, which
+  inside the batch is Multicall3. onego refuses PROS sends to any address with code.
 - A curve market onego doesn't know (only pMusk is in its book) needs its address in the plan.
 - One batch must fit one transaction: onego refuses above 30,000,000 gas rather than split it.
 
@@ -97,8 +102,9 @@ never takes a key anywhere else and never prints it.
 npm run build && npm test
 ```
 
-50 tests, offline. The chain-facing ones replay tapes recorded from mainnet by `node test/record-tapes.mjs`
-(after a build): quotes, recent wallets, the airdrop, the buys, and both with too little money.
+63 tests, offline. The chain-facing ones replay tapes recorded from mainnet by `node test/record-tapes.mjs`
+(after a build): quotes, recent wallets, the airdrop, the buys, both with too little money, and PROS sent to
+a contract (refused).
 
 ## Proof
 
