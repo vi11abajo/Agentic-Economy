@@ -2,7 +2,7 @@
 // reads the outcome. The check itself is tested on mainnet tapes in check.test.ts.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { decodeFunctionData, encodeFunctionResult, getAddress, parseTransaction, type Hex } from "viem";
+import { decodeFunctionData, encodeFunctionResult, getAddress, keccak256, parseTransaction, toHex, type Address, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Authorization, Step } from "./batch.js";
 import { MULTICALL3, USDC, multicall3Abi, usdcAuthAbi } from "./book.js";
@@ -15,30 +15,47 @@ const A = getAddress("0x64f26258f839af800b2ac9e3ead0ae8e7c2e0f7c");
 const B = getAddress("0xc5f6fe56976e0a55aed6c0e08951a8a2f8980f45");
 const plan = { wallet: account.address, actions: [{ kind: "send_usdc" as const, to: A, amount: "1" }, { kind: "send_usdc" as const, to: B, amount: "1" }] };
 const auth = (action: number, to: typeof A, n: number): Authorization => ({ action, to, value: 1_000_000n, validBefore: 2_000_000_000n, nonce: `0x${n.toString(16).padStart(64, "0")}`, signature: "0x" });
+const readBack = (holder: Address, asset: Address | "PROS", symbol: string, decimals: number): Step => ({ action: -1, label: "", reads: { holder, asset, symbol, decimals }, call: { target: MULTICALL3, allowFailure: true, value: 0n, callData: "0x" } });
 const step = (action: number): Step => ({ action, label: `pay ${action}`, call: { target: USDC, allowFailure: true, value: 0n, callData: "0x" } });
 
 function fakeCheck(sendable: boolean): () => Promise<CheckReport & { built: Built }> {
   return async () => ({
     wallet: account.address,
-    results: plan.actions.map((a, i) => ({ action: i, label: `send 1 USDC to ${a.to}`, ok: true })),
+    results: plan.actions.map((a, i) => ({ action: i, label: `send 1 USDC to ${a.to}`, ok: true, got: { symbol: "USDC", amount: 999n, decimals: 6 } })), // a forecast the chain will correct
     leftovers: [],
     batch: { txs: 1, gas: 200_000n, feePros: 0n, value: 0n },
     oneByOne: { txs: 2, gas: 150_000n, feePros: 0n },
     warnings: [],
     sendable,
     refusals: sendable ? [] : ["action 1 would fail: price moved"],
-    built: { steps: [step(0), step(1)], readBacks: [], value: 0n, authorizations: [auth(0, A, 1), auth(1, B, 2)], overrides: {} },
+    built: {
+      steps: [step(0), step(1)],
+      readBacks: [readBack(B, USDC, "USDC", 6), readBack(MULTICALL3, "PROS", "PROS", 18)],
+      value: 0n,
+      authorizations: [auth(0, A, 1), auth(1, B, 2)],
+      overrides: {},
+      before: new Map([[`${B}|${USDC}`.toLowerCase(), 0n], [`${MULTICALL3}|PROS`.toLowerCase(), 0n]]),
+    },
   });
 }
 
-function fakeChain(opts: { receipt: Receipt["status"]; used: Set<string> }) {
+function fakeChain(opts: { receipt: Receipt["status"]; used: Set<string>; after?: bigint[]; sendFails?: boolean }) {
   const sent: Hex[] = [];
   const chain = {
     gasPrice: async () => 10_000_000_000n,
     nonce: async () => 7,
-    sendRaw: async (tx: Hex) => (sent.push(tx), "0xabc" as Hex),
+    sendRaw: async (tx: Hex) => {
+      sent.push(tx);
+      if (opts.sendFails) throw new Error("fetch failed");
+      return keccak256(tx);
+    },
     receipt: async () => ({ status: opts.receipt, gasUsed: 1n, blockNumber: 1n, logs: [] }),
     call: async (tx: { data: Hex }) => {
+      if (tx.data.startsWith("0x174dea71")) {
+        // the read-backs after mining: B's USDC, then Multicall3's PROS
+        const after = opts.after ?? [1_000_000n, 0n];
+        return { ok: true, data: encodeFunctionResult({ abi: multicall3Abi, functionName: "aggregate3Value", result: after.map((v) => ({ success: true, returnData: toHex(v, { size: 32 }) })) }) };
+      }
       const d = decodeFunctionData({ abi: usdcAuthAbi, data: tx.data });
       const used = d.functionName === "authorizationState" && opts.used.has(String(d.args[1]));
       return { ok: true, data: encodeFunctionResult({ abi: usdcAuthAbi, functionName: "authorizationState", result: used }) };
@@ -94,9 +111,37 @@ describe("send", () => {
   });
 });
 
+describe("send, the review's findings", () => {
+  it("hands back the signatures a refused send already showed the node", async () => {
+    const { chain } = fakeChain({ receipt: "success", used: new Set() });
+    const r = await send(chain, plan, account, { ...opts, check: fakeCheck(false) });
+    assert.equal(r.unusedAuthorizations.length, 2);
+  });
+
+  it("writes the hash down before broadcasting, so a network error can't lose it", async () => {
+    const { chain, sent } = fakeChain({ receipt: "success", used: new Set(), sendFails: true });
+    const noted: Hex[] = [];
+    await assert.rejects(send(chain, plan, account, { ...opts, check: fakeCheck(true), onSigned: async (rec) => void noted.push(rec.hash) }), (err: Error) => err.message.includes(noted[0]));
+    assert.equal(noted[0], keccak256(sent[0]));
+  });
+
+  it("reports what the chain says after mining, and shouts if Multicall3 kept something", async () => {
+    const all = new Set([auth(0, A, 1).nonce, auth(1, B, 2).nonce]);
+    const { chain } = fakeChain({ receipt: "success", used: all, after: [1_000_000n, 5n] });
+    const r = await send(chain, plan, account, { ...opts, check: fakeCheck(true) });
+    assert.equal(r.results[1].got?.amount, 1_000_000n);
+    assert.deepEqual(r.leftovers, [{ symbol: "PROS", amount: 5n }]);
+  });
+});
+
 describe("cancel", () => {
+  it("doesn't claim success when the cancel transaction reverted", async () => {
+    const { chain } = fakeChain({ receipt: "reverted", used: new Set() });
+    await assert.rejects(cancel(chain, account, [auth(1, B, 2)], { sleep: async () => {} }), /revert/);
+  });
+
   it("voids unused signatures in one transaction, signed by the wallet", async () => {
-    const { chain, sent } = fakeChain({ receipt: "success", used: new Set() });
+    const { chain, sent } = fakeChain({ receipt: "success", used: new Set([auth(1, B, 2).nonce]) });
     await cancel(chain, account, [auth(1, B, 2)], { sleep: async () => {} });
     const tx = parseTransaction(sent[0]);
     const outer = decodeFunctionData({ abi: multicall3Abi, data: tx.data! });

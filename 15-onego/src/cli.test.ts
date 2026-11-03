@@ -50,4 +50,10 @@ describe("cli", () => {
     assert.equal(r.code, 2);
     assert.doesNotMatch(r.text, /59c6995e/);
   });
+
+  it("doesn't print a key back even when it's passed where the plan file should be", async () => {
+    const r = await run(["check", "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"]);
+    assert.equal(r.code, 2);
+    assert.doesNotMatch(r.text, /59c6995e/);
+  });
 });

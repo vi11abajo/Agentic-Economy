@@ -52,7 +52,9 @@ const randomNonces = (): ((i: number) => Hex) => {
 
 function readPlan(file: string | undefined, print: Deps["print"]): Plan | null {
   if (!file || !existsSync(file)) {
-    print(`no plan file${file ? ` at ${file}` : ""}; see onego --help`);
+    // Never echo something that looks like a key, even if it landed where the plan file should be.
+    const shown = file && /[0-9a-fA-F]{64}/.test(file) ? "(that looks like a private key: it's now exposed, move the funds to a fresh wallet)" : file;
+    print(`no plan file${shown ? ` at ${shown}` : ""}; see onego --help`);
     return null;
   }
   let json: unknown;
@@ -135,15 +137,24 @@ export async function main(argv: string[], deps: Deps): Promise<number> {
     }
     const plan = readPlan(arg, print);
     if (!plan) return 2;
-    const r = await send(chain, plan, account, { now, nonceFor: deps.nonceFor ?? randomNonces() });
     const sendsDir = join(home, "sends");
     mkdirSync(sendsDir, { recursive: true });
+    // Written the moment the transaction is signed, before it leaves: if anything breaks after that, the hash and
+    // every signature are on disk, so nobody has to guess whether to send again.
+    const onSigned = async (s: { hash: Hex; authorizations: Authorization[] }) => {
+      writeFileSync(join(sendsDir, `${s.hash}.json`), JSON.stringify({ hash: s.hash, status: "signed, not confirmed yet", unusedAuthorizations: s.authorizations }, big, 2));
+      print(`signed ${s.hash}, sending...`);
+    };
+    const r = await send(chain, plan, account, { now, nonceFor: deps.nonceFor ?? randomNonces(), onSigned });
     const resultFile = join(sendsDir, `${r.hash ?? `refused-${now}`}.json`);
-    writeFileSync(resultFile, JSON.stringify({ hash: r.hash, status: r.status, results: r.results, unusedAuthorizations: r.unusedAuthorizations, refusals: r.refusals }, big, 2));
+    writeFileSync(resultFile, JSON.stringify({ hash: r.hash, status: r.status, results: r.results, unusedAuthorizations: r.unusedAuthorizations, leftovers: r.leftovers, refusals: r.refusals }, big, 2));
     if (json) print(JSON.stringify({ ...r, report: undefined, resultFile }, big, 2));
     else {
-      if (r.status === "refused") print(`not sent:\n${r.refusals.map((x) => `  - ${x}`).join("\n")}`);
-      else {
+      if (r.status === "refused") {
+        print(`not sent:\n${r.refusals.map((x) => `  - ${x}`).join("\n")}`);
+        if (r.unusedAuthorizations.length) print(`the check showed ${r.unusedAuthorizations.length} signed USDC payment(s) to the node; void them with: onego cancel ${displayPath(resultFile)}`);
+      } else {
+        if (r.leftovers.length) print(`WARNING: Multicall3 now holds ${r.leftovers.map((l) => `${fmt(l.amount, 18)} ${l.symbol}`).join(", ")} from this transaction`);
         print(`${r.status === "sent_ok" ? "sent" : "REVERTED"}: https://www.pharosscan.xyz/tx/${r.hash}`);
         for (const x of r.results) print(`${String(x.action + 1).padStart(3)}  ${x.label}  ${x.ok ? `ok${x.got ? `, ${fmt(x.got.amount, x.got.decimals)} ${x.got.symbol}` : ""}` : `FAILED: ${x.reason}`}`);
         if (r.unusedAuthorizations.length)
