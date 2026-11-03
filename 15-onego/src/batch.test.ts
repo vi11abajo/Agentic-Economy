@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { decodeFunctionData, getAddress, parseEther, recoverTypedDataAddress, type Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { buildBatch, type Step } from "./batch.js";
+import { buildBatch, sentData, type Step } from "./batch.js";
 import { MULTICALL3, USDC, USDC_DOMAIN, multicall3Abi, pairAbi } from "./book.js";
 import type { Venue } from "./market.js";
 import type { Plan } from "./plan.js";
@@ -84,5 +84,13 @@ describe("buildBatch", () => {
     assert.ok(eth);
     assert.equal(decodeFunctionData({ abi: multicall3Abi, data: eth.call.callData }).functionName, "getEthBalance");
     assert.ok(b.readBacks.every((r) => r.call.allowFailure && r.call.value === 0n));
+  });
+});
+
+describe("sentData", () => {
+  it("is what goes on chain: the actions only, no read-backs, so the gas we quote is the gas we pay", async () => {
+    const b = await built();
+    const calls = decodeFunctionData({ abi: multicall3Abi, data: sentData(b) }).args[0] as unknown as unknown[];
+    assert.equal(calls.length, b.steps.length);
   });
 });

@@ -5,7 +5,29 @@ import { parseEther } from "viem";
 import { rpcChain, taped } from "../dist/chain.js";
 import { quoteCurve, quotePool, resolveVenue } from "../dist/market.js";
 import { recentWallets } from "../dist/recipients.js";
-import { probeSwap } from "../dist/testkit.js";
+import { check } from "../dist/check.js";
+import { parsePlan } from "../dist/plan.js";
+import { renderCheck } from "../dist/report.js";
+import { SIM_KEY, nonceFor, probeSwap } from "../dist/testkit.js";
+
+const WALLET = "0x4da5c63c10b505e638b5bf5226df15a1c8cb804a";
+const now = BigInt(Math.floor(Date.now() / 1000));
+// A check scene: saves the plan, the clock and the "what if" balances next to the tape, prints the report.
+async function checkScene(chain, extra, raw, whatIf) {
+  const parsed = parsePlan(raw); // the same road the CLI takes, addresses checksummed and all
+  if (!parsed.plan) throw new Error(parsed.problems.join("; "));
+  const plan = parsed.plan;
+  Object.assign(extra, { plan, now, whatIf });
+  console.log(renderCheck(await check(chain, plan, { now, simKey: SIM_KEY, nonceFor, whatIf })));
+}
+let airdropPlan;
+async function airdrop(chain) {
+  if (airdropPlan) return airdropPlan;
+  const wallets = await recentWallets(rpcChain(), 10, { exclude: [WALLET] });
+  airdropPlan = { wallet: WALLET, actions: wallets.map((w) => ({ kind: "send_usdc", to: w.address, amount: "0.00001" })) };
+  return airdropPlan;
+}
+const buysPlan = { wallet: WALLET, actions: ["pTACO", "pCARR", "pMusk"].map((token) => ({ kind: "buy", token, pros: "5" })) };
 
 const FIVE = parseEther("5");
 const scenes = {
@@ -20,6 +42,18 @@ const scenes = {
   async recipients(chain, extra) {
     extra.exclude = ["0x4da5c63c10b505e638b5bf5226df15a1c8cb804a"];
     for (const w of await recentWallets(chain, 10, { exclude: extra.exclude })) console.log(w.address, w.block);
+  },
+  async airdrop(chain, extra) {
+    await checkScene(chain, extra, await airdrop(chain), { pros: parseEther("1"), usdc: 1_000_000n });
+  },
+  async "airdrop-short"(chain, extra) {
+    await checkScene(chain, extra, await airdrop(chain), { pros: parseEther("1"), usdc: 55n });
+  },
+  async buys(chain, extra) {
+    await checkScene(chain, extra, buysPlan, { pros: parseEther("100") });
+  },
+  async "buys-short"(chain, extra) {
+    await checkScene(chain, extra, buysPlan, { pros: parseEther("10") });
   },
 };
 
