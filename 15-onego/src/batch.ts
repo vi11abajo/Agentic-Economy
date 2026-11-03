@@ -94,3 +94,6 @@ export async function buildBatch(input: BatchInput): Promise<{ steps: Step[]; re
 }
 
 export const encodeBatch = (steps: Step[]): Hex => encodeFunctionData({ abi: multicall3Abi, functionName: "aggregate3Value", args: [steps.map((s) => s.call)] });
+
+/** The calldata that really goes on chain: the actions only. Read-backs are for simulations, not worth paying for. */
+export const sentData = (b: { steps: Step[] }): Hex => encodeBatch(b.steps);

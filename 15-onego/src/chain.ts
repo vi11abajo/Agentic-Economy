@@ -3,7 +3,7 @@
 // and fromTape replays those answers so tests run offline against what mainnet really said.
 import { encodeAbiParameters, keccak256, type Address, type Hex } from "viem";
 
-export type Overrides = Record<Address, { balance?: Hex; stateDiff?: Record<Hex, Hex> }>;
+export type Overrides = Record<Address, { balance?: Hex; code?: Hex; stateDiff?: Record<Hex, Hex> }>;
 export type TxReq = { from?: Address; to: Address; data: Hex; value?: bigint };
 export type CallResult = { ok: true; data: Hex } | { ok: false; revertData: Hex; message: string };
 export type Receipt = { status: "success" | "reverted"; gasUsed: bigint; blockNumber: bigint; logs: Array<{ address: Address; topics: Hex[]; data: Hex }> };
