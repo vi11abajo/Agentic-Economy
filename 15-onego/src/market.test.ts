@@ -3,8 +3,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { parseEther } from "viem";
-import { fromTape } from "./chain.js";
+import { decodeFunctionData, encodeFunctionResult, parseEther } from "viem";
+import { erc20Abi, marketAbi } from "./book.js";
+import { fromTape, type Chain } from "./chain.js";
 import { quoteCurve, quotePool, resolveVenue } from "./market.js";
 import { probeSwap } from "./testkit.js";
 
@@ -48,5 +49,20 @@ describe("quotes", () => {
     const q = await quoteCurve(chain, v, FIVE);
     assert.equal(q.usedGross, FIVE);
     assert.ok(q.out > 0n);
+  });
+});
+
+describe("a market given in the plan", () => {
+  it("must sell the token the plan asked for", async () => {
+    const other = "0x52ACdEb49056518578c7af788aE2C367132E2DB5";
+    // A made-up market that says it sells pTACO while the plan wants pMusk's address.
+    const fake = {
+      call: async (tx: { to: string; data: `0x${string}` }) => {
+        const { functionName } = decodeFunctionData({ abi: [...marketAbi, ...erc20Abi], data: tx.data });
+        const result = functionName === "pToken" ? other : functionName === "phase" ? 1 : functionName === "endsAt" ? 0n : "TACO";
+        return { ok: true, data: encodeFunctionResult({ abi: [...marketAbi, ...erc20Abi], functionName, result } as never) };
+      },
+    } as unknown as Chain;
+    await assert.rejects(resolveVenue(fake, "0xE318ac4113324841265d270Dc2393f1Bf742A7f8", "0x5c3e0e4b1be0851dcbc5f6a5cc04d799acbe8b7f"), /sells .*not/);
   });
 });

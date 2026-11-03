@@ -52,6 +52,10 @@ const scenes = {
   async buys(chain, extra) {
     await checkScene(chain, extra, buysPlan, { pros: parseEther("100") });
   },
+  // The final review's critical case: WPROS credits whoever sends it PROS, and inside the batch that's Multicall3.
+  async "pros-to-contract"(chain, extra) {
+    await checkScene(chain, extra, { wallet: WALLET, actions: [{ kind: "send_pros", to: "0x52C48d4213107b20bC583832b0d951FB9CA8F0B0", amount: "1" }] }, { pros: parseEther("10") });
+  },
   async "buys-short"(chain, extra) {
     await checkScene(chain, extra, buysPlan, { pros: parseEther("10") });
   },

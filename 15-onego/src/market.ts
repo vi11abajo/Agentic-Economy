@@ -32,6 +32,9 @@ export async function resolveVenue(chain: Chain, token: string, market?: Address
       read<bigint>(chain, curve.market, marketAbi, "endsAt"),
     ]);
     const symbol = await read<string>(chain, tokenAddr, erc20Abi, "symbol");
+    // A market from the plan has to sell what the plan asked for, or the PROS buys something else (or nothing).
+    const asked = isAddress(token) ? same(token, tokenAddr) : same(token, symbol) || same(token, `p${symbol}`) || CURVE_MARKETS[token]?.token.toLowerCase() === tokenAddr.toLowerCase();
+    if (!asked) throw new Error(`the market ${curve.market} sells ${symbol} (${tokenAddr}), not ${token}`);
     return { kind: "curve", symbol: Object.keys(CURVE_MARKETS).find((s) => same(CURVE_MARKETS[s].token, tokenAddr)) ?? symbol, token: getAddress(tokenAddr), market: getAddress(curve.market), phase: Number(phase), endsAt, failed: Number(phase) === FAILED_PHASE };
   }
 

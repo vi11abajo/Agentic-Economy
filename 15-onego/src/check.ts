@@ -9,6 +9,10 @@ import { mapSlot, type Chain, type Overrides } from "./chain.js";
 import { oneByOne } from "./baseline.js";
 import { quoteCurve, quotePool, resolveVenue, type Venue } from "./market.js";
 import { toUnits, type Plan } from "./plan.js";
+import { fmt } from "./format.js";
+import { GAS_CAP, gatekeep, multicallKeeps } from "./verdict.js";
+
+export { fmt, GAS_CAP };
 
 export type ActionResult = { action: number; label: string; ok: boolean; reason?: string; got?: { symbol: string; amount: bigint; decimals: number } };
 export type CheckReport = {
@@ -28,9 +32,8 @@ export type CheckOptions = {
   signer?: LocalAccount; // the real wallet, when send() checks what it's about to broadcast
   whatIf?: { pros?: bigint; usdc?: bigint };
 };
-export type Built = { steps: Step[]; readBacks: Step[]; value: bigint; authorizations: Authorization[]; overrides: Overrides };
+export type Built = { steps: Step[]; readBacks: Step[]; value: bigint; authorizations: Authorization[]; overrides: Overrides; before: Map<string, bigint> };
 
-export const GAS_CAP = 30_000_000n; // far below the 1e9 block limit; a batch is never split, so it must fit
 const PLENTY = 10n ** 27n; // for gas estimates only: gas doesn't depend on how rich the sender is
 
 /** Turns revert bytes into words: Error(string), Panic, or at least the custom error's selector. */
@@ -139,20 +142,30 @@ export async function check(chain: Chain, plan: Plan, opts: CheckOptions): Promi
     return { action: i, label, ok: true, got: { symbol: venues.get(i)!.symbol, amount: quotes.get(i)!.out, decimals: 18 } };
   });
 
-  // Several buys of one token share a balance, so check the total matches what the quotes promised.
-  const promised = new Map<string, { symbol: string; amount: bigint; token: Address }>();
+  // What the wallet really gets from the buys, measured. Several buys of one token share a balance, so the check
+  // is per token: the total must reach what the quotes promised (an exact-out swap gives exactly that).
+  const promised = new Map<string, { symbol: string; amount: bigint; token: Address; actions: number[] }>();
   for (const [i, v] of venues) {
     if (!results[i].ok) continue;
-    const p = promised.get(v.token) ?? { symbol: v.symbol, amount: 0n, token: v.token };
+    const p = promised.get(v.token) ?? { symbol: v.symbol, amount: 0n, token: v.token, actions: [] };
     p.amount += quotes.get(i)!.out;
+    p.actions.push(i);
     promised.set(v.token, p);
   }
-  for (const p of promised.values()) if (!wholeRevert && delta(plan.wallet, p.token) < p.amount) warnings.push(`${p.symbol}: the wallet would get ${fmt(delta(plan.wallet, p.token), 18)}, less than the ${fmt(p.amount, 18)} quoted`);
+  const shortfalls: Array<{ symbol: string; got: bigint; promised: bigint }> = [];
+  for (const p of promised.values()) {
+    if (wholeRevert) continue;
+    const got = delta(plan.wallet, p.token);
+    if (got < p.amount) shortfalls.push({ symbol: p.symbol, got, promised: p.amount });
+    if (p.actions.length === 1) results[p.actions[0]].got = { symbol: p.symbol, amount: got, decimals: 18 };
+  }
 
-  const leftovers = built.readBacks
-    .filter((rb) => rb.reads!.holder.toLowerCase() === MULTICALL3.toLowerCase())
-    .map((rb) => ({ symbol: rb.reads!.symbol, amount: afterOf.get(`${rb.reads!.holder}|${rb.reads!.asset}`.toLowerCase()) ?? 0n }))
-    .filter((l) => l.amount > 0n && !wholeRevert);
+  const keeps = wholeRevert ? [] : multicallKeeps(built.readBacks, beforeOf, afterOf);
+  const leftovers = keeps;
+
+  // PROS to a contract: it may credit whoever called it, which inside the batch is Multicall3.
+  const contractRecipients: Address[] = [];
+  for (const a of plan.actions) if (a.kind === "send_pros" && (await chain.code(a.to)) !== "0x") contractRecipients.push(a.to);
 
   // 5. Gas: the batch vs the same actions one transaction at a time.
   const generous = mergeOverrides(usdcMirror, { [plan.wallet]: { balance: toHex(PLENTY) } });
@@ -160,11 +173,7 @@ export async function check(chain: Chain, plan: Plan, opts: CheckOptions): Promi
   const price = await chain.gasPrice();
   const single = await oneByOne(chain, plan, venues, quotes);
 
-  for (const r of results) if (!r.ok) refusals.push(`action ${r.action + 1} (${r.label}) would fail: ${r.reason}`);
-  if (leftovers.length) refusals.push(`Multicall3 would keep ${leftovers.map((l) => `${l.symbol} ${l.amount}`).join(", ")}, where anyone could take it`);
-  if (gas !== null && gas > GAS_CAP) refusals.push(`the batch needs ${gas} gas, over the ${GAS_CAP} onego allows in one transaction; split the plan`);
-  if (built.value + (gas ?? 0n) * price > pros) refusals.push(`not enough PROS: the wallet has ${fmt(pros, 18)}, the batch needs ${fmt(built.value, 18)} plus about ${fmt((gas ?? 0n) * price, 18)} for gas`);
-  if (usesUsdc && usdc < built.authorizations.reduce((s, a) => s + a.value, 0n)) refusals.push(`not enough USDC: the wallet has ${fmt(usdc, USDC_DECIMALS)}, the payments add up to ${fmt(built.authorizations.reduce((s, a) => s + a.value, 0n), USDC_DECIMALS)}`);
+  refusals.push(...gatekeep({ results, wholeRevert, keeps, gas, price, pros, value: built.value, usesUsdc, usdc, usdcNeeded: built.authorizations.reduce((sum, a) => sum + a.value, 0n), shortfalls, contractRecipients }));
 
   return {
     wallet: plan.wallet,
@@ -175,7 +184,7 @@ export async function check(chain: Chain, plan: Plan, opts: CheckOptions): Promi
     warnings,
     sendable: refusals.length === 0,
     refusals,
-    built: { ...built, overrides },
+    built: { ...built, overrides, before: beforeOf },
   };
 }
 
@@ -183,12 +192,4 @@ async function readUnits(chain: Chain, token: Address, holder: Address): Promise
   const r = await chain.call({ to: token, data: encodeFunctionData({ abi: erc20Abi, functionName: "balanceOf", args: [holder] }) });
   if (!r.ok) throw new Error(`couldn't read the balance of ${holder}: ${r.message}`);
   return BigInt(r.data);
-}
-
-export function fmt(units: bigint, decimals: number, maxFrac = 6): string {
-  const neg = units < 0n;
-  const u = neg ? -units : units;
-  const whole = u / 10n ** BigInt(decimals);
-  const frac = (u % 10n ** BigInt(decimals)).toString().padStart(decimals, "0").slice(0, maxFrac).replace(/0+$/, "");
-  return `${neg ? "-" : ""}${whole.toLocaleString("en-US")}${frac ? `.${frac}` : ""}`;
 }
