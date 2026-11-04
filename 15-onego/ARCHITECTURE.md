@@ -41,8 +41,10 @@ plain words --(agent, SKILL.md)--> plan.json --> check --> table for the user --
 `check` again with the wallet as the signer; stop if anything fails (its signatures are then listed for
 `cancel`, since the node has seen them). Sign a type-2 transaction to Multicall3 (fee cap 2x the node's gas
 price, 1 gwei tip, gas = estimate x 1.2), write its hash and signatures to `sends/<hash>.json`, then send and
-wait up to 60 s for the receipt. Ask USDC `authorizationState` for every payment, and read the balances again:
-the reported amounts are measured on chain, and any growth in Multicall3's balances is reported loudly.
+wait up to 60 s for the receipt. Ask USDC `authorizationState` for every payment, then measure the outcome:
+tokens from the receipt's own Transfer events (a balance read later would also count whatever else reached the
+recipient in the meantime), PROS by reading the balances again. Any growth in Multicall3's holdings is
+reported loudly.
 `cancel` voids unused signatures (`cancelAuthorization`, one transaction) and only says so after checking the
 receipt and that every signature now reads as used.
 

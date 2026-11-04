@@ -2,7 +2,7 @@
 // reads the outcome. The check itself is tested on mainnet tapes in check.test.ts.
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { decodeFunctionData, encodeFunctionResult, getAddress, keccak256, parseTransaction, toHex, type Address, type Hex } from "viem";
+import { decodeFunctionData, encodeFunctionResult, getAddress, keccak256, pad, parseTransaction, toHex, type Address, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Authorization, Step } from "./batch.js";
 import { MULTICALL3, USDC, multicall3Abi, usdcAuthAbi } from "./book.js";
@@ -39,7 +39,11 @@ function fakeCheck(sendable: boolean): () => Promise<CheckReport & { built: Buil
   });
 }
 
-function fakeChain(opts: { receipt: Receipt["status"]; used: Set<string>; after?: bigint[]; sendFails?: boolean }) {
+// A USDC Transfer event as it shows up in the receipt.
+const usdcTransfer = (from: Address, to: Address, amount: bigint) => ({ address: USDC, topics: [TRANSFER, pad(from), pad(to)], data: toHex(amount, { size: 32 }) });
+const TRANSFER: Hex = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+function fakeChain(opts: { receipt: Receipt["status"]; used: Set<string>; after?: bigint[]; sendFails?: boolean; logs?: Receipt["logs"] }) {
   const sent: Hex[] = [];
   const chain = {
     gasPrice: async () => 10_000_000_000n,
@@ -49,7 +53,7 @@ function fakeChain(opts: { receipt: Receipt["status"]; used: Set<string>; after?
       if (opts.sendFails) throw new Error("fetch failed");
       return keccak256(tx);
     },
-    receipt: async () => ({ status: opts.receipt, gasUsed: 1n, blockNumber: 1n, logs: [] }),
+    receipt: async () => ({ status: opts.receipt, gasUsed: 1n, blockNumber: 1n, logs: opts.logs ?? [] }),
     call: async (tx: { data: Hex }) => {
       if (tx.data.startsWith("0x174dea71")) {
         // the read-backs after mining: B's USDC, then Multicall3's PROS
@@ -127,10 +131,19 @@ describe("send, the review's findings", () => {
 
   it("reports what the chain says after mining, and shouts if Multicall3 kept something", async () => {
     const all = new Set([auth(0, A, 1).nonce, auth(1, B, 2).nonce]);
-    const { chain } = fakeChain({ receipt: "success", used: all, after: [1_000_000n, 5n] });
+    const { chain } = fakeChain({ receipt: "success", used: all, after: [1_000_000n, 5n], logs: [usdcTransfer(account.address, B, 1_000_000n)] });
     const r = await send(chain, plan, account, { ...opts, check: fakeCheck(true) });
     assert.equal(r.results[1].got?.amount, 1_000_000n);
     assert.deepEqual(r.leftovers, [{ symbol: "PROS", amount: 5n }]);
+  });
+
+  it("counts what this transaction paid, not what else landed in the recipient's wallet meanwhile", async () => {
+    // Seen live: two recipients got other USDC between the check and the read-back, and onego reported
+    // 238.82 USDC for a 0.00001 payment. The receipt's Transfer events are the only honest source.
+    const all = new Set([auth(0, A, 1).nonce, auth(1, B, 2).nonce]);
+    const { chain } = fakeChain({ receipt: "success", used: all, after: [238_821_448n, 0n], logs: [usdcTransfer(account.address, B, 10n)] });
+    const r = await send(chain, plan, account, { ...opts, check: fakeCheck(true) });
+    assert.equal(r.results[1].got?.amount, 10n);
   });
 });
 
