@@ -109,4 +109,20 @@ a contract (refused).
 
 ## Proof
 
-Live transactions: to be added after the runs from the user's wallet.
+Recorded for the walkthrough video on 2026-11-04: an agent installed the skill from this repo and was asked in
+plain words for both runs, from a small test wallet (0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb).
+
+- **Airdrop, sent.** The agent ran `recipients --recent 10` (wallets seen in blocks 22093704 to 22093717), wrote
+  the plan, checked it ("ready to send", 825,739 gas estimated vs 734,069 one by one) and sent it:
+  [0x2eb371bf…bd434](https://www.pharosscan.xyz/tx/0x2eb371bf2e11ae1de11fb4fa534ca9177e2ebc0447f75f067481f724932bd434),
+  block 22093758, status success, gas used 631,932. The receipt holds 10 USDC `Transfer` events from the wallet,
+  10 raw units (0.00001 USDC) each, one to each recipient.
+- **Buys, refused.** pTACO, pCARR and pMusk for 5 PROS each: every buy passed in the simulation (1 transaction
+  instead of 7, -19.63% gas), and the verdict was NOT sendable: "not enough PROS: the wallet has 0.039814, the
+  batch needs 15 plus about 0.004887 for gas". The agent sent nothing and said why.
+
+An earlier take of the same airdrop
+([0x1c2ed683…21d3e](https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e))
+caught a bug: two recipients got other USDC between the check and the read-back, and onego reported their whole
+balance change (238.82 USDC) as this payment. The agent checked the receipt itself and said so. onego now counts
+tokens from the transaction's own Transfer events.
