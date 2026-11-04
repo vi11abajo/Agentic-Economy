@@ -91,4 +91,36 @@ fake chain that really decodes and applies the signed transactions.
 
 ## Proof
 
-Filled after the recorded run.
+Recorded for the walkthrough video on 2026-11-04 (23:47 to 23:53 UTC): an agent installed the skill from this repo
+and ran two draws from plain-English requests, paying from a small test wallet
+(0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb). After each draw it ran `kickback verify` on the commit tx, and both
+answered `MATCH: the winners follow from the committed list and the block hash, and each one was paid`. The numbers
+below are copied from that run.
+
+**Draw 1:** "send a bonus cashback of 0.00001 USDC to 3 random people out of the last 30 buyers"
+
+- Pool: 30 buyers on the Prosper V2 pairs, blocks 22110648..22136647 (snapshot 22136647), 0 contracts skipped.
+- Commit [0xa8af5d14…604b](https://www.pharosscan.xyz/tx/0xa8af5d14dd0dfe35c180b4c961fd1c16399ee2ffecd70b1e3a08c04f1021604b), block 22136706.
+- Target block 22136711 (commit + 5), hash `0x0d0385665696362b0ac74eff9d936ee606bb01c0e319e1059c4b129877484fdf`.
+- Winners, 0.00001 USDC each:
+  - 0x5c6ae2fbbe12720e075a8dff9d39b440ce26de82 in [0x4b556c22…6277](https://www.pharosscan.xyz/tx/0x4b556c22159d94dd794083998f6d23081d97fecebff44e90e6653da283c76277)
+  - 0xcc1e28073b2ab93b6053cc96f1f0d41e7cb85632 in [0x8da38db7…0af0](https://www.pharosscan.xyz/tx/0x8da38db7113c4b855fea14ec4c6f4cf054680b5477f940bae56aa9d1f0360af0)
+  - 0x35717f33fa679575c0fb9d5d6fbbfd0322dd6812 in [0x7f075734…77e7](https://www.pharosscan.xyz/tx/0x7f0757343342bec9ecdbdbc1902a6cfdb3f2e70a9f4230ae54072e405a6477e7)
+- 125 Chain MCP calls from the snapshot to the last payout check.
+
+**Draw 2:** "one more round: 2 lucky people from the last 50 buyers, 0.00002 USDC each, and wait 8 blocks this time"
+
+- Pool: only 39 buyers in the 50,000-block look-back (22086818..22136817), 2 contracts skipped. kickback said so and
+  drew from those 39; the commit records 39.
+- Commit [0x6d14d16a…d54e](https://www.pharosscan.xyz/tx/0x6d14d16a8d2fa09a633aee5b3c18ce67cd33a95c19d82e417952637ede05d54e), block 22136890.
+- Target block 22136898 (commit + 8), hash `0x9296730968b1bea30f6e70084ffe35a0c3c27dc90386dd2cca5c85ec146cc6be`.
+- Winners, 0.00002 USDC each:
+  - 0xffe3b944e628a36e10f06f872dbd46fc30167732 in [0xa0c1671b…080f](https://www.pharosscan.xyz/tx/0xa0c1671b040eea93368c4cfe24c92835b137079061e0d78290c785c4f562080f)
+  - 0xa97f27bd0a0be4755a1f01c47ed7e5db84cf2609 in [0x477abd8f…dbf5](https://www.pharosscan.xyz/tx/0x477abd8f7c73409e5dd831e77941009618dceb4c724377c1ae188b64cce7dbf5)
+- 155 Chain MCP calls.
+
+Check either one yourself:
+
+```bash
+node skill/kickback/scripts/kickback.mjs verify 0xa8af5d14dd0dfe35c180b4c961fd1c16399ee2ffecd70b1e3a08c04f1021604b
+```
