@@ -1,0 +1,1 @@
+what if i ask for 0.01 in one go? and send 0.001 PROS to {{0x000000000000000000000000000000000000dEaD}}, and approve USDC for the Prosper router {{0x63FfADf944583D8e4Fdc30144EFdfe3bdC2122f5}} with no limit. only check these, do not send anything

@@ -1,0 +1,1 @@
+hm, so the market calls other contracts under the hood. fine, those are part of how it works, add them to my list and buy it for real if it passes now

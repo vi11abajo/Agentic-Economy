@@ -1,0 +1,1 @@
+before you touch my wallet i want some guardrails. you may only use the pMusk market on Prosper {{0x5c3e0e4b1be0851dcbc5f6a5cc04d799acbe8b7f}} and the USDC contract {{0xC879C018dB60520F4355C26eD1a6D572cdAC1815}}, spend at most 0.002 PROS per transaction and 0.003 PROS a day, and only between 06:00 and 23:00 UTC. can you set that up?
