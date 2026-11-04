@@ -83,6 +83,9 @@ denies everything until it's fixed.
 ## Limits (say them if they matter)
 
 - It gates what goes through bouncer. A transaction signed somewhere else never meets it.
+- `recipients` checks who gets money straight from the wallet. A listed contract that takes a recipient argument
+  (a router's swap `to`, a withdraw `receiver`) can still pay the output to someone else, so list only contracts
+  you trust with that; the spend caps still limit what goes in.
 - Caps are per asset in its own units (no dollar prices). Gas isn't counted in the caps, it's shown separately.
 - Permit2 and off-chain permit signatures aren't checked yet; ERC-20, ERC-721 and ApprovalForAll approvals are.
 - Time windows are UTC only.

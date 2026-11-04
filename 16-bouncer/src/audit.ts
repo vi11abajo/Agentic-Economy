@@ -11,28 +11,29 @@ export type Entry = { at: string; kind: "decision" | "sent" | "receipt" | "error
 export type EntryBody = { kind: Entry["kind"]; [k: string]: unknown };
 
 const GENESIS = `0x${"0".repeat(64)}` as Hex;
-const LOCK_TRIES = 50;
-const LOCK_NAP_MS = 100;
-const STALE_LOCK_MS = 30_000; // a bouncer that died mid-write leaves its lock behind; after 30 s it's not coming back
-
 const sealOf = (unsealed: Omit<Entry, "hash">): Hex => keccak256(toBytes(JSON.stringify(unsealed)));
 const nap = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-async function withLock<T>(home: string, work: () => T): Promise<T> {
-  const lock = join(home, "audit.lock");
-  for (let attempt = 1; ; attempt++) {
+/**
+ * A lock file next to the log: exclusive create, retried every 100 ms. A bouncer that died mid-work leaves its lock
+ * behind, so a lock older than `staleMs` is taken over. The log uses a short one per line; send holds a longer one
+ * from its fresh check until its "sent" line is written, so two sends can't both read the same daily total.
+ */
+export async function holdLock<T>(home: string, name: string, work: () => T | Promise<T>, o: { waitMs: number; staleMs: number }): Promise<T> {
+  const lock = join(home, name);
+  for (let waited = 0; ; waited += 100) {
     try {
       closeSync(openSync(lock, "wx"));
       break;
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
-      if (existsSync(lock) && Date.now() - statSync(lock).mtimeMs > STALE_LOCK_MS) rmSync(lock, { force: true });
-      else if (attempt >= LOCK_TRIES) throw new Error(`${lock} has been held for ${(LOCK_TRIES * LOCK_NAP_MS) / 1000} s; is another bouncer stuck?`);
-      else await nap(LOCK_NAP_MS);
+      if (existsSync(lock) && Date.now() - statSync(lock).mtimeMs > o.staleMs) rmSync(lock, { force: true });
+      else if (waited >= o.waitMs) throw new Error(`${lock} has been held for ${o.waitMs / 1000} s; is another bouncer stuck?`);
+      else await nap(100);
     }
   }
   try {
-    return work();
+    return await work();
   } finally {
     rmSync(lock, { force: true });
   }
@@ -60,7 +61,7 @@ export function readLog(home: string): { entries: Entry[]; brokenAt: number | nu
 }
 
 export async function appendEntry(home: string, body: EntryBody, now: Date): Promise<Entry> {
-  return withLock(home, () => {
+  return holdLock(home, "audit.lock", () => {
     const { entries, brokenAt } = readLog(home);
     // Even a broken log gets the new line: chained to the last good one, so --verify still points at the damage.
     const last = brokenAt === null ? entries.at(-1) : entries[brokenAt - 2];
@@ -68,7 +69,7 @@ export async function appendEntry(home: string, body: EntryBody, now: Date): Pro
     const entry = { ...unsealed, hash: sealOf(unsealed) } as Entry;
     appendFileSync(join(home, "audit.jsonl"), JSON.stringify(entry) + "\n");
     return entry;
-  });
+  }, { waitMs: 5000, staleMs: 30_000 });
 }
 
 /**

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { maxUint256, type Address, type Hex } from "viem";
+import { encodeAbiParameters, maxUint256, type Address, type Hex } from "viem";
 import type { Frame } from "./chain.js";
 import { DEAD, HIDDEN_HOP, PMUSK_MARKET, PROSPER_ROUTER, USDC, WALLET, recorded } from "./testkit.js";
 import { readTrace } from "./trace.js";
@@ -10,6 +10,7 @@ const word = (a: string) => `0x${a.slice(2).padStart(64, "0")}` as Hex;
 const amount = (n: bigint) => `0x${n.toString(16).padStart(64, "0")}` as Hex;
 const OTHER = "0x1111111111111111111111111111111111111111" as Address;
 const TOKEN = "0x2222222222222222222222222222222222222222" as Address;
+const FRIEND = "0x3333333333333333333333333333333333333333" as Address;
 
 describe("readTrace on real mainnet traces", () => {
   it("finds the contract a pMusk buy reaches that nobody asked about", () => {
@@ -74,6 +75,32 @@ describe("readTrace on hand-made frames", () => {
   it("skips precompiles like ecrecover", () => {
     const facts = readTrace(top([{ type: "CALL", from: OTHER, to: "0x0000000000000000000000000000000000000001" }]), WALLET);
     assert.deepEqual(facts.hops.map((h) => h.address), [OTHER]);
+  });
+
+  it("still counts PROS sent to a precompile, so it can't slip past the caps", () => {
+    const ecrecover = "0x0000000000000000000000000000000000000004" as Address;
+    const facts = readTrace({ type: "CALL", from: WALLET, to: ecrecover, value: "0xde0b6b3a7640000" }, WALLET);
+    assert.equal(facts.prosOut, 10n ** 18n);
+    assert.deepEqual(facts.prosTo.map((p) => p.to), [ecrecover]);
+    assert.deepEqual(facts.hops, []);
+  });
+
+  it("counts an NFT leaving the wallet as a token going out", () => {
+    const facts = readTrace(top([], { logs: [{ address: TOKEN, topics: [TRANSFER, word(WALLET), word(OTHER), amount(42n)], data: "0x" }] }), WALLET);
+    assert.deepEqual(facts.tokenTo, [{ token: TOKEN, to: OTHER, amount: 1n }]);
+    assert.equal(facts.tokensOut.get(TOKEN), 1n);
+  });
+
+  it("counts ERC-1155 single and batch transfers out of the wallet", () => {
+    const SINGLE = "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62";
+    const BATCH = "0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb";
+    const batchData = encodeAbiParameters([{ type: "uint256[]" }, { type: "uint256[]" }], [[1n, 2n], [3n, 4n]]);
+    const facts = readTrace(top([], { logs: [
+      { address: TOKEN, topics: [SINGLE, word(OTHER), word(WALLET), word(OTHER)], data: encodeAbiParameters([{ type: "uint256" }, { type: "uint256" }], [9n, 5n]) },
+      { address: TOKEN, topics: [BATCH, word(OTHER), word(WALLET), word(FRIEND)], data: batchData },
+    ] }), WALLET);
+    assert.deepEqual(facts.tokenTo, [{ token: TOKEN, to: OTHER, amount: 5n }, { token: TOKEN, to: FRIEND, amount: 7n }]);
+    assert.equal(facts.tokensOut.get(TOKEN), 12n);
   });
 
   it("sees an NFT approval and a blanket operator approval", () => {

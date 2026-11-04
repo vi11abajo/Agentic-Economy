@@ -41,7 +41,7 @@ reaches it at depth 1: wallet -> 0x5c3e…8b7f -> 0x30be…bb56
 After the user looked at those four and added them, the same buy passed all seven rules (block 22111409).
 
 The same idea runs through every rule: PROS is counted from every call the wallet makes with value, tokens from
-every Transfer log out of the wallet, approvals from Approval and ApprovalForAll logs. A contract that "just
+every ERC-20, ERC-721 and ERC-1155 transfer out of the wallet (an NFT counts as 1), approvals from Approval and ApprovalForAll logs. A contract that "just
 swaps" but also approves something, or sends a token somewhere else, can't hide it.
 
 ## The rules
@@ -53,7 +53,7 @@ Checked in this order; the first one that fails decides.
 | `time_window` | the clock | outside the allowed days and hours (UTC; 22:00-02:00 belongs to the day it opens) |
 | `simulation` | the trace, balance, gas | the tx would fail anyway, or the wallet can't cover value + worst-case gas |
 | `contracts` | every CALL / CREATE in the trace, any depth | a contract it touches isn't listed, or it creates a new one |
-| `recipients` | PROS sent to plain wallets, Transfer logs out of the wallet | the receiver isn't the wallet, a listed recipient or a listed contract |
+| `recipients` | PROS sent to plain wallets, ERC-20 / ERC-721 / ERC-1155 transfers out of the wallet | the receiver isn't the wallet, a listed recipient or a listed contract |
 | `approvals` | Approval / ApprovalForAll logs from the wallet | the spender isn't listed, or the approval is unlimited and the policy says no |
 | `spend.per_tx` | PROS and tokens leaving the wallet | over the cap, or the asset has no cap at all |
 | `spend.per_day` | the audit log's last 24 hours + this one | over the daily cap, or the log is broken (then nobody knows what was spent) |
@@ -125,6 +125,9 @@ where), written by the user, never passed on the command line.
 ## Limits
 
 - It gates what goes through bouncer. A transaction signed somewhere else never meets it.
+- `recipients` checks who gets money straight from the wallet. A listed contract that takes a recipient argument
+  (a router's swap `to`, a withdraw `receiver`) can still pay the output to someone else, so list only contracts
+  you trust with that; the spend caps still limit what goes in.
 - Caps are per asset in its own units, no dollar prices. Gas isn't counted in the caps; it's shown on every
   decision and the `simulation` rule makes sure the wallet can pay it.
 - Permit2 and off-chain permit signatures aren't checked yet.
@@ -137,7 +140,7 @@ where), written by the user, never passed on the command line.
 npm test
 ```
 
-91 tests. The chain-facing ones replay four real mainnet traces recorded by `test/record.mjs` (a pMusk buy, a
+96 tests. The chain-facing ones replay four real mainnet traces recorded by `test/record.mjs` (a pMusk buy, a
 PROS send, an unlimited USDC approval to the Prosper router, a buy bigger than the wallet), so they run offline
 against what Pharos really answered.
 

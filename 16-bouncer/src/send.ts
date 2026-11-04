@@ -3,7 +3,7 @@
 // gas limit from that estimate), writes the hash to the log BEFORE broadcasting (so a crash can't hide a send),
 // then waits for the receipt and logs what really left the wallet.
 import { keccak256, type Address, type Hex, type LocalAccount } from "viem";
-import { appendEntry } from "./audit.js";
+import { appendEntry, holdLock } from "./audit.js";
 import { CHAIN_ID, type Chain } from "./chain.js";
 import { gate, type Verdict } from "./gate.js";
 import { loadPolicy, type Policy } from "./policy.js";
@@ -29,29 +29,45 @@ function amountsByKey(policy: Policy, prosOut: bigint, tokensOut: Facts["tokensO
 }
 
 export async function sendGated(chain: Chain, home: string, request: Request, account: LocalAccount, opts: { now: Date; sleep?: (ms: number) => Promise<void> }): Promise<SendOutcome> {
-  const sleep = opts.sleep ?? nap;
-  const verdict = await gate(chain, home, request, { now: opts.now, signer: account.address.toLowerCase() as Address });
-  if (verdict.decision !== "allow" || !verdict.tx || !verdict.gasLimit || !verdict.maxFee || !verdict.facts) return { verdict, hash: null, status: "denied" };
+  // From the fresh check until the tx is on its way, no other send may judge or sign: otherwise two sends could both
+  // read the same daily total and squeeze under the cap, or take the same nonce.
+  const signed = await holdLock(home, "send.lock", async () => {
+    const s = await checkAndSign(chain, home, request, account, opts.now);
+    if ("done" in s) return s;
+    try {
+      await chain.sendRaw(s.raw);
+    } catch (err) {
+      return { done: { verdict: s.verdict, hash: s.hash, status: "unknown" as const, note: `broadcasting failed (${(err as Error).message}); it may still have reached the node, so look ${s.hash} up on pharosscan before sending again` } };
+    }
+    return s;
+  }, { waitMs: 120_000, staleMs: 120_000 });
+  if ("done" in signed) return signed.done;
+  return awaitReceipt(chain, home, signed, opts.sleep ?? nap);
+}
+
+type Signed = { verdict: Verdict; raw: Hex; hash: Hex; policy: Policy; from: Address; prosOut: bigint };
+
+async function checkAndSign(chain: Chain, home: string, request: Request, account: LocalAccount, now: Date): Promise<Signed | { done: SendOutcome }> {
+  const verdict = await gate(chain, home, request, { now, signer: account.address.toLowerCase() as Address });
+  if (verdict.decision !== "allow" || !verdict.tx || !verdict.gasLimit || !verdict.maxFee || !verdict.facts) return { done: { verdict, hash: null, status: "denied" } };
 
   const loaded = loadPolicy(home);
-  if ("problems" in loaded) return { verdict, hash: null, status: "denied", note: "the policy changed under us between the check and the signature" };
+  if ("problems" in loaded) return { done: { verdict, hash: null, status: "denied", note: "the policy changed under us between the check and the signature" } };
   const { tx, facts } = verdict;
   const raw = await account.signTransaction({ type: "eip1559", chainId: CHAIN_ID, to: tx.to, data: tx.data, value: tx.value, gas: verdict.gasLimit, maxFeePerGas: verdict.maxFee, maxPriorityFeePerGas: PRIORITY_FEE, nonce: await chain.nonce(tx.from) });
   const hash = keccak256(raw);
   await appendEntry(home, { kind: "sent", txHash: hash, amounts: amountsByKey(loaded.policy, facts.prosOut, facts.tokensOut) }, new Date());
+  return { verdict, raw, hash, policy: loaded.policy, from: tx.from, prosOut: facts.prosOut };
+}
 
-  try {
-    await chain.sendRaw(raw);
-  } catch (err) {
-    return { verdict, hash, status: "unknown", note: `broadcasting failed (${(err as Error).message}); it may still have reached the node, so look ${hash} up on pharosscan before sending again` };
-  }
-
+async function awaitReceipt(chain: Chain, home: string, s: Signed, sleep: (ms: number) => Promise<void>): Promise<SendOutcome> {
+  const { verdict, hash } = s;
   for (let waited = 0; waited <= RECEIPT_WAIT_MS; waited += POLL_MS) {
     const receipt = await chain.receipt(hash).catch(() => null); // a blip while polling isn't an answer
     if (receipt) {
       // PROS sent leaves no event, so it's the traced amount; tokens are counted from this tx's own Transfer logs.
-      const fromReceipt = readTrace({ type: "LOGS", from: "0x0000000000000000000000000000000000000000", logs: receipt.logs }, tx.from);
-      const spent = receipt.status === "success" ? amountsByKey(loaded.policy, facts.prosOut, fromReceipt.tokensOut) : {};
+      const fromReceipt = readTrace({ type: "LOGS", from: "0x0000000000000000000000000000000000000000", logs: receipt.logs }, s.from);
+      const spent = receipt.status === "success" ? amountsByKey(s.policy, s.prosOut, fromReceipt.tokensOut) : {};
       await appendEntry(home, { kind: "receipt", txHash: hash, status: receipt.status, block: receipt.blockNumber.toString(), gasUsed: receipt.gasUsed.toString(), amounts: spent }, new Date());
       return { verdict, hash, status: receipt.status === "success" ? "sent" : "reverted", spent };
     }
