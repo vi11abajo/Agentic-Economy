@@ -61,8 +61,9 @@ Proof of the live runs: [Proof](#proof).
 - Nothing is sent unless a fresh check right before signing passes, so a moved price or a spent balance stops
   it first. That check shows the real USDC signatures to the node, so a refused send lists them for `cancel`
   too.
-- The hash and every signature are saved to disk before broadcasting, and after mining onego reads the
-  balances again: the amounts it reports are the chain's, and anything Multicall3 gained is shouted about.
+- The hash and every signature are saved to disk before broadcasting. After mining, the amounts onego reports
+  are the chain's: tokens from the transaction's own Transfer events, PROS from the balances. Anything
+  Multicall3 gained is shouted about.
 
 Example from the tapes: with 0.000055 USDC for ten payments of 0.00001, the first five are paid and the last
 five fail with `ERC20: transfer amount exceeds balance`; the verdict is NOT sendable and says why.
@@ -102,7 +103,7 @@ never takes a key anywhere else and never prints it.
 npm run build && npm test
 ```
 
-63 tests, offline. The chain-facing ones replay tapes recorded from mainnet by `node test/record-tapes.mjs`
+64 tests, offline. The chain-facing ones replay tapes recorded from mainnet by `node test/record-tapes.mjs`
 (after a build): quotes, recent wallets, the airdrop, the buys, both with too little money, and PROS sent to
 a contract (refused).
 

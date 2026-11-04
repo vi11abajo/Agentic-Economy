@@ -1,10 +1,11 @@
 // send: check again on fresh state with the real signatures, and only then sign and broadcast the one
 // transaction. The hash is written down before it goes out, so a network hiccup can't make anyone send twice
-// blind. After mining, the balances are read again: what's reported is what the chain says, not the forecast.
-import { decodeFunctionResult, encodeFunctionData, keccak256, parseSignature, type Hex, type LocalAccount } from "viem";
+// blind. After mining, what's reported is what the chain says, not the forecast: tokens from the receipt's own
+// Transfer events, PROS from the balances.
+import { decodeFunctionResult, encodeFunctionData, keccak256, parseSignature, type Address, type Hex, type LocalAccount } from "viem";
 import { encodeBatch, sentData, type Authorization } from "./batch.js";
 import { CHAIN_ID, MULTICALL3, USDC, USDC_DOMAIN, multicall3Abi, usdcAuthAbi } from "./book.js";
-import type { Chain } from "./chain.js";
+import type { Chain, Receipt } from "./chain.js";
 import { check, type ActionResult, type Built, type CheckReport } from "./check.js";
 import type { Plan } from "./plan.js";
 import { multicallKeeps } from "./verdict.js";
@@ -31,6 +32,21 @@ type SendOptions = {
 const RECEIPT_WAIT_MS = 60_000;
 const PRIORITY_FEE = 1_000_000_000n; // 1 gwei
 const nap = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const TRANSFER: Hex = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+
+/** How much of `token` this transaction moved into `holder`, minus what it moved out, read from its Transfer events. */
+function flowIn(logs: Receipt["logs"], token: Address, holder: Address): bigint {
+  const h = holder.toLowerCase();
+  const who = (topic: Hex | undefined) => (topic ? `0x${topic.slice(-40)}`.toLowerCase() : "");
+  let net = 0n;
+  for (const l of logs) {
+    if (l.address.toLowerCase() !== token.toLowerCase() || l.topics[0] !== TRANSFER || l.topics.length < 3) continue;
+    const amount = BigInt(l.data);
+    if (who(l.topics[2]) === h) net += amount;
+    if (who(l.topics[1]) === h) net -= amount;
+  }
+  return net;
+}
 
 async function signFor(chain: Chain, account: LocalAccount, data: Hex, value: bigint, gas: bigint): Promise<Hex> {
   const price = await chain.gasPrice();
@@ -89,16 +105,21 @@ export async function send(chain: Chain, plan: Plan, account: LocalAccount, opts
   const unused: Authorization[] = [];
   for (const a of built.authorizations) if (!(await wasUsed(chain, account.address, a.nonce))) unused.push(a);
 
-  // Then read the same balances as the check did, now from the chain, and report those.
+  // Then the same balances the check watched. A token's balance read now would also count whatever else
+  // reached that wallet since the check (a live airdrop once showed 238.82 USDC "received" for a 0.00001
+  // payment), so tokens are counted from this transaction's Transfer events. PROS leaves no events, so PROS is
+  // read from the chain.
   const after = new Map<string, bigint>();
   const read = await chain.call({ from: account.address, to: MULTICALL3, value: 0n, data: encodeBatch(built.readBacks) });
-  if (read.ok) {
-    const rows = decodeFunctionResult({ abi: multicall3Abi, functionName: "aggregate3Value", data: read.data }) as Array<{ success: boolean; returnData: Hex }>;
-    built.readBacks.forEach((rb, k) => rows[k]?.success && after.set(`${rb.reads!.holder}|${rb.reads!.asset}`.toLowerCase(), BigInt(rows[k].returnData)));
-  }
+  const rows = read.ok ? (decodeFunctionResult({ abi: multicall3Abi, functionName: "aggregate3Value", data: read.data }) as Array<{ success: boolean; returnData: Hex }>) : [];
+  built.readBacks.forEach((rb, k) => {
+    const key = `${rb.reads!.holder}|${rb.reads!.asset}`.toLowerCase();
+    if (rb.reads!.asset !== "PROS") after.set(key, (built.before.get(key) ?? 0n) + flowIn(receipt.logs, rb.reads!.asset, rb.reads!.holder));
+    else if (rows[k]?.success) after.set(key, BigInt(rows[k].returnData));
+  });
   const measured = (holder: string, symbol: string) => {
     const rb = built.readBacks.find((x) => x.reads!.holder.toLowerCase() === holder.toLowerCase() && x.reads!.symbol === symbol);
-    if (!rb || !read.ok) return undefined;
+    if (!rb || (rb.reads!.asset === "PROS" && !read.ok)) return undefined;
     const key = `${rb.reads!.holder}|${rb.reads!.asset}`.toLowerCase();
     return (after.get(key) ?? 0n) - (built.before.get(key) ?? 0n);
   };
@@ -110,7 +131,7 @@ export async function send(chain: Chain, plan: Plan, account: LocalAccount, opts
     const amount = r.got ? measured(holder, r.got.symbol) : undefined;
     return amount === undefined || !r.got ? r : { ...r, got: { ...r.got, amount } };
   });
-  const leftovers = read.ok ? multicallKeeps(built.readBacks, built.before, after) : [];
+  const leftovers = multicallKeeps(built.readBacks, built.before, after);
   return { hash, status: "sent_ok", results, unusedAuthorizations: unused, leftovers, refusals: [], report };
 }
 
