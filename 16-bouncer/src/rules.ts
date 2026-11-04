@@ -55,7 +55,12 @@ export function checkContracts(s: Situation): Check {
   const touched = s.facts.hops.filter((h) => h.type.startsWith("CREATE") || s.hasCode(h.address));
   for (const hop of touched) {
     if (hop.type.startsWith("CREATE")) return fail("contracts", `it creates a new contract (${hop.address}); a new address can't be on the list. Path: ${describePath(hop)}`, hop);
-    if (!listed.has(hop.address)) return fail("contracts", `${hop.address} isn't on the contracts list; the transaction reaches it at depth ${hop.depth}: ${describePath(hop)}`, hop);
+    if (!listed.has(hop.address)) {
+      // Name the first one with its path, and the rest too: the user decides about all of them at once.
+      const others = [...new Set(touched.filter((h) => !listed.has(h.address) && h.address !== hop.address).map((h) => h.address))];
+      const more = others.length ? `; ${others.length} more not on the list: ${others.join(", ")}` : "";
+      return fail("contracts", `${hop.address} isn't on the contracts list; the transaction reaches it at depth ${hop.depth}: ${describePath(hop)}${more}`, hop);
+    }
   }
   return pass("contracts", touched.length ? `all ${new Set(touched.map((h) => h.address)).size} contracts it calls are listed` : "calls no contract");
 }

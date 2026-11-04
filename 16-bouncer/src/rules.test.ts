@@ -77,6 +77,11 @@ describe("contracts", () => {
     assert.match(c.reason, new RegExp(HIDDEN_HOP));
     assert.match(c.reason, /depth 1/);
   });
+  it("lists every other unlisted contract too, so the user can decide in one go", () => {
+    const c = checkContracts(situation(buy(), { policy: policyWith({ contracts: [PMUSK_MARKET] }) }));
+    for (const a of BUY_HOPS.slice(2)) assert.match(c.reason, new RegExp(a));
+    assert.match(c.reason, /3 more not on the list/);
+  });
   it("passes when every contract the trace touches is listed", () => assert.equal(checkContracts(situation(buy())).ok, true));
   it("ignores plain wallets: those are the recipients rule's job", () => assert.equal(checkContracts(situation(sendTo(DEAD, 1n))).ok, true));
 });

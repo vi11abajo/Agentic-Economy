@@ -140,7 +140,7 @@ where), written by the user, never passed on the command line.
 npm test
 ```
 
-96 tests. The chain-facing ones replay four real mainnet traces recorded by `test/record.mjs` (a pMusk buy, a
+97 tests. The chain-facing ones replay four real mainnet traces recorded by `test/record.mjs` (a pMusk buy, a
 PROS send, an unlimited USDC approval to the Prosper router, a buy bigger than the wallet), so they run offline
 against what Pharos really answered.
 
