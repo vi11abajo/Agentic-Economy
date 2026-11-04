@@ -95,6 +95,23 @@ describe("sendGated", () => {
     assert.equal(out.verdict.policyHash, policyHash(newer));
   });
 
+  it("two sends at once can't both squeeze under the daily cap", async () => {
+    const w = world();
+    const dir = home("race", rules({ spend: { PROS: { per_tx: "0.001", per_day: "0.001" } } }));
+    const [a, b] = await Promise.all([sendGated(w.chain, dir, w.request, w.account, { now: NOON, sleep: noNap }), sendGated(w.chain, dir, w.request, w.account, { now: NOON, sleep: noNap })]);
+    assert.deepEqual([a.status, b.status].sort(), ["denied", "sent"]);
+    assert.equal((a.status === "denied" ? a : b).verdict.rule, "spend.per_day");
+  });
+
+  it("two sends at once never sign with the same nonce", async () => {
+    const w = world();
+    let broadcasts = 0;
+    const chain: Chain = { ...w.chain, nonce: async () => 7 + broadcasts, sendRaw: async (raw) => (broadcasts++, keccak256(raw)) };
+    const dir = home("nonce", rules());
+    await Promise.all([sendGated(chain, dir, w.request, w.account, { now: NOON, sleep: noNap }), sendGated(chain, dir, w.request, w.account, { now: NOON, sleep: noNap })]);
+    assert.deepEqual(w.signed.map((t) => (t as { nonce: number }).nonce).sort(), [7, 8]);
+  });
+
   it("says 'unknown' and keeps the traced amount counted when no receipt comes", async () => {
     const w = world(null);
     const dir = home("silent", rules());
