@@ -146,4 +146,29 @@ against what Pharos really answered.
 
 ## Proof
 
-Filled in after the live run.
+Recorded for the walkthrough video on 2026-11-04 (17:16 to 17:20 UTC): an agent installed the skill from this repo,
+set the policy from a plain-English ask (only the pMusk market and USDC, 0.002 PROS per tx, 0.003 PROS a day,
+06:00-23:00 UTC) and worked from a small test wallet (0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb). Every request
+went through `bouncer check` or `bouncer send`; the commands and answers below are copied from that run.
+
+**Allowed and sent** (both receipts status success, from the wallet to the pMusk market):
+
+- [0x44057f9b…7aa9](https://www.pharosscan.xyz/tx/0x44057f9b8db4fc1ee0f902cc9c2c31887495e98a163798f09678dfef2ff67aa9),
+  pMusk for 0.001 PROS, block 22113010, after the user added the four contracts the first deny named.
+- [0xb8be6167…147d](https://www.pharosscan.xyz/tx/0xb8be6167abfefb28aac89a774b7a3227203514c246fcabfb8ef5ea91314f147d),
+  pMusk for another 0.001 PROS, block 22113038 (`spend.per_day 0.002 PROS of 0.003 PROS today`).
+
+**One deny per rule**, nothing signed for any of them:
+
+| Rule | Request | bouncer said | Block |
+|---|---|---|---|
+| `contracts` | buy pMusk for 0.001 PROS | `0x30bebe432ff53c9b6ed28dd9daf125902cbabb56 isn't on the contracts list; the transaction reaches it at depth 1: wallet -> 0x5c3e…8b7f -> 0x30be…bb56; 3 more not on the list: ...` | 22112942 |
+| `spend.per_day` | buy pMusk for 0.002 PROS after the two buys | `0.002 PROS already sent in the last 24 h + 0.002 PROS now = 0.004 PROS, over the daily cap of 0.003 PROS` | 22113039 |
+| `spend.per_tx` | buy pMusk for 0.01 PROS | `0.01 PROS in one go is over the per-transaction cap of 0.002 PROS` | 22113098 |
+| `recipients` | send 0.001 PROS to 0x…dEaD | `0.001 PROS would go to 0x000000000000000000000000000000000000dead, which isn't on the recipients list` | 22113104 |
+| `approvals` | approve USDC for the Prosper router, no limit | `it would let 0x63ffadf944583d8e4fdc30144efdfe3bdc2122f5 spend the wallet's 0xc879c018db60520f4355c26ed1a6d572cdac1815, and that spender isn't on the approvals list` | 22113110 |
+| `simulation` | buy pMusk for 1 PROS | `the transaction would fail on chain anyway: the wallet doesn't hold enough PROS for this (insufficient balance)` | 22113163 |
+| `time_window` | buy pMusk for 0.001 PROS after the hours were set to mon 03:00-04:00 | `it's wed 17:20 UTC, outside the allowed window mon 03:00-04:00 UTC` | none: the clock is checked before the chain is asked |
+
+At the end `bouncer log --verify` answered `chain intact (14 entries)`: 10 decisions (3 allow, 7 deny), 2 sends and
+2 receipts, all from this run.
