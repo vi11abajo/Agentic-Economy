@@ -85,7 +85,7 @@ logs), and so does a USDC draw that was resumed long after the target block. It 
 
 ## Tests
 
-`npm test` in this folder: 62 tests. The buyer search replays a tape of real Chain MCP answers recorded on
+`npm test` in this folder: 63 tests. The buyer search replays a tape of real Chain MCP answers recorded on
 2026-11-04 (`test/tapes/buyers.json`, made by `test/record.mjs`); the full draw, crashes and resume run on a small
 fake chain that really decodes and applies the signed transactions.
 

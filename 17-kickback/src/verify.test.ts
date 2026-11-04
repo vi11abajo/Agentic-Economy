@@ -72,3 +72,11 @@ test("verify accepts USDC payouts that landed late when their hashes are given",
   const v = await verifyDraw(chain, commitTx, state.payouts.map((p) => p.tx!));
   assert.equal(v.match, true, v.firstDifference);
 });
+
+test("verify works right after a draw, before 2000 more blocks exist", async () => {
+  const chain = world();
+  const state = await drawOn(chain);
+  assert.ok(chain.head < state.target!.block + 1999n, "the chain hasn't reached the end of the scan windows yet");
+  const v = await verifyDraw(chain, state.commit!.tx, []);
+  assert.equal(v.match, true, v.firstDifference);
+});
