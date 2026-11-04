@@ -35,7 +35,8 @@ async function record(home: string, v: Verdict, now: Date): Promise<Verdict> {
   return v;
 }
 
-export async function gate(chain: Chain, home: string, request: Request, opts: { now: Date }): Promise<Verdict> {
+/** `signer`: the address of the key that would sign, when gate() runs on the way to send. */
+export async function gate(chain: Chain, home: string, request: Request, opts: { now: Date; signer?: Address }): Promise<Verdict> {
   const blank: Verdict = { decision: "deny", rule: null, reason: "", checks: [], request, tx: null, block: null, gasLimit: null, maxFee: null, facts: null, policyHash: null };
 
   const loaded = loadPolicy(home);
@@ -45,6 +46,10 @@ export async function gate(chain: Chain, home: string, request: Request, opts: {
   }
   const { policy, hash } = loaded;
   const base = { ...blank, policyHash: hash };
+  if (opts.signer && opts.signer.toLowerCase() !== policy.wallet) {
+    const reason = `the key in .env is for ${opts.signer}, but this policy guards ${policy.wallet}`;
+    return record(home, { ...base, rule: "policy", reason, checks: [{ rule: "policy", ok: false, reason }] }, opts.now);
+  }
 
   // The clock needs no network: outside the window we don't even ask the chain.
   const clock = checkTimeWindow({ policy, now: opts.now } as Situation);
