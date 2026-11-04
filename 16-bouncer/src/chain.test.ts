@@ -37,6 +37,13 @@ describe("rpcChain", () => {
     assert.deepEqual(naps, [1500]);
   });
 
+  it("treats a wallet too poor for the value as 'no gas amount works', not as a broken node", async () => {
+    // What Pharos really answered on 2026-11-04 for a 1 PROS buy from a wallet holding 0.039.
+    const node = scriptedNode([{ jsonrpc: "2.0", id: 1, error: { code: -32000, message: "The caller does not have enough funds for value transfer." } }]);
+    const chain = rpcChain("http://node", { fetch: node.fetch, sleep: async () => {} });
+    assert.equal(await chain.estimateGas({ from: WALLET, to: WPROS, data: "0xd0e30db0", value: 10n ** 18n }, 5n), null);
+  });
+
   it("reads code and balance at the block it's told, not at latest", async () => {
     const node = scriptedNode([{ jsonrpc: "2.0", id: 1, result: "0x6080" }, { jsonrpc: "2.0", id: 1, result: "0x2a" }]);
     const chain = rpcChain("http://node", { fetch: node.fetch, sleep: async () => {} });

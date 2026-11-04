@@ -34,8 +34,9 @@ class NodeSaidNo extends Error {
     super(answer.message);
   }
 }
-// "execution reverted" (code 3) is the EVM saying no; anything else is the node having a problem.
-const isRevert = (e: RpcError) => e.code === 3 || /revert/i.test(e.message);
+// "execution reverted" (code 3) is the EVM saying no, and so is a wallet that can't cover the value (Pharos says
+// "does not have enough funds"). Anything else is the node having a problem.
+const isRevert = (e: RpcError) => e.code === 3 || /revert|not have enough funds/i.test(e.message);
 
 export function rpcChain(url = PHAROS_RPC, deps: { fetch?: typeof fetch; sleep?: (ms: number) => Promise<void> } = {}): Chain {
   const doFetch = deps.fetch ?? fetch;
