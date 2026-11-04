@@ -23,7 +23,8 @@ The list of buyers and the rule are written on chain first; the hash of a later 
       --dry stops before anything is signed
   kickback draw --resume <commitTx>      finish a draw that was interrupted (never pays anyone twice)
   kickback verify <commitTx> [payoutTx...]   redo the draw from the chain alone and check the payouts
-      (PROS payouts leave no logs, so pass their tx hashes; USDC ones are found automatically)
+      (PROS payouts leave no logs, so pass their tx hashes; USDC ones are found near the target block,
+      pass their hashes too if the draw was resumed much later)
   kickback setup                         data folder, wallet, balances and the caps
 
 Caps live in config.json in the data folder and only change when you edit that file.`;

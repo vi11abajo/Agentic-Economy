@@ -22,11 +22,12 @@ export function usdcTransfer(to: Address, amount: bigint): Hex {
 /**
  * Builds and signs one transaction with fresh nonce, gas price and a 20% gas margin over the estimate.
  * Throws RevertedCall if the estimate says it would revert, before anything is signed.
+ * `minNonce` is the lowest nonce we know is still free: a node a block behind can report a nonce we already used.
  */
-export async function signTx(chain: Chain, account: LocalAccount, tx: { to: Address; data?: Hex; value?: bigint }): Promise<{ raw: Hex; hash: Hex }> {
+export async function signTx(chain: Chain, account: LocalAccount, tx: { to: Address; data?: Hex; value?: bigint }, minNonce = 0): Promise<{ raw: Hex; hash: Hex }> {
   const from = account.address;
   const estimate = await chain.estimateGas({ from, to: tx.to, data: tx.data, value: tx.value });
-  const nonce = await chain.nonce(from);
+  const nonce = Math.max(await chain.nonce(from), minNonce);
   const gasPrice = await chain.gasPrice();
   const raw = await account.signTransaction!({
     type: "legacy",

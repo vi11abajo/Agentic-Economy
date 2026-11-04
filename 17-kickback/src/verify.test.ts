@@ -5,7 +5,7 @@ import { join } from "node:path";
 import type { Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { FakeChain } from "./fakechain.js";
-import { runDraw } from "./flow.js";
+import { resumeDraw, runDraw } from "./flow.js";
 import { DEFAULTS, DEFAULT_CAPS, type DrawParams } from "./params.js";
 import { verifyDraw } from "./verify.js";
 
@@ -56,4 +56,19 @@ test("verify rejects a tx that is not a kickback commit", async () => {
   const chain = world();
   const state = await drawOn(chain);
   await assert.rejects(verifyDraw(chain, state.payouts[0].tx!, []), /not a kickback commit/);
+});
+
+test("verify accepts USDC payouts that landed late when their hashes are given", async () => {
+  const chain = world();
+  chain.killAfterSends = 1; // the commit goes out, then the draw stalls for a long while
+  mkdirSync(join(process.cwd(), ".test-tmp"), { recursive: true });
+  const home = mkdtempSync(join(process.cwd(), ".test-tmp", "verify-"));
+  const deps = { chain, account, caps: DEFAULT_CAPS, home, say: () => {}, sleep: async () => {} };
+  await assert.rejects(runDraw(deps, DEFAULTS, { dry: false }));
+  chain.revive();
+  chain.head += 50_000n; // resumed hours later, far past the log windows verify scans
+  const commitTx = (await import("viem")).keccak256(chain.sendCalls[0]);
+  const state = await resumeDraw(deps, commitTx);
+  const v = await verifyDraw(chain, commitTx, state.payouts.map((p) => p.tx!));
+  assert.equal(v.match, true, v.firstDifference);
 });

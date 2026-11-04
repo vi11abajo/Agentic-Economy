@@ -1,6 +1,6 @@
 // The data folder: config.json with the caps, the key in .env (written by the user, read only here, never
 // printed), and one JSON per draw so a crash halfway can be picked up again with --resume.
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, closeSync, existsSync, mkdirSync, openSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { LocalAccount } from "viem";
@@ -58,6 +58,38 @@ export function saveDraw(home: string, commitTx: string, state: unknown): void {
   const dir = join(home, "draws");
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${commitTx}.json`), `${toJson(state)}\n`);
+}
+
+const stillRunning = (pid: number) => {
+  try {
+    process.kill(pid, 0); // signal 0 only asks "are you there?"
+    return true;
+  } catch (err) {
+    return (err as NodeJS.ErrnoException).code === "EPERM";
+  }
+};
+
+/**
+ * One process per draw. Two of them on the same draw could each sign a payout for the same winner with different
+ * nonces, and then both land. A lock left by a process that died is taken over. Returns the release function.
+ */
+export function holdDraw(home: string, commitTx: string): () => void {
+  const dir = join(home, "draws");
+  mkdirSync(dir, { recursive: true });
+  const file = join(dir, `${commitTx}.lock`);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const fd = openSync(file, "wx");
+      writeFileSync(fd, String(process.pid));
+      closeSync(fd);
+      return () => rmSync(file, { force: true });
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== "EEXIST" || attempt > 0) throw err;
+      const holder = Number(readFileSync(file, "utf8").trim());
+      if (holder && stillRunning(holder)) throw new Error(`draw ${commitTx} is already running in process ${holder}; let it finish first`);
+      rmSync(file, { force: true });
+    }
+  }
 }
 
 export function loadDraw<T>(home: string, commitTx: string): T | null {

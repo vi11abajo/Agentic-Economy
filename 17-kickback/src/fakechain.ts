@@ -50,6 +50,8 @@ export class FakeChain implements Chain {
   dropAnswerAfter = Infinity;
   /** After this many sends the "network" dies: every call throws until revive(). Simulates the process crashing. */
   killAfterSends = Infinity;
+  /** The nonce answer is this many behind the truth, like a node that hasn't seen the last block yet. */
+  nonceLag = 0;
   private dead = false;
 
   revive() {
@@ -127,7 +129,7 @@ export class FakeChain implements Chain {
 
   async nonce(a: Address) {
     this.alive();
-    return this.nonces.get(a.toLowerCase() as Address) ?? 0;
+    return Math.max(0, (this.nonces.get(a.toLowerCase() as Address) ?? 0) - this.nonceLag);
   }
 
   async gasPrice() {
@@ -154,6 +156,7 @@ export class FakeChain implements Chain {
     const tx = parseTransaction(raw as TransactionSerialized);
     const from = (await recoverTransactionAddress({ serializedTransaction: raw as TransactionSerialized })).toLowerCase() as Address;
     const to = tx.to!.toLowerCase() as Address;
+    if ((tx.nonce ?? 0) < (this.nonces.get(from) ?? 0)) throw new Error("nonce too low");
     const value = tx.value ?? 0n;
     const gasCost = (tx.gas ?? 0n) * (tx.gasPrice ?? 0n);
     this.pros.set(from, (this.pros.get(from) ?? 0n) - gasCost - value);

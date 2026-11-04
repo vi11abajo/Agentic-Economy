@@ -40,7 +40,7 @@ export async function verifyDraw(chain: Chain, commitTx: Hex, payoutTxs: Hex[]):
   chain.step("payouts");
   const sender = tx.from.toLowerCase() as Address;
   const payouts =
-    commit.token === PROS_TOKEN ? await prosPayouts(chain, sender, commit, winners, payoutTxs) : await usdcPayouts(chain, sender, commit, winners, n);
+    commit.token === PROS_TOKEN ? await prosPayouts(chain, sender, commit, winners, payoutTxs) : await usdcPayouts(chain, sender, commit, winners, n, payoutTxs);
   const bad = payouts.find((p) => !p.ok);
   return {
     match: !bad,
@@ -55,8 +55,18 @@ export async function verifyDraw(chain: Chain, commitTx: Hex, payoutTxs: Hex[]):
   };
 }
 
-async function usdcPayouts(chain: Chain, sender: Address, commit: Commit, winners: Address[], from: bigint) {
+async function usdcPayouts(chain: Chain, sender: Address, commit: Commit, winners: Address[], from: bigint, payoutTxs: Hex[]) {
   const found = new Map<Address, Hex>();
+  // A draw resumed much later pays outside the windows below, so hashes from the draw report count too.
+  for (const h of payoutTxs) {
+    const r = await chain.receipt(h);
+    if (!r || r.status !== "success" || r.blockNumber < from) continue;
+    for (const l of r.logs) {
+      if (l.address.toLowerCase() !== USDC || l.topics[0] !== TRANSFER_TOPIC || l.topics[1] !== pad(sender)) continue;
+      const to = `0x${l.topics[2].slice(26)}` as Address;
+      if (winners.includes(to) && BigInt(l.data) === commit.amountRaw && !found.has(to)) found.set(to, h);
+    }
+  }
   for (let w = 0n; w < PAYOUT_WINDOWS; w++) {
     const logs = await chain.logs({
       address: USDC,
