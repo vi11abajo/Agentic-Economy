@@ -99,6 +99,8 @@ export class FakeChain implements Chain {
 
   async logs(q: { address: Address[] | Address; topics: (Hex | Hex[] | null)[]; from: bigint; to: bigint }) {
     this.alive();
+    // The real node refuses a range that reaches past its head (seen live on 2026-11-05).
+    if (q.to > this.head) throw new Error("PARAM_VERIFY_ERROR: to_block_number cannot be greater than last_block_number");
     const all = [...this.swaps, ...[...this.mined.values()].flatMap((m) => m.receipt.logs)];
     const want = (Array.isArray(q.address) ? q.address : [q.address]).map((a) => a.toLowerCase());
     return all.filter(

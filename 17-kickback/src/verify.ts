@@ -67,12 +67,15 @@ async function usdcPayouts(chain: Chain, sender: Address, commit: Commit, winner
       if (winners.includes(to) && BigInt(l.data) === commit.amountRaw && !found.has(to)) found.set(to, h);
     }
   }
-  for (let w = 0n; w < PAYOUT_WINDOWS; w++) {
+  // The node refuses ranges past its head, and right after a draw the chain is only a few blocks past the target.
+  const head = await chain.blockNumber();
+  for (let w = 0n; w < PAYOUT_WINDOWS && from + w * 1000n <= head; w++) {
+    const end = from + w * 1000n + 999n;
     const logs = await chain.logs({
       address: USDC,
       topics: [TRANSFER_TOPIC, pad(sender), winners.map((x) => pad(x))],
       from: from + w * 1000n,
-      to: from + w * 1000n + 999n,
+      to: end < head ? end : head,
     });
     for (const l of logs) {
       const to = `0x${l.topics[2].slice(26)}` as Address;
