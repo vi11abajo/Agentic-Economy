@@ -6,24 +6,25 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { encodeFunctionData, maxUint256, parseAbi, parseEther } from "viem";
 import { rpcChain, taped } from "../dist/chain.js";
 
-const WALLET = "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb";
+// Lower-case and in {from, to, data, value} order: exactly how the gate asks, so the tape keys match.
+const WALLET = "0x46441dc99f8000959e9c48cf2a01a018d131d3bb";
 const PMUSK_MARKET = "0x5c3e0e4b1be0851dcbc5f6a5cc04d799acbe8b7f";
-const USDC = "0xC879C018dB60520F4355C26eD1a6D572cdAC1815";
+const USDC = "0xc879c018db60520f4355c26ed1a6d572cdac1815";
 const PROSPER_ROUTER = "0x63FfADf944583D8e4Fdc30144EFdfe3bdC2122f5";
-const DEAD = "0x000000000000000000000000000000000000dEaD";
+const DEAD = "0x000000000000000000000000000000000000dead";
 
 const deadline = BigInt(Math.floor(Date.now() / 1000) + 600);
 const buy = (pros) => ({
   from: WALLET,
   to: PMUSK_MARKET,
-  value: parseEther(pros),
   data: encodeFunctionData({ abi: parseAbi(["function buyNative(uint256 minOut, uint256 deadline, address recipient) payable"]), functionName: "buyNative", args: [0n, deadline, WALLET] }),
+  value: parseEther(pros),
 });
 
 const cases = {
   "pmusk-buy": buy("0.001"),
-  "pros-send": { from: WALLET, to: DEAD, value: parseEther("0.001"), data: "0x" },
-  "usdc-approve-max": { from: WALLET, to: USDC, value: 0n, data: encodeFunctionData({ abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]), functionName: "approve", args: [PROSPER_ROUTER, maxUint256] }) },
+  "pros-send": { from: WALLET, to: DEAD, data: "0x", value: parseEther("0.001") },
+  "usdc-approve-max": { from: WALLET, to: USDC, data: encodeFunctionData({ abi: parseAbi(["function approve(address spender, uint256 amount) returns (bool)"]), functionName: "approve", args: [PROSPER_ROUTER, maxUint256] }), value: 0n },
   "too-big-buy": buy("1"),
 };
 
