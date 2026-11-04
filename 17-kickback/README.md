@@ -69,8 +69,9 @@ kickback verify <commitTx>
 ```
 
 It needs nothing but the hash: the list and the rule are inside the commit tx. It reads the commit block, gets
-the hash of block commit + delay, redoes the draw, and finds the USDC payouts in the logs (for PROS payouts pass
-their tx hashes too, plain PROS transfers leave no logs). It answers MATCH or the first difference.
+the hash of block commit + delay, redoes the draw, and finds the USDC payouts in the logs of the 2,000 blocks after
+it. Payout hashes from the draw report can be passed too: PROS payouts need them (plain PROS transfers leave no
+logs), and so does a USDC draw that was resumed long after the target block. It answers MATCH or the first difference.
 
 ## Limits
 
@@ -78,12 +79,13 @@ their tx hashes too, plain PROS transfers leave no logs). It answers MATCH or th
   participants from whoever runs the draw, not from the chain itself.
 - "Buyer" means a buy on Prosper's V2 pairs. Buys on the bonding curve and on other DEXes aren't counted.
 - A payout that keeps failing in simulation is marked FAILED; no replacement winner is drawn.
+- One process per draw: a second `draw --resume` on a draw that is still running refuses to start.
 - Pharos mainnet only. The Chain MCP allows 120 calls a minute; the 30-person dry run above took 94 calls and
   53 seconds before the point where the commit would go out.
 
 ## Tests
 
-`npm test` in this folder: 59 tests. The buyer search replays a tape of real Chain MCP answers recorded on
+`npm test` in this folder: 62 tests. The buyer search replays a tape of real Chain MCP answers recorded on
 2026-11-04 (`test/tapes/buyers.json`, made by `test/record.mjs`); the full draw, crashes and resume run on a small
 fake chain that really decodes and applies the signed transactions.
 

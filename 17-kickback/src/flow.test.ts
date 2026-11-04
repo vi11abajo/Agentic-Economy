@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -109,4 +109,26 @@ test("resume never pays twice", async () => {
   for (const w of winnersOf(state)) assert.equal(chain.usdcTransfersTo(w), 1);
   const secondRaw = state.payouts[1].raw!;
   assert.equal(chain.sendCalls.filter((r) => r === secondRaw).length, 2, "payout 2 was re-broadcast from the stored raw, not re-signed");
+});
+
+test("a node that lags on the nonce doesn't stall the next payout", async () => {
+  const { chain, deps } = setup();
+  chain.nonceLag = 1; // every nonce answer is one behind, so payout 1 would reuse the commit's nonce
+  const state = await runDraw(deps, DEFAULTS, { dry: false });
+  assert.ok(state.payouts.every((p) => p.status === "paid"));
+  for (const w of winnersOf(state)) assert.equal(chain.usdcTransfersTo(w), 1);
+});
+
+test("a second process can't pick up a draw that is still running", async () => {
+  const { chain, deps } = setup();
+  chain.killAfterSends = 1; // only the commit goes out
+  await assert.rejects(runDraw(deps, DEFAULTS, { dry: false }));
+  chain.revive();
+  const commitTx = (await import("viem")).keccak256(chain.sendCalls[0]);
+  writeFileSync(join(deps.home, "draws", `${commitTx}.lock`), String(process.pid)); // "someone" alive holds it
+  await assert.rejects(resumeDraw(deps, commitTx), /already running/);
+  assert.equal(chain.sendCalls.length, 1, "nothing was signed or sent by the second process");
+  writeFileSync(join(deps.home, "draws", `${commitTx}.lock`), "2147483646"); // a holder that is long gone
+  const state = await resumeDraw(deps, commitTx);
+  assert.ok(state.payouts.every((p) => p.status === "paid"));
 });

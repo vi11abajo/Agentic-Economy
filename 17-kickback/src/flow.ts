@@ -1,13 +1,13 @@
 // The whole draw, start to finish, from one call. The order matters and is the point of the design:
 // the list and the rule go on chain first, and only then do we look at the block that picks the winners.
-import { formatUnits, type Address, type Hex, type LocalAccount } from "viem";
+import { formatUnits, parseTransaction, type Address, type Hex, type LocalAccount } from "viem";
 import { RevertedCall, type CallLog, type Chain } from "./chain.js";
 import { collectPool, findPairs, type Pool } from "./buyers.js";
 import { PROS_TOKEN, encodeCommit } from "./commit.js";
 import { pickWinners, seedOf } from "./lottery.js";
 import { DECIMALS, amountRaw, checkParams, type Caps, type DrawParams } from "./params.js";
 import { USDC, broadcastAndWait, paidRight, realSleep, signTx, usdcTransfer, type Sleep } from "./pay.js";
-import { appendHistory, loadDraw, saveDraw } from "./store.js";
+import { appendHistory, holdDraw, loadDraw, saveDraw } from "./store.js";
 
 export type Payout = { winner: Address; raw?: Hex; tx?: Hex; status: "pending" | "sent" | "paid" | "failed"; error?: string };
 export type DrawState = {
@@ -86,20 +86,30 @@ export async function runDraw(deps: Deps, params: DrawParams, opts: { dry: boole
   chain.step("commit");
   const signed = await signTx(chain, account, { to: me, data: commitData });
   state.commit = { raw: signed.raw, tx: signed.hash };
-  saveDraw(deps.home, signed.hash, state); // saved before it leaves, so a crash right here can still be resumed
-  const receipt = await broadcastAndWait(chain, signed.raw, signed.hash, deps.sleep ?? realSleep);
-  state.commit.block = receipt.blockNumber;
-  saveDraw(deps.home, signed.hash, state);
-  say(`commit: tx ${signed.hash} in block ${receipt.blockNumber}; the list and the rule are on chain now`);
-  return carryOn(deps, state);
+  const release = holdDraw(deps.home, signed.hash);
+  try {
+    saveDraw(deps.home, signed.hash, state); // saved before it leaves, so a crash right here can still be resumed
+    const receipt = await broadcastAndWait(chain, signed.raw, signed.hash, deps.sleep ?? realSleep);
+    state.commit.block = receipt.blockNumber;
+    saveDraw(deps.home, signed.hash, state);
+    say(`commit: tx ${signed.hash} in block ${receipt.blockNumber}; the list and the rule are on chain now`);
+    return await carryOn(deps, state);
+  } finally {
+    release();
+  }
 }
 
 export async function resumeDraw(deps: Deps, commitTx: Hex): Promise<DrawState> {
   const state = loadDraw<DrawState>(deps.home, commitTx);
   if (!state?.commit) throw new Error(`no saved draw for ${commitTx} in ${deps.home}/draws`);
-  deps.say(`resume: picking up draw ${commitTx}`);
-  state.calls = deps.chain.journal;
-  return carryOn(deps, state);
+  const release = holdDraw(deps.home, commitTx);
+  try {
+    deps.say(`resume: picking up draw ${commitTx}`);
+    state.calls = deps.chain.journal;
+    return await carryOn(deps, state);
+  } finally {
+    release();
+  }
 }
 
 // Everything after the commit. Each step looks at what's already done, so a resumed draw skips it.
@@ -139,7 +149,7 @@ async function carryOn(deps: Deps, state: DrawState): Promise<DrawState> {
     if (p.status === "paid" || p.status === "failed") continue;
     if (p.status === "pending") {
       const tx = state.params.token === "USDC" ? { to: USDC, data: usdcTransfer(p.winner, each) } : { to: p.winner, value: each };
-      const signed = await signWithOneRetry(chain, deps.account, tx, sleep);
+      const signed = await signWithOneRetry(chain, deps.account, tx, sleep, nextFreeNonce(state));
       if ("error" in signed) {
         p.status = "failed";
         p.error = signed.error;
@@ -190,10 +200,16 @@ async function payoutGas(chain: Chain, me: Address, someone: Address, token: Dra
   }
 }
 
-async function signWithOneRetry(chain: Chain, account: LocalAccount, tx: { to: Address; data?: Hex; value?: bigint }, sleep: Sleep) {
+// Every tx this draw signed used a nonce; the next one has to be above all of them, whatever a lagging node says.
+function nextFreeNonce(state: DrawState): number {
+  const used = [state.commit?.raw, ...state.payouts.map((p) => p.raw)].filter((r): r is Hex => Boolean(r));
+  return Math.max(-1, ...used.map((r) => parseTransaction(r).nonce ?? 0)) + 1;
+}
+
+async function signWithOneRetry(chain: Chain, account: LocalAccount, tx: { to: Address; data?: Hex; value?: bigint }, sleep: Sleep, minNonce: number) {
   for (let attempt = 1; ; attempt++) {
     try {
-      return await signTx(chain, account, tx);
+      return await signTx(chain, account, tx, minNonce);
     } catch (err) {
       if (!(err instanceof RevertedCall)) throw err;
       if (attempt >= 2) return { error: err.message };

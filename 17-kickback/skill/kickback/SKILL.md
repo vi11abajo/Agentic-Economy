@@ -39,8 +39,9 @@ command to share.
 - `kickback draw [--pool 30] [--winners 3] [--amount 0.00001] [--token USDC|PROS] [--delay 5] [--dry]`
 - `kickback draw --resume <commitTx>`: finish an interrupted draw. It re-sends a payout that was already signed
   instead of signing a new one, so nobody gets paid twice.
-- `kickback verify <commitTx> [payoutTx...]`: anyone can run this. USDC payouts are found from logs; PROS payouts
-  leave no logs, so pass their tx hashes (the draw prints them).
+- `kickback verify <commitTx> [payoutTx...]`: anyone can run this. USDC payouts are found from logs near the
+  target block; PROS payouts leave no logs, so pass their tx hashes (the draw prints them). Pass them for a USDC
+  draw that was resumed much later, too.
 
 Exit codes: 0 done or MATCH; 1 network or other error; 2 bad input, a stop before the commit, or a verify that
 does not match.
