@@ -34,7 +34,7 @@ export interface LookupPlan {
   maxPages?: number;
 }
 
-const QUOTE_CAP_PER_PAGE = 10;
+const QUOTE_CAP_PER_PAGE = 20;
 const QUOTE_MAX_CHARS = 400;
 
 /** Pulls the "Title: / Link:" pairs out of a searchDocumentation answer, in the order the server ranked them. */
