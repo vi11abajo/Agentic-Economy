@@ -1,0 +1,23 @@
+{
+  "name": "receipts",
+  "version": "1.0.0",
+  "description": "receipts: answers plain questions about a Pharos wallet (what it holds, where its money sits, what it made) and shows the contract and block behind every number",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "receipts": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
