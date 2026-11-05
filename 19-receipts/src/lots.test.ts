@@ -81,6 +81,7 @@ test("a token that only ever arrived as a gift: no profit claimed, only the pric
   assert.equal(s.unrealizedUsd, undefined);
   const u = s.unknowns.find((x: { reason: string }) => x.reason === "received-not-bought")!;
   assert.match(u.details, /received 5 TOK/);
+  assert.match(ctx.ledger.facts().find((f) => f.label.startsWith("received"))!.label, /in a tx sent by another wallet, 0x0000...00ff; this wallet paid nothing/);
   assert.equal(s.received.length, 1);
   assert.ok(s.received[0].priceThenUsd !== undefined);
 });

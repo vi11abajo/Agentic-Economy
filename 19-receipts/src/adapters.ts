@@ -4,7 +4,7 @@ import { formatUnits } from "viem";
 import { batch } from "./reads.js";
 import { nativeBalance, receiptTransfers, tokenMeta, WPROS, MULTICALL3, type TokenMeta } from "./chain.js";
 import type { WalletIndex } from "./explorer.js";
-import type { Ledger, Unknown } from "./facts.js";
+import { plain, type Ledger, type Unknown } from "./facts.js";
 import { groupFlows } from "./flows.js";
 import type { ToolLine } from "./mcp.js";
 
@@ -278,10 +278,16 @@ async function unreadableDestinations(ctx: ScanCtx, flows: ReturnType<typeof gro
   for (const [target, e] of byTarget) {
     const { code } = JSON.parse(await ctx.line.ask("get_code", { address: target, block: String(ctx.block) })) as { code: string };
     if (!code || code === "0x") continue;
+    // What went in is a figure the user will want quoted, so it gets a fact too: summed from the explorer's rows.
+    const sent = [...e.sent.entries()].map(([t, a]) => {
+      const unit = t === NATIVE ? "PROS" : short(t);
+      const f = ctx.ledger.add({ label: `sent to ${short(target)} (no reader) in ${e.txs} tx`, value: plain(a), unit, contract: target, call: "sum of the explorer's rows for those txs", block: ctx.block, source: "explorer" });
+      return `${plain(a)} ${unit} [${f.id}]`;
+    });
     out.push(ctx.ledger.unknown({
       reason: "no-adapter",
       subject: target,
-      details: `the wallet sent ${[...e.sent.entries()].map(([t, a]) => `${a} ${t === "native" ? "PROS" : short(t)}`).join(", ")} there in ${e.txs} tx (method ${[...e.methods].join(", ")}) and got nothing back in those txs; receipts has no reader for this contract`,
+      details: `the wallet sent ${sent.join(", ")} there in ${e.txs} tx (method ${[...e.methods].join(", ")}) and got nothing back in those txs; receipts has no reader for this contract`,
     }));
   }
   return out;
