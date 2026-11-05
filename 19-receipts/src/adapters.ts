@@ -38,6 +38,8 @@ export interface Holding {
   /** Fact ids behind the amount and the underlying. */
   facts: string[];
   note?: string;
+  /** The contract that holds the money when it isn't the share token itself (ERC-7540 vaults, Morpho). */
+  venue?: string;
 }
 
 export interface Findings {
@@ -119,7 +121,7 @@ export async function findHoldings(ctx: ScanCtx, ix: WalletIndex): Promise<Findi
       }
       const um = meta.get(separate.asset) ?? { symbol: short(separate.asset), decimals: 18, from: "explorer" as const };
       const f = ctx.ledger.add({ label: `${h.m.symbol} shares are worth`, value: show(out, um.decimals), raw: out.toString(), unit: um.symbol, contract: separate.vault, call: "convertToAssets(shares)", block: ctx.block, source: "chain" });
-      holdings.push({ kind: "vault", protocol: separate.name, asset: h.token, symbol: h.m.symbol, amount: h.amount, decimals: h.m.decimals, underlying: [{ token: separate.asset, amount: out, fact: f.id }], facts: [h.fact, f.id] });
+      holdings.push({ kind: "vault", protocol: separate.name, asset: h.token, symbol: h.m.symbol, amount: h.amount, decimals: h.m.decimals, underlying: [{ token: separate.asset, amount: out, fact: f.id }], facts: [h.fact, f.id], venue: separate.vault });
     } else if (asset && assets !== undefined) {
       const a = asset.toLowerCase();
       const um = meta.get(a) ?? (await tokenMeta(ctx.line, [a], ctx.block, new Map())).get(a)!;

@@ -98,6 +98,21 @@ export class Pricer {
       }
     }
 
+    // 3. A vault share (ERC-4626): one share converts into some amount of its asset, which we price instead.
+    tried.push("ERC-4626 convertToAssets");
+    const [asset, perShare] = (await batch(at, [{ to: t, fn: "asset" }, { to: t, fn: "convertToAssets", args: [10n ** BigInt(dec)] }])) as [string?, bigint?];
+    if (asset && perShare !== undefined && asset.toLowerCase() !== t) {
+      const a = asset.toLowerCase();
+      const under = await this.price(a, block);
+      if ("usd" in under) {
+        const aDec = a === USDC ? 6 : Number(((await batch(at, [{ to: a, fn: "decimals" }]))[0] as number | undefined) ?? 18);
+        const assetsPerShare = num(perShare, aDec);
+        const cf = this.ledger.add({ label: `one ${sym} share converts into`, value: round(assetsPerShare), unit: short(a), contract: t, call: "convertToAssets(1 share)", block, source: "chain" });
+        const uf = this.ledger.add({ label: `${sym} price in USD`, value: round(assetsPerShare * under.usd), unit: "USD", call: `${cf.id} x ${under.facts[0] ?? "1"}`, block, source: "derived" });
+        return { usd: assetsPerShare * under.usd, facts: [uf.id, cf.id, ...under.facts], how: `convertToAssets on ${short(t)} x price of its asset` };
+      }
+    }
+
     return this.ledger.unknown({ reason: "no-price-route", subject: `${sym} (${t})`, details: `tried ${tried.join(" and ")} at block ${block}; none could price it` });
   }
 
