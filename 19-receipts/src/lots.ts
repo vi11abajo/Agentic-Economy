@@ -127,7 +127,11 @@ export async function tokenStory(ctx: LotCtx, token: string): Promise<TokenStory
         const priceThenUsd = "usd" in then ? then.usd : undefined;
         const from = r.transfers.find((x) => x.token === t && x.to === w)?.from ?? "?";
         story.received.push({ tx: f.hash, block: r.block, amount: net, from, priceThenUsd });
-        const fact = ctx.ledger.add({ label: `received ${show(net)} from ${short(from)} (nothing paid in that tx)`, value: round(num(net, decimals)), unit: symbol, tx: f.hash, block: r.block, call: "receipt Transfer logs", source: "explorer+chain" });
+        // Someone else can buy a token and have it delivered here; then the pool is the "from" and the buyer is the
+        // tx sender. Say who sent the tx, so nobody goes hunting for a payment this wallet never made.
+        const sender = r.from?.toLowerCase();
+        const how = sender && sender !== w ? `in a tx sent by another wallet, ${short(sender)}; this wallet paid nothing` : "nothing paid in that tx";
+        const fact = ctx.ledger.add({ label: `received ${show(net)} from ${short(from)} (${how})`, value: round(num(net, decimals)), unit: symbol, tx: f.hash, block: r.block, call: "receipt Transfer logs", source: "explorer+chain" });
         story.events.push({ tx: f.hash, block: r.block, kind: "received", amount: net, fact: fact.id });
       }
     } else {

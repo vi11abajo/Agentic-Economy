@@ -140,10 +140,13 @@ test("one broken token doesn't sink the scan; it's named with the call that fail
 });
 
 test("money sent into a contract nobody can read is reported, with what went in", async () => {
-  const { found } = await scan();
+  const { found, ledger } = await scan();
   const u = found.unknowns.find((x) => x.reason === "no-adapter")!;
   assert.equal(u.subject, X);
-  assert.match(u.details, /sent 3 0xc879\.\.\.1815 there in 1 tx \(method 0x5696bdae\)/);
+  assert.match(u.details, /sent 3 0xc879\.\.\.1815 \[F\d+\] there in 1 tx \(method 0x5696bdae\)/);
+  // the amount is a fact, so an answer can quote it and still pass the check
+  const id = u.details.match(/\[(F\d+)\]/)![1];
+  assert.equal(ledger.byId(id)!.value, "3");
 });
 
 test("a Morpho supply position is read from the market the wallet's own receipt names", async () => {

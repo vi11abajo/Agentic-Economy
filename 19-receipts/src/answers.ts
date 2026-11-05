@@ -171,7 +171,7 @@ export async function earning(scan: Scan): Promise<Answer> {
 /** The answer as text: the lines, then every fact they cite, then everything receipts could not tell and why. */
 export function render(scan: Scan, a: Answer): string {
   const cited = new Set<string>();
-  for (const l of a.lines) for (const m of l.matchAll(/F\d+/g)) cited.add(m[0]);
+  for (const l of [...a.lines, ...a.unknowns.map((u) => u.details)]) for (const m of l.matchAll(/\bF\d+\b/g)) cited.add(m[0]);
   if (scan.saved.gaps.length) for (const id of scan.saved.gapFacts ?? []) cited.add(id);
   // A derived figure names its inputs in its call ("F1 x F6"); list those inputs too.
   for (let grew = true; grew; ) {
