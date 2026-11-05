@@ -1,1 +1,0 @@
-ok, now buy pMusk for 0.001 PROS on that market. it has buyNative(minOut, deadline, recipient), minOut 0 is fine for such a tiny amount, and send the tokens to my wallet

@@ -1,1 +1,0 @@
-and this swap on Faroswap failed too, the one right before it worked fine {{0x59925ccc327c5f329736bfbbe752ee4a2a3b48561dd4f23995743ddcb34d77cf}}

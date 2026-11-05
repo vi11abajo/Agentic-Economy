@@ -11,3 +11,7 @@ trades.jsonl
 
 # design notes and build plans stay local
 docs/superpowers/
+
+# demo kits for the videos are internal
+*/agent/
+!01-read-contract-state/agent/
