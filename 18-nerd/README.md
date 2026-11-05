@@ -99,4 +99,15 @@ the docs' offsets, the latest-block walk.
 
 ## Proof
 
-Filled in after the recorded agent run.
+A real agent session recorded on 2026-11-05 (Claude Code with the skill installed from this repo by the agent
+itself, five turns, Pharos mainnet, read-only). In every turn the agent ran `docs`, then `call`, then `read`, and
+explained the function only from the quoted docs lines, with their links.
+
+| Turn | The user asked | Docs MCP read | Chain MCP called (block) | Reading |
+|---|---|---|---|---|
+| 2 | does USDC's DOMAIN_SEPARATOR match what the x402 docs sign with? | [x402 Pacific Mainnet](https://docs.pharos.xyz/developer-guide/x402/x402-pacific-mainnet), [x402 Atlantic Testnet](https://docs.pharos.xyz/developer-guide/x402/x402-atlantic-testnet) | USDC `name()`, `version()`, `DOMAIN_SEPARATOR()` (22187241) | MATCH x3: "USDC", "2", separator `0x6ffe34d1...5232` rebuilt from the docs equals the chain's |
+| 3 | how much USDC moves for a 0.01 call? | x402 Pacific Mainnet | USDC `decimals()` (22187286) | MATCH: 6 decimals; the docs' `0.01 -> "10000"` redone with the chain's decimals gives 10000; 0.005 is 5000 base units |
+| 4 | could I send a CCTP message from my wallet to domain 0? simulate only, explain each parameter | [Circle CCTP](https://docs.pharos.xyz/tooling-and-infrastructure/cross-chain/circle-cctp) | `localDomain()`, `version()`, `sendMessage` eth_call from `0x4644...D3Bb`, estimate_gas, newest `MessageSent` (22187321) | MATCH domain 31, version 1; simulation goes through, 47,803 gas; DOCS SILENT on which chain domain 0 is; the real message in [`0x9c69c43a...1eef`](https://www.pharosscan.xyz/tx/0x9c69c43a7365656ef1ef64c136fa9ff312986770a9236731d4528498a12d1eef) (block 22187272) cut by the docs' table: source 31, version 1, sender TokenMessengerV2 `0x28b5...cf5d`, all MATCH |
+| 5 | grab the first function call in the latest blocks and explain it | searches for the contract and the selector: nothing | `first` walked back to [`0xafed5faf...2192`](https://www.pharosscan.xyz/tx/0xafed5fafbb87836a1f21b933e6e3bb18cc3cb6a53880dc754d7a3830afa42192) (block 22187364), replayed as its sender at 22187363 | DOCS SILENT x2: the docs list neither `0x9365...b470` nor a function with selector `0x2f139e4f`; the agent said so and did not guess |
+
+Nothing was signed or sent in the whole session.
