@@ -129,3 +129,46 @@ replying. Wallet A is `0x4644...D3Bb` (scanned at block 22213793), wallet B is `
 
 Each fact names its contract and call or transaction and the block it was read at, for example
 `F7  redeem request waiting at DOG: 394.869775562229396107 DOGV | 0x6496...da38, pendingRedeemRequest(11) | block 22213977 | chain`.
+
+### What a vault earned, on a wallet that deposited itself
+
+Neither demo wallet had deposited into a vault itself, so this one comes from the CLI on a third wallet found
+through recent ERC-4626 `Deposit` events: `0xb29e...adf1`, holding Faroo Staked PROS and two Faroo vaults on top of
+it. Same tool, same facts, block 22218210 (fact table trimmed):
+
+```text
+What this wallet is earning (wallet 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1, block 22218210)
+- Faroo Staked PROS: no earnings figure (see below)
+- Faroo RWA Hybrid Vault 001: earned 0.0657149 stPROS so far (worth now + taken out - put in) [F29, F6, F27, F28]
+- Faroo Yield Vault 001: earned -0.078843 stPROS so far (worth now + taken out - put in) [F38, F7, F30, ... F37]
+
+  F6   FRHV001 shares are worth: 2.065714871332832809 stPROS | contract 0x36f3...b7e6, convertToAssets(balance) | block 22218210 | chain
+  F27  put into Faroo RWA Hybrid Vault 001: 1 stPROS | tx 0x78fc3090...6edbd, receipt Transfer logs | block 11405173 | explorer+chain
+  F28  put into Faroo RWA Hybrid Vault 001: 1 stPROS | tx 0x3cc2a7bf...4453d, receipt Transfer logs | block 11429701 | explorer+chain
+  F29  earned in Faroo RWA Hybrid Vault 001 (worth now + taken out - put in): 0.06571487133 stPROS | F6 + withdrawals - deposits | block 22218210 | derived
+
+What receipts can't tell you, and why:
+  - stPROS (Faroo Staked PROS): this wallet received it by transfer and never paid for it. 0.01002589443 stPROS came in
+    from 0xa5ca...f75c in tx 0x1bb90682...b2e192; this wallet didn't deposit for them, so what the position earned can't be added up
+```
+
+The Yield Vault figure is a loss: 3.21 stPROS went in over four deposits, 1.1712245 came out over four withdrawals,
+and the shares are worth 1.9599325 now. Both share values were read again straight from the vaults
+(`convertToAssets(balanceOf)` at that block) and match F6 and F7.
+
+### Where is my USDC, and what's the biggest position
+
+The two questions from the task text, on wallet B's saved scan (block 22213977):
+
+```text
+$ receipts where USDC
+1.51474 USDC in the wallet: worth $1.51474 [F18, F2]
+0.00276241 BANANA in Banana500 Vault (vault), which is 0.002971 USDC: worth $0.002971 [F19, F3, F4]
+40 PROPRO waiting at PROS PRO (redeem request 2, waiting, ...), which is 35.4042 USDC: worth $35.4042 [F20, F5, F6]
+394.87 DOGV waiting at DOG (redeem request 11, waiting, ...), which is 376.474 USDC: worth $376.474 [F21, F7, F8]
+
+$ receipts biggest
+1. 394.87 DOGV waiting at DOG (redeem request 11, waiting, ...), which is 376.474 USDC: worth $376.474 [F21, F7, F8]
+2. 40 PROPRO waiting at PROS PRO (redeem request 2, waiting, ...), which is 35.4042 USDC: worth $35.4042 [F20, F5, F6]
+3. 1.51474 USDC in the wallet: worth $1.51474 [F18, F2]
+```
