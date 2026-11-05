@@ -144,6 +144,17 @@ test("a vault position: earned = worth now + taken out - put in, in the vault's 
   assert.equal(ledger.byId(e.fact)!.value, "1");
 });
 
+test("a vault of some other token reports earnings in that token's symbol, not its address", async () => {
+  const VLT = "0x00000000000000000000000000000000000000c1";
+  const dep: FakeTx = { hash: h(13), block: 10, from: W, legs: [{ token: TOK, from: W, to: VLT, amount: 3n * E18 }, { token: VLT, from: "0x0000000000000000000000000000000000000000", to: W, amount: 3n * E18 }] };
+  const { ctx, ledger } = world([dep], 0n);
+  const holding = { kind: "vault" as const, protocol: "Staked TOK", asset: VLT, symbol: "sTOK", amount: 3n * E18, decimals: 18, underlying: [{ token: TOK, amount: 3n * E18 + E18 / 10n, fact: "F0" }], facts: [] };
+  const e = await vaultEarnings(ctx, holding);
+  assert.ok("earned" in e, "reason" in e ? e.details : "");
+  assert.equal(ledger.byId(e.fact)!.unit, "TOK");
+  assert.equal(ledger.byId(e.facts[1])!.unit, "TOK");
+});
+
 test("vault shares the history can't account for give no earnings figure", async () => {
   const VLT = "0x00000000000000000000000000000000000000c1";
   const dep: FakeTx = { hash: h(21), block: 10, from: W, legs: [{ token: USDC, from: W, to: VLT, amount: 10_000_000n }, { token: VLT, from: "0x0000000000000000000000000000000000000000", to: W, amount: 10n * E18 }] };

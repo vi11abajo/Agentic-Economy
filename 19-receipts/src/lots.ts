@@ -263,9 +263,10 @@ export async function vaultEarnings(ctx: LotCtx, h: import("./adapters.js").Hold
   let withdrawn = 0n;
   const facts: string[] = [];
   const flows = flowsUpTo(ctx).filter((f) => [...f.in, ...f.out].some((m) => m.token === asset && places.has(m.counterparty))).sort((a, b) => a.block - b.block);
-  const [dRaw] = (await batch(ctx, [{ to: asset, fn: "decimals" }])) as [number?];
+  // the vault's asset by name: "earned 0.07 stPROS" reads better than "earned 0.07 0x6b0a...5ec4"
+  const [dRaw, symRaw] = (await batch(ctx, [{ to: asset, fn: "decimals" }, { to: asset, fn: "symbol" }])) as [number?, string?];
   const decimals = asset === "0xc879c018db60520f4355c26ed1a6d572cdac1815" ? 6 : Number(dRaw ?? 18);
-  const sym = asset === "0xc879c018db60520f4355c26ed1a6d572cdac1815" ? "USDC" : short(asset);
+  const sym = asset === "0xc879c018db60520f4355c26ed1a6d572cdac1815" ? "USDC" : (symRaw || short(asset));
   for (const f of flows) {
     const r = await receiptTransfers(ctx.line, f.hash);
     if (r.status !== 1) continue;
