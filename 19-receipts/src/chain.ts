@@ -11,6 +11,21 @@ export const ZERO = "0x0000000000000000000000000000000000000000";
 const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 const WRAP = "0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c"; // WPROS Deposit(dst, wad)
 const UNWRAP = "0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65"; // WPROS Withdrawal(src, wad)
+// ERC-7540 RedeemRequest / DepositRequest(controller, owner, requestId indexed, sender, amount)
+const REQUEST_EVENTS = new Set([
+  "0x1fdc681a13d8c5da54e301c7ce6542dcde4581e4725043fdab2db12ddc574506",
+  "0xbb58420bb8ce44e11b84e214cc0de10ce5e7c24d0355b2815c3d758b514cae72",
+]);
+const MORPHO_ADDRESS = "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb";
+// Morpho Blue events whose first indexed topic is the market id.
+const MORPHO_MARKET_EVENTS = new Set([
+  "0xedf8870433c83823eb071d3df1caa8d008f12f6440918c20d75a3602cda30fe0", // Supply
+  "0xa56fc0ad5702ec05ce63666221f796fb62437c32db1aa1aa075fc6484cf58fbf", // Withdraw
+  "0x570954540bed6b1304a87dfe815a5eda4a648f7097a16240dcd85c9b5fd42a43", // Borrow
+  "0x52acb05cebbd3cd39715469f22afbf5a17496295ef3bc9bb5944056c63ccaa09", // Repay
+  "0xa3b9472a1399e17e123f3c2e6586c23e504184d504de59cdaa2b375e880c6184", // SupplyCollateral
+  "0xe80ebd7cc9223d7382aab2e0d1d6155c65651f83d53c8b9b06901d167e321142", // WithdrawCollateral
+]);
 
 const mcAbi = parseAbi([
   "function aggregate3((address target, bool allowFailure, bytes callData)[] calls) payable returns ((bool success, bytes returnData)[] returnData)",
@@ -121,6 +136,10 @@ export interface TxReceipt {
   wraps: { who: string; amount: bigint }[];
   /** WPROS unwrapped back to native PROS (who, how much): how routers pay out native PROS. */
   unwraps: { who: string; amount: bigint }[];
+  /** ERC-7540 request ids the vaults handed out in this tx. */
+  requestIds?: { vault: string; id: bigint }[];
+  /** Morpho Blue market ids this tx touched. */
+  morphoMarkets?: string[];
 }
 
 const topicAddr = (t: string) => `0x${t.slice(26)}`.toLowerCase();
@@ -145,6 +164,8 @@ export async function receiptTransfers(line: ToolLine, hash: string): Promise<Tx
     transfers: [],
     wraps: [],
     unwraps: [],
+    requestIds: [],
+    morphoMarkets: [],
   };
   for (const log of rc.logs) {
     const address = log.address.toLowerCase();
@@ -154,6 +175,10 @@ export async function receiptTransfers(line: ToolLine, hash: string): Promise<Tx
       out.wraps.push({ who: topicAddr(log.topics[1]), amount: BigInt(log.data) });
     } else if (address === WPROS && log.topics[0] === UNWRAP) {
       out.unwraps.push({ who: topicAddr(log.topics[1]), amount: BigInt(log.data) });
+    } else if (REQUEST_EVENTS.has(log.topics[0]) && log.topics.length === 4) {
+      out.requestIds!.push({ vault: address, id: BigInt(log.topics[3]) });
+    } else if (address === MORPHO_ADDRESS && MORPHO_MARKET_EVENTS.has(log.topics[0]) && !out.morphoMarkets!.includes(log.topics[1])) {
+      out.morphoMarkets!.push(log.topics[1]);
     }
   }
   writeJson(rel, out);
@@ -168,6 +193,8 @@ function revive(saved: Record<string, unknown>): TxReceipt {
     transfers: r.transfers.map((t) => ({ ...t, amount: BigInt(t.amount as unknown as string) })),
     wraps: r.wraps.map((w) => ({ ...w, amount: BigInt(w.amount as unknown as string) })),
     unwraps: r.unwraps.map((w) => ({ ...w, amount: BigInt(w.amount as unknown as string) })),
+    requestIds: (r.requestIds ?? []).map((q) => ({ ...q, id: BigInt(q.id as unknown as string) })),
+    morphoMarkets: r.morphoMarkets ?? [],
   };
 }
 
