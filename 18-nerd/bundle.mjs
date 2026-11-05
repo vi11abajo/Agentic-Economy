@@ -15,6 +15,6 @@ await build({
   target: "node20",
   minify: true,
   legalComments: "none",
-  banner: { js: "// nerd, built from 17-nerd/src in github.com/vi11abajo/Agentic-Economy (npm run build)" },
+  banner: { js: "// nerd, built from 18-nerd/src in github.com/vi11abajo/Agentic-Economy (npm run build)" },
   logLevel: "warning",
 });
