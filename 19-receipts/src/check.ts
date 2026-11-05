@@ -4,9 +4,14 @@
 import type { Fact } from "./facts.js";
 
 const CITATION = /\[(F\d+(?:\s*,\s*F\d+)*)\]/g;
-// A figure is a number standing on its own: not glued to letters (ERC-4626, x402, p3QMV), not part of a hex.
-const FIGURE = /(?<![\w.\-])-?\$?\d[\d,]*(?:\.\d+)?(?![\w]|\.\d)%?/g;
+// A figure is a number that doesn't start inside a word (x402, p3QMV, ERC-4626 are names, not figures). What comes
+// after it doesn't matter: "$9.9k", "5M", "7000USD" are figures too, and k/M/B scale them.
+const FIGURE = /(?<![\w.])(?<![A-Za-z]-)-?\$?\d[\d,]*(?:\.\d+)?(?!\.\d)(?:([kKmMbB])(?![A-Za-z]))?%?/g;
+const SCALE: Record<string, number> = { k: 1e3, m: 1e6, b: 1e9 };
 const TOLERANCE = 0.005; // half a percent covers "about" and rounding to a few digits
+// A negative fact may be shown without its minus only when the words around it already say it's a loss.
+const LOSS_WORDS = /\b(loss|losses|lost|losing|down|lower|less|fell|dropped|decrease[ds]?|negative|minus|cost you)\b/i;
+const NUMBER_IN_LABEL = /(?<![\w.])\d[\d,]*(?:\.\d+)?(?![\w.])/g;
 
 /** Things that look like numbers but are addresses, hashes, block heights, dates or list markers. */
 function stripNonFigures(line: string): string {
@@ -56,16 +61,19 @@ export function checkAnswer(text: string, facts: Fact[]): { ok: boolean; problem
       else problems.push(`line ${n + 1}: ${id} does not exist`);
     }
     const values = allowedValues(cited.map((f) => Number(f.value)).filter((v) => Number.isFinite(v)));
+    // Amounts a fact names in its own label ("bought 12.5 FOO for") came off the same receipt; they may be shown too.
+    for (const f of cited) for (const lm of f.label.matchAll(NUMBER_IN_LABEL)) values.push(Number(lm[0].replace(/,/g, "")));
+    const saysLoss = LOSS_WORDS.test(line);
     for (const m of stripNonFigures(line).matchAll(FIGURE)) {
-      const token = m[0].replace(/[$%,]/g, "");
-      const shown = Number(token);
+      const token = m[0].replace(/[$%,kKmMbB]/g, "");
+      const shown = Number(token) * (m[1] ? SCALE[m[1].toLowerCase()] : 1);
       if (!Number.isFinite(shown)) continue;
       if (!cited.length) {
         problems.push(`line ${n + 1}: ${m[0]} has no fact id`);
         continue;
       }
-      const decimals = shownDecimals(token);
-      const ok = values.some((v) => close(shown, v, decimals) || close(shown, Math.abs(v), decimals));
+      const decimals = shownDecimals(token) - (m[1] ? Math.log10(SCALE[m[1].toLowerCase()]) : 0);
+      const ok = values.some((v) => close(shown, v, decimals) || (v < 0 && shown > 0 && saysLoss && close(shown, -v, decimals)));
       if (!ok) {
         const listed = cited.map((f) => `${f.id} (${f.value})`).join(", ");
         problems.push(`line ${n + 1}: ${m[0]} does not match ${listed}`);

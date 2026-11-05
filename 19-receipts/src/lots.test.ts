@@ -142,3 +142,34 @@ test("a vault position: earned = worth now + taken out - put in, in the vault's 
   assert.equal(e.earned, 1_000_000n);
   assert.equal(ledger.byId(e.fact)!.value, "1");
 });
+
+test("vault shares the history can't account for give no earnings figure", async () => {
+  const VLT = "0x00000000000000000000000000000000000000c1";
+  const dep: FakeTx = { hash: h(21), block: 10, from: W, legs: [{ token: USDC, from: W, to: VLT, amount: 10_000_000n }, { token: VLT, from: "0x0000000000000000000000000000000000000000", to: W, amount: 10n * E18 }] };
+  const { ctx } = world([dep], 12n * E18);
+  const holding = { kind: "vault" as const, protocol: "Steady", asset: VLT, symbol: "sV", amount: 12n * E18, decimals: 18, underlying: [{ token: USDC, amount: 12_600_000n, fact: "F0" }], facts: [] };
+  const e = await vaultEarnings(ctx, holding);
+  assert.ok("reason" in e && e.reason === "history-incomplete", JSON.stringify(e, (_, v) => (typeof v === "bigint" ? String(v) : v)));
+});
+
+test("vault shares that came from another wallet give no earnings figure", async () => {
+  const VLT = "0x00000000000000000000000000000000000000c1";
+  const dep: FakeTx = { hash: h(31), block: 10, from: W, legs: [{ token: USDC, from: W, to: VLT, amount: 10_000_000n }, { token: VLT, from: "0x0000000000000000000000000000000000000000", to: W, amount: 10n * E18 }] };
+  const gift: FakeTx = { hash: h(32), block: 11, from: FRIEND, legs: [{ token: VLT, from: FRIEND, to: W, amount: 5n * E18 }] };
+  const { ctx } = world([dep, gift], 15n * E18);
+  const holding = { kind: "vault" as const, protocol: "Steady", asset: VLT, symbol: "sV", amount: 15n * E18, decimals: 18, underlying: [{ token: USDC, amount: 15_750_000n, fact: "F0" }], facts: [] };
+  const e = await vaultEarnings(ctx, holding);
+  assert.ok("reason" in e && e.reason === "received-not-bought");
+});
+
+test("history after the scan's pinned block is left out", async () => {
+  const VLT = "0x00000000000000000000000000000000000000c1";
+  const dep: FakeTx = { hash: h(41), block: 10, from: W, legs: [{ token: USDC, from: W, to: VLT, amount: 10_000_000n }, { token: VLT, from: "0x0000000000000000000000000000000000000000", to: W, amount: 10n * E18 }] };
+  const later: FakeTx = { hash: h(42), block: 2000, from: W, legs: [{ token: VLT, from: W, to: "0x0000000000000000000000000000000000000000", amount: 2n * E18 }, { token: USDC, from: VLT, to: W, amount: 2_100_000n }] };
+  const { ctx } = world([dep, later], 10n * E18); // ctx.block is 1000
+  const holding = { kind: "vault" as const, protocol: "Steady", asset: VLT, symbol: "sV", amount: 10n * E18, decimals: 18, underlying: [{ token: USDC, amount: 10_500_000n, fact: "F0" }], facts: [] };
+  const e = await vaultEarnings(ctx, holding);
+  assert.ok("earned" in e, "reason" in e ? e.details : "");
+  assert.equal(e.withdrawn, 0n);
+  assert.equal(e.earned, 500_000n);
+});

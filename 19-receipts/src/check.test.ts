@@ -57,3 +57,31 @@ test("citing a fact that doesn't exist is caught", () => {
   assert.equal(r.ok, false);
   assert.match(r.problems[0], /F9 does not exist/);
 });
+
+test("a figure with a k, M or unit suffix is still a figure", () => {
+  const f = facts("1000");
+  assert.equal(checkAnswer("Total: $9.9k [F1]", f).ok, false);
+  assert.equal(checkAnswer("Total: $5M [F1]", f).ok, false);
+  assert.equal(checkAnswer("Total about 7000USD [F1]", f).ok, false);
+  assert.equal(checkAnswer("Total: $1k [F1]", f).ok, true);
+  assert.equal(checkAnswer("It speaks x402 and holds ERC-4626 shares worth 1000 [F1]", f).ok, true);
+});
+
+test("a number after a hyphen between numbers is checked", () => {
+  assert.equal(checkAnswer("1000-99999 [F1]", facts("1000")).ok, false);
+});
+
+test("a loss can't be told as a gain", () => {
+  const f = facts("-50");
+  assert.equal(checkAnswer("You made $50 on it [F1]", f).ok, false);
+  assert.equal(checkAnswer("You lost $50 on it [F1]", f).ok, true);
+  assert.equal(checkAnswer("You are down $50 [F1]", f).ok, true);
+  assert.equal(checkAnswer("Result: -$50 [F1]", f).ok, true);
+});
+
+test("an amount the cited fact names in its own label passes (the tool's own pnl lines)", () => {
+  const ledger = new Ledger();
+  ledger.add({ label: "block 123: bought 12.5 FOO for", value: "3", unit: "USD", tx: "0xabc", block: 123, source: "explorer+chain" });
+  assert.equal(checkAnswer("  block 123: bought 12.5 FOO for $3, tx 0xabc [F1]", ledger.facts()).ok, true);
+  assert.equal(checkAnswer("  bought 14 FOO for $3 [F1]", ledger.facts()).ok, false);
+});

@@ -2,7 +2,7 @@
 // what it paid, what it got, what it simply received. Average cost, realized and unrealized P&L, and for tokens
 // that just arrived, the honest version: you didn't buy these, here is only how the price moved since.
 import { formatUnits } from "viem";
-import { confirmTransfer, receiptTransfers, type TxReceipt } from "./chain.js";
+import { confirmTransfer, receiptTransfers, ZERO, type TxReceipt } from "./chain.js";
 import type { WalletIndex } from "./explorer.js";
 import { plain, type Ledger, type Unknown } from "./facts.js";
 import { groupFlows } from "./flows.js";
@@ -74,7 +74,7 @@ export async function tokenStory(ctx: LotCtx, token: string): Promise<TokenStory
   }
   story.facts.balance = ctx.ledger.add({ label: `${symbol} in the wallet`, value: round(num(story.balance, decimals)), raw: story.balance.toString(), unit: symbol, contract: t, call: `balanceOf(${short(w)})`, block: ctx.block, source: "chain" }).id;
 
-  const flows = groupFlows(ctx.ix).filter((f) => [...f.in, ...f.out].some((m) => m.token === t)).sort((a, b) => a.block - b.block);
+  const flows = flowsUpTo(ctx).filter((f) => [...f.in, ...f.out].some((m) => m.token === t)).sort((a, b) => a.block - b.block);
   if (!flows.some((f) => f.in.some((m) => m.token === t))) {
     if (story.balance > 0n) say({ reason: "no-cost-basis", subject: symbol, details: `the wallet holds ${show(story.balance)} but the explorer history has no incoming transfers of it, so there is nothing to say what it cost` });
     return story;
@@ -258,7 +258,7 @@ export async function vaultEarnings(ctx: LotCtx, h: import("./adapters.js").Hold
   let deposited = 0n;
   let withdrawn = 0n;
   const facts: string[] = [];
-  const flows = groupFlows(ctx.ix).filter((f) => [...f.in, ...f.out].some((m) => m.token === asset && places.has(m.counterparty))).sort((a, b) => a.block - b.block);
+  const flows = flowsUpTo(ctx).filter((f) => [...f.in, ...f.out].some((m) => m.token === asset && places.has(m.counterparty))).sort((a, b) => a.block - b.block);
   const [dRaw] = (await batch(ctx, [{ to: asset, fn: "decimals" }])) as [number?];
   const decimals = asset === "0xc879c018db60520f4355c26ed1a6d572cdac1815" ? 6 : Number(dRaw ?? 18);
   const sym = asset === "0xc879c018db60520f4355c26ed1a6d572cdac1815" ? "USDC" : short(asset);
@@ -272,10 +272,48 @@ export async function vaultEarnings(ctx: LotCtx, h: import("./adapters.js").Hold
     deposited += put;
     withdrawn += took;
   }
+  const shares = await shareTrail(ctx, h, places);
+  if (shares) return shares;
   if (deposited === 0n) {
     return ctx.ledger.unknown({ reason: "no-cost-basis", subject: `${h.symbol} (${h.protocol})`, details: `no deposit of ${sym} from this wallet into ${h.protocol} shows up in its history; the shares may have arrived by transfer, so what they cost is unknown` });
   }
   const earned = under.amount + withdrawn - deposited;
   const fact = ctx.ledger.add({ label: `earned in ${h.protocol} (worth now + taken out - put in)`, value: round(num(earned, decimals)), unit: sym, call: `${under.fact} + withdrawals - deposits`, block: ctx.block, source: "derived" });
   return { protocol: h.protocol, asset, deposited, withdrawn, now: under.amount, earned, decimals, fact: fact.id, facts: [under.fact, ...facts] };
+}
+
+/** The wallet's history as of the scan's block: rows the explorer already has from later blocks don't belong here. */
+function flowsUpTo(ctx: LotCtx) {
+  return groupFlows(ctx.ix).filter((f) => f.block <= ctx.block);
+}
+
+/**
+ * Earned = worth now + taken out - put in only holds if every share the wallet has came from its own deposits.
+ * So follow the share token itself: shares from someone else mean nobody here paid for them, and shares the
+ * history can't add up to the balance on chain mean a deposit or a withdrawal is missing from it.
+ */
+async function shareTrail(ctx: LotCtx, h: import("./adapters.js").Holding, places: Set<string>): Promise<Unknown | undefined> {
+  const w = ctx.wallet.toLowerCase();
+  const share = h.asset.toLowerCase();
+  const subject = `${h.symbol} (${h.protocol})`;
+  const amt = (x: bigint) => plain(num(x, h.decimals));
+  let net = 0n;
+  for (const f of flowsUpTo(ctx).filter((f) => [...f.in, ...f.out].some((m) => m.token === share))) {
+    const r = await receiptTransfers(ctx.line, f.hash);
+    if (r.status !== 1) continue;
+    for (const x of r.transfers.filter((x) => x.token === share)) {
+      if (x.to === w && x.from !== w) {
+        net += x.amount;
+        if (x.from !== ZERO && !places.has(x.from)) {
+          return ctx.ledger.unknown({ reason: "received-not-bought", subject, details: `${amt(x.amount)} ${h.symbol} came in from ${short(x.from)} in tx ${f.hash}; this wallet didn't deposit for them, so what the position earned can't be added up` });
+        }
+      } else if (x.from === w && x.to !== w) {
+        net -= x.amount;
+      }
+    }
+  }
+  if (net !== h.amount) {
+    return ctx.ledger.unknown({ reason: "history-incomplete", subject, details: `the history adds up to ${amt(net)} ${h.symbol}, the chain says the wallet holds ${amt(h.amount)} at block ${ctx.block}; a deposit or withdrawal is missing, so there is no earnings figure` });
+  }
+  return undefined;
 }
