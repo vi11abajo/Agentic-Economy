@@ -27,6 +27,7 @@ const chain = {
   [PMUSK]: { symbol: () => "pMusk", decimals: () => 18 },
   [MARKET]: { pToken: () => PMUSK, quoteSell: (x: bigint) => [x / 100_000n, 0n, x / 100_000n] }, // 0.00001 WPROS each
   [NOBODY]: { symbol: () => "NOPE", decimals: () => 18 },
+  [VAULT]: { symbol: () => "sv", decimals: () => 24, asset: () => WPROS, convertToAssets: (x: bigint) => (x * 2n) / 10n ** 6n }, // 1 share = 2 WPROS
 };
 
 const buyFromMarket = { transaction_hash: "0x01", log_index: 0, from_address: MARKET, to_address: W, value: "10", token_address: PMUSK, block_number: 5, token_info: { symbol: "pMusk", decimals: 18 } };
@@ -69,7 +70,7 @@ test("no route at all is an Unknown that lists what was tried", async () => {
   const r = await p.price(NOBODY, 1000);
   assert.ok("reason" in r);
   assert.equal(r.reason, "no-price-route");
-  assert.match(r.details, /Prosper V2 pairs.*curve market/);
+  assert.match(r.details, /Prosper V2 pairs.*curve market.*ERC-4626/);
 });
 
 test("a past block is passed through to every read", async () => {
@@ -94,4 +95,12 @@ test("holdings are valued through their underlying; debt counts against the tota
   assert.equal(v.lines[3].usd, undefined);
   assert.ok(Math.abs(v.total - 6.19) < 1e-9);
   assert.deepEqual(v.excluded, ["NOPE"]);
+});
+
+test("a vault share is priced through what one share converts into", async () => {
+  const { p } = pricer();
+  const r = await p.price(VAULT, 1000);
+  assert.ok("usd" in r);
+  assert.ok(Math.abs(r.usd - 2 * 0.519) < 1e-12);
+  assert.match(r.how, /convertToAssets/);
 });
