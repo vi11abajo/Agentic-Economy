@@ -107,7 +107,7 @@ NOT OK:
 
 ## Tests
 
-`npm test`: 48 tests on a scripted Chain MCP and a scripted explorer, plus real transactions and receipts saved
+`npm test`: 55 tests on a scripted Chain MCP and a scripted explorer, plus real transactions and receipts saved
 from mainnet: explorer paging and gaps, receipts against explorer rows, holdings for every share kind, pricing
 routes, average cost and realized profit, received tokens, half-answered vault requests, the answer checker, and
 a check that the source has no signing or sending code.
