@@ -35,7 +35,13 @@ export interface Fact {
   call?: string;
   tx?: string;
   block: number;
-  source: "chain" | "explorer+chain" | "derived";
+  source: "chain" | "explorer+chain" | "explorer" | "derived";
+}
+
+/** A number as plain decimal text, never "3.9e-7": people read it and the answer checker parses it. */
+export function plain(x: number, digits = 10): string {
+  if (!Number.isFinite(x)) return String(x);
+  return x.toLocaleString("en-US", { maximumSignificantDigits: digits, useGrouping: false });
 }
 
 export interface Unknown {
