@@ -5,7 +5,7 @@ import { formatUnits } from "viem";
 import { WPROS } from "./chain.js";
 import { NATIVE, type Holding } from "./adapters.js";
 import type { WalletIndex } from "./explorer.js";
-import type { Ledger, Unknown } from "./facts.js";
+import { plain, type Ledger, type Unknown } from "./facts.js";
 import type { ToolLine } from "./mcp.js";
 import { batch } from "./reads.js";
 
@@ -37,7 +37,7 @@ export interface Valuation {
 const ZERO = "0x0000000000000000000000000000000000000000";
 const short = (a: string) => `${a.slice(0, 6)}...${a.slice(-4)}`;
 const num = (x: bigint, d: number) => Number(formatUnits(x, d));
-const round = (x: number) => Number(x.toPrecision(10)).toString();
+const round = (x: number) => plain(x);
 
 export class Pricer {
   private readonly memo = new Map<string, Promise<Price | Unknown>>();
