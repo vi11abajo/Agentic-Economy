@@ -6,8 +6,7 @@ delegation. Ask the agent in plain words ("airdrop 0.00001 USDC to the 10 latest
 pCARR and pMusk for 5 PROS each"): it turns that into a plan, simulates the whole batch on mainnet, shows what
 each action would do and how it compares with sending them one by one, and sends only when the user says so.
 
-How it works, piece by piece: [ARCHITECTURE.md](ARCHITECTURE.md). Design notes:
-[docs/superpowers/specs/2026-11-03-onego-design.md](../docs/superpowers/specs/2026-11-03-onego-design.md).
+How it works, piece by piece: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Why "nobody gets rights" matters
 

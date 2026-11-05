@@ -9,8 +9,7 @@ if anyone edits it.
 What's different: bouncer doesn't judge the request by what it says, it judges the transaction by what it would
 do. Each request is run through `debug_traceCall` on mainnet first, and the rules read the trace.
 
-How it works, piece by piece: [ARCHITECTURE.md](ARCHITECTURE.md). Design notes:
-[docs/superpowers/specs/2026-11-04-bouncer-design.md](../docs/superpowers/specs/2026-11-04-bouncer-design.md).
+How it works, piece by piece: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Why the trace and not the request
 
