@@ -1,8 +1,8 @@
 // Turns "the wallet touched these tokens and contracts" into "the wallet has these positions right now".
 // Everything is read at the scan's pinned block, in a few Multicall3 batches, and every figure becomes a fact.
-import { encodeFunctionData, decodeFunctionResult, formatUnits, type Hex } from "viem";
-import { READS, type ReadName } from "./abis.js";
-import { multicall, nativeBalance, receiptTransfers, tokenMeta, WPROS, MULTICALL3, type TokenMeta } from "./chain.js";
+import { formatUnits } from "viem";
+import { batch } from "./reads.js";
+import { nativeBalance, receiptTransfers, tokenMeta, WPROS, MULTICALL3, type TokenMeta } from "./chain.js";
 import type { WalletIndex } from "./explorer.js";
 import type { Ledger, Unknown } from "./facts.js";
 import { groupFlows } from "./flows.js";
@@ -45,23 +45,6 @@ export interface Findings {
   unknowns: Unknown[];
   checked: { tokens: number; nonZero: number };
   meta: Map<string, TokenMeta>;
-}
-
-type Call = { to: string; fn: ReadName; args?: readonly unknown[] };
-
-/** Runs a batch of reads through Multicall3 and decodes each answer; a failed read is undefined, never zero. */
-async function batch(ctx: ScanCtx, calls: Call[]): Promise<unknown[]> {
-  if (!calls.length) return [];
-  const encoded = calls.map((c) => ({ to: c.to, data: encodeFunctionData({ abi: READS, functionName: c.fn as never, args: (c.args ?? []) as never }) }));
-  const raw = await multicall(ctx.line, encoded, ctx.block);
-  return raw.map((r, i) => {
-    if (!r.ok) return undefined;
-    try {
-      return decodeFunctionResult({ abi: READS, functionName: calls[i].fn as never, data: r.data as Hex });
-    } catch {
-      return undefined;
-    }
-  });
 }
 
 const show = (amount: bigint, decimals: number) => formatUnits(amount, decimals);
