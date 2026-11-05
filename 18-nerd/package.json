@@ -1,0 +1,23 @@
+{
+  "name": "nerd",
+  "version": "1.0.0",
+  "description": "nerd: reads the Pharos developer docs first, then calls the same function through the Pharos Chain MCP, then holds the answer up against what it read",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "nerd": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
