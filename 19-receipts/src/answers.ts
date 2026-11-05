@@ -149,7 +149,7 @@ export async function earning(scan: Scan): Promise<Answer> {
   const lines: string[] = [];
   const unknowns: Unknown[] = [];
   const vaults = scan.saved.holdings.filter((h) => h.kind === "vault");
-  if (vaults.length) lines.push("Vault positions:");
+  lines.push(vaults.length ? "Vault positions:" : "No vault or staking shares in the wallet at this block.");
   for (const h of vaults) {
     const e = await vaultEarnings(ctx, h);
     if ("reason" in e) {
@@ -161,7 +161,7 @@ export async function earning(scan: Scan): Promise<Answer> {
     }
   }
   const inFlight = scan.saved.holdings.filter((h) => h.kind === "in-flight");
-  if (inFlight.length) lines.push("", `${inFlight.length} vault request(s) still waiting to be paid; they earn nothing until then.`);
+  if (inFlight.length) lines.push("", `${inFlight.length} vault request(s) still waiting to be paid out (receipts inflight shows them).`);
   const tokens = await pnl(scan);
   lines.push("", "Tokens held now:", ...tokens.lines);
   unknowns.push(...tokens.unknowns, ...scan.ledger.unknowns().filter((u) => /request/.test(u.subject)));
