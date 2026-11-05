@@ -93,7 +93,8 @@ export async function readTheDocs(docs: ToolLine, plan: LookupPlan): Promise<Bri
     const lines = quotesFrom(page, plan.needles);
     if (lines.length === 0) continue;
     pages.push(page);
-    quotes.push(...lines);
+    // The testnet twin of a page repeats most lines; quote a line once, from the higher-ranked page.
+    quotes.push(...lines.filter((l) => !quotes.some((q) => q.text === l.text)));
   }
   return { key: plan.key, subject: plan.subject, searched: plan.searches, pages, quotes, madeAt: Date.now() };
 }
