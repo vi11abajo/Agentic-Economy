@@ -8,3 +8,6 @@ trades.jsonl
 .test-tmp/
 .env.*
 *-home/
+
+# design notes and build plans stay local
+docs/superpowers/
