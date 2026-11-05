@@ -10,8 +10,7 @@ The skill makes every decision; the Chain MCP supplies every fact and carries ev
 literally can't be known until a future block is mined, so the skill's answer depends on live chain data in the
 strongest way there is.
 
-The full flow (what calls what, in order) with a diagram: [ARCHITECTURE.md](ARCHITECTURE.md). Design notes:
-[docs/superpowers/specs/2026-11-04-kickback-design.md](../docs/superpowers/specs/2026-11-04-kickback-design.md).
+The full flow (what calls what, in order) with a diagram: [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Why a fair draw
 
