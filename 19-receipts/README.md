@@ -114,4 +114,18 @@ a check that the source has no signing or sending code.
 
 ## Proof
 
-Filled in after the recorded agent session.
+A recorded session on 2026-11-05: a fresh Claude Code agent installs the skill from this repo with
+`npx skills add`, then answers six questions on Pharos mainnet. It ran `receipts check` on every draft before
+replying. Wallet A is `0x4644...D3Bb` (scanned at block 22213793), wallet B is `0x9f85...a37c` (block 22213977).
+
+| # | Question | What the agent ran | What it answered, with the facts behind it |
+|---|---|---|---|
+| 1 | "can you install this skill for yourself?" | `npx skills add .../19-receipts/skill/receipts`, read SKILL.md, `node --version` | installed for the project, said what the skill reads and that it needs no keys |
+| 2 | "what's in this wallet and what's it worth?" (A) | `scan`, `holdings`, `total`, `check` | $0.518 in total [F19], line by line: 0.49979 USDC, 0.0141658 PROS, 1385.68 pMusk, 1 pTACO, 1 pCARR. Left out, with the reason: 2.45718 PROS sent to `0xf81f...626a` that nothing can read [F6], and an APT redeem request whose status read fails. Explorer gap named: 833 of 859 txs [F20, F21] |
+| 3 | "i bought some pTACO there today. am i up or down on it?" | `pnl pTACO`, `check` | bought 1 pTACO for $0.00459879 at block 22203872, tx `0xb096cf58...8baf` [F26]; worth $0.00452232 now [F29]; down $0.0000765 [F31], about 1.66%, unrealized |
+| 4 | "and the pCARR? how much did i make on that one?" | `pnl pCARR`, `check` (twice) | no profit figure: the pCARR came out of the pool in a tx sent by another wallet, `0xdcbb...36e7`, and this wallet paid nothing [F36]. Only the price move since it arrived is shown, as not earnings: -$0.0000507 per token [F40]. Its first draft said "about 4.7% lower"; `check` answered NOT OK (no fact for 4.7%), and the agent dropped the figure |
+| 5 | "is any of his money in vaults or staking, and what is it earning?" (B) | `scan`, `earning`, `protocols`, `check` | one open vault position, 0.00276241 BANANA in Banana500 Vault worth $0.002971 [F3, F19], no earnings figure because the shares came in by transfer from `0x707e...9325`. Two redeem requests waiting: 40 PROPRO worth $35.4042 [F5, F20] and 394.87 DOGV worth $376.474 [F7, F21]. Money sent to contracts nothing can read, e.g. 1156.902369 USDC to `0x36c8...1fec` [F15] |
+| 6 | "is anything of his stuck somewhere, or in a place you just cannot read?" | `inflight`, `check` | the two requests are unpaid but not provably stuck (the vaults don't say when they become claimable); seven unreadable destinations, each amount with its fact [F9-F15]. Explorer gap named: 351 of 352 txs [F23, F24] |
+
+Each fact names its contract and call or transaction and the block it was read at, for example
+`F7  redeem request waiting at DOG: 394.869775562229396107 DOGV | 0x6496...da38, pendingRedeemRequest(11) | block 22213977 | chain`.
