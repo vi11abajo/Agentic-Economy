@@ -91,6 +91,7 @@ export async function look(chain: Chain, a: LookArgs): Promise<Look> {
   };
 
   const costs: Look["costs"] = {};
+  const stUnbond = readings.find((x) => x.source.kind === "stpros")?.waitSeconds ?? 86400;
   if (amount > 0n) {
     await Promise.all(
       readings
@@ -99,7 +100,9 @@ export async function look(chain: Chain, a: LookArgs): Promise<Look> {
           try {
             const steps = buildSteps(from, to, a.wallet, amount);
             const est = await estimateAll(chain, a.wallet, steps);
-            costs[to.source.id] = est.total === undefined ? { gasWhy: est.problem, steps } : { gas: gasToLane(est.total), steps };
+            // Out of a Faroo vault the money is stPROS: into stPROS there's no wait, anywhere else it unbonds first.
+            const waitSeconds = from.source.kind === "faroo-vault" ? (to.source.kind === "stpros" ? 0 : stUnbond) : undefined;
+            costs[to.source.id] = est.total === undefined ? { gasWhy: est.problem, steps, waitSeconds } : { gas: gasToLane(est.total), steps, waitSeconds };
           } catch (e) {
             costs[to.source.id] = { gasWhy: (e as Error).message };
           }
@@ -120,6 +123,7 @@ export async function look(chain: Chain, a: LookArgs): Promise<Look> {
     entryFee: x.entryFee,
     exitFee: x.exitFee,
     exitRoom: x.exitRoom === undefined ? undefined : unit(lane, x.exitRoom),
+    exitBlocked: x.exitBlocked,
     entryRoom: x.entryRoom === undefined ? undefined : unit(lane, x.entryRoom),
     waitSeconds: x.waitSeconds,
   });
@@ -141,7 +145,7 @@ export async function look(chain: Chain, a: LookArgs): Promise<Look> {
       amount: amount.toString(),
       holdDays: a.holdDays,
       minGain: a.minGain,
-      waitSeconds: from.waitSeconds,
+      waitSeconds: costs[decision.to].waitSeconds ?? from.waitSeconds,
       steps: costs[decision.to].steps!,
     };
   }
