@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ENV_TEMPLATE, channelsOn, ensureEnvTemplate, hide, loadSecrets, shout, type Outlet } from "./deliver.js";
 import { idMatchesParams, taylor } from "./morpho.js";
+import type { Card } from "./render.js";
 import { decodeRuleLog, isRuleChange } from "./tripwire.js";
 
 // The real syzUSD/USDC market, params as idToMarketParams returned them on 2026-11-06.
@@ -69,6 +70,26 @@ test("an alert goes to the console with a timestamp and to both channels", async
   assert.match(lines[0], /\n\s+act: repay 1 USDC/);
   assert.deepEqual(report, ["telegram: delivered", "discord: delivered"]);
   assert.ok(calls.every((c) => c.includes("[2026-11-06T12:00:00.000Z] CRITICAL")));
+});
+
+test("with a card, Discord gets a coloured embed and Telegram gets HTML, the console still gets the text", async () => {
+  const bodies: Record<string, any> = {};
+  const net = (async (url: string, init: { body: string }) => {
+    bodies[url.includes("telegram") ? "telegram" : "discord"] = JSON.parse(init.body);
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  }) as unknown as typeof fetch;
+  const lines: string[] = [];
+  const o: Outlet = { console: (l) => lines.push(l), net, secrets: { telegramToken: "t0ken:x", telegramChat: "42", discordWebhook: "https://d/1/w" }, telegram: true, discord: true };
+  const card: Card = { tone: "critical", title: "CRITICAL · Avalon", lead: "health 1.05 <below warn>", fields: [{ name: "To do", value: "repay 1 USDC" }], footer: "lastcall · Pharos block 1" };
+  await shout(o, "CRITICAL something", new Date("2026-11-06T12:00:00Z"), card);
+  assert.match(lines[0], /CRITICAL something/);
+  const e = bodies.discord.embeds[0];
+  assert.equal(e.color, 0xdc2626);
+  assert.deepEqual(e.fields, [{ name: "To do", value: "repay 1 USDC", inline: false }]);
+  assert.equal(e.timestamp, "2026-11-06T12:00:00.000Z");
+  assert.equal(bodies.telegram.parse_mode, "HTML");
+  assert.match(bodies.telegram.text, /^<b>CRITICAL · Avalon<\/b>/);
+  assert.ok(bodies.telegram.text.includes("&lt;below warn&gt;"), "card text is escaped for Telegram HTML");
 });
 
 test("a channel that isn't set up says so instead of failing silently", async () => {
