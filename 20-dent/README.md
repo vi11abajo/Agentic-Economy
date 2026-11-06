@@ -273,3 +273,23 @@ recheck step 1: BLOCKED - this plan was made for 0x46441dc99f8000959e9c48cf2a01a
 Step 2 is the deposit, checked before its approve had landed: the vault's `TransferFromReverted()`
 (`0xe65b7a77`, decoded by name since) is exactly what it should say, and the page keeps that button disabled until
 step 1 is mined.
+
+### The transaction dent prepares is the one real users send
+
+dent doesn't sign, so instead of moving our own money we put its prepared Morpho supply next to real, successful
+supplies to the same contract from the explorer's list. The test wallet's plan at 365 days (step 2, decoded):
+
+```text
+dent  -> 0x18573fa1…4efb  0xa99aad89 supply((USDC, APC3M, oracle 0x4Eb6fcFf…, irm 0xD5E02889…, lltv 0.86), 499790, 0, 0x46441dc9…D3Bb, 0x)
+real  0x82ab6ef6…  -> 0x18573fa1…4efb  0xa99aad89 supply((USDC, 0x13282289…, oracle 0xd7E33079…, irm 0xD5E02889…, lltv 0.86), 1000000, 0, 0x…dEaD, 0x)  success, gas 127569
+real  0x053e6cb8…  -> 0x18573fa1…4efb  0xa99aad89 supply((0x52C48d42…, 0x4b01436d…, oracle 0x1f4Cc0cc…, irm 0xD5E02889…, lltv 0.385), 1e16, 0, 0x6Ea606Ec…, 0x)  success, gas 102884
+```
+
+Same contract, same function, same argument layout (assets set, shares 0, empty callback data), so the only thing
+left to the user's wallet is the signature. Full hashes:
+[`0x82ab6ef6…`](https://www.pharosscan.xyz/tx/0x82ab6ef6ad507cc75dcc9e8b723424d1fc8530a46a852f26ec0147169dca0fb4),
+[`0x053e6cb8…`](https://www.pharosscan.xyz/tx/0x053e6cb8a52e669b3ddd784f99d391e0ff3c526db84ea923eae371bff5425744).
+
+`--hold-days` is not a lock. Morpho supply can be withdrawn whenever the market has cash; the hold is how long
+*you* mean to stay, and it only decides whether gas pays back. At 30 days the same wallet gets STAY PUT
+([run 1](#1-small-money-short-hold-stay-put-and-why)); at 365 it gets MOVE. That's the point of asking.
