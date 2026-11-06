@@ -4,6 +4,7 @@
 // dent places
 import { writeFileSync } from "node:fs";
 import { RpcChain } from "./chain.js";
+import { backtest, renderBacktest } from "./backtest.js";
 import { look } from "./look.js";
 import { render } from "./render.js";
 import { serveSigning } from "./sign.js";
@@ -31,7 +32,9 @@ waiting, and says MOVE (with transactions for your own wallet) or STAY PUT (with
   dent places
   dent look --wallet 0x... --lane USDC|PROS [--from <place>] [--amount N] [--hold-days 30]
             [--min-gain 0.01] [--keep-pros 0.005] [--json look.json] [--plan plan.json]
-  dent sign plan.json [--port 8642]     opens a local page; you sign in your own browser wallet`;
+  dent sign plan.json [--port 8642]     opens a local page; you sign in your own browser wallet
+  dent backtest --lane USDC|PROS [--amount 100] [--start <place>] [--days 60] [--every 7] [--hold-days 30]
+            [--min-gain X] [--json file]       replays the rule on the chain's history`;
 
 async function main() {
   const [cmd, ...argv] = process.argv.slice(2);
@@ -65,6 +68,27 @@ async function main() {
         console.log(`plan written to ${f.plan}; open it with: dent sign ${f.plan}`);
       } else console.log("no plan written: the answer is STAY PUT");
     }
+    return;
+  }
+  if (cmd === "backtest") {
+    const lane = (f.lane ?? "USDC").toUpperCase() as Lane;
+    if (lane !== "USDC" && lane !== "PROS") throw new Error("--lane is USDC or PROS");
+    const args = {
+      lane,
+      amount: f.amount ?? "100",
+      start: f.start ?? (lane === "USDC" ? "wallet-usdc" : "wallet-pros"),
+      days: Number(f.days ?? 60),
+      every: Number(f.every ?? 7),
+      holdDays: Number(f["hold-days"] ?? 30),
+      minGain: Number(f["min-gain"] ?? (lane === "USDC" ? 0.01 : 0.001)),
+      // An address that holds nothing anywhere, so every "your position" read is 0.
+      wallet: "0x000000000000000000000000000000000000d3e7",
+    };
+    const chain = new RpcChain();
+    const bt = await backtest(chain, args, (s) => process.stderr.write(s + "\n"));
+    console.log(renderBacktest(bt, args));
+    console.log(`\n(${chain.requests} RPC requests)`);
+    if (f.json) writeFileSync(f.json, JSON.stringify(bt, null, 2));
     return;
   }
   if (cmd === "sign") {
