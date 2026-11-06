@@ -1,0 +1,22 @@
+{
+  "name": "dent",
+  "version": "1.0.0",
+  "description": "dent: a Pharos yield optimizer that ranks venues by the rate after your money lands, counts gas, fees and waiting, and hands the move to your own wallet to sign",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "dent": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
