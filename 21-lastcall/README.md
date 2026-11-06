@@ -145,12 +145,12 @@ Runner was compiled with solc 0.8.24 (optimizer 200, evm paris); the runtime cod
 
 ## Tests
 
-`npm test`: 17 tests. Thresholds and their order checks, levels and the rearm band, price drop for volatile
+`npm test`: 18 tests. Thresholds and their order checks, levels and the rearm band, price drop for volatile
 collateral and the same-token case, the carry clock on the real syzUSD loop's numbers (growing now, 30-33 days
 under stress), move sizes hitting the target without overshooting, the raised aim for a short clock, oracle
 shapes, Morpho's id-equals-hash check on the real syzUSD market params, Taylor compounding, decoding the real
 Avalon strategy-swap logs, secrets hidden in errors, and delivery to the console, Telegram and Discord through
-a fake network.
+a fake network, and the alerts file (empty means console only, filled lines switch channels on, a filled file is never overwritten).
 
 ## Proof
 
