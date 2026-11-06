@@ -2,6 +2,7 @@
 import { formatUnits } from "viem";
 import type { Look } from "./look.js";
 import { LANE_DECIMALS } from "./venues.js";
+import { days } from "./decide.js";
 
 const pct = (x?: number) => (x === undefined ? "-" : `${(x * 100).toFixed(2)}%`);
 const pad = (s: string, n: number) => (s.length >= n ? s.slice(0, n - 1) + " " : s + " ".repeat(n - s.length));
@@ -30,7 +31,8 @@ export function render(l: Look): string {
   }
   lines.push("");
   const d = l.decision;
-  lines.push(`moving ${num(d.amount)} ${u} out of ${d.from.name}, credited ${pct(d.from.rateUsed)} (${d.from.rateHow}); hold ${d.holdDays} days; minimum gain ${d.minGain} ${u}`);
+  lines.push(`moving ${num(d.amount)} ${u} out of ${d.from.name}; hold ${d.holdDays} days; minimum gain ${d.minGain} ${u}`);
+  lines.push("each option is compared with where you are in the same window, and the window worst for the move counts");
   lines.push(`gas price ${Number(formatUnits(BigInt(l.gasPriceWei), 9))} gwei${l.prosUsd ? `; PROS = $${l.prosUsd.usd.toFixed(4)} (Chainlink, updated ${new Date(l.prosUsd.updatedAt * 1000).toISOString()})` : ""}`);
   for (const o of d.options) {
     if (o.verdict === "skip") {
@@ -38,13 +40,16 @@ export function render(l: Look): string {
       continue;
     }
     lines.push(
-      `  - ${o.name}: ${pct(o.rateUsed)} (${o.rateHow}); extra yield ${num(o.extraYield)} - fees ${num(o.fees)} - gas ${num(o.gas)} = net ${num(o.net)} ${u}; break-even ${o.breakEvenDays ?? "never"}${o.breakEvenDays !== null ? " days" : ""}. ${o.why}`,
+      `  - ${o.name}: ${pct(o.rateUsed)} vs your ${pct(o.fromRate)} (${o.rateHow}); extra yield ${num(o.extraYield)} - fees ${num(o.fees)} - gas ${num(o.gas)} = net ${num(o.net)} ${u}; break-even ${o.breakEvenDays === null || o.breakEvenDays === undefined ? "never" : days(o.breakEvenDays)}. ${o.why}`,
     );
   }
   lines.push("");
   lines.push(d.action === "MOVE" ? `MOVE to ${d.reason}` : `STAY PUT: ${d.reason}`);
   for (const n of l.notes) lines.push(`note: ${n}`);
-  for (const r of l.readings) for (const n of r.notes) lines.push(`note (${r.source.name}): ${n}`);
+  // The same remark about several places is printed once, naming them all.
+  const byText = new Map<string, string[]>();
+  for (const r of l.readings) for (const n of r.notes) byText.set(n, [...(byText.get(n) ?? []), r.source.name]);
+  for (const [n, who] of byText) lines.push(`note (${who.join("; ")}): ${n}`);
   if (l.plan) {
     lines.push("");
     lines.push(`transactions for YOUR wallet to sign (dent holds no key):`);
