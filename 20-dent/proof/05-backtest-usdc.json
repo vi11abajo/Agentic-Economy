@@ -1,0 +1,132 @@
+{
+  "lane": "USDC",
+  "from": "2026-09-11T18:46:40.000Z",
+  "to": "2026-11-06T18:46:40.000Z",
+  "checkpoints": [
+    {
+      "block": 17361938,
+      "at": "2026-09-11T18:46:40.000Z",
+      "in": "wallet-usdc",
+      "value": 100,
+      "action": "MOVE",
+      "to": "morpho-usdc-syzusd",
+      "reason": "Morpho, lend USDC against syzUSD: nets 0.302243 over 30 days, pays back in 1 day"
+    },
+    {
+      "block": 17949639,
+      "at": "2026-09-18T18:46:40.000Z",
+      "in": "morpho-usdc-syzusd",
+      "value": 100.07968846826286,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend USDC against wsrUSD pays 3.33% now, with your deposit in it, not more than the 5.24% you get in the same window"
+    },
+    {
+      "block": 18555621,
+      "at": "2026-09-25T18:46:40.000Z",
+      "in": "morpho-usdc-syzusd",
+      "value": 100.12037009137347,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend USDC against wsrUSD pays 3.67% now, with your deposit in it, not more than the 5.37% you get in the same window"
+    },
+    {
+      "block": 19198564,
+      "at": "2026-10-02T18:46:40.000Z",
+      "in": "morpho-usdc-syzusd",
+      "value": 100.26625045634633,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend USDC against wsrUSD pays 4.42% over the last 7 days, not more than the 7.60% you get in the same window"
+    },
+    {
+      "block": 19818826,
+      "at": "2026-10-09T18:46:40.000Z",
+      "in": "morpho-usdc-syzusd",
+      "value": 100.37115686080146,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend USDC against wsrUSD pays 4.40% over the last 7 days, not more than the 5.46% you get in the same window"
+    },
+    {
+      "block": 20416466,
+      "at": "2026-10-16T18:46:40.000Z",
+      "in": "morpho-usdc-syzusd",
+      "value": 100.48067914502965,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend USDC against wsrUSD pays 4.15% over the last 30 days, not more than the 5.10% you get in the same window"
+    },
+    {
+      "block": 21049001,
+      "at": "2026-10-23T18:46:40.000Z",
+      "in": "morpho-usdc-syzusd",
+      "value": 100.57964938369722,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend USDC against WPROS pays 4.75% over the last 30 days, not more than the 5.58% you get in the same window"
+    },
+    {
+      "block": 21702152,
+      "at": "2026-10-30T18:46:40.000Z",
+      "in": "morpho-usdc-syzusd",
+      "value": 100.69518445657442,
+      "action": "MOVE",
+      "to": "morpho-usdc-apt",
+      "reason": "Morpho, lend USDC against APT: nets 0.116701 over 30 days, pays back in 1 day"
+    },
+    {
+      "block": 22303940,
+      "at": "2026-11-06T18:46:40.000Z",
+      "in": "morpho-usdc-apt",
+      "value": 100.78079440269427,
+      "action": "STAY PUT",
+      "reason": "end of the replay"
+    }
+  ],
+  "rule": {
+    "end": 100.78079440269427,
+    "moves": 2,
+    "gasPaid": 0.0036315602484618295
+  },
+  "parked": [
+    {
+      "id": "morpho-usdc-syzusd",
+      "name": "Morpho, lend USDC against syzUSD",
+      "end": 100.8119861731979
+    },
+    {
+      "id": "morpho-usdc-wpros",
+      "name": "Morpho, lend USDC against WPROS",
+      "end": 100.78621973609111
+    },
+    {
+      "id": "morpho-usdc-wsrusd",
+      "name": "Morpho, lend USDC against wsrUSD",
+      "end": 100.70643131235146
+    },
+    {
+      "id": "rockawayx-usdc",
+      "name": "RockawayX USDC vault",
+      "end": 100.6135745565579
+    },
+    {
+      "id": "avalon-usdc",
+      "name": "Avalon main pool, USDC",
+      "end": 100.29268975463177
+    },
+    {
+      "id": "openfi-usdc",
+      "name": "OpenFi, USDC",
+      "end": 100.20620314764456
+    },
+    {
+      "id": "wallet-usdc",
+      "name": "USDC left in the wallet",
+      "end": 100
+    },
+    {
+      "id": "zona-usdc",
+      "name": "Zona, USDC",
+      "end": 99.99593493451717
+    }
+  ],
+  "gasBasis": "gas at today's 10 gwei and PROS = $0.5430; leaving a place is charged what entering it costs",
+  "notes": [
+    "rates and growth are read at each checkpoint's block; positions are what this replay would have held, not a real wallet's"
+  ]
+}

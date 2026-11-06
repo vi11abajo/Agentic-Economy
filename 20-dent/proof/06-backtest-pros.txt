@@ -1,0 +1,25 @@
+dent backtest  PROS lane, 100 PROS starting in wallet-pros, checkpoint every 7 days, hold 30 days, min gain 0.001
+from 2026-09-11T18:51:55.000Z to 2026-11-06T18:51:55.000Z; gas at today's 10 gwei; leaving a place is charged what entering it costs
+
+  block 17362265 2026-09-11T18:51  in wallet-pros          100            stay: best alternative Morpho, lend WPROS against BTCVC pays back only after 56 days, longer than your 30-day hold
+  block 17949972 2026-09-18T18:51  in wallet-pros          100            stay: best alternative Morpho, lend WPROS against BTCVC pays back only after 37 days, longer than your 30-day hold
+  block 18556007 2026-09-25T18:51  in wallet-pros          100            MOVE -> morpho-wpros-btcvc
+  block 19198906 2026-10-02T18:51  in morpho-wpros-btcvc   99.997475      stay: best alternative PROS left in the wallet pays 0.00% now, not more than the 0.18% you get in the same window
+  block 19819145 2026-10-09T18:51  in morpho-wpros-btcvc   99.997475      stay: best alternative PROS left in the wallet pays 0.00% now, not more than the 0.18% you get in the same window
+  block 20416804 2026-10-16T18:51  in morpho-wpros-btcvc   99.997475      stay: best alternative PROS left in the wallet pays 0.00% now, not more than the 0.18% you get in the same window
+  block 21049355 2026-10-23T18:51  in morpho-wpros-btcvc   100.01209      stay: best alternative PROS left in the wallet pays 0.00% over the last 7 days, not more than the 0.76% you get in the same window
+  block 21702494 2026-10-30T18:51  in morpho-wpros-btcvc   100.01209      MOVE -> faroo-stpros
+  block 22304297 2026-11-06T18:51  in faroo-stpros         100.60312      stay: end of the replay
+
+the rule: ends with 100.60312 PROS after 2 move(s), 0.00668977 PROS of it spent on gas
+parked in one place the whole time (entry and exit gas paid once):
+  Faroo stPROS (liquid staking)        100.70958 PROS   <- beat the rule
+  OpenFi, WPROS                        100.02116 PROS
+  Morpho, lend WPROS against BTCVC     100.01796 PROS
+  PROS left in the wallet              100 PROS
+  Zona, WPROS                          99.993754 PROS
+  Avalon innovative pool, WPROS        99.992342 PROS
+note: rates and growth are read at each checkpoint's block; positions are what this replay would have held, not a real wallet's
+note: unbonding days (stPROS) are counted as earning nothing
+
+(1266 RPC requests)

@@ -1,0 +1,123 @@
+{
+  "lane": "PROS",
+  "from": "2026-09-11T18:51:55.000Z",
+  "to": "2026-11-06T18:51:55.000Z",
+  "checkpoints": [
+    {
+      "block": 17362265,
+      "at": "2026-09-11T18:51:55.000Z",
+      "in": "wallet-pros",
+      "value": 100,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend WPROS against BTCVC pays back only after 56 days, longer than your 30-day hold"
+    },
+    {
+      "block": 17949972,
+      "at": "2026-09-18T18:51:53.000Z",
+      "in": "wallet-pros",
+      "value": 100,
+      "action": "STAY PUT",
+      "reason": "best alternative Morpho, lend WPROS against BTCVC pays back only after 37 days, longer than your 30-day hold"
+    },
+    {
+      "block": 18556007,
+      "at": "2026-09-25T18:51:55.000Z",
+      "in": "wallet-pros",
+      "value": 100,
+      "action": "MOVE",
+      "to": "morpho-wpros-btcvc",
+      "reason": "Morpho, lend WPROS against BTCVC: nets 0.00724616 over 30 days, pays back in 8 days"
+    },
+    {
+      "block": 19198906,
+      "at": "2026-10-02T18:51:55.000Z",
+      "in": "morpho-wpros-btcvc",
+      "value": 99.99747495,
+      "action": "STAY PUT",
+      "reason": "best alternative PROS left in the wallet pays 0.00% now, not more than the 0.18% you get in the same window"
+    },
+    {
+      "block": 19819145,
+      "at": "2026-10-09T18:51:55.000Z",
+      "in": "morpho-wpros-btcvc",
+      "value": 99.99747495,
+      "action": "STAY PUT",
+      "reason": "best alternative PROS left in the wallet pays 0.00% now, not more than the 0.18% you get in the same window"
+    },
+    {
+      "block": 20416804,
+      "at": "2026-10-16T18:51:55.000Z",
+      "in": "morpho-wpros-btcvc",
+      "value": 99.99747495,
+      "action": "STAY PUT",
+      "reason": "best alternative PROS left in the wallet pays 0.00% now, not more than the 0.18% you get in the same window"
+    },
+    {
+      "block": 21049355,
+      "at": "2026-10-23T18:51:55.000Z",
+      "in": "morpho-wpros-btcvc",
+      "value": 100.01208647594252,
+      "action": "STAY PUT",
+      "reason": "best alternative PROS left in the wallet pays 0.00% over the last 7 days, not more than the 0.76% you get in the same window"
+    },
+    {
+      "block": 21702494,
+      "at": "2026-10-30T18:51:54.000Z",
+      "in": "morpho-wpros-btcvc",
+      "value": 100.01208647594252,
+      "action": "MOVE",
+      "to": "faroo-stpros",
+      "reason": "Faroo stPROS (liquid staking): nets 0.0982654 over 30 days, pays back in 2 days"
+    },
+    {
+      "block": 22304297,
+      "at": "2026-11-06T18:51:55.000Z",
+      "in": "faroo-stpros",
+      "value": 100.60311551854583,
+      "action": "STAY PUT",
+      "reason": "end of the replay"
+    }
+  ],
+  "rule": {
+    "end": 100.60311551854583,
+    "moves": 2,
+    "gasPaid": 0.00668977
+  },
+  "parked": [
+    {
+      "id": "faroo-stpros",
+      "name": "Faroo stPROS (liquid staking)",
+      "end": 100.70958170060582
+    },
+    {
+      "id": "openfi-wpros",
+      "name": "OpenFi, WPROS",
+      "end": 100.02115816072074
+    },
+    {
+      "id": "morpho-wpros-btcvc",
+      "name": "Morpho, lend WPROS against BTCVC",
+      "end": 100.01796467292635
+    },
+    {
+      "id": "wallet-pros",
+      "name": "PROS left in the wallet",
+      "end": 100
+    },
+    {
+      "id": "zona-wpros",
+      "name": "Zona, WPROS",
+      "end": 99.99375436505048
+    },
+    {
+      "id": "avalon-inno-wpros",
+      "name": "Avalon innovative pool, WPROS",
+      "end": 99.9923422
+    }
+  ],
+  "gasBasis": "gas at today's 10 gwei; leaving a place is charged what entering it costs",
+  "notes": [
+    "rates and growth are read at each checkpoint's block; positions are what this replay would have held, not a real wallet's",
+    "unbonding days (stPROS) are counted as earning nothing"
+  ]
+}

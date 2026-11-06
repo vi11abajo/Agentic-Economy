@@ -1,0 +1,26 @@
+dent backtest  USDC lane, 100 USDC starting in wallet-usdc, checkpoint every 7 days, hold 30 days, min gain 0.01
+from 2026-09-11T18:46:40.000Z to 2026-11-06T18:46:40.000Z; gas at today's 10 gwei and PROS = $0.5430; leaving a place is charged what entering it costs
+
+  block 17361938 2026-09-11T18:46  in wallet-usdc          100            MOVE -> morpho-usdc-syzusd
+  block 17949639 2026-09-18T18:46  in morpho-usdc-syzusd   100.07969      stay: best alternative Morpho, lend USDC against wsrUSD pays 3.33% now, with your deposit in it, not more than the 5.24% you get in the same window
+  block 18555621 2026-09-25T18:46  in morpho-usdc-syzusd   100.12037      stay: best alternative Morpho, lend USDC against wsrUSD pays 3.67% now, with your deposit in it, not more than the 5.37% you get in the same window
+  block 19198564 2026-10-02T18:46  in morpho-usdc-syzusd   100.26625      stay: best alternative Morpho, lend USDC against wsrUSD pays 4.42% over the last 7 days, not more than the 7.60% you get in the same window
+  block 19818826 2026-10-09T18:46  in morpho-usdc-syzusd   100.37116      stay: best alternative Morpho, lend USDC against wsrUSD pays 4.40% over the last 7 days, not more than the 5.46% you get in the same window
+  block 20416466 2026-10-16T18:46  in morpho-usdc-syzusd   100.48068      stay: best alternative Morpho, lend USDC against wsrUSD pays 4.15% over the last 30 days, not more than the 5.10% you get in the same window
+  block 21049001 2026-10-23T18:46  in morpho-usdc-syzusd   100.57965      stay: best alternative Morpho, lend USDC against WPROS pays 4.75% over the last 30 days, not more than the 5.58% you get in the same window
+  block 21702152 2026-10-30T18:46  in morpho-usdc-syzusd   100.69518      MOVE -> morpho-usdc-apt
+  block 22303940 2026-11-06T18:46  in morpho-usdc-apt      100.78079      stay: end of the replay
+
+the rule: ends with 100.78079 USDC after 2 move(s), 0.0036315602 USDC of it spent on gas
+parked in one place the whole time (entry and exit gas paid once):
+  Morpho, lend USDC against syzUSD     100.81199 USDC   <- beat the rule
+  Morpho, lend USDC against WPROS      100.78622 USDC   <- beat the rule
+  Morpho, lend USDC against wsrUSD     100.70643 USDC
+  RockawayX USDC vault                 100.61357 USDC
+  Avalon main pool, USDC               100.29269 USDC
+  OpenFi, USDC                         100.2062 USDC
+  USDC left in the wallet              100 USDC
+  Zona, USDC                           99.995935 USDC
+note: rates and growth are read at each checkpoint's block; positions are what this replay would have held, not a real wallet's
+
+(1670 RPC requests)
