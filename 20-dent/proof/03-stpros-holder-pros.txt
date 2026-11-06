@@ -1,0 +1,35 @@
+dent  PROS lane  wallet 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1
+block 22290978 (2026-11-06T15:39:09.000Z); 7-day window from block 21690076, 30-day from 19625890
+
+place                           you hold        now     with you  7d real  30d real  status
+PROS left in the wallet         4.6404 PROS     0.00%   -         -        -         open
+Faroo stPROS (liquid staking)   0.480724 PROS   31.03%  -         31.03%   8.67%     open
+OpenFi, WPROS                   -               0.38%   0.00%     0.38%    0.34%     open
+Zona, WPROS                     -               0.04%   0.03%     0.03%    0.02%     open
+Avalon innovative pool, WPROS   -               0.00%   0.00%     0.00%    0.00%     open
+Faroo RWA Hybrid Vault 001      2.08044 PROS    0.00%   -         0.00%    0.00%     closed: deposit reverts: InvalidPhase(3)
+Faroo Yield Vault 001           1.9739 PROS     0.00%   -         0.00%    0.00%     closed: deposit reverts: InvalidPhase(1)
+
+moving 4.635395 PROS out of PROS left in the wallet, credited 0.00% (quoted now); hold 30 days; minimum gain 0.001 PROS
+gas price 10 gwei
+  - Faroo stPROS (liquid staking): 8.67% (realised over 30 days); extra yield 0.033044 - fees 0 - gas 0.001414 = net 0.03163 PROS; break-even 2 days. nets 0.03163 over 30 days, pays back in 2 days
+  - OpenFi, WPROS: 0.00% (with your deposit in it); extra yield 0.000018 - fees 0 - gas 0.004018 = net -0.004 PROS; break-even 6732 days. pays back only after 6732 days, longer than your 30-day hold
+  - Zona, WPROS: 0.02% (realised over 30 days); extra yield 0.000087 - fees 0 - gas 0.004073 = net -0.003986 PROS; break-even 1403 days. pays back only after 1403 days, longer than your 30-day hold
+  - Avalon innovative pool, WPROS: 0.00% (with your deposit in it); extra yield 0 - fees 0 - gas 0.003832 = net -0.003832 PROS; break-even never. pays 0.00% (with your deposit in it), not more than the 0.00% you have
+  - Faroo RWA Hybrid Vault 001: skipped, closed: deposit reverts: InvalidPhase(3)
+  - Faroo Yield Vault 001: skipped, closed: deposit reverts: InvalidPhase(1)
+
+MOVE to Faroo stPROS (liquid staking): nets 0.03163 over 30 days, pays back in 2 days
+note: kept 0.005 PROS in the wallet to pay gas
+note (PROS left in the wallet): earns nothing
+note (Faroo stPROS (liquid staking)): leaving: redeem, wait 24 h, then claim; nothing is earned while waiting
+note (OpenFi, WPROS): Aave V3 supply and withdraw take no fee
+note (Zona, WPROS): Aave V3 supply and withdraw take no fee
+note (Avalon innovative pool, WPROS): Aave V3 supply and withdraw take no fee
+note (Faroo RWA Hybrid Vault 001): rate is the vault's own share price in stPROS, on top of stPROS's rate
+note (Faroo Yield Vault 001): rate is the vault's own share price in stPROS, on top of stPROS's rate
+
+transactions for YOUR wallet to sign (dent holds no key):
+  1. [phase 1] stake 4635395121798579945 wei PROS with Faroo for stPROS -> 0x6b0a44c64190279f7034b77c13a566e914fe5ec4  gas 141447 (estimated)
+
+(176 RPC requests to https://rpc.pharos.xyz)
