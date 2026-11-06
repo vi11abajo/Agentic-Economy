@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Hex } from "viem";
 import { RpcChain } from "./chain.js";
-import { ENV_KEYS, HOME, ensureEnvTemplate, findTelegramChat, hide, loadSecrets, shout, type Outlet } from "./deliver.js";
+import { ENV_FILE, ENV_KEYS, HOME, STATE_DIR, channelsOn, ensureEnvTemplate, findTelegramChat, hide, loadSecrets, shout, type Outlet } from "./deliver.js";
 import { DEFAULT_THRESHOLDS, checkThresholds, type Thresholds } from "./health.js";
 import { lookAt } from "./look.js";
 import { alertText, stamp, table } from "./render.js";
@@ -18,9 +18,9 @@ const HELP = `lastcall: a liquidation watchdog for Pharos lending (Morpho Blue, 
   lastcall look --wallet 0x... [--wallet 0x...] [thresholds] [--block N] [--json out.json]
       every loan the wallet has, its level, how far the price can fall, how many days the carry leaves,
       and a repay / top-up rehearsed on the real contracts
-  lastcall watch --wallet 0x... [thresholds] [--every 60] [--rounds N] [--telegram] [--discord]
+  lastcall watch --wallet 0x... [thresholds] [--every 60] [--rounds N] [--console-only]
       the same every --every seconds; alerts on a worse level, a recovery, a short clock or a rule change
-  lastcall replay --pool avalon --wallet 0x... --block N [--telegram] [--discord]
+  lastcall replay --pool avalon --wallet 0x... --block N [--console-only]
       the rules alert lastcall would have sent for a change that already happened in block N
   lastcall scan [--hours 24] [--top 15]
       borrowers seen in the last hours on every venue, ranked by health
@@ -30,7 +30,9 @@ const HELP = `lastcall: a liquidation watchdog for Pharos lending (Morpho Blue, 
 thresholds: --warn 1.3 --critical 1.1 --target 1.5 --rearm 0.02 --days-warn 30
             (--days-warn: alert when the carry leaves fewer days than this, even with a healthy-looking factor)
 extra Morpho markets: --market 0x<id> (repeatable). Public RPC: https://rpc.pharos.xyz, PHAROS_RPC_URL overrides.
-secrets: ${HOME}/.env (${ENV_KEYS.telegramToken}, ${ENV_KEYS.telegramChat}, ${ENV_KEYS.discordWebhook}), LASTCALL_HOME moves it.`;
+alerts always go to the console; Telegram and/or Discord join in as soon as their lines in
+${ENV_FILE} (in the skill folder, next to SKILL.md; \`lastcall channels\` prints where) are filled (${ENV_KEYS.telegramToken} + ${ENV_KEYS.telegramChat}, ${ENV_KEYS.discordWebhook}).
+--console-only keeps a run off them. LASTCALL_HOME moves the file.`;
 
 class Exit extends Error {
   constructor(readonly code: number, message: string) {
@@ -77,7 +79,9 @@ const note = (s: string) => process.stderr.write(`${s}\n`);
 const json = (x: unknown) => JSON.stringify(x, (_k, v) => (typeof v === "bigint" ? v.toString() : v === Infinity ? "Infinity" : v), 2);
 
 function outlet(p: ReturnType<typeof parse>): Outlet {
-  return { console: say, net: fetch, secrets: loadSecrets(), telegram: p.one("telegram") === "true", discord: p.one("discord") === "true" };
+  const secrets = loadSecrets();
+  const on = p.one("console-only") === "true" ? { telegram: false, discord: false } : channelsOn(secrets);
+  return { console: say, net: fetch, secrets, ...on };
 }
 
 function loadState(path: string): WatchState {
@@ -121,8 +125,8 @@ async function main(argv: string[]): Promise<void> {
     const daysWarn = p.num("days-warn", 30);
     const every = p.num("every", 60);
     const rounds = p.num("rounds", Infinity);
-    mkdirSync(HOME, { recursive: true });
-    const statePath = p.one("state") ?? join(HOME, "state.json");
+    mkdirSync(STATE_DIR, { recursive: true });
+    const statePath = p.one("state") ?? join(STATE_DIR, "watch.json");
     const state = loadState(statePath);
     const o = outlet(p);
     note(`watching ${wallets.length} wallet(s) every ${every} s; state in ${statePath}; channels: console${o.telegram ? ", telegram" : ""}${o.discord ? ", discord" : ""}`);
@@ -177,21 +181,31 @@ async function main(argv: string[]): Promise<void> {
   if (cmd === "channels") {
     const env = ensureEnvTemplate();
     const s = loadSecrets();
-    say(`secrets file: ${env}`);
-    say(`telegram: bot token ${s.telegramToken ? "filled" : "empty"}, chat id ${s.telegramChat ? "filled" : "empty"}`);
-    say(`discord: webhook ${s.discordWebhook ? "filled" : "empty"}`);
+    const on = channelsOn(s);
+    say(`alerts file: ${env}`);
+    say(`telegram: ${on.telegram ? "ON" : "off"} (bot token ${s.telegramToken ? "filled" : "empty"}, chat id ${s.telegramChat ? "filled" : s.telegramToken ? "empty, run `lastcall channels test` after pressing Start in the bot" : "empty"})`);
+    say(`discord: ${on.discord ? "ON" : "off"} (webhook ${s.discordWebhook ? "filled" : "empty"})`);
+    if (!s.telegramToken && !s.discordWebhook) say("only the console gets alerts until one of those lines is filled in");
     if (p.words[1] !== "test") return;
     if (s.telegramToken && !s.telegramChat) {
       const chat = await findTelegramChat(fetch, s.telegramToken).catch((e: Error) => { say(hide(e.message, s)); return null; });
       if (!chat) say("telegram: no /start message found; open your bot in Telegram, press Start, then run this again");
       else {
-        const text = readFileSync(env, "utf8").replace(new RegExp(`^${ENV_KEYS.telegramChat}=.*$`, "m"), `${ENV_KEYS.telegramChat}=${chat}`);
+        const old = readFileSync(env, "utf8");
+        const line = new RegExp(`^${ENV_KEYS.telegramChat}=.*$`, "m");
+        const text = line.test(old) ? old.replace(line, `${ENV_KEYS.telegramChat}=${chat}`) : `${old.trimEnd()}
+${ENV_KEYS.telegramChat}=${chat}
+`;
         writeFileSync(env, text);
         s.telegramChat = chat;
         say("telegram: found your chat and saved its id");
       }
     }
     const o: Outlet = { console: say, net: fetch, secrets: s, telegram: !!s.telegramToken, discord: !!s.discordWebhook };
+    if (!o.telegram && !o.discord) {
+      say(`nothing to test yet: fill ${ENV_KEYS.telegramToken} and/or ${ENV_KEYS.discordWebhook} in ${env} first`);
+      return;
+    }
     for (const line of await shout(o, "lastcall test: if you can read this, alerts will reach you here.")) say(`  ${line}`);
     return;
   }

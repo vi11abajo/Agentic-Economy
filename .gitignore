@@ -15,3 +15,6 @@ docs/superpowers/
 # demo kits for the videos are internal
 */agent/
 !01-read-contract-state/agent/
+
+# lastcall: watch memory
+21-lastcall/skill/lastcall/.state/

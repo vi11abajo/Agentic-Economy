@@ -3,7 +3,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { Hex } from "viem";
-import { hide, shout, type Outlet } from "./deliver.js";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { ENV_TEMPLATE, channelsOn, ensureEnvTemplate, hide, loadSecrets, shout, type Outlet } from "./deliver.js";
 import { idMatchesParams, taylor } from "./morpho.js";
 import { decodeRuleLog, isRuleChange } from "./tripwire.js";
 
@@ -71,4 +74,17 @@ test("an alert goes to the console with a timestamp and to both channels", async
 test("a channel that isn't set up says so instead of failing silently", async () => {
   const o: Outlet = { console: () => {}, net: fetch, secrets: {}, telegram: true, discord: true };
   assert.deepEqual(await shout(o, "x"), ["telegram: not set up (token or chat id missing)", "discord: not set up (webhook missing)"]);
+});
+
+test("the alerts file: empty template means console only, filled lines switch channels on", () => {
+  const dir = mkdtempSync(join(tmpdir(), "lastcall-"));
+  const p = ensureEnvTemplate(dir);
+  assert.deepEqual(channelsOn(loadSecrets(dir)), { telegram: false, discord: false });
+  // Only the token: Telegram stays off until the chat id is found.
+  writeFileSync(p, ENV_TEMPLATE.replace("LASTCALL_TELEGRAM_BOT_TOKEN=", "LASTCALL_TELEGRAM_BOT_TOKEN=123:abc"));
+  assert.deepEqual(channelsOn(loadSecrets(dir)), { telegram: false, discord: false });
+  writeFileSync(p, ENV_TEMPLATE.replace("LASTCALL_TELEGRAM_BOT_TOKEN=", "LASTCALL_TELEGRAM_BOT_TOKEN=123:abc").replace("LASTCALL_TELEGRAM_CHAT_ID=", "LASTCALL_TELEGRAM_CHAT_ID=42").replace("LASTCALL_DISCORD_WEBHOOK=", "LASTCALL_DISCORD_WEBHOOK=https://discord.com/api/webhooks/1/x"));
+  assert.deepEqual(channelsOn(loadSecrets(dir)), { telegram: true, discord: true });
+  ensureEnvTemplate(dir);
+  assert.equal(loadSecrets(dir).telegramChat, "42", "a filled file is never overwritten");
 });
