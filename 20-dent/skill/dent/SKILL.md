@@ -2,8 +2,9 @@
 name: dent
 description: >
   dent: a Pharos yield optimizer. Compares where a wallet's USDC or PROS could earn (Avalon, OpenFi and Zona
-  lending pools, the RockawayX USDC vault, Faroo stPROS liquid staking and Faroo vaults, or staying in the wallet)
-  by the rate each place would pay once THIS amount lands in it, read from the pool's own interest-rate contract.
+  lending pools, eight Morpho Blue markets, the RockawayX USDC vault, Faroo stPROS liquid staking and Faroo
+  vaults, or staying in the wallet) by the rate each place would pay once THIS amount lands in it, read from the
+  pool's own interest-rate contract or market rate model.
   Counts gas (estimated from the user's address), entry and exit fees, unbonding waits and pool cash, then says
   MOVE with the expected net gain and break-even, or STAY PUT with the reason. A MOVE becomes unsigned
   transactions on a local page where the user signs in their own browser wallet; the page re-checks every step
@@ -29,6 +30,9 @@ bundled file, no install, no keys. It reads Pharos mainnet through the public RP
   (about 150 reads); say so before you run it. Without `--from` it moves from wherever the wallet holds the most
   in that lane; without `--amount`, all of it. `--hold-days` is how long the user means to leave the money; ask
   if they didn't say, it changes the answer. `--min-gain` is in lane units (USDC or PROS).
+- `dent backtest --lane USDC|PROS [--amount 100] [--start <place>] [--days 60] [--every 7] [--hold-days 30]`:
+  replays the same rule on the chain's history and compares it with parking the money in one place. Takes about
+  5 minutes; say so first. Use it when the user asks whether the rule (or moving at all) would have paid.
 - `dent sign plan.json [--port 8642]`: serves the plan on http://127.0.0.1:8642/ for the user's browser wallet.
   Keep it running while they sign; stop it after.
 
@@ -39,9 +43,13 @@ bundled file, no install, no keys. It reads Pharos mainnet through the public RP
    point it out: the pool is small and the user's own money would dilute it.
 2. Give the verdict with its numbers: net gain over the hold, the parts it is made of (extra yield, fees, gas)
    and the break-even in days. For STAY PUT, give the reason line as dent printed it, in plain words.
-3. Say how dent was careful: the place the money is now gets its best rate, a destination its worst one.
-4. Closed places are part of the answer: say why each is closed (e.g. Faroo vaults revert InvalidPhase).
-5. Use only numbers dent printed. Rates are simple annual rates from on-chain share prices or rate contracts,
+3. Say how dent was careful: each option is compared with where the money is in the same window (now, last 7
+   days, last 30 days) and the window worst for the move counts; a destination is never credited more than it
+   would pay with the user's money in it.
+4. Closed places are part of the answer: say why each is closed (e.g. Faroo vaults revert InvalidPhase). A
+   Faroo vault can still be left when its redeem goes through; dent says so in the notes.
+5. In a backtest, say plainly when parking in one place beat the rule. That's a result, not a failure to hide.
+6. Use only numbers dent printed. Rates are simple annual rates from on-chain share prices or rate contracts,
    not promises.
 
 ## When the answer is MOVE
