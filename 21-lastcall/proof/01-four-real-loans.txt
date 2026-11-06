@@ -1,0 +1,35 @@
+[2026-11-06T21:57:29.000Z] block 22317005: 4 loan(s) for 4 wallet(s); warn 1.3, critical 1.1, target 1.5, clock alert under 30 days
+# | venue | wallet | health | level | price risk | days left (now / stress) | debt
+1 | Morpho syzUSD/USDC | 0xA4A5…3DCc | 1.0140 | critical | no price risk | growing / 31 | 1,527,386.75 USDC
+2 | OpenFi | 0xf4df…a989 | 1.0403 | critical | covered | 1051 / 19 | $4.59
+3 | Avalon | 0xd360…e7a0 | 1.7870 | ok | -44.0% | >10y / >10y | $251,843.91
+4 | Avalon | 0xf5cb…db13 | 2.8167 | ok | -64.5% | >10y / >10y | $196,428.07
+
+CRITICAL Morpho syzUSD/USDC 0xA4A5…3DCc: health 1.0140 (debt 1,527,386.75 USDC, collateral 1,547,470.9 syzUSD)
+syzUSD oracle only climbed in 7 days (7.50%/yr, NAV-style), so a price drop isn't the risk here
+carry now: health is growing on its own (collateral 7.50%/yr vs debt 5.91%/yr)
+carry if every spare unit of supply left the market (borrow 23.72%): health shrinks 16.21%/yr (collateral 7.50% vs debt 23.72%), about 31 days to liquidation if nothing else moves
+act to get back to 1.50: repay 494,854.57 USDC -> health 1.5000 (rehearsed on the real Morpho contract at block 22317005; you hold 0 USDC)  OR  add 741,645.68 syzUSD collateral -> health 1.5000 (rehearsed on the real Morpho contract at block 22317005; you hold 0 syzUSD)
+rules: fixed: the market id is the hash of its oracle, LLTV and rate model (checked), nobody can change them
+
+CRITICAL OpenFi 0xf4df…a989: health 1.0403 (debt 4.5941 USDC, collateral 6.0724 USDC + 0.100031 WPROS)
+even if WPROS went to zero the rest of the collateral still covers the debt; USDC is posted against a USDC loan, its price cancels out
+carry now: health shrinks 1.37%/yr (collateral 1.82% vs debt 3.19%), about 1051 days to liquidation if nothing else moves
+carry if every spare unit of supply left the market (borrow 79.00%): health shrinks 77.18%/yr (collateral 1.82% vs debt 79.00%), about 19 days to liquidation if nothing else moves
+act to get back to 1.50: repay 1.408 USDC -> health 1.5000 (rehearsed on the real pool at block 22317005; you hold 0.14 USDC)  OR  add 2.7077 USDC collateral -> health 1.5000 (rehearsed on the real pool at block 22317005; you hold 0.14 USDC)
+rules: 0x277bc3069b0e45c02a18Ec78A407267Ad582E38C (answers neither as a Safe nor as a timelock)
+
+OK Avalon 0xd360…e7a0: health 1.7870 (debt 251,909.4 USDC, collateral 8.5 FBTC)
+liquidated if FBTC falls 44.0% further
+carry now: health shrinks 0.01%/yr (collateral 0.00% vs debt 0.01%), more than 10 years to liquidation if nothing else moves
+carry if every spare unit of supply left the market (borrow 0.01%): health shrinks 0.01%/yr (collateral 0.00% vs debt 0.01%), more than 10 years to liquidation if nothing else moves
+act: nothing needed, health is above 1.50
+rules: Safe 0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4, 3 of 5 signers, no timelock in front
+
+OK Avalon 0xf5cb…db13: health 2.8167 (debt 196,479.15 USDC, collateral 10.45 FBTC)
+liquidated if FBTC falls 64.5% further
+carry now: health shrinks 0.01%/yr (collateral 0.00% vs debt 0.01%), more than 10 years to liquidation if nothing else moves
+carry if every spare unit of supply left the market (borrow 0.01%): health shrinks 0.01%/yr (collateral 0.00% vs debt 0.01%), more than 10 years to liquidation if nothing else moves
+act: nothing needed, health is above 1.50
+rules: Safe 0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4, 3 of 5 signers, no timelock in front
+(373 reads, 55.1 s)

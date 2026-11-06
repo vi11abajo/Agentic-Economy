@@ -1,0 +1,13 @@
+[2026-11-06T18:30:38.000Z] RULES CHANGED on Avalon at block 22302862 (tx 0x1e75…7ac5, sent by 0x3b47…fc92 through 0xc6f5…84f4): ReserveInterestRateStrategyChanged USDC, ReserveInterestRateStrategyChanged WETH, ReserveInterestRateStrategyChanged FBTC
+                           for 0xd360…e7a0: health 1.7900 -> 1.7900; USDC borrow 3.96% -> 0.01%
+                           days left at today's rates over 10 years -> over 10 years; if suppliers leave 3542 days -> over 10 years
+                           this doesn't hurt the loan (yet). Who can change these rules: Safe 0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4, 3 of 5 signers, no timelock in front
+                           act: nothing needed, health is above 1.50
+
+[2026-11-06T18:30:38.000Z] RULES CHANGED on Avalon at block 22302862 (tx 0x1e75…7ac5, sent by 0x3b47…fc92 through 0xc6f5…84f4): ReserveInterestRateStrategyChanged USDC, ReserveInterestRateStrategyChanged WETH, ReserveInterestRateStrategyChanged FBTC
+                           for 0xf5cb…db13: health 2.8215 -> 2.8215; USDC borrow 3.96% -> 0.01%
+                           days left at today's rates over 10 years -> over 10 years; if suppliers leave over 10 years -> over 10 years
+                           this doesn't hurt the loan (yet). Who can change these rules: Safe 0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4, 3 of 5 signers, no timelock in front
+                           act: nothing needed, health is above 1.50
+
+[2026-11-06T18:30:37.000Z] no rule change from Avalon's admin contracts in block 22302861

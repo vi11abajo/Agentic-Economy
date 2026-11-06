@@ -1,0 +1,16 @@
+watching 3 wallet(s) every 30 s; state in D:\tmp\w21\home4\state.json; channels: console
+[2026-11-06T22:00:40.423Z] first look: CRITICAL Morpho syzUSD/USDC 0xA4A5…3DCc: health 1.0140 (debt 1,527,387.17 USDC, collateral 1,547,470.9 syzUSD)
+                           syzUSD oracle only climbed in 7 days (7.50%/yr, NAV-style), so a price drop isn't the risk here
+                           carry now: health is growing on its own (collateral 7.50%/yr vs debt 5.91%/yr)
+                           carry if every spare unit of supply left the market (borrow 23.72%): health shrinks 16.22%/yr (collateral 7.50% vs debt 23.72%), about 31 days to liquidation if nothing else moves
+                           act to get back to 1.50: repay 494,854.99 USDC -> health 1.5000 (rehearsed on the real Morpho contract at block 22317175; you hold 0 USDC)  OR  add 741,646.32 syzUSD collateral -> health 1.5000 (rehearsed on the real Morpho contract at block 22317175; you hold 0 syzUSD)
+                           rules: fixed: the market id is the hash of its oracle, LLTV and rate model (checked), nobody can change them
+[2026-11-06T22:00:40.425Z] first look: CRITICAL OpenFi 0xf4df…a989: health 1.0403 (debt 4.5941 USDC, collateral 6.0724 USDC + 0.100031 WPROS)
+                           even if WPROS went to zero the rest of the collateral still covers the debt; USDC is posted against a USDC loan, its price cancels out
+                           carry now: health shrinks 1.37%/yr (collateral 1.82% vs debt 3.19%), about 1051 days to liquidation if nothing else moves
+                           carry if every spare unit of supply left the market (borrow 79.00%): health shrinks 77.18%/yr (collateral 1.82% vs debt 79.00%), about 19 days to liquidation if nothing else moves
+                           act to get back to 1.50: repay 1.408 USDC -> health 1.5000 (rehearsed on the real pool at block 22317175; you hold 0.14 USDC)  OR  add 2.7077 USDC collateral -> health 1.5000 (rehearsed on the real pool at block 22317175; you hold 0.14 USDC)
+                           rules: 0x277bc3069b0e45c02a18Ec78A407267Ad582E38C (answers neither as a Safe nor as a timelock)
+[2026-11-06T22:00:40.426Z] round 1 at block 22317175: 2 alert(s)
+[2026-11-06T22:01:15.742Z] round 2 at block 22317228: 0 alert(s), all as before (Morpho syzUSD/USDC 1.0140 critical, OpenFi 1.0403 critical, Avalon 1.7870 ok)
+[2026-11-06T22:01:43.295Z] round 3 at block 22317269: 0 alert(s), all as before (Morpho syzUSD/USDC 1.0140 critical, OpenFi 1.0403 critical, Avalon 1.7870 ok)

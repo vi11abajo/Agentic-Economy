@@ -1,0 +1,398 @@
+{
+  "block": 22317005,
+  "time": 1794002249,
+  "thresholds": {
+    "warn": 1.3,
+    "critical": 1.1,
+    "target": 1.5,
+    "rearm": 0.02
+  },
+  "daysWarn": 30,
+  "loans": [
+    {
+      "key": "morpho:0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86:0xa4a57dcf7b15456b7053f10a377bdb437c073dcc",
+      "loan": {
+        "snap": {
+          "kind": "morpho",
+          "venue": "Morpho syzUSD/USDC",
+          "where": "0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86",
+          "wallet": "0xA4A57DcF7B15456b7053f10A377Bdb437C073DCc",
+          "block": 22317005,
+          "time": 1794002249,
+          "quote": "USDC",
+          "hf": 1.014018406291,
+          "collateral": [
+            {
+              "token": "0x54dF79D8EDf36D15cd83fbeDbdd90807fC828934",
+              "symbol": "syzUSD",
+              "decimals": 18,
+              "amount": "1547470901193805025792539",
+              "value": 1692675.715999,
+              "lt": 0.915,
+              "apr": 0,
+              "priceShape": "climbing",
+              "trendApr": 0.07504325124953685
+            }
+          ],
+          "debt": [
+            {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "1527386752084",
+              "value": 1527386.752084,
+              "lt": 0,
+              "apr": 0.059112001711008,
+              "stressApr": 0.237158165775744,
+              "priceShape": "flat",
+              "trendApr": 0
+            }
+          ]
+        },
+        "morpho": {
+          "params": {
+            "loanToken": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+            "collateralToken": "0x54dF79D8EDf36D15cd83fbeDbdd90807fC828934",
+            "oracle": "0x4eEfC4C6e7216Aedd5E809e4fC74fb8859B3FA46",
+            "irm": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+            "lltv": "915000000000000000"
+          },
+          "fixedTerms": true,
+          "debtRaw": "1527386752084"
+        }
+      },
+      "level": "critical",
+      "drop": null,
+      "clockNow": {
+        "collateralGrowth": 0.07504325124953685,
+        "debtGrowth": 0.059112001711008,
+        "net": 0.015931249538528855,
+        "days": null
+      },
+      "clockStress": {
+        "collateralGrowth": 0.07504325124953685,
+        "debtGrowth": 0.237158165775744,
+        "net": -0.16211491452620713,
+        "days": 31.34311164443076
+      },
+      "aim": 1.5,
+      "advice": [
+        {
+          "move": {
+            "kind": "repay",
+            "leg": {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "1527386752084",
+              "value": 1527386.752084,
+              "lt": 0,
+              "apr": 0.059112001711008,
+              "stressApr": 0.237158165775744,
+              "priceShape": "flat",
+              "trendApr": 0
+            },
+            "amount": "494854565326",
+            "expectedHf": 1.5
+          },
+          "rehearsal": {
+            "ok": true,
+            "hfAfter": 1.500000000001,
+            "walletHas": "0",
+            "toppedUp": true
+          }
+        },
+        {
+          "move": {
+            "kind": "add",
+            "leg": {
+              "token": "0x54dF79D8EDf36D15cd83fbeDbdd90807fC828934",
+              "symbol": "syzUSD",
+              "decimals": 18,
+              "amount": "1547470901193805025792539",
+              "value": 1692675.715999,
+              "lt": 0.915,
+              "apr": 0,
+              "priceShape": "climbing",
+              "trendApr": 0.07504325124953685
+            },
+            "amount": "741645684253318270943233",
+            "expectedHf": 1.5
+          },
+          "rehearsal": {
+            "ok": true,
+            "hfAfter": 1.5,
+            "walletHas": "0",
+            "toppedUp": true
+          }
+        }
+      ],
+      "keys": "fixed: the market id is the hash of its oracle, LLTV and rate model (checked), nobody can change them"
+    },
+    {
+      "key": "aave:0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26:0xf4dfdd6407a63a36bd26af92b593e7fdc913a989",
+      "loan": {
+        "snap": {
+          "kind": "aave",
+          "venue": "OpenFi",
+          "where": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+          "wallet": "0xf4dfdd6407a63a36bd26af92b593e7fdc913a989",
+          "block": 22317005,
+          "time": 1794002249,
+          "quote": "USD",
+          "hf": 1.0402839302520939,
+          "collateral": [
+            {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "6072406",
+              "value": 6.07082717444,
+              "lt": 0.78,
+              "apr": 0.018306252,
+              "priceShape": "moving",
+              "trendApr": 0.005803928907002074
+            },
+            {
+              "token": "0x52C48d4213107b20bC583832b0d951FB9CA8F0B0",
+              "symbol": "WPROS",
+              "decimals": 18,
+              "amount": "100031216147205486",
+              "value": 0.05473742758375871,
+              "lt": 0.78,
+              "apr": 0.003808036,
+              "priceShape": "moving",
+              "trendApr": -2.126420868830243
+            }
+          ],
+          "debt": [
+            {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "4594114",
+              "value": 4.59291953036,
+              "lt": 0,
+              "apr": 0.031890657,
+              "stressApr": 0.79,
+              "priceShape": "moving",
+              "trendApr": 0.005803928907002074
+            }
+          ]
+        },
+        "aave": {
+          "wiring": {
+            "provider": "0x3078361290234F1269034e6f9aF90A7512159fb1",
+            "oracle": "0x878aF9E17C0168bBCdB4f33890Bf8CDE7592a6d1",
+            "configurator": "0x16Bccb7eA0C8669140E8E941e68787850b77476E",
+            "owner": "0x277bc3069b0e45c02a18Ec78A407267Ad582E38C"
+          },
+          "poolKey": "openfi"
+        }
+      },
+      "level": "critical",
+      "drop": 1,
+      "clockNow": {
+        "collateralGrowth": 0.018176697403819345,
+        "debtGrowth": 0.031890657,
+        "net": -0.013713959596180658,
+        "days": 1051.132985910458
+      },
+      "clockStress": {
+        "collateralGrowth": 0.018176697403819345,
+        "debtGrowth": 0.79,
+        "net": -0.7718233025961807,
+        "days": 18.676807567872576
+      },
+      "aim": 1.5,
+      "advice": [
+        {
+          "move": {
+            "kind": "repay",
+            "leg": {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "4594114",
+              "value": 4.59291953036,
+              "lt": 0,
+              "apr": 0.031890657,
+              "stressApr": 0.79,
+              "priceShape": "moving",
+              "trendApr": 0.005803928907002074
+            },
+            "amount": "1407994",
+            "expectedHf": 1.5
+          },
+          "rehearsal": {
+            "ok": true,
+            "hfAfter": 1.5000009355501394,
+            "walletHas": "140000",
+            "toppedUp": true
+          }
+        },
+        {
+          "move": {
+            "kind": "add",
+            "leg": {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "6072406",
+              "value": 6.07082717444,
+              "lt": 0.78,
+              "apr": 0.018306252,
+              "priceShape": "moving",
+              "trendApr": 0.005803928907002074
+            },
+            "amount": "2707678",
+            "expectedHf": 1.5
+          },
+          "rehearsal": {
+            "ok": true,
+            "hfAfter": 1.500000175269781,
+            "walletHas": "140000",
+            "toppedUp": true
+          }
+        }
+      ],
+      "keys": "0x277bc3069b0e45c02a18Ec78A407267Ad582E38C (answers neither as a Safe nor as a timelock)"
+    },
+    {
+      "key": "aave:0xd9b9e4f8257bff9b1415d74c1ef88d8057f60cba:0xd360d59d3d9449c6cec9e6f50046b57cc67fe7a0",
+      "loan": {
+        "snap": {
+          "kind": "aave",
+          "venue": "Avalon",
+          "where": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+          "wallet": "0xd360d59d3d9449c6cec9e6f50046b57cc67fe7a0",
+          "block": 22317005,
+          "time": 1794002249,
+          "quote": "USD",
+          "hf": 1.7869870078090875,
+          "collateral": [
+            {
+              "token": "0xD990CF81e9aeA2417326fdFAc12b19aA66F8B6C2",
+              "symbol": "FBTC",
+              "decimals": 8,
+              "amount": "850000000",
+              "value": 642916.8387886849,
+              "lt": 0.7,
+              "apr": 0,
+              "priceShape": "moving",
+              "trendApr": -1.4017068750985682
+            }
+          ],
+          "debt": [
+            {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "251909401960",
+              "value": 251843.9055154904,
+              "lt": 0,
+              "apr": 0.00006598,
+              "stressApr": 0.0001,
+              "priceShape": "moving",
+              "trendApr": 0.005803928907002074
+            }
+          ]
+        },
+        "aave": {
+          "wiring": {
+            "provider": "0x100AC26ad2c253B18375f1dC4BC0EeeB66DEBc88",
+            "oracle": "0xa2eD1C2149978cc817Ccf4bb1bB0a9982163a7bE",
+            "configurator": "0x4BbD637d772c23a6f12498e7520797F45D747012",
+            "owner": "0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4"
+          },
+          "poolKey": "avalon"
+        }
+      },
+      "level": "ok",
+      "drop": 0.44039884138495217,
+      "clockNow": {
+        "collateralGrowth": 0,
+        "debtGrowth": 0.00006598,
+        "net": -0.00006598,
+        "days": 3211485.336494408
+      },
+      "clockStress": {
+        "collateralGrowth": 0,
+        "debtGrowth": 0.0001,
+        "net": -0.0001,
+        "days": 2118938.02501901
+      },
+      "aim": 1.5,
+      "advice": [],
+      "keys": "Safe 0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4, 3 of 5 signers, no timelock in front"
+    },
+    {
+      "key": "aave:0xd9b9e4f8257bff9b1415d74c1ef88d8057f60cba:0xf5cbd5859d9c1538f00f61115a27a46b5901db13",
+      "loan": {
+        "snap": {
+          "kind": "aave",
+          "venue": "Avalon",
+          "where": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+          "wallet": "0xf5cbd5859d9c1538f00f61115a27a46b5901db13",
+          "block": 22317005,
+          "time": 1794002249,
+          "quote": "USD",
+          "hf": 2.816739313905043,
+          "collateral": [
+            {
+              "token": "0xD990CF81e9aeA2417326fdFAc12b19aA66F8B6C2",
+              "symbol": "FBTC",
+              "decimals": 8,
+              "amount": "1045000000",
+              "value": 790409.5253343245,
+              "lt": 0.7,
+              "apr": 0,
+              "priceShape": "moving",
+              "trendApr": -1.4017068750985682
+            }
+          ],
+          "debt": [
+            {
+              "token": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+              "symbol": "USDC",
+              "decimals": 6,
+              "amount": "196479154797",
+              "value": 196428.07021675276,
+              "lt": 0,
+              "apr": 0.00006598,
+              "stressApr": 0.0001,
+              "priceShape": "moving",
+              "trendApr": 0.005803928907002074
+            }
+          ]
+        },
+        "aave": {
+          "wiring": {
+            "provider": "0x100AC26ad2c253B18375f1dC4BC0EeeB66DEBc88",
+            "oracle": "0xa2eD1C2149978cc817Ccf4bb1bB0a9982163a7bE",
+            "configurator": "0x4BbD637d772c23a6f12498e7520797F45D747012",
+            "owner": "0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4"
+          },
+          "poolKey": "avalon"
+        }
+      },
+      "level": "ok",
+      "drop": 0.644979570859317,
+      "clockNow": {
+        "collateralGrowth": 0,
+        "debtGrowth": 0.00006598,
+        "net": -0.00006598,
+        "days": 5728806.906105951
+      },
+      "clockStress": {
+        "collateralGrowth": 0,
+        "debtGrowth": 0.0001,
+        "net": -0.0001,
+        "days": 3779866.796648707
+      },
+      "aim": 1.5,
+      "advice": [],
+      "keys": "Safe 0xc6f56760f2F4E41095DB8269c5D8380B0fd184F4, 3 of 5 signers, no timelock in front"
+    }
+  ]
+}
