@@ -38,7 +38,8 @@ elsewhere). One bundled file, no install, no keys. Reads Pharos mainnet through 
   alert for a change that already happened in block N (Avalon's Safe swapped the rate strategies in block
   22302862).
 - `lastcall scan [--hours 24] [--top 15]`: borrowers seen on every venue in the last hours, ranked by health.
-  About 1 s per 1,000 blocks (roughly 17 min of chain), so 24 h is about 1.5 minutes, a week about 10.
+  One log query per 999 blocks (about 17 minutes of chain). A 7-day scan took about an hour on 2026-11-06,
+  so use 24 h unless the user asks for more, and tell them how long it will take before starting.
 - `lastcall channels [test]`: where alerts go. `test` sends a test message to whatever is set up and, after
   the user pressed Start on their bot, finds their Telegram chat id by itself.
 
