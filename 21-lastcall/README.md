@@ -56,6 +56,10 @@ Telegram or Discord with the user, and how to explain an alert.
 in when you run `lastcall channels test` after pressing Start in the bot), the webhook URL for Discord, or both.
 A channel switches on once its line is filled. `SKILL.md` walks the agent through explaining all of this to
 someone who has never made a bot or a webhook. The file holds secrets once filled: keep it out of git.
+On the phone an alert is a card, not a wall of text: Discord gets an embed with a colour stripe for the level
+(red critical, orange warn, green recovered, blue rule change) and one field each for the loan, price risk,
+time left, what to repay or add, and who can change the rules; Telegram gets the same fields in bold-headed
+HTML. The console keeps the full text.
 
 Thresholds are flags: `--warn 1.3 --critical 1.1` (the defaults), `--target 1.5` is the health the advice aims
 at, `--rearm 0.02` is how far health has to climb back above a line before that level clears (so a loan
@@ -145,12 +149,12 @@ Runner was compiled with solc 0.8.24 (optimizer 200, evm paris); the runtime cod
 
 ## Tests
 
-`npm test`: 18 tests. Thresholds and their order checks, levels and the rearm band, price drop for volatile
+`npm test`: 19 tests. Thresholds and their order checks, levels and the rearm band, price drop for volatile
 collateral and the same-token case, the carry clock on the real syzUSD loop's numbers (growing now, 30-33 days
 under stress), move sizes hitting the target without overshooting, the raised aim for a short clock, oracle
 shapes, Morpho's id-equals-hash check on the real syzUSD market params, Taylor compounding, decoding the real
 Avalon strategy-swap logs, secrets hidden in errors, and delivery to the console, Telegram and Discord through
-a fake network, and the alerts file (empty means console only, filled lines switch channels on, a filled file is never overwritten).
+a fake network (cards as a Discord embed and Telegram HTML), and the alerts file (empty means console only, filled lines switch channels on, a filled file is never overwritten).
 
 ## Proof
 

@@ -8,7 +8,7 @@ import { RpcChain } from "./chain.js";
 import { ENV_FILE, ENV_KEYS, HOME, STATE_DIR, channelsOn, ensureEnvTemplate, findTelegramChat, hide, loadSecrets, shout, type Outlet } from "./deliver.js";
 import { DEFAULT_THRESHOLDS, checkThresholds, type Thresholds } from "./health.js";
 import { lookAt } from "./look.js";
-import { alertText, stamp, table } from "./render.js";
+import { alertText, stamp, table, type Card } from "./render.js";
 import { recentBorrowers } from "./scan.js";
 import { AAVE_POOLS, MORPHO_MARKETS } from "./venues.js";
 import { emptyState, replayRules, watchRound, type WatchState } from "./watch.js";
@@ -134,7 +134,7 @@ async function main(argv: string[]): Promise<void> {
       const started = Date.now();
       try {
         const { alerts, look } = await watchRound(chain, wallets, t, daysWarn, state, p.addrs("market", 64));
-        for (const a of alerts) for (const line of await shout(o, a.text)) say(`  ${line}`);
+        for (const a of alerts) for (const line of await shout(o, a.text, new Date(), a.card)) say(`  ${line}`);
         const quiet = look.out.map((a) => `${a.loan.snap.venue} ${a.loan.snap.hf.toFixed(4)} ${state.levels[a.key]}`).join(", ");
         note(`${stamp()} round ${i} at block ${look.block}: ${alerts.length} alert(s)${alerts.length ? "" : `, all as before (${quiet || "no loans"})`}`);
         writeFileSync(statePath, json(state));
@@ -152,9 +152,9 @@ async function main(argv: string[]): Promise<void> {
     const pool = p.one("pool");
     const block = p.num("block", NaN);
     if (!wallet || !pool || !Number.isInteger(block)) throw new Exit(2, `replay needs --pool <${AAVE_POOLS.map((x) => x.key).join("|")}> --wallet 0x... --block N`);
-    const text = await replayRules(chain, pool, wallet, block, thresholds(p), p.num("days-warn", 30));
+    const r = await replayRules(chain, pool, wallet, block, thresholds(p), p.num("days-warn", 30));
     const ts = await chain.timestamp(block);
-    for (const line of await shout(outlet(p), text, new Date(ts * 1000))) say(`  ${line}`);
+    for (const line of await shout(outlet(p), r.text, new Date(ts * 1000), r.card)) say(`  ${line}`);
     return;
   }
 
@@ -206,7 +206,9 @@ ${ENV_KEYS.telegramChat}=${chat}
       say(`nothing to test yet: fill ${ENV_KEYS.telegramToken} and/or ${ENV_KEYS.discordWebhook} in ${env} first`);
       return;
     }
-    for (const line of await shout(o, "lastcall test: if you can read this, alerts will reach you here.")) say(`  ${line}`);
+    const hello = "lastcall test: if you can read this, alerts will reach you here.";
+    const card: Card = { tone: "ok", title: "🟢 lastcall is connected", lead: "If you can read this, alerts will reach you here.", fields: [{ name: "What comes next", value: "a card like this one, coloured by level, with the loan, the time left and what to repay or add" }], footer: "lastcall · test message" };
+    for (const line of await shout(o, hello, new Date(), card)) say(`  ${line}`);
     return;
   }
 

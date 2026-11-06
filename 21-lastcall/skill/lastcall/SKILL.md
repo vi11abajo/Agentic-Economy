@@ -85,7 +85,8 @@ Do it with the user step by step:
    pressed Start and writes `LASTCALL_TELEGRAM_CHAT_ID` itself, then every filled channel gets a test message.
    Ask the user whether it arrived. If it says "no /start message found", they need to press Start in the bot
    and you run the test again. If a channel says FAILED, read them the reason and go back to step 3 for it.
-6. From then on `watch` and `replay` send to every filled channel. `--console-only` keeps a single run off them.
+6. From then on `watch` and `replay` send to every filled channel, as a card: a colour for the level and one
+   short field per question (loan, price risk, time left, what to do, rules). `--console-only` keeps a single run off them.
 
 ## How to read an alert
 

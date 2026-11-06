@@ -4,7 +4,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { stamp } from "./render.js";
+import { cardEmbed, cardHtml, stamp, type Card } from "./render.js";
 
 // The skill folder (the one with SKILL.md). The bundled CLI sits in <skill>/scripts/, the dev build in dist/.
 const here = dirname(fileURLToPath(import.meta.url));
@@ -75,11 +75,11 @@ export function hide(text: string, s: Secrets): string {
 
 export type Net = typeof fetch;
 
-export async function toTelegram(net: Net, s: Secrets, text: string): Promise<void> {
+export async function toTelegram(net: Net, s: Secrets, text: string, html = false): Promise<void> {
   const res = await net(`https://api.telegram.org/bot${s.telegramToken}/sendMessage`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ chat_id: s.telegramChat, text, link_preview_options: { is_disabled: true } }),
+    body: JSON.stringify({ chat_id: s.telegramChat, text, ...(html ? { parse_mode: "HTML" } : {}), link_preview_options: { is_disabled: true } }),
   });
   const j = (await res.json().catch(() => ({}))) as { ok?: boolean; description?: string };
   if (!res.ok || !j.ok) throw new Error(hide(`Telegram said: ${j.description ?? `HTTP ${res.status}`}`, s));
@@ -94,10 +94,10 @@ export async function findTelegramChat(net: Net, token: string): Promise<string 
   return hit ? String(hit.message!.chat!.id) : null;
 }
 
-export async function toDiscord(net: Net, s: Secrets, text: string): Promise<void> {
-  // Discord caps a message at 2000 characters; alerts are shorter, but cut cleanly just in case.
-  const content = text.length > 1990 ? `${text.slice(0, 1985)}…` : text;
-  const res = await net(`${s.discordWebhook}?wait=true`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ content }) });
+export async function toDiscord(net: Net, s: Secrets, text: string, embed?: object): Promise<void> {
+  // An embed when we have a card (colour stripe, one field per idea); plain text otherwise, cut at Discord's 2000.
+  const payload = embed ? { embeds: [embed] } : { content: text.length > 1990 ? `${text.slice(0, 1985)}…` : text };
+  const res = await net(`${s.discordWebhook}?wait=true`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
   if (!res.ok) {
     const j = (await res.json().catch(() => ({}))) as { message?: string };
     throw new Error(hide(`Discord said: ${j.message ?? `HTTP ${res.status}`}`, s));
@@ -112,19 +112,23 @@ export interface Outlet {
   discord: boolean;
 }
 
-/** Sends one alert everywhere it should go; returns what happened per channel, failures included. */
-export async function shout(o: Outlet, text: string, when = new Date()): Promise<string[]> {
+/**
+ * Sends one alert everywhere it should go; returns what happened per channel, failures included. The console gets
+ * the full text; Telegram and Discord get the card when there is one, laid out for a phone.
+ */
+export async function shout(o: Outlet, text: string, when = new Date(), card?: Card): Promise<string[]> {
   const t = stamp(when);
   o.console(text.split("\n").map((l, i) => (i === 0 ? `${t} ${l}` : `${" ".repeat(t.length)} ${l}`)).join("\n"));
   const report: string[] = [];
   const body = `${t} ${text}`;
+  const utc = `${when.toISOString().slice(0, 16).replace("T", " ")} UTC`;
   if (o.telegram) {
     if (!o.secrets.telegramToken || !o.secrets.telegramChat) report.push("telegram: not set up (token or chat id missing)");
-    else await toTelegram(o.net, o.secrets, body).then(() => report.push("telegram: delivered"), (e: Error) => report.push(`telegram: FAILED, ${e.message}`));
+    else await toTelegram(o.net, o.secrets, card ? cardHtml(card, utc) : body, !!card).then(() => report.push("telegram: delivered"), (e: Error) => report.push(`telegram: FAILED, ${e.message}`));
   }
   if (o.discord) {
     if (!o.secrets.discordWebhook) report.push("discord: not set up (webhook missing)");
-    else await toDiscord(o.net, o.secrets, body).then(() => report.push("discord: delivered"), (e: Error) => report.push(`discord: FAILED, ${e.message}`));
+    else await toDiscord(o.net, o.secrets, body, card ? cardEmbed(card, when) : undefined).then(() => report.push("discord: delivered"), (e: Error) => report.push(`discord: FAILED, ${e.message}`));
   }
   return report;
 }

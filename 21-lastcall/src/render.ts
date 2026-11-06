@@ -95,3 +95,119 @@ export function table(rows: Assessment[]): string {
   });
   return [head, ...lines].join("\n");
 }
+
+// ---- Cards: the same alert, laid out for a phone screen (Discord embeds, Telegram HTML) ----
+
+export interface Card {
+  /** Sets the colour stripe in Discord and the icon in the title. */
+  tone: "liquidatable" | "critical" | "warn" | "ok" | "rules";
+  title: string;
+  lead: string;
+  fields: { name: string; value: string }[];
+  footer: string;
+}
+
+const ICON: Record<Card["tone"], string> = { liquidatable: "🟥", critical: "🔴", warn: "🟠", ok: "🟢", rules: "🛠" };
+export const TONE_COLOR: Record<Card["tone"], number> = { liquidatable: 0x7f1d1d, critical: 0xdc2626, warn: 0xf59e0b, ok: 0x059669, rules: 0x1e2bfa };
+
+const days = (c: Clock) => (c.days === null ? "not shrinking" : c.days === 0 ? "past the line" : c.days > 3650 ? "over 10 years" : `about ${Math.round(c.days)} days`);
+
+/** "Safe 0xc6f5…84f4 · 3 of 5 signers · no timelock" instead of the long sentence. */
+export function shortKeys(keys: string): string {
+  if (keys.startsWith("fixed")) return "fixed: the market id is the hash of its terms, nobody can change them";
+  const safe = keys.match(/Safe (0x[0-9a-fA-F]{40}), (\d+) of (\d+) signers/);
+  if (safe) return `can change: Safe ${short(safe[1])}, ${safe[2]} of ${safe[3]} signers, no timelock`;
+  const tl = keys.match(/timelock (0x[0-9a-fA-F]{40}), (.*)/);
+  if (tl) return `can change: timelock ${short(tl[1])}, ${tl[2]}`;
+  const any = keys.match(/(0x[0-9a-fA-F]{40})/);
+  return any ? `can change: ${short(any[1])} (not a Safe or a timelock)` : keys;
+}
+
+function priceShort(a: Assessment): string {
+  const s = a.loan.snap;
+  const owedTokens = new Set(s.debt.map((d) => d.token.toLowerCase()));
+  const out: string[] = [];
+  if (a.drop !== null) {
+    const moving = movingCollateral(s).map((c) => c.symbol).join("/");
+    out.push(a.drop >= 1 ? `${moving} could go to zero, the rest still covers the debt` : `${moving} can fall ${pct(a.drop, 1)} more before liquidation`);
+  }
+  for (const c of s.collateral.filter((x) => x.lt > 0 && owedTokens.has(x.token.toLowerCase()))) out.push(`${c.symbol} against a ${c.symbol} loan cancels out`);
+  for (const c of s.collateral.filter((x) => x.lt > 0 && x.priceShape !== "moving" && !owedTokens.has(x.token.toLowerCase()))) {
+    out.push(c.priceShape === "flat" ? `${c.symbol} oracle flat for 7 days` : `none: ${c.symbol} oracle only climbed this week (+${pct(c.trendApr)}/yr)`);
+  }
+  return out.join("\n") || "n/a";
+}
+
+function timeShort(a: Assessment): string {
+  const n = a.clockNow;
+  const lines = [n.days === null
+    ? `now: health grows (earns ${pct(n.collateralGrowth)}, costs ${pct(n.debtGrowth)})`
+    : `now: ${days(n)} (earns ${pct(n.collateralGrowth)}, costs ${pct(n.debtGrowth)})`];
+  if (a.loan.snap.debt.some((d) => d.stressApr !== undefined && d.stressApr !== d.apr)) {
+    lines.push(`if suppliers pull their cash (borrow ${pct(a.clockStress.debtGrowth)}): ${days(a.clockStress)}`);
+  }
+  return lines.join("\n");
+}
+
+function todoShort(a: Assessment): string {
+  if (a.advice.length === 0) return `nothing for now, health is above ${a.aim.toFixed(2)}`;
+  const s = a.loan.snap;
+  const lines = a.advice.map((x, i) => {
+    const what = `${i === 0 ? "" : "or "}${x.move.kind === "repay" ? "repay" : "add"} ${amount(x.move.amount, x.move.leg.decimals)} ${x.move.leg.symbol}`;
+    return x.rehearsal.ok ? `• ${what} → health ${hfText(x.rehearsal.hfAfter!)}` : `• ${what} → about ${hfText(x.move.expectedHf)} (rehearsal failed)`;
+  });
+  const held = a.advice.map((x) => `${amount(x.rehearsal.walletHas, x.move.leg.decimals)} ${x.move.leg.symbol}`).join(" / ");
+  const ok = a.advice.every((x) => x.rehearsal.ok);
+  lines.push(`${ok ? "both tried on the real " + (s.kind === "aave" ? "pool" : "Morpho contract") + " first" : "arithmetic only where the rehearsal failed"}; wallet holds ${held}`);
+  return lines.join("\n");
+}
+
+export function alertCard(a: Assessment, reason?: string): Card {
+  const s = a.loan.snap;
+  return {
+    tone: a.level,
+    title: `${ICON[a.level]} ${a.level.toUpperCase()} · ${s.venue}`,
+    lead: `${short(s.wallet)} · health ${hfText(s.hf)} (liquidation at 1.0)${reason ? ` · ${reason}` : ""}`,
+    fields: [
+      { name: "Loan", value: `owes ${legs(s.debt)}\nagainst ${legs(s.collateral)}` },
+      { name: "Price risk", value: priceShort(a) },
+      { name: "Time left", value: timeShort(a) },
+      { name: `To get back to ${a.aim.toFixed(2)}`, value: todoShort(a) },
+      { name: "Rules", value: shortKeys(a.keys) },
+    ],
+    footer: `lastcall · Pharos block ${s.block}`,
+  };
+}
+
+export function recoveredCard(a: Assessment, from: string, to: string): Card {
+  const s = a.loan.snap;
+  return {
+    tone: "ok",
+    title: `${ICON.ok} RECOVERED · ${s.venue}`,
+    lead: `${short(s.wallet)} · health ${hfText(s.hf)}, ${from} → ${to}`,
+    fields: [{ name: "To do", value: "nothing needed now" }],
+    footer: `lastcall · Pharos block ${s.block}`,
+  };
+}
+
+const escHtml = (t: string) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+export function cardHtml(c: Card, when: string): string {
+  return [
+    `<b>${escHtml(c.title)}</b>`,
+    escHtml(c.lead),
+    ...c.fields.map((f) => `\n<b>${escHtml(f.name)}</b>\n${escHtml(f.value)}`),
+    `\n<i>${escHtml(c.footer)} · ${escHtml(when)}</i>`,
+  ].join("\n");
+}
+
+export function cardEmbed(c: Card, when: Date): object {
+  return {
+    title: c.title,
+    description: c.lead,
+    color: TONE_COLOR[c.tone],
+    fields: c.fields.map((f) => ({ name: f.name, value: f.value.slice(0, 1024), inline: false })),
+    footer: { text: c.footer },
+    timestamp: when.toISOString(),
+  };
+}
