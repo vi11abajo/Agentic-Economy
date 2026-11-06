@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import { decodeFunctionData, encodeErrorResult, parseAbi } from "viem";
 import { aavePool, erc20, erc4626 } from "./abis.js";
+import { morphoAbi } from "./morpho.js";
 import { buildSteps } from "./plan.js";
 import { explainRevert, tokenOverride } from "./reads.js";
 import type { Reading } from "./sources.js";
@@ -86,4 +87,31 @@ test("no key, no signing, no sending anywhere in dent's source", () => {
     for (const bad of ["privateKey", "PRIVATE_KEY", "privateKeyToAccount", "signTransaction", "eth_sendRawTransaction", "send_raw_transaction", "mnemonic"])
       assert.ok(!src.includes(bad), `${f} mentions ${bad}`);
   }
+});
+
+test("out of a Faroo vault into stPROS is one redeem: the vault pays out in stPROS", () => {
+  const from = { ...reading("faroo-frhv001", 2n * 10n ** 18n, 5n * 10n ** 24n), heldUnderlying: 19n * 10n ** 17n };
+  const steps = buildSteps(from, reading("faroo-stpros"), ME, 2n * 10n ** 18n);
+  assert.equal(steps.length, 1);
+  assert.equal(decodeFunctionData({ abi: erc4626, data: steps[0].data }).args![0], 5n * 10n ** 24n);
+});
+
+test("out of a Faroo vault anywhere else: vault redeem, stPROS redeem on a stand-in balance, claim, then in", () => {
+  const from = { ...reading("faroo-frhv001", 2n * 10n ** 18n, 5n * 10n ** 24n), heldUnderlying: 19n * 10n ** 17n };
+  const steps = buildSteps(from, reading("openfi-wpros"), ME, 2n * 10n ** 18n);
+  assert.deepEqual(steps.map((s) => s.phase), [1, 1, 2, 2, 2, 2]);
+  assert.equal(decodeFunctionData({ abi: erc4626, data: steps[1].data }).args![0], 19n * 10n ** 17n);
+  assert.ok(steps[1].simOverrides?.[STPROS], "stPROS redeem is estimated with the stPROS the vault will have paid");
+});
+
+test("Morpho: supply carries the market params; a full exit goes by shares", () => {
+  const mp = { loanToken: USDC as `0x${string}`, collateralToken: WPROS as `0x${string}`, oracle: "0x0000000000000000000000000000000000000001" as `0x${string}`, irm: "0x0000000000000000000000000000000000000002" as `0x${string}`, lltv: 385n * 10n ** 15n };
+  const into = buildSteps(reading("wallet-usdc", 10n ** 6n), { ...reading("morpho-usdc-wpros"), marketParams: mp }, ME, 10n ** 6n);
+  assert.equal(into.length, 2);
+  const sup = decodeFunctionData({ abi: morphoAbi, data: into[1].data });
+  assert.equal(sup.functionName, "supply");
+  assert.equal((sup.args![0] as { lltv: bigint }).lltv, mp.lltv);
+  const out = buildSteps({ ...reading("morpho-usdc-wpros", 10n ** 6n, 777n), marketParams: mp }, reading("wallet-usdc"), ME, 10n ** 6n);
+  const wd = decodeFunctionData({ abi: morphoAbi, data: out[0].data });
+  assert.deepEqual([wd.args![1], wd.args![2]], [0n, 777n]);
 });

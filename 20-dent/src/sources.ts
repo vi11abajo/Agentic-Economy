@@ -3,6 +3,7 @@
 import { encodeFunctionData, type Hex } from "viem";
 import { aavePool, erc20, erc4626, rateStrategy, stableDebt, stpros } from "./abis.js";
 import { Failed, Reader, nativeOverride, tokenOverride } from "./reads.js";
+import { MORPHO, morphoAbi, params, sharePrice, state, supplyRate, vaultV2Model, type MarketParams } from "./morpho.js";
 import { STPROS, USDC, type Source } from "./venues.js";
 
 /** Blocks we read history at, with the real seconds between them (from block timestamps, not an assumed block time). */
@@ -33,11 +34,17 @@ export interface Reading {
   exitFee: number;
   /** How much could leave right now (pool cash). Undefined when nothing limits it that we know of. */
   exitRoom?: bigint;
+  /** Set when getting out is impossible right now, with the reason. */
+  exitBlocked?: string;
   /** How much more the venue accepts (supply cap). */
   entryRoom?: bigint;
   /** Seconds between asking for the money back and having it (stPROS unbonding). */
   waitSeconds: number;
   notes: string[];
+  /** Faroo vaults: the stPROS behind the wallet's shares. */
+  heldUnderlying?: bigint;
+  /** Morpho markets: the market's parameters, which every supply and withdraw call carries. */
+  marketParams?: MarketParams;
   /** Aave only: the aToken, for the plan and for reading balances. */
   aToken?: string;
 }
@@ -56,7 +63,12 @@ function blank(source: Source): Reading {
   return { source, status: "open", held: 0n, heldShares: 0n, entryFee: 0, exitFee: 0, waitSeconds: 0, notes: [] };
 }
 
-export async function readSource(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows): Promise<Reading> {
+export interface ReadOpts {
+  /** Reading the past (backtest): no simulations, they can only run against the latest state. */
+  historical?: boolean;
+}
+
+export async function readSource(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows, o: ReadOpts = {}): Promise<Reading> {
   try {
     switch (source.kind) {
       case "idle":
@@ -64,11 +76,13 @@ export async function readSource(r: Reader, source: Source, wallet: string, amou
       case "aave":
         return await aave(r, source, wallet, amount, w);
       case "vault":
-        return await vault(r, source, wallet, amount, w);
+        return await vault(r, source, wallet, amount, w, o);
       case "stpros":
-        return await stPros(r, source, wallet, amount, w);
+        return await stPros(r, source, wallet, amount, w, o);
       case "faroo-vault":
-        return await farooVault(r, source, wallet, amount, w);
+        return await farooVault(r, source, wallet, amount, w, o);
+      case "morpho-market":
+        return await morphoMarket(r, source, wallet, amount, w, o);
     }
   } catch (e) {
     const out = blank(source);
@@ -171,7 +185,7 @@ async function aave(r: Reader, source: Source, wallet: string, amount: bigint, w
   return out;
 }
 
-async function vault(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows): Promise<Reading> {
+async function vault(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows, o: ReadOpts): Promise<Reading> {
   const out = blank(source);
   const v = source.address!;
   const label = source.name;
@@ -181,6 +195,16 @@ async function vault(r: Reader, source: Source, wallet: string, amount: bigint, 
   out.heldShares = shares;
   out.held = shares > 0n ? await r.read<bigint>(`${label}: wallet's shares in USDC`, v, erc4626, "convertToAssets", [shares], w.now) : 0n;
   await vaultFees(r, out, v, amount > 0n ? amount : 10n ** 6n, shares, w);
+  try {
+    const m = await vaultV2Model(r, v, amount, w.now);
+    out.rateWithYou = m.withYou;
+    out.notes.push(
+      `rate with you modelled from the ${m.markets} Morpho markets it lends into, after its performance fee: ${(m.now * 100).toFixed(2)}% now, ${(m.withYou * 100).toFixed(2)}% with your deposit; ${(m.idleShare * 100).toFixed(0)}% of the vault sits idle`,
+    );
+  } catch (e) {
+    out.notes.push(`couldn't model its rate with your deposit (${e instanceof Failed ? e.reason : (e as Error).message}); realised rates only`);
+  }
+  if (o.historical) return out;
   // Is the door open? Hand a fresh copy of the wallet the amount and try the deposit.
   const sim = await r.simulate(
     `${label}: deposit ${amount} would go through`,
@@ -199,11 +223,10 @@ async function vault(r: Reader, source: Source, wallet: string, amount: bigint, 
       out.notes.push(`leaving now reverts: ${exit.why}`);
     }
   }
-  if (source.note) out.notes.push(source.note);
   return out;
 }
 
-async function stPros(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows): Promise<Reading> {
+async function stPros(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows, o: ReadOpts): Promise<Reading> {
   const out = blank(source);
   const label = source.name;
   await sharePrices(r, out, STPROS, 10n ** 18n, w);
@@ -214,6 +237,7 @@ async function stPros(r: Reader, source: Source, wallet: string, amount: bigint,
   // Unnamed getter 0x6cf6d675 answers 86400. Recent real redeems were claimed 24-29 h later, so we read it as the
   // unbonding time; if it ever changes, the number shown changes with it.
   out.waitSeconds = Number(await r.readRaw(`${label}: unbonding seconds`, STPROS, "0x6cf6d675", w.now));
+  if (o.historical) return out;
   const stake = await r.simulate(
     `${label}: staking ${amount} wei would go through`,
     { from: wallet, to: STPROS, data: encodeFunctionData({ abi: stpros, functionName: "depositWithPROS" }), value: amount },
@@ -224,29 +248,77 @@ async function stPros(r: Reader, source: Source, wallet: string, amount: bigint,
   return out;
 }
 
-async function farooVault(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows): Promise<Reading> {
+async function farooVault(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows, o: ReadOpts): Promise<Reading> {
   const out = blank(source);
   const v = source.address!;
   const label = source.name;
-  await sharePrices(r, out, v, 10n ** 24n, w);
-  out.notes.push("rate is the vault's own share price in stPROS, on top of stPROS's rate");
+  // In PROS a vault share is worth (stPROS per share) x (PROS per stPROS), so its rate rides stPROS's rate too.
+  const probe = 10n ** 24n;
+  const inPros = async (b: number) => {
+    const st = await r.read<bigint>(`${label}: stPROS per share`, v, erc4626, "convertToAssets", [probe], b);
+    return r.read<bigint>(`${label}: that stPROS in PROS`, STPROS, erc4626, "convertToAssets", [st], b);
+  };
+  const [now, p7, p30] = await Promise.all([inPros(w.now), inPros(w.d7).catch(() => 0n), inPros(w.d30).catch(() => 0n)]);
+  if (p7 > 0n) out.realized7d = annualise(p7, now, w.secs7);
+  if (p30 > 0n) out.realized30d = annualise(p30, now, w.secs30);
+  out.rateNow = out.realized7d;
+  out.notes.push("a Faroo vault holds stPROS, so in PROS it earns stPROS's rate plus its own");
   const shares = await r.read<bigint>(`${label}: wallet's shares`, v, erc20, "balanceOf", [wallet], w.now);
   out.heldShares = shares;
   if (shares > 0n) {
     const st = await r.read<bigint>(`${label}: wallet's shares in stPROS`, v, erc4626, "convertToAssets", [shares], w.now);
+    out.heldUnderlying = st;
     out.held = await r.read<bigint>(`${label}: that stPROS in PROS`, STPROS, erc4626, "convertToAssets", [st], w.now);
   }
-  // Try to put in stPROS worth the amount. These vaults go through phases; outside the deposit phase they revert.
+  out.status = "closed";
+  out.why = "dent plans only exits from Faroo vaults (they take stPROS, not PROS)";
+  if (o.historical) return out;
+  // These vaults go through phases. Deposit and redeem are tried separately: one can be open while the other isn't.
   const stAmount = amount > 0n ? amount : 10n ** 18n;
-  const sim = await r.simulate(
+  const dep = await r.simulate(
     `${label}: deposit would go through`,
     { from: wallet, to: v, data: encodeFunctionData({ abi: erc4626, functionName: "deposit", args: [stAmount, wallet as Hex] }) },
     tokenOverride(STPROS, wallet, stAmount, v),
   );
-  if (!sim.ok) return closed(out, `deposit reverts: ${sim.why}`);
-  out.notes.push("open, but dent does not plan moves into it (needs stPROS first)");
-  out.status = "closed";
-  out.why = "dent plans only direct PROS moves; stake first, then deposit by hand";
+  if (!dep.ok) out.why = `deposit reverts: ${dep.why}`;
+  if (shares > 0n) {
+    const red = await r.simulate(`${label}: wallet can redeem its shares`, {
+      from: wallet,
+      to: v,
+      data: encodeFunctionData({ abi: erc4626, functionName: "redeem", args: [shares, wallet as Hex, wallet as Hex] }),
+    });
+    if (!red.ok) out.exitBlocked = `redeem reverts: ${red.why}`;
+    else out.notes.push("redeeming your shares goes through right now");
+  }
+  return out;
+}
+
+async function morphoMarket(r: Reader, source: Source, wallet: string, amount: bigint, w: Windows, o: ReadOpts): Promise<Reading> {
+  const out = blank(source);
+  const id = source.marketId!;
+  const mp = await params(r, id, w.now);
+  out.marketParams = mp;
+  const m = await state(r, id, w.now);
+  out.rateNow = await supplyRate(r, id, mp, m, 0n, w.now);
+  out.rateWithYou = await supplyRate(r, id, mp, m, amount, w.now);
+  const past = async (b: number) => sharePrice(await state(r, id, b));
+  const [p7, p30] = await Promise.all([past(w.d7).catch(() => 0n), past(w.d30).catch(() => 0n)]);
+  const pNow = sharePrice(m);
+  if (p7 > 0n) out.realized7d = annualise(p7, pNow, w.secs7);
+  if (p30 > 0n) out.realized30d = annualise(p30, pNow, w.secs30);
+  out.exitRoom = m.totalSupplyAssets - m.totalBorrowAssets;
+  const pos = await r.read<readonly [bigint, bigint, bigint]>(`${source.name}: wallet's position`, MORPHO, morphoAbi, "position", [id, wallet], w.now);
+  out.heldShares = pos[0];
+  out.held = m.totalSupplyShares > 0n ? (pos[0] * m.totalSupplyAssets) / m.totalSupplyShares : 0n;
+  out.notes.push("Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market");
+  if (source.note) out.notes.push(source.note);
+  if (o.historical) return out;
+  const sim = await r.simulate(
+    `${source.name}: supply ${amount} would go through`,
+    { from: wallet, to: MORPHO, data: encodeFunctionData({ abi: morphoAbi, functionName: "supply", args: [mp, amount, 0n, wallet as Hex, "0x"] }) },
+    tokenOverride(source.asset, wallet, amount, MORPHO),
+  );
+  if (!sim.ok) return closed(out, `supply reverts: ${sim.why}`);
   return out;
 }
 

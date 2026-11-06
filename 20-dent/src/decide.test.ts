@@ -104,3 +104,16 @@ test("supply cap and unknown gas are reasons, not zeros", () => {
   assert.match(d.options.find((o) => o.id === "capped")!.why, /supply cap/);
   assert.match(d.options.find((o) => o.id === "nogas")!.why, /gas unknown: Aave error code 51/);
 });
+
+test("a source whose exit reverts is STAY PUT with the revert as the reason", () => {
+  const d = decide({
+    from: place({ id: "vault", rateNow: 0, exitBlocked: "redeem reverts: InvalidPhase(1)" }),
+    amount: 2,
+    places: [place({ id: "st", rateNow: 0.08 })],
+    costs: { st: { gas: 0 } },
+    holdDays: 30,
+    minGain: 0,
+  });
+  assert.equal(d.action, "STAY PUT");
+  assert.match(d.reason, /InvalidPhase\(1\)/);
+});

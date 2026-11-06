@@ -5,6 +5,7 @@ import { encodeFunctionData, maxUint256, type Hex } from "viem";
 import { aavePool, erc20, erc4626, stpros, wpros } from "./abis.js";
 import type { Chain, Overrides } from "./chain.js";
 import { explainRevert, mergeOverrides, nativeOverride, tokenOverride } from "./reads.js";
+import { MORPHO, morphoAbi } from "./morpho.js";
 import type { Reading } from "./sources.js";
 import { STPROS, STPROS_CLAIM_GAS_OBSERVED, WPROS } from "./venues.js";
 
@@ -38,16 +39,47 @@ export interface Plan {
   steps: Step[];
 }
 
-type Form = "native" | "token";
+type Form = "native" | "token" | "stpros";
 
 const call = (abi: Parameters<typeof encodeFunctionData>[0]["abi"], functionName: string, args: unknown[] = []) =>
   encodeFunctionData({ abi, functionName, args } as never);
 
-/** Exit steps, plus what form the money is in afterwards (native PROS or the lane's ERC-20). */
-export function exitSteps(from: Reading, wallet: string, amount: bigint, nextAsset: string): { steps: Step[]; form: Form } {
+/** Leaving stPROS: the redeem starts the wait, the claim after it hands back native PROS. */
+function stprosExit(stShares: bigint, wallet: string, preFunded: boolean): Step[] {
+  const w = wallet as Hex;
+  return [
+    {
+      says: `redeem ${stShares} stPROS (starts the unbonding wait)`,
+      to: STPROS,
+      data: call(erc4626, "redeem", [stShares, w, w]),
+      value: "0",
+      phase: 1,
+      gasHow: "estimated",
+      // When the stPROS only arrives from an earlier step (a Faroo vault redeem), stand in for it.
+      simOverrides: preFunded ? tokenOverride(STPROS, wallet, stShares) : undefined,
+    },
+    {
+      says: "claim the unstaked PROS",
+      to: STPROS,
+      data: call(stpros, "withdrawCompleteToPROS"),
+      value: "0",
+      phase: 2,
+      gas: STPROS_CLAIM_GAS_OBSERVED.toString(),
+      gasHow: "observed",
+      gasWhy: "can't be simulated before the redeem exists; highest gas of recent real claims",
+    },
+  ];
+}
+
+/** The share of a position that `amount` (in lane units) stands for. */
+const part = (whole: bigint, amount: bigint, held: bigint) => (amount >= held ? whole : (whole * amount) / (held || 1n));
+
+/** Exit steps, plus what form the money is in afterwards: native PROS, the lane's ERC-20, or stPROS. */
+export function exitSteps(from: Reading, wallet: string, amount: bigint, to: Reading): { steps: Step[]; form: Form } {
   const s = from.source;
   const w = wallet as Hex;
   const steps: Step[] = [];
+  const nextAsset = to.source.asset;
   if (s.kind === "idle") return { steps, form: s.asset === "native" ? "native" : "token" };
   if (s.kind === "aave") {
     // Withdrawing everything uses type(uint256).max, so interest earned until the block it lands in comes along too.
@@ -66,24 +98,39 @@ export function exitSteps(from: Reading, wallet: string, amount: bigint, nextAss
     }
     return { steps, form: "token" };
   }
+  if (s.kind === "morpho-market") {
+    // All of it goes out by shares, so nothing is left behind to rounding; part of it goes out by assets.
+    const all = amount >= from.held;
+    steps.push({
+      says: `withdraw ${all ? "everything" : amount.toString()} from ${s.name}`,
+      to: s.address!,
+      data: call(morphoAbi, "withdraw", [from.marketParams!, all ? 0n : amount, all ? from.heldShares : 0n, w, w]),
+      value: "0",
+      phase: 1,
+      gasHow: "estimated",
+    });
+    if (s.asset === WPROS && nextAsset !== WPROS) {
+      steps.push({ says: "unwrap WPROS to PROS", to: WPROS, data: call(wpros, "withdraw", [amount]), value: "0", phase: 1, gasHow: "estimated", simOverrides: tokenOverride(WPROS, wallet, amount) });
+      return { steps, form: "native" };
+    }
+    return { steps, form: "token" };
+  }
   if (s.kind === "vault") {
-    const shares = amount >= from.held ? from.heldShares : (from.heldShares * amount) / (from.held || 1n);
+    const shares = part(from.heldShares, amount, from.held);
     steps.push({ says: `redeem ${shares} shares of ${s.name}`, to: s.address!, data: call(erc4626, "redeem", [shares, w, w]), value: "0", phase: 1, gasHow: "estimated" });
     return { steps, form: "token" };
   }
   if (s.kind === "stpros") {
-    const shares = amount >= from.held ? from.heldShares : (from.heldShares * amount) / (from.held || 1n);
-    steps.push({ says: `redeem ${shares} stPROS (starts the unbonding wait)`, to: STPROS, data: call(erc4626, "redeem", [shares, w, w]), value: "0", phase: 1, gasHow: "estimated" });
-    steps.push({
-      says: "claim the unstaked PROS",
-      to: STPROS,
-      data: call(stpros, "withdrawCompleteToPROS"),
-      value: "0",
-      phase: 2,
-      gas: STPROS_CLAIM_GAS_OBSERVED.toString(),
-      gasHow: "observed",
-      gasWhy: "can't be simulated before the redeem exists; highest gas of recent real claims",
-    });
+    if (to.source.kind === "faroo-vault") throw new Error("dent doesn't plan deposits into Faroo vaults");
+    return { steps: stprosExit(part(from.heldShares, amount, from.held), wallet, false), form: "native" };
+  }
+  if (s.kind === "faroo-vault") {
+    const shares = part(from.heldShares, amount, from.held);
+    const st = part(from.heldUnderlying ?? 0n, amount, from.held);
+    steps.push({ says: `redeem ${shares} shares of ${s.name} for stPROS`, to: s.address!, data: call(erc4626, "redeem", [shares, w, w]), value: "0", phase: 1, gasHow: "estimated" });
+    // Into stPROS itself there's nothing more to do: the vault pays out in stPROS.
+    if (to.source.kind === "stpros") return { steps, form: "stpros" };
+    steps.push(...stprosExit(st, wallet, true));
     return { steps, form: "native" };
   }
   throw new Error(`dent doesn't plan exits from ${s.name}`);
@@ -93,11 +140,15 @@ export function entrySteps(to: Reading, wallet: string, amount: bigint, form: Fo
   const s = to.source;
   const w = wallet as Hex;
   const steps: Step[] = [];
+  const unwrap = (): Step => ({ says: "unwrap WPROS to PROS", to: WPROS, data: call(wpros, "withdraw", [amount]), value: "0", phase, gasHow: "estimated", simOverrides: tokenOverride(WPROS, wallet, amount) });
   if (s.kind === "idle") {
-    if (s.lane === "PROS" && form === "token") steps.push({ says: "unwrap WPROS to PROS", to: WPROS, data: call(wpros, "withdraw", [amount]), value: "0", phase, gasHow: "estimated", simOverrides: tokenOverride(WPROS, wallet, amount) });
+    if (s.lane === "PROS" && form === "token") steps.push(unwrap());
+    if (form === "stpros") throw new Error("dent doesn't plan a move that ends in stPROS sitting in the wallet");
     return steps;
   }
   if (s.kind === "stpros") {
+    if (form === "stpros") return steps;
+    if (form === "token") steps.push(unwrap());
     steps.push({ says: `stake ${amount} wei PROS with Faroo for stPROS`, to: STPROS, data: call(stpros, "depositWithPROS"), value: amount.toString(), phase, gasHow: "estimated", simOverrides: nativeOverride(wallet, amount + 10n ** 18n) });
     return steps;
   }
@@ -105,11 +156,12 @@ export function entrySteps(to: Reading, wallet: string, amount: bigint, form: Fo
   if (token === WPROS && form === "native") {
     steps.push({ says: `wrap ${amount} wei PROS into WPROS`, to: WPROS, data: call(wpros, "deposit"), value: amount.toString(), phase, gasHow: "estimated", simOverrides: nativeOverride(wallet, amount + 10n ** 18n) });
   }
-  const spender = s.address!;
+  const spender = s.kind === "morpho-market" ? MORPHO : s.address!;
   steps.push({ says: `let ${s.name} take ${amount} of your ${token === WPROS ? "WPROS" : "USDC"}`, to: token, data: call(erc20, "approve", [spender, amount]), value: "0", phase, gasHow: "estimated", simOverrides: tokenOverride(token, wallet, amount) });
   const funded = tokenOverride(token, wallet, amount, spender);
   if (s.kind === "aave") steps.push({ says: `supply ${amount} to ${s.name}`, to: spender, data: call(aavePool, "supply", [token, amount, w, 0]), value: "0", phase, gasHow: "estimated", simOverrides: funded });
   else if (s.kind === "vault") steps.push({ says: `deposit ${amount} into ${s.name}`, to: spender, data: call(erc4626, "deposit", [amount, w]), value: "0", phase, gasHow: "estimated", simOverrides: funded });
+  else if (s.kind === "morpho-market") steps.push({ says: `supply ${amount} to ${s.name}`, to: MORPHO, data: call(morphoAbi, "supply", [to.marketParams!, amount, 0n, w, "0x"]), value: "0", phase, gasHow: "estimated", simOverrides: funded });
   else throw new Error(`dent doesn't plan entries into ${s.name}`);
   return steps;
 }
@@ -137,7 +189,7 @@ export async function estimateAll(chain: Chain, wallet: string, steps: Step[]): 
 }
 
 export function buildSteps(from: Reading, to: Reading, wallet: string, amount: bigint): Step[] {
-  const exit = exitSteps(from, wallet, amount, to.source.asset);
+  const exit = exitSteps(from, wallet, amount, to);
   const phase = exit.steps.some((s) => s.phase === 2) ? 2 : 1;
   return [...exit.steps, ...entrySteps(to, wallet, amount, exit.form, phase)];
 }

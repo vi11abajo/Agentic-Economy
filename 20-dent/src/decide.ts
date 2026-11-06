@@ -19,6 +19,8 @@ export interface Place {
   entryFee: number;
   exitFee: number;
   exitRoom?: number;
+  /** Getting out is impossible right now, and this is why. */
+  exitBlocked?: string;
   entryRoom?: number;
   waitSeconds: number;
 }
@@ -27,6 +29,8 @@ export interface Costs {
   /** Gas for the whole move (exit + entry), in lane units (USDC or PROS). Undefined if it couldn't be estimated. */
   gas?: number;
   gasWhy?: string;
+  /** Unbonding wait on the way to this destination, when it differs from the source's own (Faroo vault -> stPROS: none). */
+  waitSeconds?: number;
 }
 
 export interface Option {
@@ -129,8 +133,9 @@ export function decide(input: {
   const out: Option[] = [];
   const waitDays = from.waitSeconds / DAY;
 
-  if (from.exitRoom !== undefined && from.exitRoom < amount) {
-    const why = `${from.name} has only ${amt(from.exitRoom)} free to withdraw right now, less than the ${amt(amount)} you'd move`;
+  const blocked = from.exitBlocked ?? (from.exitRoom !== undefined && from.exitRoom < amount ? "cash" : undefined);
+  if (blocked) {
+    const why = from.exitBlocked ? `can't leave ${from.name} right now: ${from.exitBlocked}` : `${from.name} has only ${amt(from.exitRoom!)} free to withdraw right now, less than the ${amt(amount)} you'd move`;
     for (const p of places) if (p.id !== from.id) out.push({ id: p.id, name: p.name, verdict: "skip", why: "can't leave the current place" });
     return { action: "STAY PUT", reason: why, from: { id: from.id, name: from.name }, amount, holdDays, minGain, options: out };
   }
@@ -158,8 +163,9 @@ export function decide(input: {
       out.push({ ...base, verdict: "skip", why: `gas unknown: ${c?.gasWhy ?? "not estimated"}`, rateUsed: dst.rate, rateHow: dst.how });
       continue;
     }
-    const m = netOfMove(amount, src.rate, dst.rate, from.exitFee, p.entryFee, waitDays, c.gas, holdDays);
-    const be = breakEven(amount, src.rate, dst.rate, from.exitFee, p.entryFee, waitDays, c.gas);
+    const wait = c.waitSeconds !== undefined ? c.waitSeconds / DAY : waitDays;
+    const m = netOfMove(amount, src.rate, dst.rate, from.exitFee, p.entryFee, wait, c.gas, holdDays);
+    const be = breakEven(amount, src.rate, dst.rate, from.exitFee, p.entryFee, wait, c.gas);
     const opt: Option = {
       ...base,
       verdict: "candidate",
