@@ -1,25 +1,38 @@
 dent  USDC lane  wallet 0x46441dc99f8000959e9c48cf2a01a018d131d3bb
-block 22290930 (2026-11-06T15:38:28.000Z); 7-day window from block 21690039, 30-day from 19625852
+block 22304524 (2026-11-06T18:55:23.000Z); 7-day window from block 21702727, 30-day from 19638080
 
 place                           you hold        now     with you  7d real  30d real  status
 USDC left in the wallet         0.49979 USDC    0.00%   -         -        -         open
-Avalon main pool, USDC          -               1.94%   1.94%     1.93%    1.93%     open
-OpenFi, USDC                    -               1.83%   1.71%     1.83%    1.72%     open
+Avalon main pool, USDC          -               0.00%   0.00%     1.92%    1.93%     open
+OpenFi, USDC                    -               1.83%   1.71%     1.83%    1.73%     open
 Zona, USDC                      -               0.00%   0.00%     0.00%    0.00%     open
-RockawayX USDC vault            -               4.54%   -         4.54%    4.37%     open
+RockawayX USDC vault            -               4.53%   2.85%     4.53%    4.37%     open
+Morpho, lend USDC against WPROS -               7.25%   7.25%     7.08%    5.93%     open
+Morpho, lend USDC against wsrUS -               4.29%   4.29%     6.02%    4.84%     open
+Morpho, lend USDC against syzUS -               5.32%   5.32%     6.11%    5.79%     open
+Morpho, lend USDC against APC3M -               5.97%   5.97%     12.46%   8.71%     open
+Morpho, lend USDC against strUS -               0.85%   0.85%     1.37%    9.51%     open
+Morpho, lend USDC against APT   -               4.83%   4.83%     4.56%    -         open
 
-moving 0.49979 USDC out of USDC left in the wallet, credited 0.00% (quoted now); hold 30 days; minimum gain 0.01 USDC
-gas price 10 gwei; PROS = $0.5379 (Chainlink, updated 2026-11-06T15:31:13.000Z)
-  - Avalon main pool, USDC: 1.93% (realised over 7 days); extra yield 0.000793 - fees 0 - gas 0.002017 = net -0.001224 USDC; break-even 77 days. pays back only after 77 days, longer than your 30-day hold
-  - OpenFi, USDC: 1.71% (with your deposit in it); extra yield 0.000702 - fees 0 - gas 0.002015 = net -0.001313 USDC; break-even 87 days. pays back only after 87 days, longer than your 30-day hold
-  - Zona, USDC: 0.00% (with your deposit in it); extra yield 0 - fees 0 - gas 0.002017 = net -0.002017 USDC; break-even never. pays 0.00% (with your deposit in it), not more than the 0.00% you have
-  - RockawayX USDC vault: 4.37% (realised over 30 days); extra yield 0.001796 - fees 0 - gas 0.002826 = net -0.00103 USDC; break-even 48 days. pays back only after 48 days, longer than your 30-day hold
+moving 0.49979 USDC out of USDC left in the wallet; hold 30 days; minimum gain 0.01 USDC
+each option is compared with where you are in the same window, and the window worst for the move counts
+gas price 10 gwei; PROS = $0.5430 (Chainlink, updated 2026-11-06T18:43:36.000Z)
+  - Avalon main pool, USDC: 0.00% vs your 0.00% (now, with your deposit in it); extra yield 0.000001 - fees 0 - gas 0.002036 = net -0.002035 USDC; break-even 46465 days. pays back only after 46465 days, longer than your 30-day hold
+  - OpenFi, USDC: 1.71% vs your 0.00% (now, with your deposit in it); extra yield 0.000702 - fees 0 - gas 0.002034 = net -0.001332 USDC; break-even 87 days. pays back only after 87 days, longer than your 30-day hold
+  - Zona, USDC: 0.00% vs your 0.00% (now, with your deposit in it); extra yield 0 - fees 0 - gas 0.002036 = net -0.002036 USDC; break-even never. pays 0.00% now, with your deposit in it, not more than the 0.00% you get in the same window
+  - RockawayX USDC vault: 2.85% vs your 0.00% (now, with your deposit in it); extra yield 0.001173 - fees 0 - gas 0.002853 = net -0.00168 USDC; break-even 73 days. pays back only after 73 days, longer than your 30-day hold
+  - Morpho, lend USDC against WPROS: 5.93% vs your 0.00% (over the last 30 days); extra yield 0.002437 - fees 0 - gas 0.001097 = net 0.00134 USDC; break-even 14 days. nets 0.00133984 over 30 days, below your minimum gain of 0.01
+  - Morpho, lend USDC against wsrUSD: 4.29% vs your 0.00% (now, with your deposit in it); extra yield 0.001761 - fees 0 - gas 0.001097 = net 0.000664 USDC; break-even 19 days. nets 0.000663925 over 30 days, below your minimum gain of 0.01
+  - Morpho, lend USDC against syzUSD: 5.32% vs your 0.00% (now, with your deposit in it); extra yield 0.002186 - fees 0 - gas 0.001097 = net 0.001088 USDC; break-even 16 days. nets 0.00108848 over 30 days, below your minimum gain of 0.01
+  - Morpho, lend USDC against APC3M: 5.97% vs your 0.00% (now, with your deposit in it); extra yield 0.002454 - fees 0 - gas 0.001097 = net 0.001357 USDC; break-even 14 days. nets 0.00135681 over 30 days, below your minimum gain of 0.01
+  - Morpho, lend USDC against strUSD: 0.85% vs your 0.00% (now, with your deposit in it); extra yield 0.000348 - fees 0 - gas 0.001097 = net -0.000748 USDC; break-even 95 days. pays back only after 95 days, longer than your 30-day hold
+  - Morpho, lend USDC against APT: 4.56% vs your 0.00% (over the last 7 days); extra yield 0.001873 - fees 0 - gas 0.001097 = net 0.000776 USDC; break-even 18 days. nets 0.000775772 over 30 days, below your minimum gain of 0.01
 
-STAY PUT: best alternative RockawayX USDC vault pays back only after 48 days, longer than your 30-day hold
+STAY PUT: best alternative Morpho, lend USDC against APC3M nets 0.00135681 over 30 days, below your minimum gain of 0.01
 note (USDC left in the wallet): earns nothing
-note (Avalon main pool, USDC): Aave V3 supply and withdraw take no fee
-note (OpenFi, USDC): Aave V3 supply and withdraw take no fee
-note (Zona, USDC): Aave V3 supply and withdraw take no fee
-note (RockawayX USDC vault): a vault spreads deposits over Morpho markets; how much your deposit lowers its rate is not modelled
+note (Avalon main pool, USDC; OpenFi, USDC; Zona, USDC): Aave V3 supply and withdraw take no fee
+note (RockawayX USDC vault): rate with you modelled from the 4 Morpho markets it lends into, after its performance fee: 2.85% now, 2.85% with your deposit; 25% of the vault sits idle
+note (Morpho, lend USDC against WPROS; Morpho, lend USDC against wsrUSD; Morpho, lend USDC against syzUSD; Morpho, lend USDC against APC3M; Morpho, lend USDC against strUSD; Morpho, lend USDC against APT): Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market
+note (Morpho, lend USDC against WPROS; Morpho, lend USDC against wsrUSD; Morpho, lend USDC against syzUSD; Morpho, lend USDC against APC3M; Morpho, lend USDC against strUSD; Morpho, lend USDC against APT): lenders in a Morpho market carry the risk of its collateral
 
-(150 RPC requests to https://rpc.pharos.xyz)
+(315 RPC requests to https://rpc.pharos.xyz)

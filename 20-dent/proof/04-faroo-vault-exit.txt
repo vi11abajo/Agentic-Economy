@@ -1,0 +1,36 @@
+dent  PROS lane  wallet 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1
+block 22304665 (2026-11-06T18:57:26.000Z); 7-day window from block 21702871, 30-day from 19638218
+
+place                           you hold        now     with you  7d real  30d real  status
+PROS left in the wallet         4.6404 PROS     0.00%   -         -        -         open
+Faroo stPROS (liquid staking)   0.480724 PROS   31.03%  -         31.03%   8.67%     open
+OpenFi, WPROS                   -               0.38%   0.02%     0.38%    0.34%     open
+Zona, WPROS                     -               0.04%   0.03%     0.03%    0.02%     open
+Avalon innovative pool, WPROS   -               0.00%   0.00%     0.00%    0.00%     open
+Morpho, lend WPROS against BTCV -               0.18%   0.18%     0.00%    0.18%     open
+Morpho, lend WPROS against bfBT -               0.01%   0.01%     0.01%    -         open
+Faroo RWA Hybrid Vault 001      2.08044 PROS    31.03%  -         31.03%   8.67%     closed: deposit reverts: InvalidPhase(3)
+Faroo Yield Vault 001           1.9739 PROS     31.03%  -         31.03%   8.67%     closed: deposit reverts: InvalidPhase(1)
+
+moving 2.080441 PROS out of Faroo RWA Hybrid Vault 001; hold 30 days; minimum gain 0.001 PROS
+each option is compared with where you are in the same window, and the window worst for the move counts
+gas price 10 gwei
+  - PROS left in the wallet: 0.00% vs your 31.03% (now); extra yield -0.053064 - fees 0 - gas 0.005171 = net -0.058235 PROS; break-even never. pays 0.00% now, not more than the 31.03% you get in the same window
+  - Faroo stPROS (liquid staking): 31.03% vs your 31.03% (now); extra yield 0 - fees 0 - gas 0.001063 = net -0.001063 PROS; break-even never. pays 31.03% now, not more than the 31.03% you get in the same window
+  - OpenFi, WPROS: 0.02% vs your 31.03% (now, with your deposit in it); extra yield -0.053034 - fees 0 - gas 0.009189 = net -0.062223 PROS; break-even never. pays 0.02% now, with your deposit in it, not more than the 31.03% you get in the same window
+  - Zona, WPROS: 0.03% vs your 31.03% (now, with your deposit in it); extra yield -0.053012 - fees 0 - gas 0.009244 = net -0.062257 PROS; break-even never. pays 0.03% now, with your deposit in it, not more than the 31.03% you get in the same window
+  - Avalon innovative pool, WPROS: 0.00% vs your 31.03% (now, with your deposit in it); extra yield -0.053064 - fees 0 - gas 0.009003 = net -0.062067 PROS; break-even never. pays 0.00% now, with your deposit in it, not more than the 31.03% you get in the same window
+  - Morpho, lend WPROS against BTCVC: 0.00% vs your 31.03% (over the last 7 days); extra yield -0.053064 - fees 0 - gas 0.007699 = net -0.060763 PROS; break-even never. pays 0.00% over the last 7 days, not more than the 31.03% you get in the same window
+  - Morpho, lend WPROS against bfBTC: 0.01% vs your 31.03% (over the last 7 days); extra yield -0.053055 - fees 0 - gas 0.007699 = net -0.060754 PROS; break-even never. pays 0.01% over the last 7 days, not more than the 31.03% you get in the same window
+  - Faroo Yield Vault 001: skipped, closed: deposit reverts: InvalidPhase(1)
+
+STAY PUT: best alternative Faroo stPROS (liquid staking) pays 31.03% now, not more than the 31.03% you get in the same window
+note (PROS left in the wallet): earns nothing
+note (Faroo stPROS (liquid staking)): leaving: redeem, wait 24 h, then claim; nothing is earned while waiting
+note (OpenFi, WPROS; Zona, WPROS; Avalon innovative pool, WPROS): Aave V3 supply and withdraw take no fee
+note (Morpho, lend WPROS against BTCVC; Morpho, lend WPROS against bfBTC): Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market
+note (Morpho, lend WPROS against BTCVC; Morpho, lend WPROS against bfBTC): lenders in a Morpho market carry the risk of its collateral
+note (Faroo RWA Hybrid Vault 001; Faroo Yield Vault 001): a Faroo vault holds stPROS, so in PROS it earns stPROS's rate plus its own
+note (Faroo RWA Hybrid Vault 001): redeeming your shares goes through right now
+
+(234 RPC requests to https://rpc.pharos.xyz)

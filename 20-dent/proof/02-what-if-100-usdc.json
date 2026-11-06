@@ -1,11 +1,11 @@
 {
-  "block": 22290959,
-  "at": "2026-11-06T15:38:52.000Z",
+  "block": 22304589,
+  "at": "2026-11-06T18:56:19.000Z",
   "windows": {
-    "now": 22290959,
-    "d7": 21690056,
-    "d30": 19625875,
-    "secs7": 604802,
+    "now": 22304589,
+    "d7": 21702797,
+    "d30": 19638140,
+    "secs7": 604800,
     "secs30": 2592000
   },
   "lane": "USDC",
@@ -29,7 +29,8 @@
       "notes": [
         "earns nothing"
       ],
-      "rateNow": 0
+      "rateNow": 0,
+      "fixedRate": 0
     },
     {
       "source": {
@@ -51,12 +52,12 @@
         "Aave V3 supply and withdraw take no fee"
       ],
       "aToken": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
-      "exitRoom": "55015931814",
-      "entryRoom": "498135137852",
-      "rateNow": 0.019361,
-      "rateWithYou": 0.019385,
-      "realized7d": 0.019296556012208955,
-      "realized30d": 0.01932004818633333
+      "exitRoom": "55005931815",
+      "entryRoom": "498131973401",
+      "rateNow": 0.000032,
+      "rateWithYou": 0.000032,
+      "realized7d": 0.019247332205000002,
+      "realized30d": 0.019308441101166664
     },
     {
       "source": {
@@ -81,8 +82,8 @@
       "exitRoom": "5077659",
       "rateNow": 0.018306,
       "rateWithYou": 0.000277,
-      "realized7d": 0.018288890548007447,
-      "realized30d": 0.01723459469833333
+      "realized7d": 0.018288764877142857,
+      "realized30d": 0.01727447616783333
     },
     {
       "source": {
@@ -108,7 +109,7 @@
       "entryRoom": "999470699497",
       "rateNow": 0,
       "rateWithYou": 0,
-      "realized7d": 3.5457025605074056e-7,
+      "realized7d": 3.5451928571428576e-7,
       "realized30d": 3.54561e-7
     },
     {
@@ -119,8 +120,7 @@
         "lane": "USDC",
         "kind": "vault",
         "address": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
-        "note": "a vault spreads deposits over Morpho markets; how much your deposit lowers its rate is not modelled"
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
       },
       "status": "open",
       "held": "0",
@@ -129,21 +129,231 @@
       "exitFee": 0,
       "waitSeconds": 0,
       "notes": [
-        "a vault spreads deposits over Morpho markets; how much your deposit lowers its rate is not modelled"
+        "rate with you modelled from the 4 Morpho markets it lends into, after its performance fee: 2.85% now, 2.85% with your deposit; 25% of the vault sits idle"
       ],
-      "realized7d": 0.04541468975414764,
-      "realized30d": 0.04370051626916666,
-      "rateNow": 0.04541468975414764
+      "realized7d": 0.04531062518714286,
+      "realized30d": 0.043712009608166666,
+      "rateNow": 0.04531062518714286,
+      "rateWithYou": 0.028544027058453488
+    },
+    {
+      "source": {
+        "id": "morpho-usdc-wpros",
+        "name": "Morpho, lend USDC against WPROS",
+        "protocol": "Morpho Blue (LLTV 38.5%)",
+        "lane": "USDC",
+        "kind": "morpho-market",
+        "address": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+        "marketId": "0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "note": "lenders in a Morpho market carry the risk of its collateral"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market",
+        "lenders in a Morpho market carry the risk of its collateral"
+      ],
+      "marketParams": {
+        "loanToken": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+        "collateralToken": "0x52C48d4213107b20bC583832b0d951FB9CA8F0B0",
+        "oracle": "0xF4331ff581C31D897da6A3cd552dC39bD44983A5",
+        "irm": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+        "lltv": "385000000000000000"
+      },
+      "rateNow": 0.07251047996848149,
+      "rateWithYou": 0.07237039944781824,
+      "realized7d": 0.0708358962807143,
+      "realized30d": 0.059322333830000004,
+      "exitRoom": "97177397344"
+    },
+    {
+      "source": {
+        "id": "morpho-usdc-wsrusd",
+        "name": "Morpho, lend USDC against wsrUSD",
+        "protocol": "Morpho Blue (LLTV 91.5%)",
+        "lane": "USDC",
+        "kind": "morpho-market",
+        "address": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+        "marketId": "0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "note": "lenders in a Morpho market carry the risk of its collateral"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market",
+        "lenders in a Morpho market carry the risk of its collateral"
+      ],
+      "marketParams": {
+        "loanToken": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+        "collateralToken": "0x4809010926aec940b550D34a46A52739f996D75D",
+        "oracle": "0x9416F861970C2a39c02ab7696Ef0496383d4E81b",
+        "irm": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+        "lltv": "915000000000000000"
+      },
+      "rateNow": 0.0428651212287478,
+      "rateWithYou": 0.04286476918048319,
+      "realized7d": 0.06020108045500001,
+      "realized30d": 0.048431144722666665,
+      "exitRoom": "2597640307384"
+    },
+    {
+      "source": {
+        "id": "morpho-usdc-syzusd",
+        "name": "Morpho, lend USDC against syzUSD",
+        "protocol": "Morpho Blue (LLTV 91.5%)",
+        "lane": "USDC",
+        "kind": "morpho-market",
+        "address": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+        "marketId": "0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "note": "lenders in a Morpho market carry the risk of its collateral"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market",
+        "lenders in a Morpho market carry the risk of its collateral"
+      ],
+      "marketParams": {
+        "loanToken": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+        "collateralToken": "0x54dF79D8EDf36D15cd83fbeDbdd90807fC828934",
+        "oracle": "0x4eEfC4C6e7216Aedd5E809e4fC74fb8859B3FA46",
+        "irm": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+        "lltv": "915000000000000000"
+      },
+      "rateNow": 0.05320352939493231,
+      "rateWithYou": 0.05316787225325844,
+      "realized7d": 0.06111015951857143,
+      "realized30d": 0.05790814229116667,
+      "exitRoom": "417043386518"
+    },
+    {
+      "source": {
+        "id": "morpho-usdc-apc3m",
+        "name": "Morpho, lend USDC against APC3M",
+        "protocol": "Morpho Blue (LLTV 86%)",
+        "lane": "USDC",
+        "kind": "morpho-market",
+        "address": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+        "marketId": "0xba0d2638a277fd7696cdefdb96b5bd7405d0f174ba7526ce2c789f41149d91bc",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "note": "lenders in a Morpho market carry the risk of its collateral"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market",
+        "lenders in a Morpho market carry the risk of its collateral"
+      ],
+      "marketParams": {
+        "loanToken": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+        "collateralToken": "0xEC47E6f3EF1E7bc8e00F670aC3d5016798Fe44d0",
+        "oracle": "0x4Eb6fcFfc4D1B27eA773EDc062D5AdFC94A81FaE",
+        "irm": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+        "lltv": "860000000000000000"
+      },
+      "rateNow": 0.05973041163062101,
+      "rateWithYou": 0.05972004636997189,
+      "realized7d": 0.12464735978785715,
+      "realized30d": 0.08708697123266666,
+      "exitRoom": "124797764204"
+    },
+    {
+      "source": {
+        "id": "morpho-usdc-strusd",
+        "name": "Morpho, lend USDC against strUSD",
+        "protocol": "Morpho Blue (LLTV 86%)",
+        "lane": "USDC",
+        "kind": "morpho-market",
+        "address": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+        "marketId": "0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "note": "lenders in a Morpho market carry the risk of its collateral"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market",
+        "lenders in a Morpho market carry the risk of its collateral"
+      ],
+      "marketParams": {
+        "loanToken": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+        "collateralToken": "0x25419E949b485d481BED4ea0c5A0496f6C7f7c63",
+        "oracle": "0x06552294d4D2113bf12DD6da9Be66d47Bc376f05",
+        "irm": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+        "lltv": "860000000000000000"
+      },
+      "rateNow": 0.008480002908553622,
+      "rateWithYou": 0.008479265350730096,
+      "realized7d": 0.013728607030000003,
+      "realized30d": 0.09506544101933333,
+      "exitRoom": "1059954334197"
+    },
+    {
+      "source": {
+        "id": "morpho-usdc-apt",
+        "name": "Morpho, lend USDC against APT",
+        "protocol": "Morpho Blue (LLTV 86%)",
+        "lane": "USDC",
+        "kind": "morpho-market",
+        "address": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+        "marketId": "0xd834016ed49b76ffcbeb8402733e2d69b1f77d30b28d6f21c826931214ae5aea",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "note": "lenders in a Morpho market carry the risk of its collateral"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Morpho markets take no supply or withdraw fee; their realised rate moves only when someone touches the market",
+        "lenders in a Morpho market carry the risk of its collateral"
+      ],
+      "marketParams": {
+        "loanToken": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+        "collateralToken": "0x13282289b8B241Cf16eB5B8Bad401C7c2fdAb0F8",
+        "oracle": "0xd7E33079D91c5fA12798C1e7b28A7877045aa7C3",
+        "irm": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+        "lltv": "860000000000000000"
+      },
+      "rateNow": 0.048290966791261825,
+      "rateWithYou": 0.04828215607053504,
+      "realized7d": 0.045586032130714285,
+      "exitRoom": "110654976192"
     }
   ],
   "gasPriceWei": "10000000000",
   "prosUsd": {
-    "usd": 0.537892986752838,
-    "updatedAt": 1793979073
+    "usd": 0.5430476029383494,
+    "updatedAt": 1793990616
   },
   "costs": {
     "avalon-usdc": {
-      "gas": 0.002016614596635065,
+      "gas": 0.002035939768176166,
       "steps": [
         {
           "says": "let Avalon main pool, USDC take 100000000 of your USDC",
@@ -180,46 +390,8 @@
         }
       ]
     },
-    "rockawayx-usdc": {
-      "gas": 0.0028255464804827907,
-      "steps": [
-        {
-          "says": "let RockawayX USDC vault take 100000000 of your USDC",
-          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
-          "data": "0x095ea7b3000000000000000000000000047cd0a91e9b92ed979189a6c8a120bf280f02e50000000000000000000000000000000000000000000000000000000005f5e100",
-          "value": "0",
-          "phase": 1,
-          "gasHow": "estimated",
-          "simOverrides": {
-            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
-              "stateDiff": {
-                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
-              }
-            }
-          },
-          "gas": "71466"
-        },
-        {
-          "says": "deposit 100000000 into RockawayX USDC vault",
-          "to": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-          "data": "0x6e553f650000000000000000000000000000000000000000000000000000000005f5e10000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb",
-          "value": "0",
-          "phase": 1,
-          "gasHow": "estimated",
-          "simOverrides": {
-            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
-              "stateDiff": {
-                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
-                "0x0176d59bbacd5be4b9cb0d0fe7f52674f2cf866432fd5d3b48caaa94cca33b26": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
-              }
-            }
-          },
-          "gas": "453833"
-        }
-      ]
-    },
     "zona-usdc": {
-      "gas": 0.0020165715651961247,
+      "gas": 0.0020358963243679307,
       "steps": [
         {
           "says": "let Zona, USDC take 100000000 of your USDC",
@@ -256,8 +428,84 @@
         }
       ]
     },
+    "rockawayx-usdc": {
+      "gas": 0.0028525584620467674,
+      "steps": [
+        {
+          "says": "let RockawayX USDC vault take 100000000 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b3000000000000000000000000047cd0a91e9b92ed979189a6c8a120bf280f02e50000000000000000000000000000000000000000000000000000000005f5e100",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "71466"
+        },
+        {
+          "says": "deposit 100000000 into RockawayX USDC vault",
+          "to": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+          "data": "0x6e553f650000000000000000000000000000000000000000000000000000000005f5e10000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
+                "0x0176d59bbacd5be4b9cb0d0fe7f52674f2cf866432fd5d3b48caaa94cca33b26": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "453821"
+        }
+      ]
+    },
+    "morpho-usdc-wsrusd": {
+      "gas": 0.0010969181446032603,
+      "steps": [
+        {
+          "says": "let Morpho, lend USDC against wsrUSD take 100000000 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b300000000000000000000000018573fa18fd17ddfd790b4a5b5b2977aad3b4efb0000000000000000000000000000000000000000000000000000000005f5e100",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "50300"
+        },
+        {
+          "says": "supply 100000000 to Morpho, lend USDC against wsrUSD",
+          "to": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+          "data": "0xa99aad89000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac18150000000000000000000000004809010926aec940b550d34a46a52739f996d75d0000000000000000000000009416f861970c2a39c02ab7696ef0496383d4e81b000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000cb2bba6f17b80000000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb00000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
+                "0xa139c2751fec7639f75ec141af26ed7ab5d6333560e1e253097d7402e33d5af6": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "151693"
+        }
+      ]
+    },
     "openfi-usdc": {
-      "gas": 0.002014871823357986,
+      "gas": 0.002034180293942646,
       "steps": [
         {
           "says": "let OpenFi, USDC take 100000000 of your USDC",
@@ -293,17 +541,205 @@
           "gas": "303120"
         }
       ]
+    },
+    "morpho-usdc-apt": {
+      "gas": 0.0010968366874628194,
+      "steps": [
+        {
+          "says": "let Morpho, lend USDC against APT take 100000000 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b300000000000000000000000018573fa18fd17ddfd790b4a5b5b2977aad3b4efb0000000000000000000000000000000000000000000000000000000005f5e100",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "50300"
+        },
+        {
+          "says": "supply 100000000 to Morpho, lend USDC against APT",
+          "to": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+          "data": "0xa99aad89000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac181500000000000000000000000013282289b8b241cf16eb5b8bad401c7c2fdab0f8000000000000000000000000d7e33079d91c5fa12798c1e7b28a7877045aa7c3000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000bef55718ad600000000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb00000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
+                "0xa139c2751fec7639f75ec141af26ed7ab5d6333560e1e253097d7402e33d5af6": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "151678"
+        }
+      ]
+    },
+    "morpho-usdc-apc3m": {
+      "gas": 0.0010968366874628194,
+      "steps": [
+        {
+          "says": "let Morpho, lend USDC against APC3M take 100000000 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b300000000000000000000000018573fa18fd17ddfd790b4a5b5b2977aad3b4efb0000000000000000000000000000000000000000000000000000000005f5e100",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "50300"
+        },
+        {
+          "says": "supply 100000000 to Morpho, lend USDC against APC3M",
+          "to": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+          "data": "0xa99aad89000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac1815000000000000000000000000ec47e6f3ef1e7bc8e00f670ac3d5016798fe44d00000000000000000000000004eb6fcffc4d1b27ea773edc062d5adfc94a81fae000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000bef55718ad600000000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb00000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
+                "0xa139c2751fec7639f75ec141af26ed7ab5d6333560e1e253097d7402e33d5af6": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "151678"
+        }
+      ]
+    },
+    "morpho-usdc-strusd": {
+      "gas": 0.0010968366874628194,
+      "steps": [
+        {
+          "says": "let Morpho, lend USDC against strUSD take 100000000 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b300000000000000000000000018573fa18fd17ddfd790b4a5b5b2977aad3b4efb0000000000000000000000000000000000000000000000000000000005f5e100",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "50300"
+        },
+        {
+          "says": "supply 100000000 to Morpho, lend USDC against strUSD",
+          "to": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+          "data": "0xa99aad89000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac181500000000000000000000000025419e949b485d481bed4ea0c5a0496f6c7f7c6300000000000000000000000006552294d4d2113bf12dd6da9be66d47bc376f05000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000bef55718ad600000000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb00000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
+                "0xa139c2751fec7639f75ec141af26ed7ab5d6333560e1e253097d7402e33d5af6": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "151678"
+        }
+      ]
+    },
+    "morpho-usdc-wpros": {
+      "gas": 0.0010970376150759066,
+      "steps": [
+        {
+          "says": "let Morpho, lend USDC against WPROS take 100000000 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b300000000000000000000000018573fa18fd17ddfd790b4a5b5b2977aad3b4efb0000000000000000000000000000000000000000000000000000000005f5e100",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "50300"
+        },
+        {
+          "says": "supply 100000000 to Morpho, lend USDC against WPROS",
+          "to": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+          "data": "0xa99aad89000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac181500000000000000000000000052c48d4213107b20bc583832b0d951fb9ca8f0b0000000000000000000000000f4331ff581c31d897da6a3cd552dc39bd44983a5000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000557cb75ce8680000000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb00000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
+                "0xa139c2751fec7639f75ec141af26ed7ab5d6333560e1e253097d7402e33d5af6": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "151715"
+        }
+      ]
+    },
+    "morpho-usdc-syzusd": {
+      "gas": 0.0010970376150759066,
+      "steps": [
+        {
+          "says": "let Morpho, lend USDC against syzUSD take 100000000 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b300000000000000000000000018573fa18fd17ddfd790b4a5b5b2977aad3b4efb0000000000000000000000000000000000000000000000000000000005f5e100",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "50300"
+        },
+        {
+          "says": "supply 100000000 to Morpho, lend USDC against syzUSD",
+          "to": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+          "data": "0xa99aad89000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac181500000000000000000000000054df79d8edf36d15cd83fbedbdd90807fc8289340000000000000000000000004eefc4c6e7216aedd5e809e4fc74fb8859b3fa46000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000cb2bba6f17b80000000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb00000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
+                "0xa139c2751fec7639f75ec141af26ed7ab5d6333560e1e253097d7402e33d5af6": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              }
+            }
+          },
+          "gas": "151715"
+        }
+      ]
     }
   },
   "decision": {
     "action": "MOVE",
-    "to": "rockawayx-usdc",
-    "reason": "RockawayX USDC vault: nets 1.07472 over 90 days, pays back in 1 days",
+    "to": "morpho-usdc-apc3m",
+    "reason": "Morpho, lend USDC against APC3M: nets 1.47145 over 90 days, pays back in 1 day",
     "from": {
       "id": "wallet-usdc",
-      "name": "USDC left in the wallet",
-      "rateUsed": 0,
-      "rateHow": "quoted now"
+      "name": "USDC left in the wallet"
     },
     "amount": 100,
     "holdDays": 90,
@@ -313,77 +749,171 @@
         "id": "avalon-usdc",
         "name": "Avalon main pool, USDC",
         "verdict": "candidate",
-        "why": "nets 0.473789 over 90 days, pays back in 1 days",
-        "rateUsed": 0.019296556012208955,
-        "rateHow": "realised over 7 days",
+        "why": "pays back only after 233 days, longer than your 90-day hold",
+        "rateUsed": 0.000032,
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
         "earningDays": 90,
-        "extraYield": 0.4758054907120017,
+        "extraYield": 0.0007890410958904109,
         "fees": 0,
-        "gas": 0.002016614596635065,
-        "net": 0.47378887611536413,
-        "breakEvenDays": 1
+        "gas": 0.002035939768176166,
+        "net": -0.0012468986722922182,
+        "breakEvenDays": 233
       },
       {
         "id": "openfi-usdc",
         "name": "OpenFi, USDC",
         "verdict": "candidate",
-        "why": "nets 0.00481527 over 90 days, below your minimum gain of 0.01",
+        "why": "nets 0.00479596 over 90 days, below your minimum gain of 0.01",
         "rateUsed": 0.000277,
-        "rateHow": "with your deposit in it",
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
         "earningDays": 90,
         "extraYield": 0.006830136986301371,
         "fees": 0,
-        "gas": 0.002014871823357986,
-        "net": 0.004815265162946503,
+        "gas": 0.002034180293942646,
+        "net": 0.004795956692362324,
         "breakEvenDays": 27
       },
       {
         "id": "zona-usdc",
         "name": "Zona, USDC",
         "verdict": "candidate",
-        "why": "pays 0.00% (with your deposit in it), not more than the 0.00% you have",
+        "why": "pays 0.00% now, with your deposit in it, not more than the 0.00% you get in the same window",
         "rateUsed": 0,
-        "rateHow": "with your deposit in it",
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
         "earningDays": 90,
         "extraYield": 0,
         "fees": 0,
-        "gas": 0.0020165715651961247,
-        "net": -0.0020165715651927485,
+        "gas": 0.0020358963243679307,
+        "net": -0.0020358963243722883,
         "breakEvenDays": null
       },
       {
         "id": "rockawayx-usdc",
         "name": "RockawayX USDC vault",
         "verdict": "candidate",
-        "why": "nets 1.07472 over 90 days, pays back in 1 days",
-        "rateUsed": 0.04370051626916666,
-        "rateHow": "realised over 30 days",
+        "why": "nets 0.700973 over 90 days, pays back in 1 day",
+        "rateUsed": 0.028544027058453488,
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
         "earningDays": 90,
-        "extraYield": 1.0775469764999999,
+        "extraYield": 0.7038253247289901,
         "fees": 0,
-        "gas": 0.0028255464804827907,
-        "net": 1.0747214300195225,
+        "gas": 0.0028525584620467674,
+        "net": 0.7009727662669434,
+        "breakEvenDays": 1
+      },
+      {
+        "id": "morpho-usdc-wpros",
+        "name": "Morpho, lend USDC against WPROS",
+        "verdict": "candidate",
+        "why": "nets 1.46165 over 90 days, pays back in 1 day",
+        "rateUsed": 0.059322333830000004,
+        "rateHow": "over the last 30 days",
+        "fromRate": 0,
+        "earningDays": 90,
+        "extraYield": 1.4627424780000002,
+        "fees": 0,
+        "gas": 0.0010970376150759066,
+        "net": 1.4616454403849133,
+        "breakEvenDays": 1
+      },
+      {
+        "id": "morpho-usdc-wsrusd",
+        "name": "Morpho, lend USDC against wsrUSD",
+        "verdict": "candidate",
+        "why": "nets 1.05584 over 90 days, pays back in 1 day",
+        "rateUsed": 0.04286476918048319,
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
+        "earningDays": 90,
+        "extraYield": 1.0569395140393114,
+        "fees": 0,
+        "gas": 0.0010969181446032603,
+        "net": 1.0558425958947169,
+        "breakEvenDays": 1
+      },
+      {
+        "id": "morpho-usdc-syzusd",
+        "name": "Morpho, lend USDC against syzUSD",
+        "verdict": "candidate",
+        "why": "nets 1.30989 over 90 days, pays back in 1 day",
+        "rateUsed": 0.05316787225325844,
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
+        "earningDays": 90,
+        "extraYield": 1.310988630902263,
+        "fees": 0,
+        "gas": 0.0010970376150759066,
+        "net": 1.3098915932871904,
+        "breakEvenDays": 1
+      },
+      {
+        "id": "morpho-usdc-apc3m",
+        "name": "Morpho, lend USDC against APC3M",
+        "verdict": "candidate",
+        "why": "nets 1.47145 over 90 days, pays back in 1 day",
+        "rateUsed": 0.05972004636997189,
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
+        "earningDays": 90,
+        "extraYield": 1.4725490885746495,
+        "fees": 0,
+        "gas": 0.0010968366874628194,
+        "net": 1.471452251887186,
+        "breakEvenDays": 1
+      },
+      {
+        "id": "morpho-usdc-strusd",
+        "name": "Morpho, lend USDC against strUSD",
+        "verdict": "candidate",
+        "why": "nets 0.207981 over 90 days, pays back in 1 day",
+        "rateUsed": 0.008479265350730096,
+        "rateHow": "now, with your deposit in it",
+        "fromRate": 0,
+        "earningDays": 90,
+        "extraYield": 0.209077775771427,
+        "fees": 0,
+        "gas": 0.0010968366874628194,
+        "net": 0.2079809390839671,
+        "breakEvenDays": 1
+      },
+      {
+        "id": "morpho-usdc-apt",
+        "name": "Morpho, lend USDC against APT",
+        "verdict": "candidate",
+        "why": "nets 1.12294 over 90 days, pays back in 1 day",
+        "rateUsed": 0.045586032130714285,
+        "rateHow": "over the last 7 days",
+        "fromRate": 0,
+        "earningDays": 90,
+        "extraYield": 1.1240391484285714,
+        "fees": 0,
+        "gas": 0.0010968366874628194,
+        "net": 1.122942311741113,
         "breakEvenDays": 1
       }
     ]
   },
   "plan": {
     "tool": "dent",
-    "createdAt": "2026-11-06T15:39:10.359Z",
+    "createdAt": "2026-11-06T18:56:55.024Z",
     "chainId": 1672,
     "wallet": "0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
     "lane": "USDC",
     "from": "wallet-usdc",
-    "to": "rockawayx-usdc",
+    "to": "morpho-usdc-apc3m",
     "amount": "100000000",
     "holdDays": 90,
     "minGain": 0.01,
     "waitSeconds": 0,
     "steps": [
       {
-        "says": "let RockawayX USDC vault take 100000000 of your USDC",
+        "says": "let Morpho, lend USDC against APC3M take 100000000 of your USDC",
         "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
-        "data": "0x095ea7b3000000000000000000000000047cd0a91e9b92ed979189a6c8a120bf280f02e50000000000000000000000000000000000000000000000000000000005f5e100",
+        "data": "0x095ea7b300000000000000000000000018573fa18fd17ddfd790b4a5b5b2977aad3b4efb0000000000000000000000000000000000000000000000000000000005f5e100",
         "value": "0",
         "phase": 1,
         "gasHow": "estimated",
@@ -394,12 +924,12 @@
             }
           }
         },
-        "gas": "71466"
+        "gas": "50300"
       },
       {
-        "says": "deposit 100000000 into RockawayX USDC vault",
-        "to": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-        "data": "0x6e553f650000000000000000000000000000000000000000000000000000000005f5e10000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb",
+        "says": "supply 100000000 to Morpho, lend USDC against APC3M",
+        "to": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+        "data": "0xa99aad89000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac1815000000000000000000000000ec47e6f3ef1e7bc8e00f670ac3d5016798fe44d00000000000000000000000004eb6fcffc4d1b27ea773edc062d5adfc94a81fae000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000bef55718ad600000000000000000000000000000000000000000000000000000000000005f5e100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb00000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000",
         "value": "0",
         "phase": 1,
         "gasHow": "estimated",
@@ -407,294 +937,826 @@
           "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
             "stateDiff": {
               "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x0000000000000000000000000000000000000000000000000000000005f5e100",
-              "0x0176d59bbacd5be4b9cb0d0fe7f52674f2cf866432fd5d3b48caaa94cca33b26": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
+              "0xa139c2751fec7639f75ec141af26ed7ab5d6333560e1e253097d7402e33d5af6": "0x0000000000000000000000000000000000000000000000000000000005f5e100"
             }
           }
         },
-        "gas": "453833"
+        "gas": "151678"
       }
     ]
   },
   "evidence": [
     {
-      "what": "USDC in the wallet",
-      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
-      "call": "balanceOf(0x4644...d3bb)",
-      "block": 22290959,
-      "value": "499790"
-    },
-    {
       "what": "Avalon main pool, USDC: reserve data",
       "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
       "call": "getReserveData(0xc879...1815)",
-      "block": 22290959,
-      "value": "{configuration: 5708990853900589261334402636123215299575916533616, liquidityIndex: 1000000669251620872255733199, currentLiquidityRate: 19361120364158523902236754, variableBorrowIndex: 1000001524096395598966330674, currentVariableBorrowRate: 39554203050016074383450504, currentStableBorrowRate: 54944275381252009297931313, lastUpdateTimestamp: 1787924826, id: 0, aTokenAddress: 0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D, stableDebtTokenAddress: 0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E, variableDebtTokenAddress: 0x0f068E70b72150Ed91275f5205aA29120224d0cb, interestRateStrategyAddress: 0x4f984745834168b1DADB1EdB84A8527DaA13754B, accruedToTreasury: 273788, unbacked: 0, isolationModeTotalDebt: 0}"
+      "block": 22304589,
+      "value": "{configuration: 5708990853900589261334402636123215299575916533616, liquidityIndex: 1003724207684065124415260154, currentLiquidityRate: 32323856013159998321107, variableBorrowIndex: 1007637581808967053950817718, currentVariableBorrowRate: 65980158238925661661762, currentStableBorrowRate: 54948511867919424624632256, lastUpdateTimestamp: 1793989902, id: 0, aTokenAddress: 0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D, stableDebtTokenAddress: 0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E, variableDebtTokenAddress: 0x0f068E70b72150Ed91275f5205aA29120224d0cb, interestRateStrategyAddress: 0x6e9FA03Dd23d84Ba0Fae6Ae5501b7A725645a91f, accruedToTreasury: 1523686129, unbacked: 0, isolationModeTotalDebt: 0}"
     },
     {
-      "what": "Avalon main pool, USDC: total supplied",
-      "contract": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
-      "call": "totalSupply()",
-      "block": 22290959,
-      "value": "501864862148"
+      "what": "USDC in the wallet",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22304589,
+      "value": "499790"
     },
     {
-      "what": "RockawayX USDC vault: share decimals",
-      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-      "call": "decimals()",
-      "block": 22290959,
-      "value": "18"
+      "what": "Morpho market 0xb3b8a31c: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x52C48d4213107b20bC583832b0d951FB9CA8F0B0, 0xF4331ff581C31D897da6A3cd552dC39bD44983A5, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 385000000000000000]"
     },
     {
       "what": "Zona, USDC: reserve data",
       "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
       "call": "getReserveData(0xc879...1815)",
-      "block": 22290959,
+      "block": 22304589,
       "value": "{configuration: 379853410010611736321840397492823982037962661042032, liquidityIndex: 1000045697979678648772404514, currentLiquidityRate: 354571062764944593242, variableBorrowIndex: 1000424393983192438280526973, currentVariableBorrowRate: 132324155435982609894064, currentStableBorrowRate: 40000000000000000000000000, lastUpdateTimestamp: 1790846672, id: 0, aTokenAddress: 0x843913DE261A1712d3aE8d4bc751E705Bb0823B8, stableDebtTokenAddress: 0x4C0f9839CbCf1e00E17E3d25Ea830D7EEe11c0C0, variableDebtTokenAddress: 0x8809BD2389E9e16C30B0e9Ae24DF0682c3290D45, interestRateStrategyAddress: 0x837b1ABfeadA4e14559a56a0def7bd417513014C, accruedToTreasury: 8767, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x4809010926aec940b550D34a46A52739f996D75D, 0x9416F861970C2a39c02ab7696Ef0496383d4E81b, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 915000000000000000]"
+    },
+    {
+      "what": "RockawayX USDC vault: share decimals",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "decimals()",
+      "block": 22304589,
+      "value": "18"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x54dF79D8EDf36D15cd83fbeDbdd90807fC828934, 0x4eEfC4C6e7216Aedd5E809e4fC74fb8859B3FA46, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 915000000000000000]"
+    },
+    {
+      "what": "Morpho market 0xba0d2638: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xba0d2638a277fd7696cdefdb96b5bd7405d0f174ba7526ce2c789f41149d91bc)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0xEC47E6f3EF1E7bc8e00F670aC3d5016798Fe44d0, 0x4Eb6fcFfc4D1B27eA773EDc062D5AdFC94A81FaE, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 860000000000000000]"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x25419E949b485d481BED4ea0c5A0496f6C7f7c63, 0x06552294d4D2113bf12DD6da9Be66d47Bc376f05, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 860000000000000000]"
+    },
+    {
+      "what": "Morpho market 0xd834016e: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xd834016ed49b76ffcbeb8402733e2d69b1f77d30b28d6f21c826931214ae5aea)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x13282289b8B241Cf16eB5B8Bad401C7c2fdAb0F8, 0xd7E33079D91c5fA12798C1e7b28A7877045aa7C3, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 860000000000000000]"
+    },
+    {
+      "what": "Avalon main pool, USDC: total supplied",
+      "contract": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
+      "call": "totalSupply()",
+      "block": 22304589,
+      "value": "501868026599"
     },
     {
       "what": "Avalon main pool, USDC: cash in the pool",
       "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
       "call": "balanceOf(0xE2ec...e87D)",
-      "block": 22290959,
-      "value": "55015931814"
-    },
-    {
-      "what": "Avalon main pool, USDC: stable debt",
-      "contract": "0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E",
-      "call": "totalSupply()",
-      "block": 22290959,
-      "value": "0"
+      "block": 22304589,
+      "value": "55005931815"
     },
     {
       "what": "OpenFi, USDC: reserve data",
       "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
       "call": "getReserveData(0xc879...1815)",
-      "block": 22290959,
+      "block": 22304589,
       "value": "{configuration: 18456329467664124091724, liquidityIndex: 1004907396704245580332020196, currentLiquidityRate: 18306252584649685872038025, variableBorrowIndex: 1010552181243294201204842175, currentVariableBorrowRate: 31890657448232975825150295, currentStableBorrowRate: 60000000000000000000000000, lastUpdateTimestamp: 1791739346, id: 0, aTokenAddress: 0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96, stableDebtTokenAddress: 0xB5da2bea9c1563D88A43479c19e613E10a0f2CBD, variableDebtTokenAddress: 0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D, interestRateStrategyAddress: 0x467887ECcfD7E8DCCf1400fc0bA023B356E9844a, accruedToTreasury: 36570, unbacked: 0, isolationModeTotalDebt: 0}"
-    },
-    {
-      "what": "RockawayX USDC vault: share price",
-      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-      "call": "convertToAssets(1000000000000000000)",
-      "block": 22290959,
-      "value": "1008950"
     },
     {
       "what": "Avalon main pool, USDC: variable debt",
       "contract": "0x0f068E70b72150Ed91275f5205aA29120224d0cb",
       "call": "totalSupply()",
-      "block": 22290959,
-      "value": "448382749202"
+      "block": 22304589,
+      "value": "448398546559"
+    },
+    {
+      "what": "Avalon main pool, USDC: stable debt",
+      "contract": "0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E",
+      "call": "totalSupply()",
+      "block": 22304589,
+      "value": "0"
     },
     {
       "what": "Avalon main pool, USDC: wallet's deposit",
       "contract": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
       "call": "balanceOf(0x4644...d3bb)",
-      "block": 22290959,
+      "block": 22304589,
       "value": "0"
     },
     {
-      "what": "RockawayX USDC vault: share price",
-      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-      "call": "convertToAssets(1000000000000000000)",
-      "block": 21690056,
-      "value": "1008072"
+      "what": "Morpho market 0xb3b8a31c: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba)",
+      "block": 22304589,
+      "value": "[1100998584428, 1087392541296880700, 1003821187084, 990145128796677741, 1793985557, 0]"
     },
     {
       "what": "Zona, USDC: variable debt",
       "contract": "0x8809BD2389E9e16C30B0e9Ae24DF0682c3290D45",
       "call": "totalSupply()",
-      "block": 22290959,
+      "block": 22304589,
       "value": "1575929"
     },
     {
-      "what": "Zona, USDC: total supplied",
-      "contract": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
-      "call": "totalSupply()",
-      "block": 22290959,
-      "value": "529300503"
+      "what": "Zona, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x8439...23B8)",
+      "block": 22304589,
+      "value": "527733345"
     },
     {
       "what": "Zona, USDC: stable debt",
       "contract": "0x4C0f9839CbCf1e00E17E3d25Ea830D7EEe11c0C0",
       "call": "totalSupply()",
-      "block": 22290959,
+      "block": 22304589,
       "value": "0"
     },
     {
       "what": "Zona, USDC: wallet's deposit",
       "contract": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
       "call": "balanceOf(0x4644...d3bb)",
-      "block": 22290959,
+      "block": 22304589,
       "value": "0"
     },
     {
-      "what": "OpenFi, USDC: total supplied",
-      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "what": "Morpho market 0xbea21c37: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73)",
+      "block": 22304589,
+      "value": "[20601390440072, 20360659693270751467, 18003750132688, 17768614015958479961, 1793985557, 0]"
+    },
+    {
+      "what": "Zona, USDC: total supplied",
+      "contract": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
       "call": "totalSupply()",
-      "block": 22290959,
-      "value": "14000737"
-    },
-    {
-      "what": "OpenFi, USDC: cash in the pool",
-      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
-      "call": "balanceOf(0x9dcf...9D96)",
-      "block": 22290959,
-      "value": "5077659"
-    },
-    {
-      "what": "OpenFi, USDC: variable debt",
-      "contract": "0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D",
-      "call": "totalSupply()",
-      "block": 22290959,
-      "value": "8962067"
-    },
-    {
-      "what": "Zona, USDC: cash in the pool",
-      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
-      "call": "balanceOf(0x8439...23B8)",
-      "block": 22290959,
-      "value": "527733345"
-    },
-    {
-      "what": "OpenFi, USDC: wallet's deposit",
-      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
-      "call": "balanceOf(0x4644...d3bb)",
-      "block": 22290959,
-      "value": "0"
-    },
-    {
-      "what": "Avalon main pool, USDC: supply rate with 100000000 more",
-      "contract": "0x4f984745834168b1DADB1EdB84A8527DaA13754B",
-      "call": "calculateInterestRates({...})",
-      "block": 22290959,
-      "value": "[19385691086961348187044443, 54947411715792133042334167, 39579293726337064338673337]"
-    },
-    {
-      "what": "Zona, USDC: supply rate with 100000000 more",
-      "contract": "0x837b1ABfeadA4e14559a56a0def7bd417513014C",
-      "call": "calculateInterestRates({...})",
-      "block": 22290959,
-      "value": "[250844753677505791850, 40000000000000000000000000, 111298675838183959273559]"
+      "block": 22304589,
+      "value": "529300503"
     },
     {
       "what": "RockawayX USDC vault: share price",
       "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
       "call": "convertToAssets(1000000000000000000)",
-      "block": 19625875,
-      "value": "1005339"
+      "block": 22304589,
+      "value": "1008965"
     },
     {
-      "what": "Avalon main pool, USDC: supplier income index",
-      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
-      "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 22290959,
-      "value": "1003717880378244755593439413"
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 21702797,
+      "value": "1008089"
     },
     {
-      "what": "Avalon main pool, USDC: supplier income index",
-      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
-      "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 19625875,
-      "value": "1002126554351810258920713353"
+      "what": "Morpho market 0xc79579a0: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86)",
+      "block": 22304589,
+      "value": "[4174787544170, 4125542852098310804, 3757744157652, 3708640604432138734, 1793985557, 0]"
+    },
+    {
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 19638140,
+      "value": "1005353"
+    },
+    {
+      "what": "Morpho market 0xba0d2638: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xba0d2638a277fd7696cdefdb96b5bd7405d0f174ba7526ce2c789f41149d91bc)",
+      "block": 22304589,
+      "value": "[1134296450380, 1126116970562600630, 1009498686176, 1001677209304493789, 1793701999, 0]"
+    },
+    {
+      "what": "Morpho market 0xd834016e: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xd834016ed49b76ffcbeb8402733e2d69b1f77d30b28d6f21c826931214ae5aea)",
+      "block": 22304589,
+      "value": "[1086626597382, 1083191776071881351, 975971621190, 972707225409444410, 1793701870, 0]"
+    },
+    {
+      "what": "OpenFi, USDC: total supplied",
+      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "call": "totalSupply()",
+      "block": 22304589,
+      "value": "14000833"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd)",
+      "block": 22304589,
+      "value": "[1821672237461, 1807548778136704939, 761717903264, 755066874277454521, 1793990838, 0]"
+    },
+    {
+      "what": "OpenFi, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x9dcf...9D96)",
+      "block": 22304589,
+      "value": "5077659"
+    },
+    {
+      "what": "OpenFi, USDC: wallet's deposit",
+      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22304589,
+      "value": "0"
     },
     {
       "what": "OpenFi, USDC: stable debt",
       "contract": "0xB5da2bea9c1563D88A43479c19e613E10a0f2CBD",
       "call": "totalSupply()",
-      "block": 22290959,
+      "block": 22304589,
       "value": "0"
     },
     {
-      "what": "Zona, USDC: supplier income index",
-      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
-      "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 19625875,
-      "value": "1000045704061048152185743304"
+      "what": "OpenFi, USDC: variable debt",
+      "contract": "0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D",
+      "call": "totalSupply()",
+      "block": 22304589,
+      "value": "8962174"
     },
     {
-      "what": "Avalon main pool, USDC: supplier income index",
-      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
-      "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 21690056,
-      "value": "1003346569744201685972815159"
+      "what": "Avalon main pool, USDC: supply rate with 100000000 more",
+      "contract": "0x6e9FA03Dd23d84Ba0Fae6Ae5501b7A725645a91f",
+      "call": "calculateInterestRates({...})",
+      "block": 22304589,
+      "value": "[32311017759453612958660, 54947529055716785545750024, 65967054076223807276667]"
     },
     {
-      "what": "Zona, USDC: supplier income index",
-      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
-      "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 22290959,
-      "value": "1000045733205206997076055297"
+      "what": "Morpho market 0xb3b8a31c: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "2521881021"
+    },
+    {
+      "what": "Zona, USDC: supply rate with 100000000 more",
+      "contract": "0x837b1ABfeadA4e14559a56a0def7bd417513014C",
+      "call": "calculateInterestRates({...})",
+      "block": 22304589,
+      "value": "[250844753677505791850, 40000000000000000000000000, 111298675838183959273559]"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1555361116"
+    },
+    {
+      "what": "Morpho market 0xba0d2638: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "2128188625"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1874308802"
+    },
+    {
+      "what": "Morpho market 0xd834016e: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1704914806"
     },
     {
       "what": "RockawayX USDC vault: wallet's shares",
       "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
       "call": "balanceOf(0x4644...d3bb)",
-      "block": 22290959,
+      "block": 22304589,
       "value": "0"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "643080887"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21702797,
+      "value": "1003353844289760027929248465"
     },
     {
       "what": "OpenFi, USDC: supply rate with 100000000 more",
       "contract": "0x467887ECcfD7E8DCCf1400fc0bA023B356E9844a",
       "call": "calculateInterestRates({...})",
-      "block": 22290959,
-      "value": "[277917923444993194739875, 60000000000000000000000000, 3929361861146527132132885]"
+      "block": 22304589,
+      "value": "[277924038189956837274569, 60000000000000000000000000, 3929405087781915639950121]"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19638140,
+      "value": "1002133827669493580480158486"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22304589,
+      "value": "1003724209203602722827673594"
     },
     {
       "what": "Zona, USDC: supplier income index",
       "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
       "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 21690056,
-      "value": "1000045726404880778824762675"
+      "block": 22304589,
+      "value": "1000045733338413343463175484"
     },
     {
-      "what": "OpenFi, USDC: supplier income index",
-      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
       "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 22290959,
-      "value": "1006214178166693778717092793"
+      "block": 21702797,
+      "value": "1000045726538109612988769353"
+    },
+    {
+      "what": "Morpho market 0xb3b8a31c: borrow rate with 100000000 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "2517238242"
+    },
+    {
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19638140,
+      "value": "1000045704194254498572863491"
+    },
+    {
+      "what": "Morpho market 0xba0d2638: borrow rate with 100000000 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "2128005816"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: borrow rate with 100000000 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1555355461"
+    },
+    {
+      "what": "Morpho market 0xd834016e: borrow rate with 100000000 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1704761281"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: borrow rate with 100000000 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1873098417"
     },
     {
       "what": "RockawayX USDC vault: shares for 100000000 at the share price",
       "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
       "call": "convertToShares(100000000)",
-      "block": 22290959,
-      "value": "99112901370016861641"
-    },
-    {
-      "what": "OpenFi, USDC: supplier income index",
-      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
-      "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 21690056,
-      "value": "1005861375300301615173668865"
-    },
-    {
-      "what": "OpenFi, USDC: supplier income index",
-      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
-      "call": "getReserveNormalizedIncome(0xc879...1815)",
-      "block": 19625875,
-      "value": "1004790849695857899808219760"
+      "block": 22304589,
+      "value": "99111457197470925142"
     },
     {
       "what": "RockawayX USDC vault: shares a deposit of 100000000 would mint",
       "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
       "call": "previewDeposit(100000000)",
-      "block": 22290959,
-      "value": "99112901370016861641"
+      "block": 22304589,
+      "value": "99111457197470925142"
     },
     {
-      "what": "RockawayX USDC vault: what redeeming 99112901370016861641 shares pays",
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22304589,
+      "value": "1006221088949988390774425512"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: borrow rate with 100000000 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "643060326"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21702797,
+      "value": "1005868287250268514664454328"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19638140,
+      "value": "1004794461718092093946788009"
+    },
+    {
+      "what": "Morpho market 0xb3b8a31c: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba)",
+      "block": 21702797,
+      "value": "[1098162115303, 1086064538406803901, 1002327723779, 990145128796677741, 1793360759, 0]"
+    },
+    {
+      "what": "Morpho market 0xba0d2638: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xba0d2638a277fd7696cdefdb96b5bd7405d0f174ba7526ce2c789f41149d91bc)",
+      "block": 19638140,
+      "value": "[1019596218973, 1019489322096632331, 1000120492702, 999959842217626327, 1790739774, 0]"
+    },
+    {
+      "what": "Morpho market 0xb3b8a31c: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba)",
+      "block": 19638140,
+      "value": "[1097325893412, 1089049468566764776, 998509279070, 990145236796859934, 1791267343, 0]"
+    },
+    {
+      "what": "Morpho market 0xba0d2638: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xba0d2638a277fd7696cdefdb96b5bd7405d0f174ba7526ce2c789f41149d91bc)",
+      "block": 21702797,
+      "value": "[1059950588344, 1054822758584822694, 1006952824140, 1001677209304493789, 1793075099, 0]"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73)",
+      "block": 21702797,
+      "value": "[5989191376705, 5926040626466371866, 5430050054947, 5366008534233641741, 1793255643, 0]"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73)",
+      "block": 19638140,
+      "value": "[6636672603048, 6585231472878543939, 6022349870690, 5969854464904942725, 1791385421, 0]"
+    },
+    {
+      "what": "Morpho market 0xd834016e: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xd834016ed49b76ffcbeb8402733e2d69b1f77d30b28d6f21c826931214ae5aea)",
+      "block": 21702797,
+      "value": "[1053405654674, 1050993876212430118, 972280654674, 969946357476262282, 1793353276, 0]"
+    },
+    {
+      "what": "Morpho market 0xd834016e: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xd834016ed49b76ffcbeb8402733e2d69b1f77d30b28d6f21c826931214ae5aea)",
+      "block": 19638140,
+      "value": "[0, 0, 0, 0, 0, 0]"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86)",
+      "block": 21702797,
+      "value": "[4056662794476, 4013509700254950587, 3651548631420, 3608519826679393522, 1793311027, 0]"
+    },
+    {
+      "what": "RockawayX USDC vault: value of 99111457197470925142 shares",
       "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-      "call": "previewRedeem(99112901370016861641)",
-      "block": 22290959,
+      "call": "convertToAssets(99111457197470925142)",
+      "block": 22304589,
       "value": "99999999"
     },
     {
-      "what": "RockawayX USDC vault: value of 99112901370016861641 shares",
+      "what": "Morpho market 0x4cbedaf6: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd)",
+      "block": 21702797,
+      "value": "[34425872827, 34167962042204496, 554543, 550000000000, 1793214925, 0]"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd)",
+      "block": 19638140,
+      "value": "[600000, 600000000000, 550000, 550000000000, 1790323586, 0]"
+    },
+    {
+      "what": "RockawayX USDC vault: what redeeming 99111457197470925142 shares pays",
       "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
-      "call": "convertToAssets(99112901370016861641)",
-      "block": 22290959,
+      "call": "previewRedeem(99111457197470925142)",
+      "block": 22304589,
       "value": "99999999"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86)",
+      "block": 19638140,
+      "value": "[3405253627225, 3381102528487981874, 3079237529520, 3054999081809330870, 1791267343, 0]"
+    },
+    {
+      "what": "Morpho, lend USDC against APC3M: wallet's position",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "position(0xba0d2638a277fd7696cdefdb96b5bd7405d0f174ba7526ce2c789f41149d91bc, 0x4644...d3bb)",
+      "block": 22304589,
+      "value": "[0, 0, 0]"
+    },
+    {
+      "what": "Morpho, lend USDC against WPROS: wallet's position",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "position(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba, 0x4644...d3bb)",
+      "block": 22304589,
+      "value": "[0, 0, 0]"
+    },
+    {
+      "what": "Morpho, lend USDC against APT: wallet's position",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "position(0xd834016ed49b76ffcbeb8402733e2d69b1f77d30b28d6f21c826931214ae5aea, 0x4644...d3bb)",
+      "block": 22304589,
+      "value": "[0, 0, 0]"
+    },
+    {
+      "what": "Morpho, lend USDC against wsrUSD: wallet's position",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "position(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73, 0x4644...d3bb)",
+      "block": 22304589,
+      "value": "[0, 0, 0]"
+    },
+    {
+      "what": "Morpho, lend USDC against strUSD: wallet's position",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "position(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd, 0x4644...d3bb)",
+      "block": 22304589,
+      "value": "[0, 0, 0]"
+    },
+    {
+      "what": "RockawayX: liquidity adapter",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "liquidityAdapter()",
+      "block": 22304589,
+      "value": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a"
+    },
+    {
+      "what": "RockawayX: liquidity market",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "liquidityData()",
+      "block": 22304589,
+      "value": "0x000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac181500000000000000000000000025419e949b485d481bed4ea0c5a0496f6c7f7c6300000000000000000000000006552294d4d2113bf12dd6da9be66d47bc376f05000000000000000000000000d5e02889c13230458506cc842347c4e62f8cdf3a0000000000000000000000000000000000000000000000000bef55718ad60000"
+    },
+    {
+      "what": "RockawayX: performance fee",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "performanceFee()",
+      "block": 22304589,
+      "value": "150000000000000000"
+    },
+    {
+      "what": "RockawayX: adapter count",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "adaptersLength()",
+      "block": 22304589,
+      "value": "1"
+    },
+    {
+      "what": "RockawayX: total assets",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "totalAssets()",
+      "block": 22304589,
+      "value": "10217433631817"
+    },
+    {
+      "what": "Morpho, lend USDC against syzUSD: wallet's position",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "position(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86, 0x4644...d3bb)",
+      "block": 22304589,
+      "value": "[0, 0, 0]"
+    },
+    {
+      "what": "Morpho, lend USDC against APC3M: supply 100000000 would go through",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "0xa99aad89 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "Morpho, lend USDC against WPROS: supply 100000000 would go through",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "0xa99aad89 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "Morpho, lend USDC against APT: supply 100000000 would go through",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "0xa99aad89 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "Morpho, lend USDC against strUSD: supply 100000000 would go through",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "0xa99aad89 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "Morpho, lend USDC against wsrUSD: supply 100000000 would go through",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "0xa99aad89 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "Morpho, lend USDC against syzUSD: supply 100000000 would go through",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "0xa99aad89 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "RockawayX: adapter",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "adapters(0)",
+      "block": 22304589,
+      "value": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a"
+    },
+    {
+      "what": "RockawayX: markets in adapter",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "marketIdsLength()",
+      "block": 22304589,
+      "value": "4"
+    },
+    {
+      "what": "RockawayX: market id",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "marketIds(0)",
+      "block": 22304589,
+      "value": "0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73"
+    },
+    {
+      "what": "RockawayX: lent into 0xbea21c37",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "expectedSupplyAssets(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73)",
+      "block": 22304589,
+      "value": "600004976926"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x4809010926aec940b550D34a46A52739f996D75D, 0x9416F861970C2a39c02ab7696Ef0496383d4E81b, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 915000000000000000]"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73)",
+      "block": 22304589,
+      "value": "[20601390440072, 20360659693270751467, 18003750132688, 17768614015958479961, 1793985557, 0]"
+    },
+    {
+      "what": "Morpho market 0xbea21c37: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1555361116"
+    },
+    {
+      "what": "RockawayX: market id",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "marketIds(1)",
+      "block": 22304589,
+      "value": "0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86"
+    },
+    {
+      "what": "RockawayX: lent into 0xc79579a0",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "expectedSupplyAssets(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86)",
+      "block": 22304589,
+      "value": "4174827637982"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x54dF79D8EDf36D15cd83fbeDbdd90807fC828934, 0x4eEfC4C6e7216Aedd5E809e4fC74fb8859B3FA46, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 915000000000000000]"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86)",
+      "block": 22304589,
+      "value": "[4174787544170, 4125542852098310804, 3757744157652, 3708640604432138734, 1793985557, 0]"
+    },
+    {
+      "what": "Morpho market 0xc79579a0: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "1874308802"
+    },
+    {
+      "what": "RockawayX: market id",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "marketIds(2)",
+      "block": 22304589,
+      "value": "0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba"
+    },
+    {
+      "what": "RockawayX: lent into 0xb3b8a31c",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "expectedSupplyAssets(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba)",
+      "block": 22304589,
+      "value": "1101013080024"
+    },
+    {
+      "what": "Morpho market 0xb3b8a31c: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x52C48d4213107b20bC583832b0d951FB9CA8F0B0, 0xF4331ff581C31D897da6A3cd552dC39bD44983A5, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 385000000000000000]"
+    },
+    {
+      "what": "Morpho market 0xb3b8a31c: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba)",
+      "block": 22304589,
+      "value": "[1100998584428, 1087392541296880700, 1003821187084, 990145128796677741, 1793985557, 0]"
+    },
+    {
+      "what": "Morpho market 0xb3b8a31c: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "2521881021"
+    },
+    {
+      "what": "RockawayX: market id",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "marketIds(3)",
+      "block": 22304589,
+      "value": "0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd"
+    },
+    {
+      "what": "RockawayX: lent into 0x4cbedaf6",
+      "contract": "0xBa3b260596D8412318Ee6ef5476291F6C8E3b68a",
+      "call": "expectedSupplyAssets(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd)",
+      "block": 22304589,
+      "value": "1821671897778"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: params",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "idToMarketParams(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd)",
+      "block": 22304589,
+      "value": "[0xC879C018dB60520F4355C26eD1a6D572cdAC1815, 0x25419E949b485d481BED4ea0c5A0496f6C7f7c63, 0x06552294d4D2113bf12DD6da9Be66d47Bc376f05, 0xD5E02889C13230458506CC842347c4E62F8cDF3a, 860000000000000000]"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: totals",
+      "contract": "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb",
+      "call": "market(0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd)",
+      "block": 22304589,
+      "value": "[1821672237461, 1807548778136704939, 761717903264, 755066874277454521, 1793990838, 0]"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: borrow rate with 0 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "643080887"
+    },
+    {
+      "what": "Morpho market 0x4cbedaf6: borrow rate with 100000000 more supplied",
+      "contract": "0xD5E02889C13230458506CC842347c4E62F8cDF3a",
+      "call": "borrowRateView({...}, {...})",
+      "block": 22304589,
+      "value": "643060326"
     },
     {
       "what": "RockawayX USDC vault: deposit 100000000 would go through",
@@ -714,14 +1776,14 @@
       "what": "PROS price in USD (Chainlink)",
       "contract": "0x371ed36aee5bffbed1a2aa9b7ded7f4eb30f5466",
       "call": "latestRoundData()",
-      "block": 22290959,
-      "value": "[0, 537892986752838000, 1793979073, 1793979073, 0]"
+      "block": 22304589,
+      "value": "[0, 543047602938349400, 1793990616, 1793990616, 0]"
     },
     {
       "what": "PROS/USD feed decimals",
       "contract": "0x371ed36aee5bffbed1a2aa9b7ded7f4eb30f5466",
       "call": "decimals()",
-      "block": 22290959,
+      "block": 22304589,
       "value": "18"
     }
   ],
