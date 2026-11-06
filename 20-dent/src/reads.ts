@@ -34,6 +34,7 @@ const knownErrors = parseAbi([
   "error Panic(uint256)",
   "error InvalidPhase(uint8)",
   "error EnforcedPause()",
+  "error TransferFromReverted()",
   "error OwnableUnauthorizedAccount(address)",
   "error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)",
   "error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)",
