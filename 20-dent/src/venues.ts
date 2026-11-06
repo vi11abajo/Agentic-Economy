@@ -3,11 +3,13 @@
 import type { Hex } from "viem";
 
 export type Lane = "USDC" | "PROS";
-export type Kind = "idle" | "aave" | "vault" | "stpros" | "faroo-vault";
+export type Kind = "idle" | "aave" | "vault" | "stpros" | "faroo-vault" | "morpho-market";
 
 export const USDC = "0xc879c018db60520f4355c26ed1a6d572cdac1815";
 export const WPROS = "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0";
 export const STPROS = "0x6b0a44c64190279f7034b77c13a566e914fe5ec4";
+/** Morpho Blue singleton. Its markets came from a full CreateMarket log scan (none created 2026-10-31..11-06). */
+export const MORPHO_BLUE = "0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb";
 /** Chainlink PROS/USD, 18 decimals. Only used to put a dollar figure on gas in the USDC lane. */
 export const PROS_USD_FEED = "0x371ed36aee5bffbed1a2aa9b7ded7f4eb30f5466";
 
@@ -19,6 +21,8 @@ export interface Source {
   kind: Kind;
   /** Pool for Aave forks, the vault itself for ERC-4626, nothing for idle money. */
   address?: string;
+  /** Morpho Blue market id, for kind "morpho-market". */
+  marketId?: Hex;
   /** The token that goes in: USDC, WPROS, native PROS (idle / stPROS) or stPROS (Faroo vaults). */
   asset: string;
   note?: string;
@@ -63,7 +67,72 @@ export const SOURCES: Source[] = [
     kind: "vault",
     address: "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
     asset: USDC,
-    note: "a vault spreads deposits over Morpho markets; how much your deposit lowers its rate is not modelled",
+  },
+  {
+    id: "morpho-usdc-wpros",
+    name: "Morpho, lend USDC against WPROS",
+    protocol: "Morpho Blue (LLTV 38.5%)",
+    lane: "USDC",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0xb3b8a31c8a1652cf31eb872c7778716edc39471ed82bcad99b3f5c83a449e1ba",
+    asset: USDC,
+    note: "lenders in a Morpho market carry the risk of its collateral",
+  },
+  {
+    id: "morpho-usdc-wsrusd",
+    name: "Morpho, lend USDC against wsrUSD",
+    protocol: "Morpho Blue (LLTV 91.5%)",
+    lane: "USDC",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0xbea21c372be9729760844cb2d60879f5ced6a8a5bba9a538dea8801e8ac49e73",
+    asset: USDC,
+    note: "lenders in a Morpho market carry the risk of its collateral",
+  },
+  {
+    id: "morpho-usdc-syzusd",
+    name: "Morpho, lend USDC against syzUSD",
+    protocol: "Morpho Blue (LLTV 91.5%)",
+    lane: "USDC",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0xc79579a002dbc8c535d3a87198fcbbece1a664ad82a356b0447c5bff9e16fd86",
+    asset: USDC,
+    note: "lenders in a Morpho market carry the risk of its collateral",
+  },
+  {
+    id: "morpho-usdc-apc3m",
+    name: "Morpho, lend USDC against APC3M",
+    protocol: "Morpho Blue (LLTV 86%)",
+    lane: "USDC",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0xba0d2638a277fd7696cdefdb96b5bd7405d0f174ba7526ce2c789f41149d91bc",
+    asset: USDC,
+    note: "lenders in a Morpho market carry the risk of its collateral",
+  },
+  {
+    id: "morpho-usdc-strusd",
+    name: "Morpho, lend USDC against strUSD",
+    protocol: "Morpho Blue (LLTV 86%)",
+    lane: "USDC",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0x4cbedaf680d648926bafbce7d874ce717a1b3232ea7084c7c3593aa42bb429cd",
+    asset: USDC,
+    note: "lenders in a Morpho market carry the risk of its collateral",
+  },
+  {
+    id: "morpho-usdc-apt",
+    name: "Morpho, lend USDC against APT",
+    protocol: "Morpho Blue (LLTV 86%)",
+    lane: "USDC",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0xd834016ed49b76ffcbeb8402733e2d69b1f77d30b28d6f21c826931214ae5aea",
+    asset: USDC,
+    note: "lenders in a Morpho market carry the risk of its collateral",
   },
   { id: "wallet-pros", name: "PROS left in the wallet", protocol: "-", lane: "PROS", kind: "idle", asset: "native" },
   {
@@ -102,6 +171,28 @@ export const SOURCES: Source[] = [
     kind: "aave",
     address: "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
     asset: WPROS,
+  },
+  {
+    id: "morpho-wpros-btcvc",
+    name: "Morpho, lend WPROS against BTCVC",
+    protocol: "Morpho Blue (LLTV 38.5%)",
+    lane: "PROS",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0x6657f8b7ec9d900f8e975e3f7eb74b80e2783cbbacd1d3f90d144a3e34ad2faa",
+    asset: WPROS,
+    note: "lenders in a Morpho market carry the risk of its collateral",
+  },
+  {
+    id: "morpho-wpros-bfbtc",
+    name: "Morpho, lend WPROS against bfBTC",
+    protocol: "Morpho Blue (LLTV 38.5%)",
+    lane: "PROS",
+    kind: "morpho-market",
+    address: MORPHO_BLUE,
+    marketId: "0xce1289aec8983c9361ce7b6c139682f78ef84d37afd0b9d44eca161092dbf347",
+    asset: WPROS,
+    note: "lenders in a Morpho market carry the risk of its collateral",
   },
   {
     id: "faroo-frhv001",
