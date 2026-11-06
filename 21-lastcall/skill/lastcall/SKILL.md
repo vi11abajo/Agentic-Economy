@@ -29,11 +29,12 @@ elsewhere). One bundled file, no install, no keys. Reads Pharos mainnet through 
 - `lastcall look --wallet 0x... [--wallet 0x...] [--warn 1.3] [--critical 1.1] [--target 1.5] [--days-warn 30] [--json out.json]`:
   every open loan of the wallet(s), one table plus a full alert per loan. 30-60 s for a few wallets; say so
   before running it.
-- `lastcall watch --wallet 0x... [same thresholds] [--every 60] [--rounds N] [--telegram] [--discord]`: the same
+- `lastcall watch --wallet 0x... [same thresholds] [--every 60] [--rounds N] [--console-only]`: the same
   in a loop. Speaks up on a worse level, a recovery, a carry clock under `--days-warn` days, or a rule change
-  by the pool's admin since the last round. Remembers levels in `.lastcall/state.json` (`LASTCALL_HOME` moves
-  the folder), so a restart doesn't repeat old alerts. Without `--rounds` it runs until stopped: start it in
-  the background and tell the user how to stop it.
+  by the pool's admin since the last round. Alerts go to the console and to every channel filled in
+  `alerts.env` (see below). Remembers levels in `.state/watch.json` next to this file, so a restart doesn't
+  repeat old alerts. Without `--rounds` it runs until stopped: start it in the background and tell the user
+  how to stop it.
 - `lastcall replay --pool avalon|avalon-innovative|openfi|zona --wallet 0x... --block N`: the rule-change
   alert for a change that already happened in block N (Avalon's Safe swapped the rate strategies in block
   22302862).
@@ -43,15 +44,48 @@ elsewhere). One bundled file, no install, no keys. Reads Pharos mainnet through 
 - `lastcall channels [test]`: where alerts go. `test` sends a test message to whatever is set up and, after
   the user pressed Start on their bot, finds their Telegram chat id by itself.
 
-## Setting up Telegram or Discord
+## Setting up Telegram, Discord or both
 
-Run `lastcall channels` once: it creates `.lastcall/.env` with three empty lines. Explain to the user how to
-fill them, in your own words:
-- Telegram: talk to @BotFather, `/newbot`, copy the token into `LASTCALL_TELEGRAM_BOT_TOKEN=`; open the new bot
-  and press Start; then `lastcall channels test` fills in the chat id.
-- Discord: channel settings, Integrations, Webhooks, New Webhook, Copy Webhook URL into `LASTCALL_DISCORD_WEBHOOK=`.
-The user pastes these into the file themselves. Never ask for the token or webhook in chat, never print or
-read them back. If one gets pasted into the chat anyway, don't repeat it and suggest making a new one.
+Alerts always go to the console with a timestamp. To get them on the phone as well, the user fills lines in
+**`alerts.env`, the file in this skill folder next to SKILL.md**. It ships with three empty lines and comments:
+
+| Line | What goes there | Needed for |
+|---|---|---|
+| `LASTCALL_TELEGRAM_BOT_TOKEN=` | the bot token from @BotFather, like `110201543:AAHdqTcv...` | Telegram |
+| `LASTCALL_TELEGRAM_CHAT_ID=` | nothing: lastcall fills it in itself (step 5 below) | Telegram |
+| `LASTCALL_DISCORD_WEBHOOK=` | the channel webhook URL, `https://discord.com/api/webhooks/...` | Discord |
+
+Telegram only, Discord only, or both: each channel switches on by itself once its line is filled, no flag
+needed. An empty line means that channel stays off.
+
+Do it with the user step by step:
+
+1. Run `lastcall channels`. It prints the full path of `alerts.env` (and recreates it if it was deleted) and
+   says which channels are on. Give the user that exact path.
+2. Ask: "Where do you want the alerts: Telegram, Discord, or both?"
+3. For each chosen channel ask whether they already have a bot or a webhook, or want help making one.
+   - **They have one:** tell them which line to fill (table above). They paste the value right after `=`, no
+     quotes, no spaces, and save the file.
+   - **Help with Telegram:**
+     1. In Telegram open @BotFather and send `/newbot`.
+     2. Send a name for the bot (anything, e.g. "My loan watchdog").
+     3. Send a username: 5-32 Latin letters, digits or `_`, ending in `bot` (e.g. `my_loan_watchdog_bot`).
+     4. BotFather answers with a token like `110201543:AAHdqTcv...`. Copy it into `LASTCALL_TELEGRAM_BOT_TOKEN=`.
+     5. Open the new bot (the t.me link BotFather gives) and press Start, or send `/start`. Without this the
+        bot isn't allowed to write to them.
+   - **Help with Discord:**
+     1. Open the server's Server Settings, then Integrations.
+     2. Create a webhook (Create Webhook / New Webhook), pick the text channel it should post to.
+     3. Press Copy Webhook URL and paste it into `LASTCALL_DISCORD_WEBHOOK=`.
+     4. If Integrations isn't there, they need a server where they can manage webhooks (their own server works).
+4. Never ask for the token or the webhook in the chat, and never read, print or `cat` `alerts.env`: anyone with
+   these can post as the bot. If one gets pasted into the chat anyway, don't repeat it and suggest replacing it
+   with a new token or a new webhook.
+5. When they say the file is saved, run `lastcall channels test`. For Telegram it first finds the chat that
+   pressed Start and writes `LASTCALL_TELEGRAM_CHAT_ID` itself, then every filled channel gets a test message.
+   Ask the user whether it arrived. If it says "no /start message found", they need to press Start in the bot
+   and you run the test again. If a channel says FAILED, read them the reason and go back to step 3 for it.
+6. From then on `watch` and `replay` send to every filled channel. `--console-only` keeps a single run off them.
 
 ## How to read an alert
 

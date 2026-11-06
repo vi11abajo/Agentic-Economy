@@ -1,11 +1,19 @@
 // Getting an alert in front of a person. The console always gets it, stamped with the time. Telegram and Discord
-// get it too when their secrets sit in <home>/.env. Both secrets live inside URLs, so every error we print goes
-// through hide() first.
+// get it too as soon as their lines in the skill's alerts.env are filled in. Both secrets live inside URLs, so
+// every error we print goes through hide() first.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { basename, dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { stamp } from "./render.js";
 
-export const HOME = process.env.LASTCALL_HOME ?? ".lastcall";
+// The skill folder (the one with SKILL.md). The bundled CLI sits in <skill>/scripts/, the dev build in dist/.
+const here = dirname(fileURLToPath(import.meta.url));
+export const SKILL_DIR = basename(here) === "scripts" ? dirname(here) : join(here, "..", "skill", "lastcall");
+/** alerts.env lives here; LASTCALL_HOME moves it (and the watch state) elsewhere. */
+export const HOME = process.env.LASTCALL_HOME ?? SKILL_DIR;
+export const ENV_FILE = "alerts.env";
+/** Watch memory (levels already alerted), kept apart from the secrets. */
+export const STATE_DIR = join(HOME, ".state");
 export const ENV_KEYS = {
   telegramToken: "LASTCALL_TELEGRAM_BOT_TOKEN",
   telegramChat: "LASTCALL_TELEGRAM_CHAT_ID",
@@ -21,7 +29,7 @@ export interface Secrets {
 /** Process env wins over the file, so a CI or a shell export can override. */
 export function loadSecrets(home = HOME): Secrets {
   const file: Record<string, string> = {};
-  const p = join(home, ".env");
+  const p = join(home, ENV_FILE);
   if (existsSync(p)) {
     for (const line of readFileSync(p, "utf8").split(/\r?\n/)) {
       const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
@@ -32,13 +40,30 @@ export function loadSecrets(home = HOME): Secrets {
   return { telegramToken: get(ENV_KEYS.telegramToken), telegramChat: get(ENV_KEYS.telegramChat), discordWebhook: get(ENV_KEYS.discordWebhook) };
 }
 
-/** Writes an empty .env template the user can fill in themselves. Never overwrites. */
+export const ENV_TEMPLATE = `# lastcall alerts: where to send them besides the console.
+# Fill Telegram, Discord or both. An empty line means that channel is off. Paste each value right after
+# the "=", no quotes, no spaces. This file holds secrets: don't share it, don't commit it.
+
+# Telegram, line 1: the token @BotFather gives you for your bot, looks like 1234567890:AAH...
+${ENV_KEYS.telegramToken}=
+# Telegram, line 2: leave it empty. After you press Start in your bot's chat, "lastcall channels test"
+# finds your chat and writes its id here by itself.
+${ENV_KEYS.telegramChat}=
+
+# Discord: the channel's webhook URL, looks like https://discord.com/api/webhooks/<numbers>/<secret>
+${ENV_KEYS.discordWebhook}=
+`;
+
+/** Makes sure the template is there for the user to fill in. Never overwrites a filled file. */
 export function ensureEnvTemplate(home = HOME): string {
   mkdirSync(home, { recursive: true });
-  const p = join(home, ".env");
-  if (!existsSync(p)) writeFileSync(p, `${ENV_KEYS.telegramToken}=\n${ENV_KEYS.telegramChat}=\n${ENV_KEYS.discordWebhook}=\n`);
+  const p = join(home, ENV_FILE);
+  if (!existsSync(p)) writeFileSync(p, ENV_TEMPLATE);
   return p;
 }
+
+/** Which channels are switched on just by being filled in. */
+export const channelsOn = (s: Secrets) => ({ telegram: !!(s.telegramToken && s.telegramChat), discord: !!s.discordWebhook });
 
 export function hide(text: string, s: Secrets): string {
   let out = text;

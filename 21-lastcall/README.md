@@ -41,7 +41,8 @@ npm run build          # also bundles skill/lastcall/scripts/lastcall.mjs
 npm test
 
 node skill/lastcall/scripts/lastcall.mjs look --wallet 0xA4A57DcF7B15456b7053f10A377Bdb437C073DCc
-node skill/lastcall/scripts/lastcall.mjs watch --wallet 0x... --every 60 --telegram
+node skill/lastcall/scripts/lastcall.mjs channels        # where alerts.env is and which channels are on
+node skill/lastcall/scripts/lastcall.mjs watch --wallet 0x... --every 60
 node skill/lastcall/scripts/lastcall.mjs replay --pool avalon --wallet 0xd360d59d3d9449c6cec9e6f50046b57cc67fe7a0 --block 22302862
 node skill/lastcall/scripts/lastcall.mjs scan --hours 24
 ```
@@ -49,6 +50,12 @@ node skill/lastcall/scripts/lastcall.mjs scan --hours 24
 As an agent skill: copy `skill/lastcall/` into your agent's skills folder. `scripts/lastcall.mjs` is one
 bundled file that runs on plain Node 20+, no install. `SKILL.md` tells the agent how to run it, how to set up
 Telegram or Discord with the user, and how to explain an alert.
+
+**Alerts.** The console always gets them, each line stamped with the time. For Telegram and/or Discord, fill
+[`skill/lastcall/alerts.env`](skill/lastcall/alerts.env): the bot token for Telegram (the chat id fills itself
+in when you run `lastcall channels test` after pressing Start in the bot), the webhook URL for Discord, or both.
+A channel switches on once its line is filled. `SKILL.md` walks the agent through explaining all of this to
+someone who has never made a bot or a webhook. The file holds secrets once filled: keep it out of git.
 
 Thresholds are flags: `--warn 1.3 --critical 1.1` (the defaults), `--target 1.5` is the health the advice aims
 at, `--rearm 0.02` is how far health has to climb back above a line before that level clears (so a loan
