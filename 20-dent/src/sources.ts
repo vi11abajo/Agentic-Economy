@@ -22,6 +22,8 @@ export interface Reading {
   held: bigint;
   /** Raw position: shares or aTokens, needed to build the exit. */
   heldShares: bigint;
+  /** Earns exactly this in every window (the wallet itself: 0). */
+  fixedRate?: number;
   rateNow?: number;
   /** The rate once the amount being moved has landed here (Aave forks only, from the pool's own rate contract). */
   rateWithYou?: number;
@@ -79,6 +81,7 @@ export async function readSource(r: Reader, source: Source, wallet: string, amou
 async function idle(r: Reader, source: Source, wallet: string, w: Windows): Promise<Reading> {
   const out = blank(source);
   out.rateNow = 0;
+  out.fixedRate = 0;
   if (source.lane === "USDC") {
     out.held = await r.read<bigint>("USDC in the wallet", USDC, erc20, "balanceOf", [wallet], w.now);
   } else {

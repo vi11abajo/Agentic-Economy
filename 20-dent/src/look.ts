@@ -112,6 +112,7 @@ export async function look(chain: Chain, a: LookArgs): Promise<Look> {
     name: x.source.name,
     status: x.status,
     why: x.why,
+    fixedRate: x.fixedRate,
     rateNow: x.rateNow,
     rateWithYou: x.rateWithYou,
     realized7d: x.realized7d,

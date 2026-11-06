@@ -1,14 +1,25 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { breakEven, decide, destinationRate, netOfMove, sourceRate, type Place } from "./decide.js";
+import { breakEven, compareRates, decide, netOfMove, windowRates, type Place } from "./decide.js";
 
 const place = (p: Partial<Place> & { id: string }): Place => ({ name: p.id, status: "open", entryFee: 0, exitFee: 0, waitSeconds: 0, ...p });
 
-test("where you are gets the best of its rates, where you'd go gets the worst", () => {
-  assert.deepEqual(sourceRate(place({ id: "a", rateNow: 0.02, realized7d: 0.03, realized30d: 0.01 })), { rate: 0.03, how: "realised over 7 days" });
-  // The rate with your money in it replaces the quoted rate; then the lowest wins.
-  assert.deepEqual(destinationRate(place({ id: "b", rateNow: 0.05, rateWithYou: 0.01, realized7d: 0.04 })), { rate: 0.01, how: "with your deposit in it" });
-  assert.equal(destinationRate(place({ id: "c" })), undefined);
+test("rates are compared window by window, and the window worst for the move counts", () => {
+  const from = place({ id: "a", rateNow: 0.02, realized7d: 0.03, realized30d: 0.01 });
+  const to = place({ id: "b", rateNow: 0.05, rateWithYou: 0.04, realized7d: 0.035, realized30d: 0.06 });
+  // now: 0.04 vs 0.02 (+2%), 7d: 0.035 vs 0.03 (+0.5%), 30d: min(0.06, 0.04) vs 0.01 (+3%) -> 7 days counts
+  assert.deepEqual(compareRates(from, to), { rFrom: 0.03, rTo: 0.035, how: "over the last 7 days" });
+  // the wallet earns 0 in every window
+  assert.deepEqual(windowRates(place({ id: "w", fixedRate: 0 }), false), { now: 0, "7d": 0, "30d": 0 });
+  assert.equal(compareRates(place({ id: "x" }), place({ id: "y", rateNow: 0.1 })), undefined);
+});
+
+test("two places riding the same underlying rate: dropping a 0% layer is a gain, not a loss", () => {
+  // A Faroo vault holds stPROS: in PROS it earns stPROS's rate plus its own 0%. stPROS alone earns the same.
+  const vault = place({ id: "vault", realized7d: 0.31, realized30d: 0.0867 });
+  const st = place({ id: "st", realized7d: 0.31, realized30d: 0.0867 });
+  const c = compareRates(vault, st)!;
+  assert.equal(c.rTo - c.rFrom, 0);
 });
 
 test("net of a move: fees off the principal, gas once, nothing earned while unbonding", () => {
@@ -29,7 +40,7 @@ test("break-even days, and never when the new place doesn't pay more", () => {
 
 test("MOVE when the best option pays back inside the hold and clears the minimum", () => {
   const d = decide({
-    from: place({ id: "wallet", rateNow: 0 }),
+    from: place({ id: "wallet", fixedRate: 0 }),
     amount: 1000,
     places: [place({ id: "wallet", rateNow: 0 }), place({ id: "good", rateWithYou: 0.0365 }), place({ id: "better-but-closed", status: "closed", why: "InvalidPhase(3)" })],
     costs: { good: { gas: 1 } },
@@ -43,7 +54,7 @@ test("MOVE when the best option pays back inside the hold and clears the minimum
 
 test("STAY PUT when gas eats the gain inside the hold, with that as the reason", () => {
   const d = decide({
-    from: place({ id: "wallet", rateNow: 0 }),
+    from: place({ id: "wallet", fixedRate: 0 }),
     amount: 0.5,
     places: [place({ id: "pool", rateWithYou: 0.0193 })],
     costs: { pool: { gas: 0.002 } },
@@ -77,7 +88,7 @@ test("a destination whose rate collapses under your deposit loses", () => {
     minGain: 0,
   });
   assert.equal(d.action, "STAY PUT");
-  assert.match(d.options[0].why, /with your deposit in it/);
+  assert.match(d.options[0].why, /not more than/);
 });
 
 test("supply cap and unknown gas are reasons, not zeros", () => {

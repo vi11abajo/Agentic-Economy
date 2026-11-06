@@ -1,14 +1,17 @@
 // The arithmetic of "is it worth moving". Pure: numbers in, verdict out, so every rule is tested without a chain.
 //
-// We are generous to where the money is now and stingy to where it would go: the current place is credited the
-// better of its quoted and realised rates, a destination the worse of its rate-with-you and realised rates.
-// A move has to win even then.
+// Rates are compared window by window (now, last 7 days, last 30 days), and the window worst for the move is the
+// one that counts. Comparing like with like matters: Faroo vaults and stPROS both ride the stPROS rate, and taking
+// one side's best week against the other side's worst month would call a free upgrade a loss. A destination's
+// rate is also capped, in every window, by what it would pay with your deposit in it.
 
 export interface Place {
   id: string;
   name: string;
   status: "open" | "closed" | "unreadable";
   why?: string;
+  /** Earns this in every window (money sitting in the wallet: 0). */
+  fixedRate?: number;
   rateNow?: number;
   rateWithYou?: number;
   realized7d?: number;
@@ -33,6 +36,8 @@ export interface Option {
   why: string;
   rateUsed?: number;
   rateHow?: string;
+  /** Your current place's rate in the same window. */
+  fromRate?: number;
   earningDays?: number;
   extraYield?: number;
   fees?: number;
@@ -45,7 +50,7 @@ export interface Decision {
   action: "MOVE" | "STAY PUT";
   to?: string;
   reason: string;
-  from: { id: string; name: string; rateUsed: number; rateHow: string };
+  from: { id: string; name: string };
   amount: number;
   holdDays: number;
   minGain: number;
@@ -56,28 +61,37 @@ const DAY = 86400;
 const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
 /** Short, readable amounts: 6 significant digits is plenty for a verdict line. */
 export const amt = (x: number) => Number(x.toPrecision(6)).toString();
+export const days = (n: number) => (n === 1 ? "1 day" : `${n} days`);
 
-/** The current place is credited its best plausible rate. */
-export function sourceRate(p: Place): { rate: number; how: string } {
-  const c: [number, string][] = [];
-  if (p.rateNow !== undefined) c.push([p.rateNow, "quoted now"]);
-  if (p.realized7d !== undefined) c.push([p.realized7d, "realised over 7 days"]);
-  if (p.realized30d !== undefined) c.push([p.realized30d, "realised over 30 days"]);
-  if (!c.length) return { rate: 0, how: "no rate readable, taken as 0" };
-  c.sort((a, b) => b[0] - a[0]);
-  return { rate: c[0][0], how: c[0][1] };
+type Win = "now" | "7d" | "30d";
+const WIN_LABEL: Record<Win, string> = { now: "now", "7d": "over the last 7 days", "30d": "over the last 30 days" };
+
+/** A place's rate in each window. For a destination, every window is capped by its rate with your money in it. */
+export function windowRates(p: Place, asDestination: boolean): Partial<Record<Win, number>> {
+  if (p.fixedRate !== undefined) return { now: p.fixedRate, "7d": p.fixedRate, "30d": p.fixedRate };
+  const cap = asDestination ? p.rateWithYou : undefined;
+  const capped = (x: number | undefined) => (x === undefined ? undefined : cap === undefined ? x : Math.min(x, cap));
+  const out: Partial<Record<Win, number>> = {};
+  const now = asDestination ? (p.rateWithYou ?? p.rateNow) : p.rateNow;
+  if (now !== undefined) out.now = now;
+  if (p.realized7d !== undefined) out["7d"] = capped(p.realized7d);
+  if (p.realized30d !== undefined) out["30d"] = capped(p.realized30d);
+  return out;
 }
 
-/** A destination is credited its worst plausible rate, with your money already in it. */
-export function destinationRate(p: Place): { rate: number; how: string } | undefined {
-  const c: [number, string][] = [];
-  if (p.rateWithYou !== undefined) c.push([p.rateWithYou, "with your deposit in it"]);
-  else if (p.rateNow !== undefined) c.push([p.rateNow, "quoted now"]);
-  if (p.realized7d !== undefined) c.push([p.realized7d, "realised over 7 days"]);
-  if (p.realized30d !== undefined) c.push([p.realized30d, "realised over 30 days"]);
-  if (!c.length) return undefined;
-  c.sort((a, b) => a[0] - b[0]);
-  return { rate: Math.max(0, c[0][0]), how: c[0][1] };
+/** The window where the destination beats the source by the least (or loses by the most). */
+export function compareRates(from: Place, to: Place): { rFrom: number; rTo: number; how: string } | undefined {
+  const a = windowRates(from, false);
+  const b = windowRates(to, true);
+  let best: { rFrom: number; rTo: number; how: string } | undefined;
+  for (const w of ["now", "7d", "30d"] as Win[]) {
+    const x = a[w];
+    const y = b[w];
+    if (x === undefined || y === undefined) continue;
+    const rTo = Math.max(0, y);
+    if (!best || rTo - x < best.rTo - best.rFrom) best = { rFrom: x, rTo, how: `${WIN_LABEL[w]}${w === "now" && to.rateWithYou !== undefined ? ", with your deposit in it" : ""}` };
+  }
+  return best;
 }
 
 /**
@@ -112,14 +126,13 @@ export function decide(input: {
   minGain: number;
 }): Decision {
   const { from, amount, places, costs, holdDays, minGain } = input;
-  const src = sourceRate(from);
   const out: Option[] = [];
   const waitDays = from.waitSeconds / DAY;
 
   if (from.exitRoom !== undefined && from.exitRoom < amount) {
     const why = `${from.name} has only ${amt(from.exitRoom)} free to withdraw right now, less than the ${amt(amount)} you'd move`;
     for (const p of places) if (p.id !== from.id) out.push({ id: p.id, name: p.name, verdict: "skip", why: "can't leave the current place" });
-    return { action: "STAY PUT", reason: why, from: { id: from.id, name: from.name, rateUsed: src.rate, rateHow: src.how }, amount, holdDays, minGain, options: out };
+    return { action: "STAY PUT", reason: why, from: { id: from.id, name: from.name }, amount, holdDays, minGain, options: out };
   }
 
   for (const p of places) {
@@ -133,11 +146,13 @@ export function decide(input: {
       out.push({ ...base, verdict: "skip", why: `supply cap leaves room for only ${amt(p.entryRoom)}` });
       continue;
     }
-    const dst = destinationRate(p);
-    if (!dst) {
-      out.push({ ...base, verdict: "skip", why: "no rate to compare" });
+    const cmp = compareRates(from, p);
+    if (!cmp) {
+      out.push({ ...base, verdict: "skip", why: "no rate in a window both places have" });
       continue;
     }
+    const dst = { rate: cmp.rTo, how: cmp.how };
+    const src = { rate: cmp.rFrom };
     const c = costs[p.id];
     if (!c || c.gas === undefined) {
       out.push({ ...base, verdict: "skip", why: `gas unknown: ${c?.gasWhy ?? "not estimated"}`, rateUsed: dst.rate, rateHow: dst.how });
@@ -151,6 +166,7 @@ export function decide(input: {
       why: "",
       rateUsed: dst.rate,
       rateHow: dst.how,
+      fromRate: src.rate,
       earningDays: m.earning,
       extraYield: m.extraYield,
       fees: m.fees,
@@ -158,18 +174,18 @@ export function decide(input: {
       net: m.net,
       breakEvenDays: be,
     };
-    if (dst.rate <= src.rate) opt.why = `pays ${pct(dst.rate)} (${dst.how}), not more than the ${pct(src.rate)} you have`;
+    if (dst.rate <= src.rate) opt.why = `pays ${pct(dst.rate)} ${dst.how}, not more than the ${pct(src.rate)} you get in the same window`;
     else if (be === null) opt.why = "never pays back the cost of moving";
-    else if (be > holdDays) opt.why = `pays back only after ${be} days, longer than your ${holdDays}-day hold`;
-    else if (m.net < minGain) opt.why = `nets ${amt(m.net)} over ${holdDays} days, below your minimum gain of ${minGain}`;
-    else opt.why = `nets ${amt(m.net)} over ${holdDays} days, pays back in ${be} days`;
+    else if (be > holdDays) opt.why = `pays back only after ${days(be)}, longer than your ${holdDays}-day hold`;
+    else if (m.net < minGain) opt.why = `nets ${amt(m.net)} over ${days(holdDays)}, below your minimum gain of ${minGain}`;
+    else opt.why = `nets ${amt(m.net)} over ${days(holdDays)}, pays back in ${days(be)}`;
     out.push(opt);
   }
 
   const winners = out
-    .filter((o) => o.verdict === "candidate" && o.net !== undefined && o.net >= minGain && o.breakEvenDays !== null && (o.breakEvenDays ?? Infinity) <= holdDays && (o.rateUsed ?? 0) > src.rate)
+    .filter((o) => o.verdict === "candidate" && o.net !== undefined && o.net >= minGain && o.breakEvenDays !== null && (o.breakEvenDays ?? Infinity) <= holdDays && (o.rateUsed ?? 0) > (o.fromRate ?? 0))
     .sort((a, b) => b.net! - a.net!);
-  const fromInfo = { id: from.id, name: from.name, rateUsed: src.rate, rateHow: src.how };
+  const fromInfo = { id: from.id, name: from.name };
   if (winners.length) {
     const w = winners[0];
     return { action: "MOVE", to: w.id, reason: `${w.name}: ${w.why}`, from: fromInfo, amount, holdDays, minGain, options: out };
