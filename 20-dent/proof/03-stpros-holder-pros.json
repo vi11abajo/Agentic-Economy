@@ -1,0 +1,1267 @@
+{
+  "block": 22290978,
+  "at": "2026-11-06T15:39:09.000Z",
+  "windows": {
+    "now": 22290978,
+    "d7": 21690076,
+    "d30": 19625890,
+    "secs7": 604800,
+    "secs30": 2592000
+  },
+  "lane": "PROS",
+  "wallet": "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+  "readings": [
+    {
+      "source": {
+        "id": "wallet-pros",
+        "name": "PROS left in the wallet",
+        "protocol": "-",
+        "lane": "PROS",
+        "kind": "idle",
+        "asset": "native"
+      },
+      "status": "open",
+      "held": "4640395121798579945",
+      "heldShares": "4640395121798579945",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "earns nothing"
+      ],
+      "rateNow": 0
+    },
+    {
+      "source": {
+        "id": "faroo-stpros",
+        "name": "Faroo stPROS (liquid staking)",
+        "protocol": "Faroo (Bifrost SLPx)",
+        "lane": "PROS",
+        "kind": "stpros",
+        "address": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+        "asset": "native",
+        "note": "leaving is redeem, a one-day unbonding wait, then a claim"
+      },
+      "status": "open",
+      "held": "480724163967499398",
+      "heldShares": "477321469380873529",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 86400,
+      "notes": [
+        "leaving: redeem, wait 24 h, then claim; nothing is earned while waiting"
+      ],
+      "realized7d": 0.3103264500321429,
+      "realized30d": 0.08673284873149999,
+      "rateNow": 0.3103264500321429
+    },
+    {
+      "source": {
+        "id": "openfi-wpros",
+        "name": "OpenFi, WPROS",
+        "protocol": "OpenFi (Aave V3 fork)",
+        "lane": "PROS",
+        "kind": "aave",
+        "address": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+        "asset": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Aave V3 supply and withdraw take no fee"
+      ],
+      "aToken": "0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9",
+      "exitRoom": "465802000000000000",
+      "rateNow": 0.003808,
+      "rateWithYou": 0.000047,
+      "realized7d": 0.003807268645,
+      "realized30d": 0.0033670106455
+    },
+    {
+      "source": {
+        "id": "zona-wpros",
+        "name": "Zona, WPROS",
+        "protocol": "Zona (Aave V3 fork)",
+        "lane": "PROS",
+        "kind": "aave",
+        "address": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+        "asset": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Aave V3 supply and withdraw take no fee"
+      ],
+      "aToken": "0x7E23C96D7FBCD538272390EC5F8766032d4D96fD",
+      "exitRoom": "22923800398559664646",
+      "entryRoom": "99974602432044318014111",
+      "rateNow": 0.000367,
+      "rateWithYou": 0.000263,
+      "realized7d": 0.00032629201071428574,
+      "realized30d": 0.00022874417383333332
+    },
+    {
+      "source": {
+        "id": "avalon-inno-wpros",
+        "name": "Avalon innovative pool, WPROS",
+        "protocol": "Avalon (Aave V3 fork)",
+        "lane": "PROS",
+        "kind": "aave",
+        "address": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+        "asset": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Aave V3 supply and withdraw take no fee"
+      ],
+      "aToken": "0x397070528a821d68C26f0558f4E816c91a0B3417",
+      "exitRoom": "1000000000000000000",
+      "entryRoom": "1999999000000000000000000",
+      "rateNow": 0,
+      "rateWithYou": 0,
+      "realized7d": 0,
+      "realized30d": 0
+    },
+    {
+      "source": {
+        "id": "faroo-frhv001",
+        "name": "Faroo RWA Hybrid Vault 001",
+        "protocol": "Faroo",
+        "lane": "PROS",
+        "kind": "faroo-vault",
+        "address": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+        "asset": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4"
+      },
+      "status": "closed",
+      "held": "2080440789317024868",
+      "heldShares": "2000000000000000000000000",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "rate is the vault's own share price in stPROS, on top of stPROS's rate"
+      ],
+      "realized7d": 0,
+      "realized30d": 0,
+      "rateNow": 0,
+      "why": "deposit reverts: InvalidPhase(3)"
+    },
+    {
+      "source": {
+        "id": "faroo-fyv001",
+        "name": "Faroo Yield Vault 001",
+        "protocol": "Faroo",
+        "lane": "PROS",
+        "kind": "faroo-vault",
+        "address": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+        "asset": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4"
+      },
+      "status": "closed",
+      "held": "1973904342359191598",
+      "heldShares": "1881842975206611570577958",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "rate is the vault's own share price in stPROS, on top of stPROS's rate"
+      ],
+      "realized7d": 0,
+      "realized30d": 0,
+      "rateNow": 0,
+      "why": "deposit reverts: InvalidPhase(1)"
+    }
+  ],
+  "gasPriceWei": "10000000000",
+  "costs": {
+    "faroo-stpros": {
+      "gas": 0.00141447,
+      "steps": [
+        {
+          "says": "stake 4635395121798579945 wei PROS with Faroo for stPROS",
+          "to": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+          "data": "0xb4430b99",
+          "value": "4635395121798579945",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1": {
+              "balance": "0x4e34f20173c606e9"
+            }
+          },
+          "gas": "141447"
+        }
+      ]
+    },
+    "openfi-wpros": {
+      "gas": 0.0040181,
+      "steps": [
+        {
+          "says": "wrap 4635395121798579945 wei PROS into WPROS",
+          "to": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+          "data": "0xd0e30db0",
+          "value": "4635395121798579945",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1": {
+              "balance": "0x4e34f20173c606e9"
+            }
+          },
+          "gas": "57576"
+        },
+        {
+          "says": "let OpenFi, WPROS take 4635395121798579945 of your WPROS",
+          "to": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+          "data": "0x095ea7b300000000000000000000000030b2e1411fd2ed9f1f46f59497e2186ce5be3b2600000000000000000000000000000000000000000000000040543b4dcc6206e9",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": {
+              "stateDiff": {
+                "0x6c3a840b410cdbb400587a68fe9d5b3d128e2aad87f7a660e24bbc39d60d3d7e": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9"
+              }
+            }
+          },
+          "gas": "59044"
+        },
+        {
+          "says": "supply 4635395121798579945 to OpenFi, WPROS",
+          "to": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+          "data": "0x617ba03700000000000000000000000052c48d4213107b20bc583832b0d951fb9ca8f0b000000000000000000000000000000000000000000000000040543b4dcc6206e9000000000000000000000000b29eaea575bd4bae7d9a301446e6204c3a23adf10000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": {
+              "stateDiff": {
+                "0x6c3a840b410cdbb400587a68fe9d5b3d128e2aad87f7a660e24bbc39d60d3d7e": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9",
+                "0x64796de8e02519bdb6d707676cc236d986589357cbb85f3779006ccb3fa64ec2": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9"
+              }
+            }
+          },
+          "gas": "285190"
+        }
+      ]
+    },
+    "zona-wpros": {
+      "gas": 0.0040733,
+      "steps": [
+        {
+          "says": "wrap 4635395121798579945 wei PROS into WPROS",
+          "to": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+          "data": "0xd0e30db0",
+          "value": "4635395121798579945",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1": {
+              "balance": "0x4e34f20173c606e9"
+            }
+          },
+          "gas": "57576"
+        },
+        {
+          "says": "let Zona, WPROS take 4635395121798579945 of your WPROS",
+          "to": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+          "data": "0x095ea7b3000000000000000000000000da464e68208a3083eb65fe5c522a72aed1c1372a00000000000000000000000000000000000000000000000040543b4dcc6206e9",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": {
+              "stateDiff": {
+                "0x6c3a840b410cdbb400587a68fe9d5b3d128e2aad87f7a660e24bbc39d60d3d7e": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9"
+              }
+            }
+          },
+          "gas": "59044"
+        },
+        {
+          "says": "supply 4635395121798579945 to Zona, WPROS",
+          "to": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+          "data": "0x617ba03700000000000000000000000052c48d4213107b20bc583832b0d951fb9ca8f0b000000000000000000000000000000000000000000000000040543b4dcc6206e9000000000000000000000000b29eaea575bd4bae7d9a301446e6204c3a23adf10000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": {
+              "stateDiff": {
+                "0x6c3a840b410cdbb400587a68fe9d5b3d128e2aad87f7a660e24bbc39d60d3d7e": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9",
+                "0x7eb5381fd72cb499fefcb3bafdc9a0faf99f4575a1d5f2edb59b618719231cba": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9"
+              }
+            }
+          },
+          "gas": "290710"
+        }
+      ]
+    },
+    "avalon-inno-wpros": {
+      "gas": 0.0038321,
+      "steps": [
+        {
+          "says": "wrap 4635395121798579945 wei PROS into WPROS",
+          "to": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+          "data": "0xd0e30db0",
+          "value": "4635395121798579945",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1": {
+              "balance": "0x4e34f20173c606e9"
+            }
+          },
+          "gas": "57576"
+        },
+        {
+          "says": "let Avalon innovative pool, WPROS take 4635395121798579945 of your WPROS",
+          "to": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+          "data": "0x095ea7b3000000000000000000000000def0eb584700fc81c73accd555cb6cea5fb85c3e00000000000000000000000000000000000000000000000040543b4dcc6206e9",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": {
+              "stateDiff": {
+                "0x6c3a840b410cdbb400587a68fe9d5b3d128e2aad87f7a660e24bbc39d60d3d7e": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9"
+              }
+            }
+          },
+          "gas": "59030"
+        },
+        {
+          "says": "supply 4635395121798579945 to Avalon innovative pool, WPROS",
+          "to": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+          "data": "0x617ba03700000000000000000000000052c48d4213107b20bc583832b0d951fb9ca8f0b000000000000000000000000000000000000000000000000040543b4dcc6206e9000000000000000000000000b29eaea575bd4bae7d9a301446e6204c3a23adf10000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0": {
+              "stateDiff": {
+                "0x6c3a840b410cdbb400587a68fe9d5b3d128e2aad87f7a660e24bbc39d60d3d7e": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9",
+                "0x8aafdac3410f4ddbadf9e74f6b8802f4c550deb1a63d02eb4217342ff8fdd8de": "0x00000000000000000000000000000000000000000000000040543b4dcc6206e9"
+              }
+            }
+          },
+          "gas": "266604"
+        }
+      ]
+    }
+  },
+  "decision": {
+    "action": "MOVE",
+    "to": "faroo-stpros",
+    "reason": "Faroo stPROS (liquid staking): nets 0.03163 over 30 days, pays back in 2 days",
+    "from": {
+      "id": "wallet-pros",
+      "name": "PROS left in the wallet",
+      "rateUsed": 0,
+      "rateHow": "quoted now"
+    },
+    "amount": 4.63539512179858,
+    "holdDays": 30,
+    "minGain": 0.001,
+    "options": [
+      {
+        "id": "faroo-stpros",
+        "name": "Faroo stPROS (liquid staking)",
+        "verdict": "candidate",
+        "why": "nets 0.03163 over 30 days, pays back in 2 days",
+        "rateUsed": 0.08673284873149999,
+        "rateHow": "realised over 30 days",
+        "earningDays": 30,
+        "extraYield": 0.033044467718604593,
+        "fees": 0,
+        "gas": 0.00141447,
+        "net": 0.03162999771860431,
+        "breakEvenDays": 2
+      },
+      {
+        "id": "openfi-wpros",
+        "name": "OpenFi, WPROS",
+        "verdict": "candidate",
+        "why": "pays back only after 6732 days, longer than your 30-day hold",
+        "rateUsed": 0.000047,
+        "rateHow": "with your deposit in it",
+        "earningDays": 30,
+        "extraYield": 0.000017906594854071228,
+        "fees": 0,
+        "gas": 0.0040181,
+        "net": -0.00400019340514568,
+        "breakEvenDays": 6732
+      },
+      {
+        "id": "zona-wpros",
+        "name": "Zona, WPROS",
+        "verdict": "candidate",
+        "why": "pays back only after 1403 days, longer than your 30-day hold",
+        "rateUsed": 0.00022874417383333332,
+        "rateHow": "realised over 30 days",
+        "earningDays": 30,
+        "extraYield": 0.00008714955842686684,
+        "fees": 0,
+        "gas": 0.0040733,
+        "net": -0.003986150441573244,
+        "breakEvenDays": 1403
+      },
+      {
+        "id": "avalon-inno-wpros",
+        "name": "Avalon innovative pool, WPROS",
+        "verdict": "candidate",
+        "why": "pays 0.00% (with your deposit in it), not more than the 0.00% you have",
+        "rateUsed": 0,
+        "rateHow": "with your deposit in it",
+        "earningDays": 30,
+        "extraYield": 0,
+        "fees": 0,
+        "gas": 0.0038321,
+        "net": -0.003832100000000338,
+        "breakEvenDays": null
+      },
+      {
+        "id": "faroo-frhv001",
+        "name": "Faroo RWA Hybrid Vault 001",
+        "verdict": "skip",
+        "why": "closed: deposit reverts: InvalidPhase(3)"
+      },
+      {
+        "id": "faroo-fyv001",
+        "name": "Faroo Yield Vault 001",
+        "verdict": "skip",
+        "why": "closed: deposit reverts: InvalidPhase(1)"
+      }
+    ]
+  },
+  "plan": {
+    "tool": "dent",
+    "createdAt": "2026-11-06T15:39:36.071Z",
+    "chainId": 1672,
+    "wallet": "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+    "lane": "PROS",
+    "from": "wallet-pros",
+    "to": "faroo-stpros",
+    "amount": "4635395121798579945",
+    "holdDays": 30,
+    "minGain": 0.001,
+    "waitSeconds": 0,
+    "steps": [
+      {
+        "says": "stake 4635395121798579945 wei PROS with Faroo for stPROS",
+        "to": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+        "data": "0xb4430b99",
+        "value": "4635395121798579945",
+        "phase": 1,
+        "gasHow": "estimated",
+        "simOverrides": {
+          "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1": {
+            "balance": "0x4e34f20173c606e9"
+          }
+        },
+        "gas": "141447"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "what": "Faroo stPROS (liquid staking): share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 22290978,
+      "value": "1007128727293661132"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 21690076,
+      "value": "1001170296150310488"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 19625890,
+      "value": "1000000000000000000"
+    },
+    {
+      "what": "PROS in the wallet",
+      "contract": "0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+      "call": "eth_getBalance",
+      "block": 22290978,
+      "value": "4640395121798579945"
+    },
+    {
+      "what": "OpenFi, WPROS: reserve data",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveData(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "{configuration: 36903076921220879881596, liquidityIndex: 1000055365795022363515653421, currentLiquidityRate: 3808036828942246301380282, variableBorrowIndex: 1001273942097550855118744829, currentVariableBorrowRate: 23565625479090179504197840, currentStableBorrowRate: 90000000000000000000000000, lastUpdateTimestamp: 1791703862, id: 2, aTokenAddress: 0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9, stableDebtTokenAddress: 0xf59f69B38e1823551B88eD55503FE4F895CcCAE7, variableDebtTokenAddress: 0xDc56D9792eC77b4f8f17D9704fC168c01091f6D6, interestRateStrategyAddress: 0x9247cBA09FBB05fb6fC81cFC7170aFD7aDAc91B8, accruedToTreasury: 28449022817342, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Zona, WPROS: reserve data",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveData(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "{configuration: 8307674973716170533532602506708257084296, liquidityIndex: 1000353527078660117265995824, currentLiquidityRate: 367459351157511616034719, variableBorrowIndex: 1001369110534448366455325698, currentVariableBorrowRate: 4286369974451060005201093, currentStableBorrowRate: 30000000000000000000000000, lastUpdateTimestamp: 1793859772, id: 2, aTokenAddress: 0x7E23C96D7FBCD538272390EC5F8766032d4D96fD, stableDebtTokenAddress: 0xfBa84EFc9FC7af7147BD8d9999A8A651bd4ca150, variableDebtTokenAddress: 0xbdc0c24Dd55F402F8A301FC2F4eE283a9F540D72, interestRateStrategyAddress: 0xFA000e15f82FB6B833dC7a8dB76Af98BA99B9083, accruedToTreasury: 277432644092048132, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: reserve data",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveData(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "{configuration: 5708990936977338997347628073784576820474361154488, liquidityIndex: 1000000000000000000000000000, currentLiquidityRate: 0, variableBorrowIndex: 1000000000000000000000000000, currentVariableBorrowRate: 0, currentStableBorrowRate: 70000000000000000000000000, lastUpdateTimestamp: 1781158509, id: 1, aTokenAddress: 0x397070528a821d68C26f0558f4E816c91a0B3417, stableDebtTokenAddress: 0xf3B59e299Bf9cfbc2e5729d88b5b1F2797D4d72B, variableDebtTokenAddress: 0xb3dA65Fb32382292aaC3FA2638C71f142362c537, interestRateStrategyAddress: 0xEe4cFd0DD22675176C07d044a8BA323836284A17, accruedToTreasury: 0, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: share price",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 22290978,
+      "value": "1032857435666416404"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: share price",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 21690076,
+      "value": "1032857435666416404"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: share price",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 19625890,
+      "value": "1032857435666416404"
+    },
+    {
+      "what": "Faroo Yield Vault 001: share price",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 21690076,
+      "value": "1041496311725871284"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): wallet's stPROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "477321469380873529"
+    },
+    {
+      "what": "Faroo Yield Vault 001: share price",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 22290978,
+      "value": "1041496311725871284"
+    },
+    {
+      "what": "Faroo Yield Vault 001: share price",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 19625890,
+      "value": "1041496311725871284"
+    },
+    {
+      "what": "OpenFi, WPROS: total supplied",
+      "contract": "0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "583837156721179180"
+    },
+    {
+      "what": "OpenFi, WPROS: stable debt",
+      "contract": "0xf59f69B38e1823551B88eD55503FE4F895CcCAE7",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, WPROS: cash in the pool",
+      "contract": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+      "call": "balanceOf(0x4d1C...19e9)",
+      "block": 22290978,
+      "value": "465802000000000000"
+    },
+    {
+      "what": "OpenFi, WPROS: wallet's deposit",
+      "contract": "0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, WPROS: variable debt",
+      "contract": "0xDc56D9792eC77b4f8f17D9704fC168c01091f6D6",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "118103920325466088"
+    },
+    {
+      "what": "Zona, WPROS: total supplied",
+      "contract": "0x7E23C96D7FBCD538272390EC5F8766032d4D96fD",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "25397567955681985889"
+    },
+    {
+      "what": "Zona, WPROS: variable debt",
+      "contract": "0xbdc0c24Dd55F402F8A301FC2F4eE283a9F540D72",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "2751372216996161178"
+    },
+    {
+      "what": "Zona, WPROS: stable debt",
+      "contract": "0xfBa84EFc9FC7af7147BD8d9999A8A651bd4ca150",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Zona, WPROS: cash in the pool",
+      "contract": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+      "call": "balanceOf(0x7E23...96fD)",
+      "block": 22290978,
+      "value": "22923800398559664646"
+    },
+    {
+      "what": "Zona, WPROS: wallet's deposit",
+      "contract": "0x7E23C96D7FBCD538272390EC5F8766032d4D96fD",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: total supplied",
+      "contract": "0x397070528a821d68C26f0558f4E816c91a0B3417",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "1000000000000000000"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: variable debt",
+      "contract": "0xb3dA65Fb32382292aaC3FA2638C71f142362c537",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: wallet's deposit",
+      "contract": "0x397070528a821d68C26f0558f4E816c91a0B3417",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: stable debt",
+      "contract": "0xf3B59e299Bf9cfbc2e5729d88b5b1F2797D4d72B",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: cash in the pool",
+      "contract": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+      "call": "balanceOf(0x3970...3417)",
+      "block": 22290978,
+      "value": "1000000000000000000"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: wallet's shares",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "2000000000000000000000000"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): wallet's stPROS in PROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(477321469380873529)",
+      "block": 22290978,
+      "value": "480724163967499398"
+    },
+    {
+      "what": "OpenFi, WPROS: supply rate with 1000000000000000000 more",
+      "contract": "0x9247cBA09FBB05fb6fC81cFC7170aFD7aDAc91B8",
+      "call": "calculateInterestRates({...})",
+      "block": 22290978,
+      "value": "[518927444616592728355958, 90000000000000000000000000, 8699248186285205620631385]"
+    },
+    {
+      "what": "Zona, WPROS: supply rate with 1000000000000000000 more",
+      "contract": "0xFA000e15f82FB6B833dC7a8dB76Af98BA99B9083",
+      "call": "calculateInterestRates({...})",
+      "block": 22290978,
+      "value": "[340434994603653706282087, 30000000000000000000000000, 4125742324743837575828095]"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supply rate with 1000000000000000000 more",
+      "contract": "0xEe4cFd0DD22675176C07d044a8BA323836284A17",
+      "call": "calculateInterestRates({...})",
+      "block": 22290978,
+      "value": "[0, 70000000000000000000000000, 0]"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: wallet's shares in stPROS",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(2000000000000000000000000)",
+      "block": 22290978,
+      "value": "2065714871332832809"
+    },
+    {
+      "what": "Faroo Yield Vault 001: wallet's shares",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "1881842975206611570577958"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): shares for 1000000000000000000 at the share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToShares(1000000000000000000)",
+      "block": 22290978,
+      "value": "992921731750401634"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): shares a deposit of 1000000000000000000 would mint",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "previewDeposit(1000000000000000000)",
+      "block": 22290978,
+      "value": "992921731750401634"
+    },
+    {
+      "what": "OpenFi, WPROS: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "1000330174892611881430833792"
+    },
+    {
+      "what": "OpenFi, WPROS: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 21690076,
+      "value": "1000257140005906398455758094"
+    },
+    {
+      "what": "OpenFi, WPROS: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 19625890,
+      "value": "1000053419508163957899324933"
+    },
+    {
+      "what": "Zona, WPROS: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 21690076,
+      "value": "1000348663383312791438687289"
+    },
+    {
+      "what": "Zona, WPROS: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 19625890,
+      "value": "1000336116009733356749355213"
+    },
+    {
+      "what": "Zona, WPROS: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "1000354923220800974790597847"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supplier income index",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 21690076,
+      "value": "1000000000000000000000000000"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supplier income index",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "1000000000000000000000000000"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: that stPROS in PROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(2065714871332832809)",
+      "block": 22290978,
+      "value": "2080440789317024868"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): value of 477321469380873529 shares",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(477321469380873529)",
+      "block": 22290978,
+      "value": "480724163967499398"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): what redeeming 477321469380873529 shares pays",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "previewRedeem(477321469380873529)",
+      "block": 22290978,
+      "value": "480724163967499398"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: deposit would go through",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "0x6e553f65 from 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+      "block": "sim",
+      "value": "reverts: InvalidPhase(3)"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supplier income index",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 19625890,
+      "value": "1000000000000000000000000000"
+    },
+    {
+      "what": "Faroo Yield Vault 001: wallet's shares in stPROS",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1881842975206611570577958)",
+      "block": 22290978,
+      "value": "1959932517924926191"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): unbonding seconds",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "selector 0x6cf6d675()",
+      "block": 22290978,
+      "value": "86400"
+    },
+    {
+      "what": "Faroo Yield Vault 001: that stPROS in PROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1959932517924926191)",
+      "block": 22290978,
+      "value": "1973904342359191598"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): staking 1000000000000000000 wei would go through",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "0xb4430b99 from 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1 with 1000000000000000000 wei",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "Faroo Yield Vault 001: deposit would go through",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "0x6e553f65 from 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+      "block": "sim",
+      "value": "reverts: InvalidPhase(1)"
+    },
+    {
+      "what": "OpenFi, WPROS: reserve data",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveData(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "{configuration: 36903076921220879881596, liquidityIndex: 1000055365795022363515653421, currentLiquidityRate: 3808036828942246301380282, variableBorrowIndex: 1001273942097550855118744829, currentVariableBorrowRate: 23565625479090179504197840, currentStableBorrowRate: 90000000000000000000000000, lastUpdateTimestamp: 1791703862, id: 2, aTokenAddress: 0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9, stableDebtTokenAddress: 0xf59f69B38e1823551B88eD55503FE4F895CcCAE7, variableDebtTokenAddress: 0xDc56D9792eC77b4f8f17D9704fC168c01091f6D6, interestRateStrategyAddress: 0x9247cBA09FBB05fb6fC81cFC7170aFD7aDAc91B8, accruedToTreasury: 28449022817342, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 19625890,
+      "value": "1000000000000000000"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 22290978,
+      "value": "1007128727293661132"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 21690076,
+      "value": "1001170296150310488"
+    },
+    {
+      "what": "Zona, WPROS: reserve data",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveData(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "{configuration: 8307674973716170533532602506708257084296, liquidityIndex: 1000353527078660117265995824, currentLiquidityRate: 367459351157511616034719, variableBorrowIndex: 1001369110534448366455325698, currentVariableBorrowRate: 4286369974451060005201093, currentStableBorrowRate: 30000000000000000000000000, lastUpdateTimestamp: 1793859772, id: 2, aTokenAddress: 0x7E23C96D7FBCD538272390EC5F8766032d4D96fD, stableDebtTokenAddress: 0xfBa84EFc9FC7af7147BD8d9999A8A651bd4ca150, variableDebtTokenAddress: 0xbdc0c24Dd55F402F8A301FC2F4eE283a9F540D72, interestRateStrategyAddress: 0xFA000e15f82FB6B833dC7a8dB76Af98BA99B9083, accruedToTreasury: 277432644092048132, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: share price",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 22290978,
+      "value": "1032857435666416404"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: share price",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 21690076,
+      "value": "1032857435666416404"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: share price",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 19625890,
+      "value": "1032857435666416404"
+    },
+    {
+      "what": "Faroo Yield Vault 001: share price",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 22290978,
+      "value": "1041496311725871284"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: reserve data",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveData(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "{configuration: 5708990936977338997347628073784576820474361154488, liquidityIndex: 1000000000000000000000000000, currentLiquidityRate: 0, variableBorrowIndex: 1000000000000000000000000000, currentVariableBorrowRate: 0, currentStableBorrowRate: 70000000000000000000000000, lastUpdateTimestamp: 1781158509, id: 1, aTokenAddress: 0x397070528a821d68C26f0558f4E816c91a0B3417, stableDebtTokenAddress: 0xf3B59e299Bf9cfbc2e5729d88b5b1F2797D4d72B, variableDebtTokenAddress: 0xb3dA65Fb32382292aaC3FA2638C71f142362c537, interestRateStrategyAddress: 0xEe4cFd0DD22675176C07d044a8BA323836284A17, accruedToTreasury: 0, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Faroo Yield Vault 001: share price",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 21690076,
+      "value": "1041496311725871284"
+    },
+    {
+      "what": "Faroo Yield Vault 001: share price",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1000000000000000000000000)",
+      "block": 19625890,
+      "value": "1041496311725871284"
+    },
+    {
+      "what": "OpenFi, WPROS: total supplied",
+      "contract": "0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "583837156721179180"
+    },
+    {
+      "what": "OpenFi, WPROS: variable debt",
+      "contract": "0xDc56D9792eC77b4f8f17D9704fC168c01091f6D6",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "118103920325466088"
+    },
+    {
+      "what": "OpenFi, WPROS: cash in the pool",
+      "contract": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+      "call": "balanceOf(0x4d1C...19e9)",
+      "block": 22290978,
+      "value": "465802000000000000"
+    },
+    {
+      "what": "Zona, WPROS: total supplied",
+      "contract": "0x7E23C96D7FBCD538272390EC5F8766032d4D96fD",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "25397567955681985889"
+    },
+    {
+      "what": "OpenFi, WPROS: wallet's deposit",
+      "contract": "0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): wallet's stPROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "477321469380873529"
+    },
+    {
+      "what": "Zona, WPROS: cash in the pool",
+      "contract": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+      "call": "balanceOf(0x7E23...96fD)",
+      "block": 22290978,
+      "value": "22923800398559664646"
+    },
+    {
+      "what": "Zona, WPROS: variable debt",
+      "contract": "0xbdc0c24Dd55F402F8A301FC2F4eE283a9F540D72",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "2751372216996161178"
+    },
+    {
+      "what": "Zona, WPROS: stable debt",
+      "contract": "0xfBa84EFc9FC7af7147BD8d9999A8A651bd4ca150",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: wallet's shares",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "2000000000000000000000000"
+    },
+    {
+      "what": "Zona, WPROS: wallet's deposit",
+      "contract": "0x7E23C96D7FBCD538272390EC5F8766032d4D96fD",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: total supplied",
+      "contract": "0x397070528a821d68C26f0558f4E816c91a0B3417",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "1000000000000000000"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: cash in the pool",
+      "contract": "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0",
+      "call": "balanceOf(0x3970...3417)",
+      "block": 22290978,
+      "value": "1000000000000000000"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: variable debt",
+      "contract": "0xb3dA65Fb32382292aaC3FA2638C71f142362c537",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: stable debt",
+      "contract": "0xf3B59e299Bf9cfbc2e5729d88b5b1F2797D4d72B",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, WPROS: stable debt",
+      "contract": "0xf59f69B38e1823551B88eD55503FE4F895CcCAE7",
+      "call": "totalSupply()",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): wallet's stPROS in PROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(477321469380873529)",
+      "block": 22290978,
+      "value": "480724163967499398"
+    },
+    {
+      "what": "Faroo Yield Vault 001: wallet's shares",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "1881842975206611570577958"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: wallet's deposit",
+      "contract": "0x397070528a821d68C26f0558f4E816c91a0B3417",
+      "call": "balanceOf(0xb29e...adf1)",
+      "block": 22290978,
+      "value": "0"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: wallet's shares in stPROS",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "convertToAssets(2000000000000000000000000)",
+      "block": 22290978,
+      "value": "2065714871332832809"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): shares a deposit of 4635395121798579945 would mint",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "previewDeposit(4635395121798579945)",
+      "block": 22290978,
+      "value": "4602584551683609908"
+    },
+    {
+      "what": "OpenFi, WPROS: supply rate with 4635395121798579945 more",
+      "contract": "0x9247cBA09FBB05fb6fC81cFC7170aFD7aDAc91B8",
+      "call": "calculateInterestRates({...})",
+      "block": 22290978,
+      "value": "[47790404890999385334521, 90000000000000000000000000, 2639968569245489526297970]"
+    },
+    {
+      "what": "Zona, WPROS: supply rate with 4635395121798579945 more",
+      "contract": "0xFA000e15f82FB6B833dC7a8dB76Af98BA99B9083",
+      "call": "calculateInterestRates({...})",
+      "block": 22290978,
+      "value": "[263669885869791922972712, 30000000000000000000000000, 3630908191277988806293989]"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): shares for 4635395121798579945 at the share price",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToShares(4635395121798579945)",
+      "block": 22290978,
+      "value": "4602584551683609908"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supply rate with 4635395121798579945 more",
+      "contract": "0xEe4cFd0DD22675176C07d044a8BA323836284A17",
+      "call": "calculateInterestRates({...})",
+      "block": 22290978,
+      "value": "[0, 70000000000000000000000000, 0]"
+    },
+    {
+      "what": "Faroo Yield Vault 001: wallet's shares in stPROS",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "convertToAssets(1881842975206611570577958)",
+      "block": 22290978,
+      "value": "1959932517924926191"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: that stPROS in PROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(2065714871332832809)",
+      "block": 22290978,
+      "value": "2080440789317024868"
+    },
+    {
+      "what": "OpenFi, WPROS: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "1000330174892611881430833792"
+    },
+    {
+      "what": "OpenFi, WPROS: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 19625890,
+      "value": "1000053419508163957899324933"
+    },
+    {
+      "what": "OpenFi, WPROS: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 21690076,
+      "value": "1000257140005906398455758094"
+    },
+    {
+      "what": "Zona, WPROS: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 21690076,
+      "value": "1000348663383312791438687289"
+    },
+    {
+      "what": "Zona, WPROS: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 19625890,
+      "value": "1000336116009733356749355213"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): value of 477321469380873529 shares",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(477321469380873529)",
+      "block": 22290978,
+      "value": "480724163967499398"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): what redeeming 477321469380873529 shares pays",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "previewRedeem(477321469380873529)",
+      "block": 22290978,
+      "value": "480724163967499398"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supplier income index",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "1000000000000000000000000000"
+    },
+    {
+      "what": "Zona, WPROS: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 22290978,
+      "value": "1000354923220800974790597847"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supplier income index",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 19625890,
+      "value": "1000000000000000000000000000"
+    },
+    {
+      "what": "Avalon innovative pool, WPROS: supplier income index",
+      "contract": "0xdef0EB584700Fc81C73ACcd555cB6cea5FB85C3e",
+      "call": "getReserveNormalizedIncome(0x52c4...f0b0)",
+      "block": 21690076,
+      "value": "1000000000000000000000000000"
+    },
+    {
+      "what": "Faroo Yield Vault 001: that stPROS in PROS",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "convertToAssets(1959932517924926191)",
+      "block": 22290978,
+      "value": "1973904342359191598"
+    },
+    {
+      "what": "Faroo RWA Hybrid Vault 001: deposit would go through",
+      "contract": "0x36f3d19dda7ed1428e3014ae6f2a75d70393b7e6",
+      "call": "0x6e553f65 from 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+      "block": "sim",
+      "value": "reverts: InvalidPhase(3)"
+    },
+    {
+      "what": "Faroo Yield Vault 001: deposit would go through",
+      "contract": "0xc775dfaa7565f2aca5ddf5dd6837ceb846de591b",
+      "call": "0x6e553f65 from 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1",
+      "block": "sim",
+      "value": "reverts: InvalidPhase(1)"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): unbonding seconds",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "selector 0x6cf6d675()",
+      "block": 22290978,
+      "value": "86400"
+    },
+    {
+      "what": "Faroo stPROS (liquid staking): staking 4635395121798579945 wei would go through",
+      "contract": "0x6b0a44c64190279f7034b77c13a566e914fe5ec4",
+      "call": "0xb4430b99 from 0xb29eaea575bd4bae7d9a301446e6204c3a23adf1 with 4635395121798579945 wei",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "gas price",
+      "contract": "node",
+      "call": "eth_gasPrice",
+      "block": "latest",
+      "value": "10000000000"
+    }
+  ],
+  "notes": [
+    "kept 0.005 PROS in the wallet to pay gas"
+  ]
+}

@@ -1,0 +1,960 @@
+{
+  "block": 22290930,
+  "at": "2026-11-06T15:38:28.000Z",
+  "windows": {
+    "now": 22290930,
+    "d7": 21690039,
+    "d30": 19625852,
+    "secs7": 604800,
+    "secs30": 2592000
+  },
+  "lane": "USDC",
+  "wallet": "0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+  "readings": [
+    {
+      "source": {
+        "id": "wallet-usdc",
+        "name": "USDC left in the wallet",
+        "protocol": "-",
+        "lane": "USDC",
+        "kind": "idle",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+      },
+      "status": "open",
+      "held": "499790",
+      "heldShares": "499790",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "earns nothing"
+      ],
+      "rateNow": 0
+    },
+    {
+      "source": {
+        "id": "avalon-usdc",
+        "name": "Avalon main pool, USDC",
+        "protocol": "Avalon (Aave V3 fork)",
+        "lane": "USDC",
+        "kind": "aave",
+        "address": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Aave V3 supply and withdraw take no fee"
+      ],
+      "aToken": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
+      "exitRoom": "55015931814",
+      "entryRoom": "498135145220",
+      "rateNow": 0.019361,
+      "rateWithYou": 0.019393,
+      "realized7d": 0.019296556261428573,
+      "realized30d": 0.019320048466166667
+    },
+    {
+      "source": {
+        "id": "openfi-usdc",
+        "name": "OpenFi, USDC",
+        "protocol": "OpenFi (Aave V3 fork)",
+        "lane": "USDC",
+        "kind": "aave",
+        "address": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Aave V3 supply and withdraw take no fee"
+      ],
+      "aToken": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "exitRoom": "5077659",
+      "rateNow": 0.018306,
+      "rateWithYou": 0.017097,
+      "realized7d": 0.018288890802142858,
+      "realized30d": 0.017234513911666666
+    },
+    {
+      "source": {
+        "id": "zona-usdc",
+        "name": "Zona, USDC",
+        "protocol": "Zona (Aave V3 fork)",
+        "lane": "USDC",
+        "kind": "aave",
+        "address": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "Aave V3 supply and withdraw take no fee"
+      ],
+      "aToken": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
+      "exitRoom": "527733345",
+      "entryRoom": "999470699497",
+      "rateNow": 0,
+      "rateWithYou": 0,
+      "realized7d": 3.5451928571428576e-7,
+      "realized30d": 3.54561e-7
+    },
+    {
+      "source": {
+        "id": "rockawayx-usdc",
+        "name": "RockawayX USDC vault",
+        "protocol": "Morpho Vault V2 (ERC-4626)",
+        "lane": "USDC",
+        "kind": "vault",
+        "address": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+        "asset": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+        "note": "a vault spreads deposits over Morpho markets; how much your deposit lowers its rate is not modelled"
+      },
+      "status": "open",
+      "held": "0",
+      "heldShares": "0",
+      "entryFee": 0,
+      "exitFee": 0,
+      "waitSeconds": 0,
+      "notes": [
+        "a vault spreads deposits over Morpho markets; how much your deposit lowers its rate is not modelled"
+      ],
+      "realized7d": 0.045414839935000006,
+      "realized30d": 0.04371266180233333,
+      "rateNow": 0.045414839935000006
+    }
+  ],
+  "gasPriceWei": "10000000000",
+  "prosUsd": {
+    "usd": 0.537892986752838,
+    "updatedAt": 1793979073
+  },
+  "costs": {
+    "rockawayx-usdc": {
+      "gas": 0.0028255464804827907,
+      "steps": [
+        {
+          "says": "let RockawayX USDC vault take 499790 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b3000000000000000000000000047cd0a91e9b92ed979189a6c8a120bf280f02e5000000000000000000000000000000000000000000000000000000000007a04e",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "71466"
+        },
+        {
+          "says": "deposit 499790 into RockawayX USDC vault",
+          "to": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+          "data": "0x6e553f65000000000000000000000000000000000000000000000000000000000007a04e00000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e",
+                "0x0176d59bbacd5be4b9cb0d0fe7f52674f2cf866432fd5d3b48caaa94cca33b26": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "453833"
+        }
+      ]
+    },
+    "avalon-usdc": {
+      "gas": 0.002016614596635065,
+      "steps": [
+        {
+          "says": "let Avalon main pool, USDC take 499790 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b3000000000000000000000000d9b9e4f8257bff9b1415d74c1ef88d8057f60cba000000000000000000000000000000000000000000000000000000000007a04e",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "71466"
+        },
+        {
+          "says": "supply 499790 to Avalon main pool, USDC",
+          "to": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+          "data": "0x617ba037000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac1815000000000000000000000000000000000000000000000000000000000007a04e00000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e",
+                "0xe331efbebf5dcce16aefe019ce41d0e601e0eb9341d788329ec16a714a80c3b4": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "303444"
+        }
+      ]
+    },
+    "zona-usdc": {
+      "gas": 0.0020165715651961247,
+      "steps": [
+        {
+          "says": "let Zona, USDC take 499790 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b3000000000000000000000000da464e68208a3083eb65fe5c522a72aed1c1372a000000000000000000000000000000000000000000000000000000000007a04e",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "71466"
+        },
+        {
+          "says": "supply 499790 to Zona, USDC",
+          "to": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+          "data": "0x617ba037000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac1815000000000000000000000000000000000000000000000000000000000007a04e00000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e",
+                "0x80492a2b7bdad7bbd40f68066e6a235130ebba18806c9e244cf8476de45a0be0": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "303436"
+        }
+      ]
+    },
+    "openfi-usdc": {
+      "gas": 0.002014871823357986,
+      "steps": [
+        {
+          "says": "let OpenFi, USDC take 499790 of your USDC",
+          "to": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+          "data": "0x095ea7b300000000000000000000000030b2e1411fd2ed9f1f46f59497e2186ce5be3b26000000000000000000000000000000000000000000000000000000000007a04e",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "71466"
+        },
+        {
+          "says": "supply 499790 to OpenFi, USDC",
+          "to": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+          "data": "0x617ba037000000000000000000000000c879c018db60520f4355c26ed1a6d572cdac1815000000000000000000000000000000000000000000000000000000000007a04e00000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb0000000000000000000000000000000000000000000000000000000000000000",
+          "value": "0",
+          "phase": 1,
+          "gasHow": "estimated",
+          "simOverrides": {
+            "0xc879c018db60520f4355c26ed1a6d572cdac1815": {
+              "stateDiff": {
+                "0x44d364f7927b752c7ac142f2d0b527070019ba8b490d898eb485c117b33c8f2a": "0x000000000000000000000000000000000000000000000000000000000007a04e",
+                "0xc34c047e0be1d3325ebd7f0ab3c5385cdf36148a57eb250d693df4fbc0b15462": "0x000000000000000000000000000000000000000000000000000000000007a04e"
+              }
+            }
+          },
+          "gas": "303120"
+        }
+      ]
+    }
+  },
+  "decision": {
+    "action": "STAY PUT",
+    "reason": "best alternative RockawayX USDC vault pays back only after 48 days, longer than your 30-day hold",
+    "from": {
+      "id": "wallet-usdc",
+      "name": "USDC left in the wallet",
+      "rateUsed": 0,
+      "rateHow": "quoted now"
+    },
+    "amount": 0.49979,
+    "holdDays": 30,
+    "minGain": 0.01,
+    "options": [
+      {
+        "id": "avalon-usdc",
+        "name": "Avalon main pool, USDC",
+        "verdict": "candidate",
+        "why": "pays back only after 77 days, longer than your 30-day hold",
+        "rateUsed": 0.019296556261428573,
+        "rateHow": "realised over 7 days",
+        "earningDays": 30,
+        "extraYield": 0.0007926760975807716,
+        "fees": 0,
+        "gas": 0.002016614596635065,
+        "net": -0.0012239384990542779,
+        "breakEvenDays": 77
+      },
+      {
+        "id": "openfi-usdc",
+        "name": "OpenFi, USDC",
+        "verdict": "candidate",
+        "why": "pays back only after 87 days, longer than your 30-day hold",
+        "rateUsed": 0.017097,
+        "rateHow": "with your deposit in it",
+        "earningDays": 30,
+        "extraYield": 0.0007023213394520549,
+        "fees": 0,
+        "gas": 0.002014871823357986,
+        "net": -0.0013125504839059943,
+        "breakEvenDays": 87
+      },
+      {
+        "id": "zona-usdc",
+        "name": "Zona, USDC",
+        "verdict": "candidate",
+        "why": "pays 0.00% (with your deposit in it), not more than the 0.00% you have",
+        "rateUsed": 0,
+        "rateHow": "with your deposit in it",
+        "earningDays": 30,
+        "extraYield": 0,
+        "fees": 0,
+        "gas": 0.0020165715651961247,
+        "net": -0.0020165715651961347,
+        "breakEvenDays": null
+      },
+      {
+        "id": "rockawayx-usdc",
+        "name": "RockawayX USDC vault",
+        "verdict": "candidate",
+        "why": "pays back only after 48 days, longer than your 30-day hold",
+        "rateUsed": 0.04371266180233333,
+        "rateHow": "realised over 30 days",
+        "earningDays": 30,
+        "extraYield": 0.0017956562664812202,
+        "fees": 0,
+        "gas": 0.0028255464804827907,
+        "net": -0.001029890214001572,
+        "breakEvenDays": 48
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "what": "Avalon main pool, USDC: reserve data",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveData(0xc879...1815)",
+      "block": 22290930,
+      "value": "{configuration: 5708990853900589261334402636123215299575916533616, liquidityIndex: 1000000669251620872255733199, currentLiquidityRate: 19361120364158523902236754, variableBorrowIndex: 1000001524096395598966330674, currentVariableBorrowRate: 39554203050016074383450504, currentStableBorrowRate: 54944275381252009297931313, lastUpdateTimestamp: 1787924826, id: 0, aTokenAddress: 0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D, stableDebtTokenAddress: 0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E, variableDebtTokenAddress: 0x0f068E70b72150Ed91275f5205aA29120224d0cb, interestRateStrategyAddress: 0x4f984745834168b1DADB1EdB84A8527DaA13754B, accruedToTreasury: 273788, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "USDC in the wallet",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "499790"
+    },
+    {
+      "what": "Zona, USDC: reserve data",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveData(0xc879...1815)",
+      "block": 22290930,
+      "value": "{configuration: 379853410010611736321840397492823982037962661042032, liquidityIndex: 1000045697979678648772404514, currentLiquidityRate: 354571062764944593242, variableBorrowIndex: 1000424393983192438280526973, currentVariableBorrowRate: 132324155435982609894064, currentStableBorrowRate: 40000000000000000000000000, lastUpdateTimestamp: 1790846672, id: 0, aTokenAddress: 0x843913DE261A1712d3aE8d4bc751E705Bb0823B8, stableDebtTokenAddress: 0x4C0f9839CbCf1e00E17E3d25Ea830D7EEe11c0C0, variableDebtTokenAddress: 0x8809BD2389E9e16C30B0e9Ae24DF0682c3290D45, interestRateStrategyAddress: 0x837b1ABfeadA4e14559a56a0def7bd417513014C, accruedToTreasury: 8767, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Avalon main pool, USDC: total supplied",
+      "contract": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "501864854780"
+    },
+    {
+      "what": "RockawayX USDC vault: share decimals",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "decimals()",
+      "block": 22290930,
+      "value": "18"
+    },
+    {
+      "what": "Avalon main pool, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0xE2ec...e87D)",
+      "block": 22290930,
+      "value": "55015931814"
+    },
+    {
+      "what": "OpenFi, USDC: reserve data",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveData(0xc879...1815)",
+      "block": 22290930,
+      "value": "{configuration: 18456329467664124091724, liquidityIndex: 1004907396704245580332020196, currentLiquidityRate: 18306252584649685872038025, variableBorrowIndex: 1010552181243294201204842175, currentVariableBorrowRate: 31890657448232975825150295, currentStableBorrowRate: 60000000000000000000000000, lastUpdateTimestamp: 1791739346, id: 0, aTokenAddress: 0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96, stableDebtTokenAddress: 0xB5da2bea9c1563D88A43479c19e613E10a0f2CBD, variableDebtTokenAddress: 0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D, interestRateStrategyAddress: 0x467887ECcfD7E8DCCf1400fc0bA023B356E9844a, accruedToTreasury: 36570, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Avalon main pool, USDC: stable debt",
+      "contract": "0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Zona, USDC: total supplied",
+      "contract": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "529300503"
+    },
+    {
+      "what": "Avalon main pool, USDC: wallet's deposit",
+      "contract": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Zona, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x8439...23B8)",
+      "block": 22290930,
+      "value": "527733345"
+    },
+    {
+      "what": "Zona, USDC: stable debt",
+      "contract": "0x4C0f9839CbCf1e00E17E3d25Ea830D7EEe11c0C0",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Zona, USDC: wallet's deposit",
+      "contract": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Avalon main pool, USDC: variable debt",
+      "contract": "0x0f068E70b72150Ed91275f5205aA29120224d0cb",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "448382735705"
+    },
+    {
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 21690039,
+      "value": "1008072"
+    },
+    {
+      "what": "Zona, USDC: variable debt",
+      "contract": "0x8809BD2389E9e16C30B0e9Ae24DF0682c3290D45",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "1575929"
+    },
+    {
+      "what": "OpenFi, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x9dcf...9D96)",
+      "block": 22290930,
+      "value": "5077659"
+    },
+    {
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 19625852,
+      "value": "1005338"
+    },
+    {
+      "what": "OpenFi, USDC: variable debt",
+      "contract": "0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "8962066"
+    },
+    {
+      "what": "OpenFi, USDC: stable debt",
+      "contract": "0xB5da2bea9c1563D88A43479c19e613E10a0f2CBD",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, USDC: total supplied",
+      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "14000737"
+    },
+    {
+      "what": "Zona, USDC: supply rate with 1000000 more",
+      "contract": "0x837b1ABfeadA4e14559a56a0def7bd417513014C",
+      "call": "calculateInterestRates({...})",
+      "block": 22290930,
+      "value": "[353244039105376837139, 40000000000000000000000000, 132076304003857358317458]"
+    },
+    {
+      "what": "Avalon main pool, USDC: supply rate with 1000000 more",
+      "contract": "0x4f984745834168b1DADB1EdB84A8527DaA13754B",
+      "call": "calculateInterestRates({...})",
+      "block": 22290930,
+      "value": "[19393316598414230138183652, 54948384671444169760707424, 39587077371553358085659393]"
+    },
+    {
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 22290930,
+      "value": "1008950"
+    },
+    {
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22290930,
+      "value": "1000045733204937143753417423"
+    },
+    {
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21690039,
+      "value": "1000045726404633413279011291"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22290930,
+      "value": "1003717865643744510829581332"
+    },
+    {
+      "what": "OpenFi, USDC: wallet's deposit",
+      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19625852,
+      "value": "1000045704060778298863105431"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21690039,
+      "value": "1003346556237576461605945251"
+    },
+    {
+      "what": "RockawayX USDC vault: wallet's shares",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, USDC: supply rate with 1000000 more",
+      "contract": "0x467887ECcfD7E8DCCf1400fc0bA023B356E9844a",
+      "call": "calculateInterestRates({...})",
+      "block": 22290930,
+      "value": "[15978978006228425054314490, 60000000000000000000000000, 29794647176062062304995604]"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19625852,
+      "value": "1002126539617310014156855272"
+    },
+    {
+      "what": "RockawayX USDC vault: shares for 1000000 at the share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToShares(1000000)",
+      "block": 22290930,
+      "value": "991129046994788956"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22290930,
+      "value": "1006214164166626329515659857"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21690039,
+      "value": "1005861362466906453405688674"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19625852,
+      "value": "1004790842378517339273120103"
+    },
+    {
+      "what": "RockawayX USDC vault: shares a deposit of 1000000 would mint",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "previewDeposit(1000000)",
+      "block": 22290930,
+      "value": "991129046994788956"
+    },
+    {
+      "what": "RockawayX USDC vault: value of 991129046994788956 shares",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(991129046994788956)",
+      "block": 22290930,
+      "value": "999999"
+    },
+    {
+      "what": "RockawayX USDC vault: what redeeming 991129046994788956 shares pays",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "previewRedeem(991129046994788956)",
+      "block": 22290930,
+      "value": "999999"
+    },
+    {
+      "what": "RockawayX USDC vault: deposit 1000000 would go through",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "0x6e553f65 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "Zona, USDC: reserve data",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveData(0xc879...1815)",
+      "block": 22290930,
+      "value": "{configuration: 379853410010611736321840397492823982037962661042032, liquidityIndex: 1000045697979678648772404514, currentLiquidityRate: 354571062764944593242, variableBorrowIndex: 1000424393983192438280526973, currentVariableBorrowRate: 132324155435982609894064, currentStableBorrowRate: 40000000000000000000000000, lastUpdateTimestamp: 1790846672, id: 0, aTokenAddress: 0x843913DE261A1712d3aE8d4bc751E705Bb0823B8, stableDebtTokenAddress: 0x4C0f9839CbCf1e00E17E3d25Ea830D7EEe11c0C0, variableDebtTokenAddress: 0x8809BD2389E9e16C30B0e9Ae24DF0682c3290D45, interestRateStrategyAddress: 0x837b1ABfeadA4e14559a56a0def7bd417513014C, accruedToTreasury: 8767, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "OpenFi, USDC: reserve data",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveData(0xc879...1815)",
+      "block": 22290930,
+      "value": "{configuration: 18456329467664124091724, liquidityIndex: 1004907396704245580332020196, currentLiquidityRate: 18306252584649685872038025, variableBorrowIndex: 1010552181243294201204842175, currentVariableBorrowRate: 31890657448232975825150295, currentStableBorrowRate: 60000000000000000000000000, lastUpdateTimestamp: 1791739346, id: 0, aTokenAddress: 0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96, stableDebtTokenAddress: 0xB5da2bea9c1563D88A43479c19e613E10a0f2CBD, variableDebtTokenAddress: 0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D, interestRateStrategyAddress: 0x467887ECcfD7E8DCCf1400fc0bA023B356E9844a, accruedToTreasury: 36570, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "RockawayX USDC vault: share decimals",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "decimals()",
+      "block": 22290930,
+      "value": "18"
+    },
+    {
+      "what": "Avalon main pool, USDC: reserve data",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveData(0xc879...1815)",
+      "block": 22290930,
+      "value": "{configuration: 5708990853900589261334402636123215299575916533616, liquidityIndex: 1000000669251620872255733199, currentLiquidityRate: 19361120364158523902236754, variableBorrowIndex: 1000001524096395598966330674, currentVariableBorrowRate: 39554203050016074383450504, currentStableBorrowRate: 54944275381252009297931313, lastUpdateTimestamp: 1787924826, id: 0, aTokenAddress: 0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D, stableDebtTokenAddress: 0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E, variableDebtTokenAddress: 0x0f068E70b72150Ed91275f5205aA29120224d0cb, interestRateStrategyAddress: 0x4f984745834168b1DADB1EdB84A8527DaA13754B, accruedToTreasury: 273788, unbacked: 0, isolationModeTotalDebt: 0}"
+    },
+    {
+      "what": "Zona, USDC: total supplied",
+      "contract": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "529300503"
+    },
+    {
+      "what": "Zona, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x8439...23B8)",
+      "block": 22290930,
+      "value": "527733345"
+    },
+    {
+      "what": "Zona, USDC: stable debt",
+      "contract": "0x4C0f9839CbCf1e00E17E3d25Ea830D7EEe11c0C0",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, USDC: total supplied",
+      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "14000737"
+    },
+    {
+      "what": "Zona, USDC: wallet's deposit",
+      "contract": "0x843913DE261A1712d3aE8d4bc751E705Bb0823B8",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Zona, USDC: variable debt",
+      "contract": "0x8809BD2389E9e16C30B0e9Ae24DF0682c3290D45",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "1575929"
+    },
+    {
+      "what": "OpenFi, USDC: stable debt",
+      "contract": "0xB5da2bea9c1563D88A43479c19e613E10a0f2CBD",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, USDC: variable debt",
+      "contract": "0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "8962066"
+    },
+    {
+      "what": "OpenFi, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0x9dcf...9D96)",
+      "block": 22290930,
+      "value": "5077659"
+    },
+    {
+      "what": "OpenFi, USDC: wallet's deposit",
+      "contract": "0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 19625852,
+      "value": "1005338"
+    },
+    {
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 21690039,
+      "value": "1008072"
+    },
+    {
+      "what": "RockawayX USDC vault: share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(1000000000000000000)",
+      "block": 22290930,
+      "value": "1008950"
+    },
+    {
+      "what": "Avalon main pool, USDC: total supplied",
+      "contract": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "501864854780"
+    },
+    {
+      "what": "Avalon main pool, USDC: cash in the pool",
+      "contract": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+      "call": "balanceOf(0xE2ec...e87D)",
+      "block": 22290930,
+      "value": "55015931814"
+    },
+    {
+      "what": "Avalon main pool, USDC: variable debt",
+      "contract": "0x0f068E70b72150Ed91275f5205aA29120224d0cb",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "448382735705"
+    },
+    {
+      "what": "Avalon main pool, USDC: stable debt",
+      "contract": "0x27c0616cE9d854c2B659E1e6bE6819b81BdFC98E",
+      "call": "totalSupply()",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Zona, USDC: supply rate with 499790 more",
+      "contract": "0x837b1ABfeadA4e14559a56a0def7bd417513014C",
+      "call": "calculateInterestRates({...})",
+      "block": 22290930,
+      "value": "[353911372396792365938, 40000000000000000000000000, 132201001545886894998250]"
+    },
+    {
+      "what": "OpenFi, USDC: supply rate with 499790 more",
+      "contract": "0x467887ECcfD7E8DCCf1400fc0bA023B356E9844a",
+      "call": "calculateInterestRates({...})",
+      "block": 22290930,
+      "value": "[17097355812742543337931149, 60000000000000000000000000, 30819686901523193861693461]"
+    },
+    {
+      "what": "RockawayX USDC vault: wallet's shares",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22290930,
+      "value": "1000045733204937143753417423"
+    },
+    {
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21690039,
+      "value": "1000045726404633413279011291"
+    },
+    {
+      "what": "Zona, USDC: supplier income index",
+      "contract": "0xda464e68208a3083eb65fe5c522a72aed1c1372a",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19625852,
+      "value": "1000045704060778298863105431"
+    },
+    {
+      "what": "Avalon main pool, USDC: wallet's deposit",
+      "contract": "0xE2ec2F3933aD2f83DE9a9dDa844558354384e87D",
+      "call": "balanceOf(0x4644...d3bb)",
+      "block": 22290930,
+      "value": "0"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22290930,
+      "value": "1006214164166626329515659857"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19625852,
+      "value": "1004790842378517339273120103"
+    },
+    {
+      "what": "OpenFi, USDC: supplier income index",
+      "contract": "0x30b2e1411fd2ed9f1f46f59497e2186ce5be3b26",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21690039,
+      "value": "1005861362466906453405688674"
+    },
+    {
+      "what": "RockawayX USDC vault: shares for 499790 at the share price",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToShares(499790)",
+      "block": 22290930,
+      "value": "495356386397525572"
+    },
+    {
+      "what": "RockawayX USDC vault: shares a deposit of 499790 would mint",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "previewDeposit(499790)",
+      "block": 22290930,
+      "value": "495356386397525572"
+    },
+    {
+      "what": "Avalon main pool, USDC: supply rate with 499790 more",
+      "contract": "0x4f984745834168b1DADB1EdB84A8527DaA13754B",
+      "call": "calculateInterestRates({...})",
+      "block": 22290930,
+      "value": "[19393355139342961453376868, 54948389588479511187333653, 39587116707836089498669229]"
+    },
+    {
+      "what": "RockawayX USDC vault: value of 495356386397525572 shares",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "convertToAssets(495356386397525572)",
+      "block": 22290930,
+      "value": "499789"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 21690039,
+      "value": "1003346556237576461605945251"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 19625852,
+      "value": "1002126539617310014156855272"
+    },
+    {
+      "what": "RockawayX USDC vault: what redeeming 495356386397525572 shares pays",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "previewRedeem(495356386397525572)",
+      "block": 22290930,
+      "value": "499789"
+    },
+    {
+      "what": "Avalon main pool, USDC: supplier income index",
+      "contract": "0xD9B9E4F8257bFf9B1415d74c1EF88d8057f60cBa",
+      "call": "getReserveNormalizedIncome(0xc879...1815)",
+      "block": 22290930,
+      "value": "1003717865643744510829581332"
+    },
+    {
+      "what": "RockawayX USDC vault: deposit 499790 would go through",
+      "contract": "0x047cd0a91e9b92ed979189a6c8a120bf280f02e5",
+      "call": "0x6e553f65 from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+      "block": "sim",
+      "value": "goes through"
+    },
+    {
+      "what": "gas price",
+      "contract": "node",
+      "call": "eth_gasPrice",
+      "block": "latest",
+      "value": "10000000000"
+    },
+    {
+      "what": "PROS price in USD (Chainlink)",
+      "contract": "0x371ed36aee5bffbed1a2aa9b7ded7f4eb30f5466",
+      "call": "latestRoundData()",
+      "block": 22290930,
+      "value": "[0, 537892986752838000, 1793979073, 1793979073, 0]"
+    },
+    {
+      "what": "PROS/USD feed decimals",
+      "contract": "0x371ed36aee5bffbed1a2aa9b7ded7f4eb30f5466",
+      "call": "decimals()",
+      "block": 22290930,
+      "value": "18"
+    }
+  ],
+  "notes": []
+}
