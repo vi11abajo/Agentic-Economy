@@ -1,0 +1,8 @@
+$ knock pay send\ 1\,000\ USDC\ to\ 0x000000000000000000000000000000000000dEaD --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 1,000 USDC to 0x000000000000000000000000000000000000dEaD
+
+I need to ask before I prepare anything:
+  ? "1,000": 1000 or 1.0? Write 1000 or 1.0 so I don't guess.
+
+Answer with: --answer "<your answer>" (and --from <address> if it was missing)
+[exit 2]

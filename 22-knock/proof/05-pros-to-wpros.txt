@@ -1,0 +1,52 @@
+$ knock pay send\ 0.001\ PROS\ to\ 0x52c48d4213107b20bc583832b0d951fb9ca8f0b0 --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb --out proof/05-pros-to-wpros.plan.json 
+you: send 0.001 PROS to 0x52c48d4213107b20bc583832b0d951fb9ca8f0b0
+understood: 0.001 PROS to 0x52c48d4213107b20bc583832b0d951fb9ca8f0b0
+
+Send 0.001 PROS
+  from        0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb
+  to          0x52C48d4213107b20bC583832b0d951FB9CA8F0B0 (a contract)
+  token       PROS, the native coin
+  amount      0.001 PROS = 1000000000000000 base units
+  network     Pharos mainnet, chain 1672
+  max fee     0.00137574 PROS (gas limit 68787)
+  after it    you'd hold 0.012592618579752846 PROS
+  simulated   at block 22407416, from your address
+
+checks
+  ok    recipient 0x52C48d4213107b20bC583832b0d951FB9CA8F0B0 is a valid address (typed in lowercase, so there was no checksum to check).
+  ok    PROS is the native coin: no contract involved.
+  ok    you hold 0.014165838579752846 PROS, this needs 0.001.
+  warn  0x52C4...F0B0 is a token contract: PROS sent to it is wrapped and comes back to you as its token (WPROS). Nobody else receives anything.
+
+UNSIGNED: knock holds no key. Nothing has been signed or sent; your wallet does that if you approve.
+
+unsigned transaction (EIP-1559, chain 1672):
+{
+  "chainId": 1672,
+  "type": "0x2",
+  "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+  "to": "0x52C48d4213107b20bC583832b0d951FB9CA8F0B0",
+  "data": "0x",
+  "value": "0x38d7ea4c68000",
+  "gas": "0x10cb3",
+  "maxFeePerGas": "0x4a817c800",
+  "maxPriorityFeePerGas": "0x0",
+  "nonce": 566
+}
+
+wallet signing request:
+{
+  "method": "eth_sendTransaction",
+  "params": [
+    {
+      "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+      "to": "0x52C48d4213107b20bC583832b0d951FB9CA8F0B0",
+      "data": "0x",
+      "value": "0x38d7ea4c68000",
+      "gas": "0x10cb3"
+    }
+  ]
+}
+
+saved to D:\.claude\pyCharm\!AIpharosVILLABAJO\Agentic-Economy\22-knock\proof\05-pros-to-wpros.plan.json. To sign it in your own wallet: knock sign proof/05-pros-to-wpros.plan.json
+[exit 0]

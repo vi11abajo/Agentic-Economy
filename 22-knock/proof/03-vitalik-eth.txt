@@ -1,0 +1,118 @@
+$ knock pay send\ 0.01\ USDC\ to\ vitalik.eth --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 0.01 USDC to vitalik.eth
+understood: 0.01 USDC to vitalik.eth
+
+Send 0.01 USDC
+  from        0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb
+  to          0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045 (vitalik.eth, resolved on Ethereum; on Pharos: an address that has never been used)
+  token       0xC879C018dB60520F4355C26eD1a6D572cdAC1815 (Pharos docs token list)
+  amount      0.01 USDC = 10000 base units
+  network     Pharos mainnet, chain 1672
+  max fee     0.00191454 PROS (gas limit 95727)
+  after it    you'd hold 0.48979 USDC
+  simulated   at block 22407451, from your address
+
+checks
+  warn  vitalik.eth points to 0xd8dA...6045, which on Ethereum is a wallet delegated by EIP-7702 to 0x5A7F...6f6d. On Pharos it is an address that has never been used. The key behind it works on any chain, but its smart-wallet setup does not come along. Confirm with them before paying.
+  ok    USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain.
+  ok    you hold 0.49979 USDC, this needs 0.01.
+
+Or pay by signature: sign a USDC ReceiveWithAuthorization instead of a transaction. Only the payee can submit it, and it expires at 2026-11-07T21:16:15Z.
+
+UNSIGNED: knock holds no key. Nothing has been signed or sent; your wallet does that if you approve.
+
+unsigned transaction (EIP-1559, chain 1672):
+{
+  "chainId": 1672,
+  "type": "0x2",
+  "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+  "to": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+  "data": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710",
+  "value": "0x0",
+  "gas": "0x175ef",
+  "maxFeePerGas": "0x4a817c800",
+  "maxPriorityFeePerGas": "0x0",
+  "nonce": 566
+}
+
+wallet signing request:
+{
+  "method": "eth_sendTransaction",
+  "params": [
+    {
+      "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+      "to": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+      "data": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000002710",
+      "value": "0x0",
+      "gas": "0x175ef"
+    }
+  ]
+}
+
+or, pay by signature (eth_signTypedData_v4):
+{
+  "domain": {
+    "name": "USDC",
+    "version": "2",
+    "chainId": 1672,
+    "verifyingContract": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+  },
+  "types": {
+    "EIP712Domain": [
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "version",
+        "type": "string"
+      },
+      {
+        "name": "chainId",
+        "type": "uint256"
+      },
+      {
+        "name": "verifyingContract",
+        "type": "address"
+      }
+    ],
+    "ReceiveWithAuthorization": [
+      {
+        "name": "from",
+        "type": "address"
+      },
+      {
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "validAfter",
+        "type": "uint256"
+      },
+      {
+        "name": "validBefore",
+        "type": "uint256"
+      },
+      {
+        "name": "nonce",
+        "type": "bytes32"
+      }
+    ]
+  },
+  "primaryType": "ReceiveWithAuthorization",
+  "message": {
+    "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+    "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    "value": "10000",
+    "validAfter": "0",
+    "validBefore": "1794086175",
+    "nonce": "0x21d98ab7e95c8067ca52f91ff48c7b5f562c7b23db3fbc7ab9b20b8af778f0ac"
+  }
+}
+
+saved to D:\.claude\pyCharm\!AIpharosVILLABAJO\Agentic-Economy\22-knock\knock-plan.json. To sign it in your own wallet: knock sign knock-plan.json
+[exit 0]

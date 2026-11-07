@@ -1,0 +1,12 @@
+$ knock pay send\ 100\ USDC\ to\ alice.eth --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 100 USDC to alice.eth
+understood: 100 USDC to alice.eth
+
+Not prepared: 100 USDC to alice.eth
+
+checks
+  STOP  alice.eth points to 0xcd2E...1c75, which on Ethereum is a 1-of-2 Safe multisig (v1.3.0). On Pharos there is nothing deployed at that address, so the Safe's owners may have no way to move money sent there. Ask them for an address they use on Pharos.
+  ok    USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain.
+
+STOPPED: nothing was prepared, nothing was signed.
+[exit 3]

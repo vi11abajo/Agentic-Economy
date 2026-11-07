@@ -1,0 +1,12 @@
+$ knock pay send\ 1\ USDT\ to\ 0x000000000000000000000000000000000000dEaD --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 1 USDT to 0x000000000000000000000000000000000000dEaD
+understood: 1 USDT to 0x000000000000000000000000000000000000dEaD
+
+Not prepared: 1 USDT to 0x000000000000000000000000000000000000dEaD
+
+checks
+  ok    recipient 0x000000000000000000000000000000000000dEaD is a valid address (checksum ok).
+  STOP  USDT is not on the Pharos mainnet token list (PROS, WPROS, USDC, LINK, WETH). A symbol alone can be anyone's token, so give me its contract address.
+
+STOPPED: nothing was prepared, nothing was signed.
+[exit 3]
