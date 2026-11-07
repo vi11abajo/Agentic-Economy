@@ -44,6 +44,9 @@ elsewhere). One bundled file, no install, no keys. Reads Pharos through https://
   payment again against the live chain before their wallet pops up, refuses another account or another chain,
   and after the block shows the tx link and whether the mined input matches what knock prepared. Stop the
   page when they're done.
+  - If you can't keep a process running in the background, give the user the link first, then run
+    `knock sign <plan file> --until-mined` in the foreground with a long timeout: the page closes by itself once
+    the payment is mined and prints the tx line (status, block, gas, whether the mined input matches).
   - Paying someone else by signature: the page downloads `knock-authorization.json`; the payee opens it with
     `knock sign knock-authorization.json` and submits it from their own wallet (only the payee can).
 
