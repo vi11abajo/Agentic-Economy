@@ -182,3 +182,19 @@ Then, from the right account:
 
 Both were checked on chain afterwards (status 1, type 2, chain id 1672, from and to as prepared). The page's own
 log line for both: "mined to/value/input match what knock handed to the wallet".
+
+### 5. The run in the video
+
+A Claude Code agent installed the skill from this repo and was asked, in plain words, for 0.01 USDC to myself by
+signature. It ran `knock pay`, started the page with `knock sign --detach`, gave me the link in the chat and
+stopped; I signed in my wallet ("Pay by signature"), said "done", and it ran `knock signed`:
+
+```text
+recheck (signature): OK - checked again at block 22413291: still goes through
+claim prepared for 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb, gas 103090
+tx 0xfb883c8bd2600a9ab9d7f5c600c62d6c31149063e09d2b1173c1dd8bff7c47c1: success in block 22413311, gas used 75643; mined to/value/input match what knock handed to the wallet
+```
+
+[`0xfb883c8b…47c1`](https://www.pharosscan.xyz/tx/0xfb883c8bd2600a9ab9d7f5c600c62d6c31149063e09d2b1173c1dd8bff7c47c1),
+read back from `rpc.pharos.xyz`: status 1, from the wallet to USDC, AuthorizationUsed with the plan's nonce
+`0x91f4…ccd9`, then Transfer of 10000 (0.01 USDC) to the same wallet.
