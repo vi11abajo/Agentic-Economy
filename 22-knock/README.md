@@ -90,7 +90,8 @@ Every check is a read against the chain at the latest block, and every one shows
 Before anything reaches the wallet, the page asks knock to build the whole payment again from the same sentence
 at the latest block, and the wallet gets that fresh build, not the file. It also asks the wallet again which
 account and chain it is on (they can change after Connect) and refuses another account or anything but chain
-1672. After the block it compares the mined `to`, `value` and input with what it handed over.
+1672. After the block it compares the mined `to`, `value` and input with what it handed over. With `--until-mined`
+the page closes itself after that check, for an agent that runs it in the foreground and waits.
 
 Paying someone else by signature: the page downloads `knock-authorization.json`. The payee runs
 `knock sign knock-authorization.json`; that page recovers the signer from the signature, checks the signed
