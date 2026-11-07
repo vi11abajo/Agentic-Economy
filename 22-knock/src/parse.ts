@@ -115,7 +115,7 @@ function read(text: string): Reading {
     out.questions.push({ field: "amount", ask: "How much exactly? I prepare a fixed amount, not \"all\" or \"half\"." });
   }
   if (ticker) out.token = ticker;
-  else if (dollars) out.questions.push({ field: "token", ask: "Dollars in which token? On Pharos that is usually USDC; say USDC or name another token." });
+  else if (dollars) out.questions.push({ field: "token", ask: "Dollars in which token? If you mean USDC, say USDC; otherwise name the token." });
   if (recipients.length === 1) {
     out.recipient = recipients[0].value;
     out.recipientKind = recipients[0].kind;
