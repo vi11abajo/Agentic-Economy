@@ -128,7 +128,14 @@ function payeeSummary(h: Handoff): string {
   ].join("\n");
 }
 
-export async function serveSigning(file: string, port: number, ph: Chain = new RpcChain(), l1: Chain = new RpcChain(ETHEREUM_RPC)): Promise<void> {
+export interface SigningPage {
+  port: number;
+  /** Resolves with the first mined-tx line, for whoever wants to stop once the payment is in a block. */
+  mined: Promise<string>;
+  close: () => Promise<void>;
+}
+
+export async function serveSigning(file: string, port: number, ph: Chain = new RpcChain(), l1: Chain = new RpcChain(ETHEREUM_RPC)): Promise<SigningPage> {
   const loaded = JSON.parse(readFileSync(file, "utf8")) as Plan | Handoff;
   const handoff = (loaded as Handoff).kind === "knock-authorization" ? (loaded as Handoff) : undefined;
   const plan = handoff ? handoff.plan : (loaded as Plan);
@@ -140,6 +147,8 @@ export async function serveSigning(file: string, port: number, ph: Chain = new R
   const summary = handoff ? payeeSummary(handoff) : renderSummary({ plan, verdicts: plan.verdicts, intent: plan.intent });
   // What we handed to the wallet, by kind, to compare with what got mined.
   const handed: Record<string, { to: Hex; data: Hex; value: bigint }> = {};
+  let markMined: (line: string) => void = () => {};
+  const mined = new Promise<string>((r) => (markMined = r));
 
   const server = createServer(async (req, res) => {
     try {
@@ -177,7 +186,9 @@ export async function serveSigning(file: string, port: number, ph: Chain = new R
         const mined = await ph.txInput(String(b.hash));
         const want = handed[String(b.kind)];
         const match = !!mined && !!want && same(mined.to ?? undefined, want.to) && same(mined.input, want.data) && mined.value === want.value;
-        console.log(`tx ${b.hash}: ${r.status} in block ${r.blockNumber}, gas used ${r.gasUsed}; mined to/value/input ${match ? "match" : "DO NOT match"} what knock handed to the wallet`);
+        const line = `tx ${b.hash}: ${r.status} in block ${r.blockNumber}, gas used ${r.gasUsed}; mined to/value/input ${match ? "match" : "DO NOT match"} what knock handed to the wallet`;
+        console.log(line);
+        markMined(line);
         return send(res, 200, "application/json", json({ ...r, same: match }));
       }
       send(res, 404, "text/plain", "not here");
@@ -186,8 +197,9 @@ export async function serveSigning(file: string, port: number, ph: Chain = new R
     }
   });
   await new Promise<void>((r) => server.listen(port, "127.0.0.1", r));
-  console.log(`knock signing page: http://127.0.0.1:${port}/  (${handoff ? "payee side of a signed authorization" : "your payment"}; knock holds no key, your wallet signs)`);
-  console.log("Ctrl+C to stop.");
+  const bound = (server.address() as { port: number }).port;
+  console.log(`knock signing page: http://127.0.0.1:${bound}/  (${handoff ? "payee side of a signed authorization" : "your payment"}; knock holds no key, your wallet signs)`);
+  return { port: bound, mined, close: () => new Promise<void>((r) => { server.closeAllConnections(); server.close(() => r()); }) };
 }
 
 const PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>knock: sign the payment</title>
