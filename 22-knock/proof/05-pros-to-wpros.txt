@@ -10,7 +10,7 @@ Send 0.001 PROS
   network     Pharos mainnet, chain 1672
   max fee     0.00137574 PROS (gas limit 68787)
   after it    you'd hold 0.012592618579752846 PROS
-  simulated   at block 22407416, from your address
+  simulated   at block 22407939, from your address
 
 checks
   ok    recipient 0x52C48d4213107b20bC583832b0d951FB9CA8F0B0 is a valid address (typed in lowercase, so there was no checksum to check).

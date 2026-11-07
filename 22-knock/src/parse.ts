@@ -26,7 +26,9 @@ interface Reading {
 
 const FULL_ADDRESS = /0x[0-9a-fA-F]{40}(?![0-9a-fA-F])/g;
 const CUT_ADDRESS = /0x[0-9a-fA-F]{2,39}(?:\.{2,3}|…)[0-9a-fA-F]*|\b0x[0-9a-fA-F]{2,39}\b(?![0-9a-fA-F])/;
-const ENS_NAME = /\b[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)*\.eth\b/gi;
+// Any characters up to ".eth": ENS names can be Unicode (ñ, emoji), and cutting them down to ASCII would quietly
+// turn them into somebody else's name. normalize() later accepts or rejects what we kept.
+const ENS_NAME = /(?<=^|[\s,;:"'(<])[^\s,;:"'()<>]+?\.eth(?=$|[\s,;:"'()<>.!?])/giu;
 const SELF = /\b(?:to|for)\s+(?:me|myself|my\s+(?:own\s+)?wallet)\b|\bmyself\b/i;
 const NUMBER = /(\$\s?)?(?<![\w.])(\d+(?:[.,]\d+)*)(\s?[kKmM](?![a-zA-Z]))?/g;
 const VAGUE_AMOUNT = /\b(all|everything|entire|whole|half|max|maximum|rest)\b/i;
@@ -66,8 +68,8 @@ function readNumber(written: string, suffix: string): { value: string } | { unsu
   } else if (dots > 1) {
     if (/^\d{1,3}(\.\d{3})+$/.test(written)) plain = written.replace(/\./g, "");
     else return { unsure: `"${written}" has more than one dot; write the amount as a plain number.` };
-  } else if (dots === 1 && /^[1-9]\d{0,2}\.\d{3}$/.test(written) && !suffix) {
-    // 0.001 can only be small; 1.000 could be either.
+  } else if (dots === 1 && /^[1-9]\d{0,2}\.\d{3}$/.test(written)) {
+    // 0.001 can only be small; 1.000 (and 1.000k) could be either.
     return { unsure: twoWays(written, ".") };
   } else plain = written;
   const s = suffix.trim().toLowerCase();
@@ -102,10 +104,14 @@ function read(text: string): Reading {
   let ticker: string | undefined = tokenAddress;
   for (const m of rest.matchAll(NUMBER)) {
     if (m[1]) dollars = true;
+    if (/-\s*\$?\s*$/.test(rest.slice(0, m.index))) {
+      out.questions.push({ field: "amount", ask: `"-${m[2]}" is negative. How much do you want to send?` });
+      continue;
+    }
     const n = readNumber(m[2], m[3] ?? "");
     if ("unsure" in n) out.questions.push({ field: "amount", ask: n.unsure });
     else amounts.push(n.value);
-    const after = rest.slice(m.index! + m[0].length).match(/^\s*([A-Za-z][A-Za-z0-9]{1,10})\b/);
+    const after = rest.slice(m.index! + m[0].length).match(/^\s*([A-Za-z][A-Za-z0-9]{1,10}(?:\.[A-Za-z][A-Za-z0-9]*)?)\b/);
     if (after && !ticker && !NOT_A_TICKER.has(after[1].toLowerCase())) ticker = after[1].toUpperCase();
   }
   if (!ticker) {
@@ -132,23 +138,33 @@ function read(text: string): Reading {
 
 export function parsePayment(text: string, answers: string[] = []): { intent: Intent } | { questions: Question[] } {
   const r = read(text);
+  // Fields the sentence left open (asked about, or simply missing). Only those can be filled by an answer.
+  const open = new Set<Question["field"]>(r.questions.map((q) => q.field));
+  if (!r.amount) open.add("amount");
+  if (!r.token) open.add("token");
+  if (!r.recipient) open.add("recipient");
+  const conflicts: Question[] = [];
+  const fill = (field: "amount" | "token" | "recipient", had: string | undefined, got: string | undefined, apply: () => void) => {
+    if (!got) return;
+    if (open.has(field)) {
+      apply();
+      open.delete(field);
+      r.questions = r.questions.filter((q) => q.field !== field);
+    } else if (got !== had) {
+      // The sentence already said this. An answer saying something else is a contradiction, not an update.
+      conflicts.push({ field, ask: `You first said ${had} and then ${got} for the ${field}. Which one?` });
+    }
+  };
   for (const a of answers) {
-    // An answer only fills what it actually says; it never reopens a field the sentence already settled.
     const ans = read(a);
-    if (ans.amount) {
-      r.amount = ans.amount;
-      r.questions = r.questions.filter((q) => q.field !== "amount");
-    }
-    if (ans.token) {
-      r.token = ans.token;
-      r.questions = r.questions.filter((q) => q.field !== "token");
-    }
-    if (ans.recipient) {
+    fill("amount", r.amount, ans.amount, () => (r.amount = ans.amount));
+    fill("token", r.token, ans.token, () => (r.token = ans.token));
+    fill("recipient", r.recipient, ans.recipient, () => {
       r.recipient = ans.recipient;
       r.recipientKind = ans.recipientKind;
-      r.questions = r.questions.filter((q) => q.field !== "recipient");
-    }
+    });
   }
+  r.questions.unshift(...conflicts);
   const has = (f: Question["field"]) => r.questions.some((q) => q.field === f);
   if (!r.amount && !has("amount")) r.questions.push({ field: "amount", ask: "How much should I send?" });
   if (!r.token && !has("token")) r.questions.push({ field: "token", ask: "Which token: PROS, USDC, WPROS, LINK, WETH, or a token contract address?" });

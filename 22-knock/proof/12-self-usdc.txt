@@ -10,14 +10,14 @@ Send 0.01 USDC to yourself
   network     Pharos mainnet, chain 1672
   max fee     0.00126358 PROS (gas limit 63179)
   after it    you'd hold 0.49979 USDC
-  simulated   at block 22407327, from your address
+  simulated   at block 22407963, from your address
 
 checks
   ok    USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain.
   ok    you hold 0.49979 USDC, this needs 0.01.
   ok    paying yourself: the USDC stays in your wallet, only the gas is spent.
 
-Or pay by signature: sign a USDC ReceiveWithAuthorization instead of a transaction. Only you (as the payee) can submit it, and it expires at 2026-11-07T21:14:01Z.
+Or pay by signature: sign a USDC ReceiveWithAuthorization instead of a transaction. Only you (as the payee) can submit it, and it expires at 2026-11-07T21:25:22Z.
 
 UNSIGNED: knock holds no key. Nothing has been signed or sent; your wallet does that if you approve.
 
@@ -109,8 +109,8 @@ or, pay by signature (eth_signTypedData_v4):
     "to": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
     "value": "10000",
     "validAfter": "0",
-    "validBefore": "1794086041",
-    "nonce": "0xae610d30096bfc81dbe1d9fb7d929bdd94be343805d91edfbc0a6a710a7e4377"
+    "validBefore": "1794086722",
+    "nonce": "0x3605e9f3e34fb4519a83ab6f31ed8986f9e10b6457094c56ab50dc9c20d632a2"
   }
 }
 

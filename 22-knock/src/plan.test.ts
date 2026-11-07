@@ -102,3 +102,11 @@ test("the summary is plain words: no JSON in it, and it says UNSIGNED", async ()
   assert.match(text, /Send 0\.01 USDC/);
   assert.match(text, /UNSIGNED/);
 });
+
+test("USDC with no PROS for gas: the transfer is off, pay-by-signature still offered", async () => {
+  const r = await buildPlan(world(500_000n, 0n), noL1, pay("0.01", "USDC", DEAD), ME);
+  assert.ok(r.plan, JSON.stringify(r.verdicts));
+  assert.ok(r.plan.byAuthorization);
+  assert.match(r.plan.transferNeedsPros ?? "", /PROS/);
+  assert.ok(r.verdicts.some((v) => v.level === "WARN" && /signature/.test(v.says)));
+});
