@@ -87,3 +87,13 @@ test("a token given by its contract address", () => {
   assert.equal(i.token, "0x52c48d4213107b20bc583832b0d951fb9ca8f0b0");
   assert.equal(i.recipient, B);
 });
+
+test("0.001 can only be a small number, so it is not asked", () => {
+  assert.equal(intent(`send 0.001 PROS to ${B}`).amount, "0.001");
+});
+
+test("the question for 1,000 suggests two spellings that are not ambiguous themselves", () => {
+  const q = asks(`send 1,000 USDC to ${B}`)[0].ask;
+  assert.match(q, /1000 or 1\.0\b/);
+  assert.match(asks(`send 1.000 USDC to ${B}`)[0].ask, /1000 or 1\.0\b/);
+});
