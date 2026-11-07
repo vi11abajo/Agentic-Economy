@@ -10,6 +10,7 @@ import { resolveName } from "./names.js";
 import { parsePayment } from "./parse.js";
 import { buildPlan } from "./plan.js";
 import { renderSummary, renderVerdicts } from "./render.js";
+import { serveSigning } from "./sign.js";
 
 const HELP = `knock: prepare a payment on Pharos from a sentence, after knocking on the recipient's address.
 
@@ -101,6 +102,11 @@ async function main(): Promise<number> {
   if (cmd === "who") {
     if (!f.pos[0]) return console.log("who needs a name or an address."), 2;
     return who(f.pos[0]);
+  }
+  if (cmd === "sign") {
+    if (!f.pos[0]) return console.log("sign needs the plan file that knock pay saved."), 2;
+    await serveSigning(f.pos[0], Number(f.one.port ?? 8643));
+    return new Promise<number>(() => {}); // the page runs until Ctrl+C
   }
   console.log(`unknown command "${cmd}".\n\n${HELP}`);
   return 2;
