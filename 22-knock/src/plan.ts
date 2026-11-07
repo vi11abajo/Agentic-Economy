@@ -60,6 +60,8 @@ export interface Plan {
   };
   sendRequest: { method: "eth_sendTransaction"; params: [Record<string, string>] };
   byAuthorization?: Authorization;
+  /** Set when the wallet can't pay the gas of the plain transfer; then only pay-by-signature is on offer. */
+  transferNeedsPros?: string;
 }
 
 export interface Built {
@@ -193,12 +195,16 @@ export async function buildPlan(ph: Chain, l1: Chain, intent: Intent, fromTyped:
   const maxFee = price * 2n;
   const fee = gas * maxFee;
   const needPros = fee + (token.address === "native" ? raw : 0n);
+  const short_ = `you hold ${fmt(pros, 18)} PROS and this needs up to ${fmt(needPros, 18)} PROS${token.address === "native" ? ` (${intent.amount} plus a fee of up to ${fmt(fee, 18)})` : ` for the fee`}`;
+  let transferNeedsPros: string | undefined;
   if (pros < needPros) {
-    verdicts.push({
-      level: "BLOCK",
-      says: `you hold ${fmt(pros, 18)} PROS and this needs up to ${fmt(needPros, 18)} PROS${token.address === "native" ? ` (${intent.amount} plus a fee of up to ${fmt(fee, 18)})` : ` for the fee`}.`,
-    });
-    return done({ name, facts, outcome: out });
+    // USDC can still go by signature: the payee submits it and pays the gas, so no PROS is needed on this side.
+    if (token.address !== USDC.address) {
+      verdicts.push({ level: "BLOCK", says: `${short_}.` });
+      return done({ name, facts, outcome: out });
+    }
+    transferNeedsPros = short_;
+    verdicts.push({ level: "WARN", says: `${short_}, so the normal transfer is off. Pay by signature still works: whoever submits it (the payee) pays the gas.` });
   }
 
   const sim = transferTx({ from, to, token, raw });
@@ -233,6 +239,7 @@ export async function buildPlan(ph: Chain, l1: Chain, intent: Intent, fromTyped:
     maxFeePros: fmt(fee, 18),
     balanceAfter: `${fmt(after, token.decimals)} ${token.symbol}`,
     tx,
+    transferNeedsPros,
     sendRequest: { method: "eth_sendTransaction", params: [{ from, to: tx.to, data: tx.data, value: tx.value, gas: tx.gas }] },
   };
   if (token.address === USDC.address) plan.byAuthorization = authorization(from, to, raw, opts.now);

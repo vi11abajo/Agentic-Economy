@@ -97,3 +97,30 @@ test("the question for 1,000 suggests two spellings that are not ambiguous thems
   assert.match(q, /1000 or 1\.0\b/);
   assert.match(asks(`send 1.000 USDC to ${B}`)[0].ask, /1000 or 1\.0\b/);
 });
+
+test("an answer never overwrites what the sentence already settled", () => {
+  // the recipient was asked for; the "20" in the answer is not a new amount
+  const r = parsePayment("send 100 USDC to someone", ["bob.eth, he is owed 20"]);
+  assert.ok("questions" in r || r.intent.amount === "100");
+  if ("intent" in r) assert.equal(r.intent.recipient, "bob.eth");
+  // the amount was asked for; a recipient in the answer that differs from the sentence becomes a question
+  const q = asks("send 1,000 USDC to bob.eth", ["1000, to carol.eth"]);
+  assert.equal(q[0].field, "recipient");
+});
+
+test("names outside ASCII are kept whole, not cut down to a different name", () => {
+  assert.equal(intent("send 1 USDC to ñalice.eth").recipient, "ñalice.eth");
+  assert.equal(intent("send 1 USDC to 🦊fox.eth").recipient, "🦊fox.eth");
+});
+
+test("a negative amount is a question, not its absolute value", () => {
+  assert.equal(asks(`send -5 USDC to ${B}`)[0].field, "amount");
+});
+
+test("1.000k is as ambiguous as 1.000", () => {
+  assert.equal(asks(`send 1.000k PROS to ${B}`)[0].field, "amount");
+});
+
+test("USDC.e is its own token, not USDC", () => {
+  assert.equal(intent(`send 1 USDC.e to ${B}`).token, "USDC.E");
+});

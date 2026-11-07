@@ -10,14 +10,14 @@ Send 0.01 USDC
   network     Pharos mainnet, chain 1672
   max fee     0.00191454 PROS (gas limit 95727)
   after it    you'd hold 0.48979 USDC
-  simulated   at block 22407451, from your address
+  simulated   at block 22407932, from your address
 
 checks
   warn  vitalik.eth points to 0xd8dA...6045, which on Ethereum is a wallet delegated by EIP-7702 to 0x5A7F...6f6d. On Pharos it is an address that has never been used. The key behind it works on any chain, but its smart-wallet setup does not come along. Confirm with them before paying.
   ok    USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain.
   ok    you hold 0.49979 USDC, this needs 0.01.
 
-Or pay by signature: sign a USDC ReceiveWithAuthorization instead of a transaction. Only the payee can submit it, and it expires at 2026-11-07T21:16:15Z.
+Or pay by signature: sign a USDC ReceiveWithAuthorization instead of a transaction. Only the payee can submit it, and it expires at 2026-11-07T21:24:48Z.
 
 UNSIGNED: knock holds no key. Nothing has been signed or sent; your wallet does that if you approve.
 
@@ -109,8 +109,8 @@ or, pay by signature (eth_signTypedData_v4):
     "to": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     "value": "10000",
     "validAfter": "0",
-    "validBefore": "1794086175",
-    "nonce": "0x21d98ab7e95c8067ca52f91ff48c7b5f562c7b23db3fbc7ab9b20b8af778f0ac"
+    "validBefore": "1794086688",
+    "nonce": "0x836450685ac1a50124dd8a6c4c2d1764d4db2facf3d614e29218040f4b409e62"
   }
 }
 

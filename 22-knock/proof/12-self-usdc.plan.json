@@ -1,6 +1,6 @@
 {
-  "createdAt": "2026-11-07T20:14:01.000Z",
-  "block": 22407327,
+  "createdAt": "2026-11-07T20:25:22.000Z",
+  "block": 22407963,
   "intent": {
     "amount": "0.01",
     "token": "USDC",
@@ -60,8 +60,8 @@
   },
   "byAuthorization": {
     "payee": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
-    "nonce": "0xae610d30096bfc81dbe1d9fb7d929bdd94be343805d91edfbc0a6a710a7e4377",
-    "validBefore": 1794086041,
+    "nonce": "0x3605e9f3e34fb4519a83ab6f31ed8986f9e10b6457094c56ab50dc9c20d632a2",
+    "validBefore": 1794086722,
     "typedData": {
       "domain": {
         "name": "USDC",
@@ -121,8 +121,8 @@
         "to": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
         "value": "10000",
         "validAfter": "0",
-        "validBefore": "1794086041",
-        "nonce": "0xae610d30096bfc81dbe1d9fb7d929bdd94be343805d91edfbc0a6a710a7e4377"
+        "validBefore": "1794086722",
+        "nonce": "0x3605e9f3e34fb4519a83ab6f31ed8986f9e10b6457094c56ab50dc9c20d632a2"
       }
     }
   }
