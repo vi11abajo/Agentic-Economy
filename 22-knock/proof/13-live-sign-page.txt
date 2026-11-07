@@ -1,0 +1,9 @@
+knock signing page: http://127.0.0.1:8643/  (your payment; knock holds no key, your wallet signs)
+Ctrl+C to stop.
+recheck (transfer): BLOCKED - this was prepared for 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb; the wallet connected is [another account of the user, address removed]. Switch accounts, nothing was signed
+recheck (transfer): OK - checked again at block 22411116: still goes through
+tx 0xfe7f9b7ac88a11715c56d6d9687fb34b067da90e8900c04d4e0d0c14bbb64863: success in block 22411124, gas used 37435; mined to/value/input match what knock handed to the wallet
+recheck (signature): OK - checked again at block 22411129: still goes through
+claim prepared for 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb, gas 103065
+tx 0x79d346c3beed0ca2b704cbb68ebbfaf3b761d329c9906bfaef74b23af77d45fe: success in block 22411143, gas used 75623; mined to/value/input match what knock handed to the wallet
+

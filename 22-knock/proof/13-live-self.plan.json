@@ -1,0 +1,129 @@
+{
+  "createdAt": "2026-11-07T21:10:51.000Z",
+  "block": 22410708,
+  "intent": {
+    "amount": "0.01",
+    "token": "USDC",
+    "recipient": "self",
+    "recipientKind": "self"
+  },
+  "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+  "to": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+  "token": {
+    "symbol": "USDC",
+    "address": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+    "decimals": 6,
+    "source": "https://docs.pharos.xyz/getting-started/token-registry"
+  },
+  "amount": "0.01",
+  "raw": "10000",
+  "verdicts": [
+    {
+      "level": "PASS",
+      "says": "USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain."
+    },
+    {
+      "level": "PASS",
+      "says": "you hold 0.49979 USDC, this needs 0.01."
+    },
+    {
+      "level": "PASS",
+      "says": "paying yourself: the USDC stays in your wallet, only the gas is spent."
+    }
+  ],
+  "recipient": "you",
+  "maxFeePros": "0.00126358",
+  "balanceAfter": "0.49979 USDC",
+  "tx": {
+    "chainId": 1672,
+    "type": "0x2",
+    "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+    "to": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+    "data": "0xa9059cbb00000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb0000000000000000000000000000000000000000000000000000000000002710",
+    "value": "0x0",
+    "gas": "0xf6cb",
+    "maxFeePerGas": "0x4a817c800",
+    "maxPriorityFeePerGas": "0x0",
+    "nonce": 566
+  },
+  "sendRequest": {
+    "method": "eth_sendTransaction",
+    "params": [
+      {
+        "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+        "to": "0xC879C018dB60520F4355C26eD1a6D572cdAC1815",
+        "data": "0xa9059cbb00000000000000000000000046441dc99f8000959e9c48cf2a01a018d131d3bb0000000000000000000000000000000000000000000000000000000000002710",
+        "value": "0x0",
+        "gas": "0xf6cb"
+      }
+    ]
+  },
+  "byAuthorization": {
+    "payee": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+    "nonce": "0x734e0470c7a01234a21bddb38505551770e1e3d429a43b5ee22a04e97fc5c2c8",
+    "validBefore": 1794089451,
+    "typedData": {
+      "domain": {
+        "name": "USDC",
+        "version": "2",
+        "chainId": 1672,
+        "verifyingContract": "0xc879c018db60520f4355c26ed1a6d572cdac1815"
+      },
+      "types": {
+        "EIP712Domain": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "version",
+            "type": "string"
+          },
+          {
+            "name": "chainId",
+            "type": "uint256"
+          },
+          {
+            "name": "verifyingContract",
+            "type": "address"
+          }
+        ],
+        "ReceiveWithAuthorization": [
+          {
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "name": "value",
+            "type": "uint256"
+          },
+          {
+            "name": "validAfter",
+            "type": "uint256"
+          },
+          {
+            "name": "validBefore",
+            "type": "uint256"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32"
+          }
+        ]
+      },
+      "primaryType": "ReceiveWithAuthorization",
+      "message": {
+        "from": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+        "to": "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb",
+        "value": "10000",
+        "validAfter": "0",
+        "validBefore": "1794089451",
+        "nonce": "0x734e0470c7a01234a21bddb38505551770e1e3d429a43b5ee22a04e97fc5c2c8"
+      }
+    }
+  }
+}
