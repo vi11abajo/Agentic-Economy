@@ -10,6 +10,7 @@ import { resolveName } from "./names.js";
 import { parsePayment } from "./parse.js";
 import { buildPlan } from "./plan.js";
 import { renderSummary, renderVerdicts } from "./render.js";
+import { startDetached, waitSigned } from "./detach.js";
 import { serveSigning } from "./sign.js";
 
 const HELP = `knock: prepare a payment on Pharos from a sentence, after knocking on the recipient's address.
@@ -20,8 +21,11 @@ const HELP = `knock: prepare a payment on Pharos from a sentence, after knocking
       (exit 3). The plan is saved to knock-plan.json (or --out) for "knock sign".
   knock who <name.eth | 0x address>
       Only the recipient check: what the name resolves to, and what lives at the address on Ethereum and Pharos.
-  knock sign <plan file> [--port 8643] [--until-mined]
+  knock sign <plan file> [--port 8643] [--until-mined | --detach]
       Opens a page on 127.0.0.1 that hands the payment to your own browser wallet, after checking it again.
+      --detach starts the page on its own and returns right away with the link; it closes once mined.
+  knock signed <plan file> [--wait 300]
+      What the detached page saw: refused connects, the tx, whether the mined input matches the plan.
 
 knock never signs or sends anything. It has no key.
 Reads Pharos through ${process.env.PHAROS_RPC_URL ?? "https://rpc.pharos.xyz"} (PHAROS_RPC_URL) and Ethereum, for .eth names only,
@@ -34,7 +38,7 @@ function flags(argv: string[]) {
   const bools = new Set<string>();
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--json" || a === "--until-mined" || a === "--help" || a === "-h") bools.add(a);
+    if (a === "--json" || a === "--until-mined" || a === "--detach" || a === "--help" || a === "-h") bools.add(a);
     else if (a === "--answer") answers.push(argv[++i] ?? "");
     else if (a.startsWith("--")) one[a.slice(2)] = argv[++i] ?? "";
     else pos.push(a);
@@ -105,17 +109,42 @@ async function main(): Promise<number> {
   }
   if (cmd === "sign") {
     if (!f.pos[0]) return console.log("sign needs the plan file that knock pay saved."), 2;
-    const page = await serveSigning(f.pos[0], Number(f.one.port ?? 8643));
+    const port = Number(f.one.port ?? 8643);
+    if (f.bools.has("--detach")) {
+      const started = await startDetached(process.argv[1], f.pos[0], port);
+      if (!started.ok) return console.log(started.says), 1;
+      console.log(`signing page: http://127.0.0.1:${port}/`);
+      console.log("Open it in the browser where your wallet is. You connect and sign there yourself: knock holds no key and sends nothing.");
+      console.log("The page checks the payment again before the wallet pops up and closes by itself once it is mined.");
+      console.log(`Afterwards: knock signed ${f.pos[0]}`);
+      return 0;
+    }
+    const page = await serveSigning(f.pos[0], port);
     if (!f.bools.has("--until-mined")) {
       console.log("Ctrl+C to stop.");
       return new Promise<number>(() => {}); // the page runs until Ctrl+C
     }
     // For an agent that can't keep a page running in the background: wait for the block, then hand back the line.
     console.log("Stops by itself once the payment is mined.");
-    await page.mined;
+    // A page nobody comes back to shouldn't sit on the port forever.
+    const gaveUp = await Promise.race([page.mined.then(() => false), new Promise<boolean>((r) => setTimeout(() => r(true), 30 * 60_000))]);
+    if (gaveUp) {
+      console.log("closed after 30 minutes without a payment; nothing was signed here.");
+      await page.close();
+      return 2;
+    }
     await new Promise((r) => setTimeout(r, 1500)); // let the page show the result before it goes away
     await page.close();
     return 0;
+  }
+  if (cmd === "signed") {
+    if (!f.pos[0]) return console.log("signed needs the plan file the page was started with."), 2;
+    const r = await waitSigned(f.pos[0], Number(f.one.wait ?? 300));
+    if (!r) return console.log(`no signing page was started for ${f.pos[0]} (knock sign ${f.pos[0]} --detach)`), 2;
+    for (const l of r.lines) console.log(l);
+    if (r.state === "waiting") return console.log("not mined yet: the page is still open and waiting for the wallet."), 2;
+    if (r.state === "closed") return 2;
+    return r.ok ? 0 : 3;
   }
   console.log(`unknown command "${cmd}".\n\n${HELP}`);
   return 2;
