@@ -5,7 +5,10 @@ import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import { fakeChain, word } from "./fake.js";
 import { buildPlan, type Plan } from "./plan.js";
 import { USDC } from "./registry.js";
-import { recheck, verifyHandoff } from "./sign.js";
+import { recheck, serveSigning, verifyHandoff } from "./sign.js";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const usdc = USDC.address as string;
 const DEAD = "0x000000000000000000000000000000000000dEaD" as Hex;
@@ -61,4 +64,21 @@ test("a plan file whose tx was tampered with is refused at the recheck", async (
 test("another chain is refused", async () => {
   const { ph, plan, payer } = await setup();
   assert.equal((await recheck(ph, fakeChain({}), plan, payer.address, "0x1", "transfer")).ok, false);
+});
+
+test("the page tells whoever started it when the payment is mined, so --until-mined can stop it", async () => {
+  const { plan } = await setup();
+  const dir = mkdtempSync(join(tmpdir(), "knock-"));
+  const file = join(dir, "plan.json");
+  writeFileSync(file, JSON.stringify(plan));
+  const ph = fakeChain({}, { receipt: async () => ({ status: "success", blockNumber: 22_400_001, gasUsed: 37_435n }) });
+  const page = await serveSigning(file, 0, ph, fakeChain({}));
+  try {
+    const r = await fetch(`http://127.0.0.1:${page.port}/receipt`, { method: "POST", body: JSON.stringify({ hash: "0xabc", kind: "transfer" }) });
+    assert.equal(r.status, 200);
+    const line = await page.mined;
+    assert.match(line, /success in block 22400001, gas used 37435/);
+  } finally {
+    await page.close();
+  }
 });

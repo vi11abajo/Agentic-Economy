@@ -20,7 +20,7 @@ const HELP = `knock: prepare a payment on Pharos from a sentence, after knocking
       (exit 3). The plan is saved to knock-plan.json (or --out) for "knock sign".
   knock who <name.eth | 0x address>
       Only the recipient check: what the name resolves to, and what lives at the address on Ethereum and Pharos.
-  knock sign <plan file> [--port 8643]
+  knock sign <plan file> [--port 8643] [--until-mined]
       Opens a page on 127.0.0.1 that hands the payment to your own browser wallet, after checking it again.
 
 knock never signs or sends anything. It has no key.
@@ -34,7 +34,7 @@ function flags(argv: string[]) {
   const bools = new Set<string>();
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === "--json" || a === "--help" || a === "-h") bools.add(a);
+    if (a === "--json" || a === "--until-mined" || a === "--help" || a === "-h") bools.add(a);
     else if (a === "--answer") answers.push(argv[++i] ?? "");
     else if (a.startsWith("--")) one[a.slice(2)] = argv[++i] ?? "";
     else pos.push(a);
@@ -105,8 +105,17 @@ async function main(): Promise<number> {
   }
   if (cmd === "sign") {
     if (!f.pos[0]) return console.log("sign needs the plan file that knock pay saved."), 2;
-    await serveSigning(f.pos[0], Number(f.one.port ?? 8643));
-    return new Promise<number>(() => {}); // the page runs until Ctrl+C
+    const page = await serveSigning(f.pos[0], Number(f.one.port ?? 8643));
+    if (!f.bools.has("--until-mined")) {
+      console.log("Ctrl+C to stop.");
+      return new Promise<number>(() => {}); // the page runs until Ctrl+C
+    }
+    // For an agent that can't keep a page running in the background: wait for the block, then hand back the line.
+    console.log("Stops by itself once the payment is mined.");
+    await page.mined;
+    await new Promise((r) => setTimeout(r, 1500)); // let the page show the result before it goes away
+    await page.close();
+    return 0;
   }
   console.log(`unknown command "${cmd}".\n\n${HELP}`);
   return 2;
