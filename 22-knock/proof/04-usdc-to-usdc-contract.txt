@@ -1,0 +1,14 @@
+$ knock pay send\ 0.01\ USDC\ to\ 0xc879c018db60520f4355c26ed1a6d572cdac1815 --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 0.01 USDC to 0xc879c018db60520f4355c26ed1a6d572cdac1815
+understood: 0.01 USDC to 0xc879c018db60520f4355c26ed1a6d572cdac1815
+
+Not prepared: 0.01 USDC to 0xc879c018db60520f4355c26ed1a6d572cdac1815
+
+checks
+  ok    recipient 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 is a valid address (typed in lowercase, so there was no checksum to check).
+  ok    USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain.
+  ok    you hold 0.49979 USDC, this needs 0.01.
+  STOP  that's the USDC contract itself. Tokens sent to their own contract are usually stuck there, and this one refuses anyway: Blacklistable: account is blacklisted.
+
+STOPPED: nothing was prepared, nothing was signed.
+[exit 3]

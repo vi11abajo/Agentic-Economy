@@ -1,0 +1,8 @@
+$ knock pay send\ 5\ dollars\ to\ 0x000000000000000000000000000000000000dEaD --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 5 dollars to 0x000000000000000000000000000000000000dEaD
+
+I need to ask before I prepare anything:
+  ? Dollars in which token? If you mean USDC, say USDC; otherwise name the token.
+
+Answer with: --answer "<your answer>" (and --from <address> if it was missing)
+[exit 2]

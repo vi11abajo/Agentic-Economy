@@ -1,0 +1,15 @@
+$ knock pay send\ 0.01\ USDC\ to\ 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 0.01 USDC to 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+understood: 0.01 USDC to 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+Not prepared: 0.01 USDC to 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+checks
+  ok    recipient 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 is a valid address (checksum ok).
+  ok    USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain.
+  ok    you hold 0.49979 USDC, this needs 0.01.
+  STOP  0xf39F...2266 is Hardhat/Anvil test account #0. Its private key is public, so anyone can take what you send.
+  warn  0xf39F...2266 is a wallet delegated by EIP-7702 to 0xab127f4dff8abce9c3d88a8238c2bed35d332b24. That contract's code runs for this wallet, so whoever wrote it decides what can happen to the money. Make sure the person knows their wallet is set up this way.
+
+STOPPED: nothing was prepared, nothing was signed.
+[exit 3]

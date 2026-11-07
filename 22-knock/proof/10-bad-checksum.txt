@@ -1,0 +1,12 @@
+$ knock pay send\ 0.01\ USDC\ to\ 0x000000000000000000000000000000000000DEaD --from 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb 
+you: send 0.01 USDC to 0x000000000000000000000000000000000000DEaD
+understood: 0.01 USDC to 0x000000000000000000000000000000000000DEaD
+
+Not prepared: 0.01 USDC to 0x000000000000000000000000000000000000DEaD
+
+checks
+  STOP  recipient 0x000000000000000000000000000000000000DEaD has mixed-case letters that fail the EIP-55 checksum. That usually means a typo; paste it again from the source.
+  ok    USDC is the contract 0xC879C018dB60520F4355C26eD1a6D572cdAC1815 from the Pharos docs token list; decimals() = 6 read on chain.
+
+STOPPED: nothing was prepared, nothing was signed.
+[exit 3]
