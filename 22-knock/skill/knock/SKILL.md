@@ -38,15 +38,17 @@ elsewhere). One bundled file, no install, no keys. Reads Pharos through https://
     `warn` line, and say where the plan file was saved. Mention the pay-by-signature option when it is offered.
   - If you don't know the user's address, ask for it. Only the public address: never ask for a key or a seed.
 - `knock who <name.eth | 0x address>`: only the recipient check, on Ethereum and Pharos.
-- `knock sign <plan file> [--port 8643]`: serves a page on http://127.0.0.1:8643/ that the user opens in the
-  browser where their wallet extension lives. Start it in the background, give the user the link, and tell
-  them what they will see: Connect wallet, then "Send transfer" or "Pay by signature"; the page checks the
-  payment again against the live chain before their wallet pops up, refuses another account or another chain,
-  and after the block shows the tx link and whether the mined input matches what knock prepared. Stop the
-  page when they're done.
-  - If you can't keep a process running in the background, give the user the link first, then run
-    `knock sign <plan file> --until-mined` in the foreground with a long timeout: the page closes by itself once
-    the payment is mined and prints the tx line (status, block, gas, whether the mined input matches).
+- `knock sign <plan file> --detach [--port 8643]`: starts a page on http://127.0.0.1:8643/ on its own and
+  returns at once. Then reply to the user and end your turn: say you prepared a local signing page, that they
+  sign it themselves in their own wallet (knock and you hold no key), give the link, and tell them which button
+  matches what they asked for ("Send transfer" or "Pay by signature"). Say what the page does: it checks the
+  payment again against the live chain before the wallet pops up, refuses another account or another chain,
+  and after the block compares the mined tx with what knock prepared. Ask them to tell you when they're done.
+- `knock signed <plan file> [--wait 300]`: when the user says they signed, this prints what the page saw
+  (refused connects, the tx line with status, block, gas, and whether the mined input matches). Exit 0 mined
+  and matching, 3 mined but not matching or failed, 2 not mined yet or the page closed after 30 minutes unused.
+  Report the tx hash and the match line as printed.
+  - Without --detach the page runs until Ctrl+C (`--until-mined` stops it after the block).
   - Paying someone else by signature: the page downloads `knock-authorization.json`; the payee opens it with
     `knock sign knock-authorization.json` and submits it from their own wallet (only the payee can).
 

@@ -31,6 +31,7 @@ node skill/knock/scripts/knock.mjs pay "send 5 dollars to 0x..." --from 0xYourAd
 node skill/knock/scripts/knock.mjs who vitalik.eth
 node skill/knock/scripts/knock.mjs pay "send 0.01 USDC to myself" --from 0xYourAddress --out plan.json
 node skill/knock/scripts/knock.mjs sign plan.json      # then open http://127.0.0.1:8643/ where your wallet lives
+node skill/knock/scripts/knock.mjs sign plan.json --detach && node skill/knock/scripts/knock.mjs signed plan.json
 ```
 
 The skill is `skill/knock/` (SKILL.md plus one bundled script, no install, no keys). Exit codes are for the agent
@@ -90,8 +91,12 @@ Every check is a read against the chain at the latest block, and every one shows
 Before anything reaches the wallet, the page asks knock to build the whole payment again from the same sentence
 at the latest block, and the wallet gets that fresh build, not the file. It also asks the wallet again which
 account and chain it is on (they can change after Connect) and refuses another account or anything but chain
-1672. After the block it compares the mined `to`, `value` and input with what it handed over. With `--until-mined`
-the page closes itself after that check, for an agent that runs it in the foreground and waits.
+1672. After the block it compares the mined `to`, `value` and input with what it handed over.
+
+An agent's turn ends before you get to the wallet, so the skill starts the page with `--detach`: it runs on its
+own, the agent hands you the link in the chat and waits for you. When you say you've signed, `knock signed
+plan.json` reads what the page saw (refused connects, the tx, the match). The page closes itself once the payment
+is mined, or after 30 minutes without one.
 
 Paying someone else by signature: the page downloads `knock-authorization.json`. The payee runs
 `knock sign knock-authorization.json`; that page recovers the signer from the signature, checks the signed
@@ -109,10 +114,10 @@ authorization is unused and unexpired, and only then lets the payee submit `rece
 
 ## Tests
 
-54 tests (`npm test` after `npm run build`): the parser (every row of the table above), name verdicts (Safe,
+60 tests (`npm test` after `npm run build`): the parser (every row of the table above), name verdicts (Safe,
 delegated, plain, ENSIP-11, unreachable), recipient verdicts, exact calldata and typed data, fee and decimals
 STOPs, and the signing side (a payer who edits the amount in the file, a message changed after signing, a
-tampered plan tx, the wrong chain). The fake chain lives in `src/fake.ts`.
+tampered plan tx, the wrong chain, reading what a detached page saw). The fake chain lives in `src/fake.ts`.
 
 ## Proof
 
