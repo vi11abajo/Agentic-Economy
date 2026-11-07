@@ -89,7 +89,7 @@ export function publicTestKeyIndex(a: string): number {
   return testAccounts.indexOf(a.toLowerCase());
 }
 
-export function recipientVerdicts(f: AccountFacts, o: Outcome, sender: Hex, token: Token): Verdict[] {
+export function recipientVerdicts(f: AccountFacts, o: Outcome, sender: Hex, token: Token, opts: { nameChecked?: boolean } = {}): Verdict[] {
   const to = f.address.toLowerCase();
   const out: Verdict[] = [];
   if (to === zeroAddress) return [{ level: "BLOCK", says: "that's the zero address: whatever goes there is gone for good." }];
@@ -119,7 +119,8 @@ export function recipientVerdicts(f: AccountFacts, o: Outcome, sender: Hex, toke
       out.push({ level: "WARN", says: `${short(to)} is ${describe(f)} on Pharos, not a person's wallet. ${token.symbol} sent there can only move again if that contract's code allows it.` });
     }
   } else if (f.kind === "empty") {
-    out.push({ level: "WARN", says: `${short(to)} has never been used on Pharos. Double-check it with the person: a wrong address can't be undone.` });
+    // When it came from a name, the name check has already said this address is unused on Pharos.
+    if (!opts.nameChecked) out.push({ level: "WARN", says: `${short(to)} has never been used on Pharos. Double-check it with the person: a wrong address can't be undone.` });
   } else if (out.every((v) => v.level !== "BLOCK")) {
     out.push({ level: "PASS", says: `${getAddress(to)} is ${describe(f)} on Pharos.` });
   }

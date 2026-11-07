@@ -183,7 +183,7 @@ export async function buildPlan(ph: Chain, l1: Chain, intent: Intent, fromTyped:
   // Who lives there and what the money does
   const facts = await accountFacts(ph, to);
   const out = await outcome(ph, { from, to, token, raw });
-  verdicts.push(...recipientVerdicts(facts, out, from, token));
+  verdicts.push(...recipientVerdicts(facts, out, from, token, { nameChecked: !!name }));
   if (blocked() || !out.gas) return done({ name, facts, outcome: out });
 
   // Fees. Pharos runs a flat 10 gwei base fee and reports 0 for the priority fee (checked 2026-11-07); a 2x

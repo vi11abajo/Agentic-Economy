@@ -76,3 +76,10 @@ test("an address never used on Pharos is a WARN", async () => {
   const v = recipientVerdicts(await accountFacts(ph, to), await outcome(ph, { from: ME, to, token: USDC, raw: 1n }), ME, USDC);
   assert.ok(v.some((x) => x.level === "WARN" && /never/.test(x.says)));
 });
+
+test("after a name check already said the address is unused on Pharos, it isn't said twice", async () => {
+  const to = "0x000000000000000000000000000000000000dead" as Hex;
+  const ph = fakeChain({});
+  const v = recipientVerdicts(await accountFacts(ph, to), await outcome(ph, { from: ME, to, token: USDC, raw: 1n }), ME, USDC, { nameChecked: true });
+  assert.ok(!v.some((x) => /never been used/.test(x.says)));
+});

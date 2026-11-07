@@ -43,6 +43,13 @@ function shift(decimal: string, places: number): string {
   return rest ? `${joined}.${rest}` : joined;
 }
 
+/** "1,000" -> "1000 or 1.0": both readings, each spelled so it can't be misread again. */
+function twoWays(written: string, sep: "," | "."): string {
+  const big = written.replace(sep, "");
+  const small = written.replace(sep, ".").replace(/0+$/, "").replace(/\.$/, ".0");
+  return `"${written}": ${big} or ${small}? Write ${big} or ${small} so I don't guess.`;
+}
+
 /** One number as written. Returns the plain decimal, or why it can't be read without asking. */
 function readNumber(written: string, suffix: string): { value: string } | { unsure: string } {
   const commas = (written.match(/,/g) ?? []).length;
@@ -54,14 +61,14 @@ function readNumber(written: string, suffix: string): { value: string } | { unsu
     else return { unsure: `"${written}": is that ${written.replace(/\./g, "").replace(",", ".")}? Write it with a dot for decimals and no thousands separator.` };
   } else if (commas) {
     if (/^\d{1,3}(,\d{3}){2,}$/.test(written)) plain = written.replace(/,/g, "");
-    else if (/^\d{1,3},\d{3}$/.test(written))
-      return { unsure: `"${written}": a thousand or one point zero? Write ${written.replace(",", "")} or ${written.replace(",", ".")} so I don't guess.` };
+    else if (/^[1-9]\d{0,2},\d{3}$/.test(written)) return { unsure: twoWays(written, ",") };
     else return { unsure: `"${written}": is the comma a decimal point? Write it as ${written.replace(",", ".")} if so.` };
   } else if (dots > 1) {
     if (/^\d{1,3}(\.\d{3})+$/.test(written)) plain = written.replace(/\./g, "");
     else return { unsure: `"${written}" has more than one dot; write the amount as a plain number.` };
-  } else if (dots === 1 && /^\d{1,3}\.\d{3}$/.test(written) && !suffix) {
-    return { unsure: `"${written}": a thousand or one point zero? Write ${written.replace(".", "")} or ${written.replace(/0+$/, "").replace(/\.$/, ".0")} so I don't guess.` };
+  } else if (dots === 1 && /^[1-9]\d{0,2}\.\d{3}$/.test(written) && !suffix) {
+    // 0.001 can only be small; 1.000 could be either.
+    return { unsure: twoWays(written, ".") };
   } else plain = written;
   const s = suffix.trim().toLowerCase();
   return { value: s === "k" ? shift(plain, 3) : s === "m" ? shift(plain, 6) : plain };
