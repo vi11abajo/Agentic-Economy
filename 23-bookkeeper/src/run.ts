@@ -371,7 +371,8 @@ async function tellTheUser(ctx: RunCtx, report: RunReport) {
     const s = series.get(evs[0].series);
     if (!s) continue;
     const lines = evs.map((e) => ({ name: s.payees[e.payee].name, address: s.payees[e.payee].address, amount: s.payees[e.payee].amount, tx: e.tx as Hex }));
-    await deliver({ kind: "paid", ...common(s, evs[0].period), at: evs[evs.length - 1].at, lines }, evs.map((e) => `paid:${e.series}:${e.period}:${e.payee}`), s);
+    const next = s.status === "active" ? dueAt(s.first, s.tz, s.every, indexAt(s.first, s.tz, s.every, now) + 1).toISOString() : null;
+    await deliver({ kind: "paid", ...common(s, evs[0].period), at: evs[evs.length - 1].at, lines, next }, evs.map((e) => `paid:${e.series}:${e.period}:${e.payee}`), s);
   }
 
   for (const e of journal) {

@@ -9,7 +9,7 @@ export interface PaidLine {
 }
 
 export type Card =
-  | { kind: "paid"; label: string; series: string; period: number; token: string; tz: string; at: string; lines: PaidLine[] }
+  | { kind: "paid"; label: string; series: string; period: number; token: string; tz: string; at: string; lines: PaidLine[]; next?: string | null }
   | { kind: "short"; label: string; series: string; period: number; token: string; tz: string; due: string; name: string; amount: string; need: string; have: string; asset: string; wallet: Hex }
   | { kind: "missed"; label: string; series: string; period: number; token: string; tz: string; due: string; name: string; amount: string }
   | { kind: "failed"; label: string; series: string; period: number; token: string; tz: string; name: string; amount: string; reason: string; tx?: Hex }
