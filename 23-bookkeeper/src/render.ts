@@ -42,7 +42,7 @@ export function statusText(series: Series[], journal: JournalEvent[], now: Date,
       const next = indexAt(s.first, s.tz, s.every, now) + 1;
       out.push(`  next payment: #${next + 1} on ${localTime(dueAt(s.first, s.tz, s.every, next).toISOString(), s.tz)}`);
       const r = runway.find((l) => l.series === s.id);
-      if (r) out.push(r.nextShort ? `  ! the wallet does not cover the next payment (${r.perPeriod} ${s.token})` : `  the wallet covers ${r.coversPeriods >= 52 ? "52+" : r.coversPeriods} more payment${r.coversPeriods === 1 ? "" : "s"}, until ${localTime(r.until!, s.tz)}`);
+      if (r) out.push(r.nextShort ? `  ! the wallet does not cover the next payment (${r.shortOf === "gas" ? "PROS for gas" : `${r.perPeriod} ${s.token}`})` : `  the wallet covers ${r.coversPeriods >= 52 ? "52+" : r.coversPeriods} more payment${r.coversPeriods === 1 ? "" : "s"}, until ${localTime(r.until!, s.tz)}`);
     }
     out.push("");
   }

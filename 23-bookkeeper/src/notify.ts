@@ -3,8 +3,16 @@
 // redact() before anyone can print it. A card counts as delivered when at least one configured channel took it.
 import type { Card } from "./cards.js";
 import { EXPLORER_TX } from "./chain.js";
-import type { Notifier } from "./cards.js";
+import type { Notifier, RunwayLine } from "./cards.js";
 import type { Secrets } from "./store.js";
+
+// The warning names what to top up: "not covered" alone read as "not enough USDC" while only the gas was short.
+function shortText(l: RunwayLine, bold = ""): string {
+  const when = `${localTime(l.nextDue!, l.tz)}, ${bold}${l.perPeriod} ${l.token}${bold}`;
+  return l.shortOf === "gas"
+    ? `the next payment (${when}) can't go out: not enough PROS for gas. Top up PROS before then.`
+    : `the next payment (${when}) is not covered. Top up ${l.token} before then.`;
+}
 
 type Net = typeof fetch;
 
@@ -78,7 +86,7 @@ export function telegramHtml(c: Card): string {
         "",
         ...c.lines.map((l) =>
           l.nextShort
-            ? `⚠️ ${b(l.label)}: the next payment (${localTime(l.nextDue!, l.tz)}, ${l.perPeriod} ${l.token}) is not covered. Top up before then.`
+            ? `⚠️ ${b(l.label)}: ${shortText(l)}`
             : `📆 ${b(l.label)}: ${l.perPeriod} ${l.token} per period, enough for ${l.coversPeriods >= 52 ? "52+" : l.coversPeriods} more (until ${localTime(l.until!, l.tz)})`,
         ),
       ].join("\n");
@@ -128,7 +136,7 @@ export function discordEmbed(c: Card): object {
           { name: "PROS (gas)", value: pretty(c.pros), inline: true },
           ...c.lines.slice(0, 20).map((l) => ({
             name: dcText(l.label).slice(0, 256),
-            value: l.nextShort ? `⚠️ The next payment (${localTime(l.nextDue!, l.tz)}, **${l.perPeriod} ${l.token}**) is not covered. Top up before then.` : `📆 ${l.perPeriod} ${l.token} per period · enough for **${l.coversPeriods >= 52 ? "52+" : l.coversPeriods} more** (until ${localTime(l.until!, l.tz)})`,
+            value: l.nextShort ? `⚠️ ${shortText(l, "**")}` : `📆 ${l.perPeriod} ${l.token} per period · enough for **${l.coversPeriods >= 52 ? "52+" : l.coversPeriods} more** (until ${localTime(l.until!, l.tz)})`,
             inline: false,
           })),
         ],

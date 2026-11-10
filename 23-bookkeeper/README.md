@@ -129,7 +129,7 @@ after a top-up) is covered by the tests below.
 
 ## Tests
 
-`npm test`: 66 tests on a small in-memory Pharos (`src/fake.ts`) that applies the same EIP-3009 rules as USDC. They
+`npm test`: 67 tests on a small in-memory Pharos (`src/fake.ts`) that applies the same EIP-3009 rules as USDC. They
 cover: schedule maths, the questions the draft asks, one payment per period after a re-run, a crash after broadcast,
 short balance over many wakes, missed windows, a stopped series, a node that refuses or loses a tx, a lagging node
 and a failing RPC for PROS, a payee that fails at estimate, a stale or half-written lock, Telegram being down, and the
