@@ -248,7 +248,9 @@ export async function contractRecord(l: Look): Promise<Finding[]> {
     why:
       found.length === 0
         ? ""
-        : "These are normal in many tokens, but each one is a lever someone holds over your money. With unverified code you can't see who may pull it.",
+        : subjectProfile.verified === true
+          ? "These are normal in many tokens, but each one is a lever someone holds over your money. The source is verified, so you can read who may pull it."
+          : "These are normal in many tokens, but each one is a lever someone holds over your money. With unverified code you can't see who may pull it.",
     source: "chain",
     evidence: [addressLink(subject, `${short(subject)} code`)],
   });

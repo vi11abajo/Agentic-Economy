@@ -200,7 +200,7 @@ async function approvals(l: WalletLook): Promise<Finding[]> {
       said:
         latest.size === 0
           ? "It has never sent an approve transaction that the explorer lists."
-          : `Of ${plural(latest.size, "approval")} we looked up on the chain, ${open} are still open, none to a wallet, an unverified contract or a contract younger than 14 days.`,
+          : `Of ${plural(latest.size, "approval")} we looked up on the chain, ${open} ${open === 1 ? "is" : "are"} still open: none to a plain wallet, and no unlimited one to an unverified contract or one younger than 14 days.`,
       why: "",
       source: "chain+explorer",
       evidence: [addressLink(l.target)],
