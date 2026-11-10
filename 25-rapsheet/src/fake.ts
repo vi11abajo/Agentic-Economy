@@ -1,5 +1,5 @@
 // A pretend chain and explorer for the tests: just enough state to play out each record without the network.
-import type { Chain, UpgradeLog } from "./chain.js";
+import type { ApprovalLog, Chain, UpgradeLog } from "./chain.js";
 import type { Explorer, Hex, Listing, Profile, Transfer, Tx } from "./explorer.js";
 
 export const A = (n: number) => `0x${n.toString(16).padStart(40, "0")}` as Hex;
@@ -37,6 +37,8 @@ export interface FakeChain extends Chain {
   inputs: Map<Hex, Hex>;
   mined: Map<Hex, { block: number; from: Hex }>;
   upgradeLogs: Map<Hex, UpgradeLog[]>;
+  /** spender -> approvals naming it */
+  approvalLogs: Map<Hex, ApprovalLog[]>;
   storageReads: number;
 }
 
@@ -51,6 +53,7 @@ export function fakeChain(head = 1_000_000, secondsPerBlock = 1, genesis = 1_700
     inputs: new Map(),
     mined: new Map(),
     upgradeLogs: new Map(),
+    approvalLogs: new Map(),
     storageReads: 0,
     head: async () => head,
     blockTime: async (n) => genesis + n * secondsPerBlock,
@@ -70,6 +73,10 @@ export function fakeChain(head = 1_000_000, secondsPerBlock = 1, genesis = 1_700
     owner: async (a) => c.owners.get(a) ?? null,
     allowance: async (t, o, s) => c.allowances.get(`${t}:${o}:${s}`) ?? 0n,
     upgrades: async (a, from, to) => (c.upgradeLogs.get(a) ?? []).filter((l) => l.block >= from && l.block <= to),
+    async approvalsTo(s, from, to) {
+      if (to - from > 999) throw new Error("the node refuses spans over 1,000 blocks");
+      return (c.approvalLogs.get(s) ?? []).filter((l) => l.block >= from && l.block <= to);
+    },
     txBlock: async (h) => c.mined.get(h) ?? null,
     txInput: async (h) => c.inputs.get(h) ?? null,
   };
