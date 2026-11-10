@@ -60,7 +60,7 @@ requires:
    did not say; never guess an amount, an address, a token, a period or the first payment time. Names the user
    paid before are filled from the address book. "Starting today" still needs a time: ask it.
    Several series (payroll + subscription) = one draft per series.
-2. `bookkeeper draft plan.json`. Exit code 2 and `STILL NEED` lines: ask the user those questions, one at a time,
+2. `bookkeeper draft plan.json` (or `bookkeeper draft -` with the JSON on stdin when files can't be written). Exit code 2 and `STILL NEED` lines: ask the user those questions, one at a time,
    in the user's language, update the JSON, draft again.
    For payments more often than hourly the draft asks how often to check: propose an interval (the draft suggests
    one), agree it with the user, put it in `checkEveryMinutes`.
