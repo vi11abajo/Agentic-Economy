@@ -91,7 +91,7 @@ async function wake(now: Date, schedule: boolean) {
   for (const l of report.lines) print(`  ${l}`);
   if (report.undelivered) print(`  ${report.undelivered} message(s) to Telegram/Discord did not go out; the next run tries again`);
   if (!makeNotifier(s).channels.length) print("  Telegram and Discord are not set up, so nobody was told. Fill them in .env and run bookkeeper notify-test.");
-  for (const r of report.runway) print(`  ${r.label}: ${r.nextShort ? `NEXT PAYMENT NOT COVERED (${r.perPeriod} ${r.token})` : `covers ${r.coversPeriods >= 52 ? "52+" : r.coversPeriods} more`}`);
+  for (const r of report.runway) print(`  ${r.label}: ${r.nextShort ? `NEXT PAYMENT NOT COVERED (${r.shortOf === "gas" ? "PROS for gas" : `${r.perPeriod} ${r.token}`})` : `covers ${r.coversPeriods >= 52 ? "52+" : r.coversPeriods} more`}`);
   if (report.nextDue) print(`  next payment: ${report.nextDue}`);
   if (schedule) for (const l of reschedule(now)) print(`  scheduler: ${l}`);
 }
@@ -118,7 +118,7 @@ async function main() {
       const c = viemChain();
       const [usdc, pros, gp] = await Promise.all([c.usdcBalance(a), c.prosBalance(a), c.gasPrice()]);
       print(`paying wallet ${a}: ${formatUnits(usdc, 6)} USDC, ${formatUnits(pros, 18)} PROS`);
-      for (const r of runway(loadSeries(home), { usdc, pros }, now, GAS_PER_PAYMENT * gp)) print(`  ${r.label}: ${r.perPeriod} ${r.token} per period; ${r.nextShort ? "the next payment is NOT covered" : `covers ${r.coversPeriods >= 52 ? "52+" : r.coversPeriods} more, until ${r.until}`}`);
+      for (const r of runway(loadSeries(home), { usdc, pros }, now, GAS_PER_PAYMENT * gp)) print(`  ${r.label}: ${r.perPeriod} ${r.token} per period; ${r.nextShort ? `the next payment is NOT covered${r.shortOf === "gas" ? " (PROS for gas)" : ""}` : `covers ${r.coversPeriods >= 52 ? "52+" : r.coversPeriods} more, until ${r.until}`}`);
       return;
     }
     case "draft": {

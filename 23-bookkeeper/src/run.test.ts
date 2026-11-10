@@ -212,6 +212,11 @@ test("runway: how many coming periods the wallet covers, and whether the next on
   assert.equal(b.nextShort, true);
   const [c] = runway([s], { usdc: USDC6(10), pros: 3n }, now, 1n);
   assert.equal(c.coversPeriods, 1); // gas: 2 payments per period, 1 wei each, 3 wei of PROS
+  assert.equal(b.shortOf, "token");
+  const [d] = runway([s], { usdc: USDC6(10), pros: 1n }, now, 1n);
+  assert.equal(d.nextShort, true);
+  assert.equal(d.shortOf, "gas"); // plenty of USDC, the PROS for gas is what runs out
+  assert.equal(a.shortOf, null);
 });
 
 test("after payouts the runway goes out, and a short next period is warned about once", async () => {

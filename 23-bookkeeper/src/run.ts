@@ -104,6 +104,7 @@ export function runway(series: Series[], bal: { usdc: bigint; pros: bigint }, no
   }
   queue.sort((a, b) => a.due.getTime() - b.due.getTime());
   let usdc = bal.usdc, pros = bal.pros, broke = false;
+  let shortOf: "token" | "gas" | null = null;
   const covered = new Map<string, { n: number; until: Date | null }>();
   for (const s of active) covered.set(s.id, { n: 0, until: null });
   for (const { s, due } of queue) {
@@ -112,6 +113,8 @@ export function runway(series: Series[], bal: { usdc: bigint; pros: bigint }, no
     const ok = s.token === "USDC" ? usdc >= need && pros >= gas : pros >= need + gas;
     if (!ok) {
       broke = true;
+      // A USDC payroll with plenty of USDC can still stop: the gas is paid in PROS. Say which one to top up.
+      shortOf = (s.token === "USDC" ? usdc < need : pros < need) ? "token" : "gas";
       break;
     }
     if (s.token === "USDC") usdc -= need;
@@ -123,7 +126,7 @@ export function runway(series: Series[], bal: { usdc: bigint; pros: bigint }, no
   return active.map((s) => {
     const c = covered.get(s.id)!;
     const next = dueAt(s.first, s.tz, s.every, indexAt(s.first, s.tz, s.every, now) + 1);
-    return { series: s.id, label: s.label, token: s.token, tz: s.tz, perPeriod: formatUnits(perPeriod(s), DECIMALS[s.token]), nextDue: next.toISOString(), coversPeriods: c.n, until: c.until?.toISOString() ?? null, nextShort: c.n === 0 };
+    return { series: s.id, label: s.label, token: s.token, tz: s.tz, perPeriod: formatUnits(perPeriod(s), DECIMALS[s.token]), nextDue: next.toISOString(), coversPeriods: c.n, until: c.until?.toISOString() ?? null, nextShort: c.n === 0, shortOf: c.n === 0 ? shortOf : null };
   });
 }
 

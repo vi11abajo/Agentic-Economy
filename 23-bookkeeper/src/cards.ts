@@ -26,6 +26,7 @@ export interface RunwayLine {
   coversPeriods: number; // how many of the coming periods the wallet covers, capped at RUNWAY_CAP
   until: string | null; // ISO due time of the last covered period
   nextShort: boolean;
+  shortOf: "token" | "gas" | null; // what runs out first when nextShort: the payout token or the PROS for gas
 }
 
 export const RUNWAY_CAP = 52;

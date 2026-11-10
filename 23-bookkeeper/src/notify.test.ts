@@ -80,3 +80,13 @@ test("balances are rounded for people: PROS to 6 decimals", () => {
 test("Telegram paid card names the next payment", () => {
   assert.ok(telegramHtml({ ...paid, next: "2026-12-04T06:00:00.000Z" } as Card).includes("Next payment: Fri 4 Dec 2026, 09:00 (Europe/Moscow)"));
 });
+
+test("a runway warning says PROS for gas when USDC is fine but gas is short", () => {
+  const line = { series: "payroll", label: "Payroll", token: "USDC", tz: "UTC", perPeriod: "0.003", nextDue: "2026-11-17T17:40:00.000Z", coversPeriods: 0, until: null, nextShort: true };
+  const gas: Card = { kind: "runway", wallet: PETE, usdc: "0.48979", pros: "0.002894", lines: [{ ...line, shortOf: "gas" }] };
+  assert.ok(telegramHtml(gas).includes("not enough PROS for gas"));
+  const d = discordEmbed(gas) as { fields: { name: string; value: string }[] };
+  assert.ok(d.fields.some((f) => f.value.includes("Top up PROS")));
+  const usdc: Card = { ...gas, lines: [{ ...line, shortOf: "token" }] };
+  assert.ok(telegramHtml(usdc).includes("Top up USDC"));
+});
