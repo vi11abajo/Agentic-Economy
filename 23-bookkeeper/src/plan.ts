@@ -11,7 +11,7 @@ import { appendJournal, loadPeople, loadSeries, savePeople, saveSeries, type Hex
 export interface DraftInput {
   label?: string;
   token?: string;
-  payees?: { name: string; address?: string; amount?: string }[];
+  payees?: { name?: string; address?: string; amount?: string }[];
   every?: Every;
   first?: string;
   tz?: string;
@@ -20,6 +20,7 @@ export interface DraftInput {
 
 export const DECIMALS = { USDC: 6, PROS: 18 } as const;
 const PAST_GRACE_MS = 10 * 60_000;
+const shortAddress = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "series";
 export const localZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -46,8 +47,11 @@ export function draft(input: DraftInput, people: Record<string, Hex>, now: Date,
 
   if (!input.payees?.length) missing.push("Who should be paid? Names and wallet addresses, please.");
   const payees = (input.payees ?? []).map((p) => {
-    const known = Object.keys(people).find((n) => n.toLowerCase() === p.name.toLowerCase());
-    const name = known ?? p.name;
+    // Someone given only by address ("pay 0x3759...") is called by the short address, so the questions and the
+    // cards still read like a sentence. approve() keeps such names out of the address book.
+    const given = p.name?.trim();
+    const known = given ? Object.keys(people).find((n) => n.toLowerCase() === given.toLowerCase()) : undefined;
+    const name = known ?? (given || (p.address ? shortAddress(isAddress(p.address, { strict: false }) ? getAddress(p.address) : p.address) : "this person"));
     let address = (p.address ?? (known ? people[known] : undefined)) as string | undefined;
     if (!address) missing.push(`What is ${name}'s wallet address on Pharos?`);
     else if (!isAddress(address, { strict: false })) missing.push(`${name}'s address ${address} is not a Pharos address. Could you check it?`);
@@ -107,7 +111,7 @@ export function approve(home: string, planId: string, now: Date): Series {
   const series: Series = { ...plan, id, status: "active", approvedAt: now.toISOString() };
   saveSeries(home, [...all, series]);
   const people = loadPeople(home);
-  for (const p of series.payees) people[p.name] = p.address;
+  for (const p of series.payees) if (p.name !== shortAddress(p.address)) people[p.name] = p.address;
   savePeople(home, people);
   appendJournal(home, { at: now.toISOString(), series: id, period: -1, payee: -1, kind: "approved", planId, label: series.label });
   return series;

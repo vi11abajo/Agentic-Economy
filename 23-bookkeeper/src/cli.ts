@@ -125,6 +125,9 @@ async function main() {
       if (!arg) throw new Error("draft needs a JSON file (or - for stdin) with what the user asked for");
       const input = JSON.parse(readFileSync(arg === "-" ? 0 : arg, "utf8")) as DraftInput;
       const r = draft(input, loadPeople(home), now, home);
+      // The plan can be talked through before there is a wallet, but nothing pays without one, so say so early.
+      if (!readSecrets(home).privateKey) print(`NO WALLET YET: run bookkeeper init and have the user fill ${join(home, ".env")} before approving.
+`);
       if ("missing" in r) {
         print("STILL NEED (ask the user, one at a time):");
         for (const q of r.missing) print(`- ${q}`);
