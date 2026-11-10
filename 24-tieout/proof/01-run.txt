@@ -1,0 +1,54 @@
+... finding the blocks for the period
+... reading the wallet's history from the explorer
+... reading 82 receipts from Pharos
+... checking 9 balances at blocks 21807389 and 22676031
+... checking which approvals are still open
+SUMMARY
+Wallet 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb, from 2026-11-01 00:00 to 2026-11-10 18:00 (UTC): Pharos blocks 21807390 to 22676031.
+The wallet sent 64 transactions itself (gas: 0.071051857 PROS) and was on the receiving end of 18 sent by others.
+By kind: 3 transfers in, 44 transfers out, 1 swap, 6 approvals and 28 contract interactions.
+The books tie out: for all 8 assets the opening balance plus what came in minus what went out (and gas) equals the closing balance read from the chain, to the last unit.
+Approvals in the period went to 4 token and spender pairs; 1 of them still open at the end.
+
+DOES IT ADD UP (opening + in - out - gas = closing on chain)
+  PROS: 0.10463686 PROS -> 0.002894438579752846 PROS  ties
+  USDC: 2.953684 USDC -> 0.48979 USDC  ties
+  pCARR: 0 pCARR -> 1 pCARR  ties
+  pTACO: 0 pTACO -> 1 pTACO  ties
+  pMusk: 1,120.260278420511658401 pMusk -> 1,385.676143983257730873 pMusk  ties
+  sbUSDC-ph-eco: 0 sbUSDC-ph-eco -> 0 sbUSDC-ph-eco  ties
+  Wrapped PROS: 0 Wrapped PROS -> 0 Wrapped PROS  ties
+  APT: 0 APT -> 0 APT  ties
+
+TOTALS BY CATEGORY
+  Transfers in: 3  (in 2.498501 USDC; in 1 pCARR)
+  Transfers out: 44  (out 0.02 PROS; out 2.962393 USDC)
+  Swaps: 1  (out 0.008690564420247154 PROS; in 1 pTACO)
+  Approvals: 6
+  Contract interactions: 28  (in 0.91 USDC, out 2.910002 USDC; in 1.981532393711254967 APT, out 1.981532393711254967 APT; in 0.1 PROS, out 0.102 PROS; in 0.2 Wrapped PROS, out 0.2 Wrapped PROS; in 0.896111322636741101 sbUSDC-ph-eco, out 0.896111322636741101 sbUSDC-ph-eco; in 265.415865562746072472 pMusk)
+
+WORTH A SECOND LOOK
+  - USDC approval to Morpho is still open at the end of the period (0.000006 USDC left)  https://www.pharosscan.xyz/tx/0xf60d336b65719366d29f44d0f4f49c79f215a274ac2c5203ff152335e5113998
+  - first payment ever to 0xa991…4348: 0.02 PROS  https://www.pharosscan.xyz/tx/0x9abadabd20ef973f75720ab5a7ab38e0a73a3ddc2ec430e31208982c4a8f385f
+  - first payment ever to 0xC5F6…0F45: 0.00001 USDC  https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e
+  - first payment ever to 0x2Cfa…a971: 0.00001 USDC  https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e
+  - first payment ever to 0xb143…B048: 0.00001 USDC  https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e
+  - first payment ever to 0x4FFD…0002: 0.00001 USDC  https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e
+  - and 28 more like that (all in the CSV)
+  - first call to T0Vault (Deposit)  https://www.pharosscan.xyz/tx/0xb39f087712be2c910b680feb567006a5e2b3c614b35bdde889eb67126a27fe97
+  - first call to Morpho (Supply Collateral)  https://www.pharosscan.xyz/tx/0x73727a3617fb12adcb07181a91d7bf8cb19f5ea736abfc750e2e1cc94f0954c7
+  - first call to sbUSDC-ph-eco (Deposit)  https://www.pharosscan.xyz/tx/0x6ce1e4f28e09adb78290237fe02f7337bcbb1fcfc8cf27d5e5e1e56b297afa7d
+  - first call to 0x14f0…9d0A (Swap Eth For Exact Tokens)  https://www.pharosscan.xyz/tx/0xb096cf58ef2f6f4acd01aaa7ac34ed1d95acc9497d8dfccd1e8c69ca5d5f8baf
+  - largest outgoing USDC in the period: 2.929983 USDC (of 47)  https://www.pharosscan.xyz/tx/0xa70e41ecdf783e522d60bf6c140473c8db71ae0efed8cc7643c2696b5b3d698b
+  - largest outgoing PROS in the period: 0.05 PROS (of 6)  https://www.pharosscan.xyz/tx/0xd064b4371d27f9ba65ebdb7b0ef48b30ac5d3f44ac20bdbeaf3ec62af08ee749
+  - largest outgoing Wrapped PROS in the period: 0.05 Wrapped PROS (of 4)  https://www.pharosscan.xyz/tx/0x73727a3617fb12adcb07181a91d7bf8cb19f5ea736abfc750e2e1cc94f0954c7
+  - largest incoming Wrapped PROS in the period: 0.05 Wrapped PROS (of 4)  https://www.pharosscan.xyz/tx/0xd064b4371d27f9ba65ebdb7b0ef48b30ac5d3f44ac20bdbeaf3ec62af08ee749
+  - largest incoming USDC in the period: 1.998501 USDC (of 5)  https://www.pharosscan.xyz/tx/0xbce35645531c6b61a5756370fe054d77bda98af5ead00dd608cb9b7bf565b09f
+  - largest incoming PROS in the period: 0.05 PROS (of 2)  https://www.pharosscan.xyz/tx/0x2a68bfa2ef4aa7ee208da2ec4a6cee706e61581b84ac9b88a10e05c3e64a28d7
+  - largest incoming pMusk in the period: 132.707950331018235611 pMusk (of 2)  https://www.pharosscan.xyz/tx/0x44057f9b8db4fc1ee0f902cc9c2c31887495e98a163798f09678dfef2ff67aa9
+
+FILES (fingerprint d4bd87708ca2307c)
+  proof\tieout-46441d-2026-11-01-to-2026-11-10.md
+  proof\tieout-46441d-2026-11-01-to-2026-11-10.csv
+  proof\tieout-46441d-2026-11-01-to-2026-11-10-books.csv
+  proof\tieout-46441d-2026-11-01-to-2026-11-10.pdf

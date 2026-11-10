@@ -1,0 +1,43 @@
+... finding the blocks for the period
+... reading the wallet's history from the explorer
+... reading 0 receipts from Pharos
+... checking 29 balances at blocks 21807389 and 22606123
+... checking which approvals are still open
+SUMMARY
+Wallet 0xF4DFDD6407a63A36bD26af92b593E7fdC913A989, from 2026-11-01 00:00 to 2026-11-09 23:59 (UTC): Pharos blocks 21807390 to 22606123.
+Nothing touched this wallet in the period.
+The books do NOT fully tie: 3 of 19 assets have a gap between what the transactions explain and the closing balance on chain (see "Does it add up").
+
+DOES IT ADD UP (opening + in - out - gas = closing on chain)
+  PROS: 0.16387038 PROS -> 0.16387038 PROS  ties
+  USDC: 0.14 USDC -> 0.14 USDC  ties
+  variableDebtUSDC: 4.59174 variableDebtUSDC -> 4.595352 variableDebtUSDC  OFF by 0.003612 variableDebtUSDC
+  UNI-V2 0x040c…c1FB: 0.555791395362828406 UNI-V2 0x040c…c1FB -> 0.555791395362828406 UNI-V2 0x040c…c1FB  ties
+  UNI-V2 0x2A32…88c6: 20.031716403614541767 UNI-V2 0x2A32…88c6 -> 20.031716403614541767 UNI-V2 0x2A32…88c6  ties
+  bUSDC: 6.070607 bUSDC -> 6.073345 bUSDC  OFF by 0.002738 bUSDC
+  UNI-V2 0x9439…7238: 0.453154571879236615 UNI-V2 0x9439…7238 -> 0.453154571879236615 UNI-V2 0x9439…7238  ties
+  UNI-V2 0x91e3…D6e1: 0.03749999999132267 UNI-V2 0x91e3…D6e1 -> 0.03749999999132267 UNI-V2 0x91e3…D6e1  ties
+  UNI-V2 0xd3c5…F8dE: 7.755553124981515713 UNI-V2 0xd3c5…F8dE -> 7.755553124981515713 UNI-V2 0xd3c5…F8dE  ties
+  UNI-V2 0x193E…b445: 0.08 UNI-V2 0x193E…b445 -> 0.08 UNI-V2 0x193E…b445  ties
+  DLP_5c83673e: 0.999999999999998999 DLP_5c83673e -> 0.999999999999998999 DLP_5c83673e  ties
+  DLP_fef4ad62: 199.999999999999998999 DLP_fef4ad62 -> 199.999999999999998999 DLP_fef4ad62  ties
+  bWPHRS: 0.100025044899776191 bWPHRS -> 0.100034434904670076 bWPHRS  OFF by 0.000009390004893885 bWPHRS
+  UNI-V2 0xcFaC…76CD: 0.0000000006 UNI-V2 0xcFaC…76CD -> 0.0000000006 UNI-V2 0xcFaC…76CD  ties
+  UNI-V2 0xF399…6204: 0.069167961159416858 UNI-V2 0xF399…6204 -> 0.069167961159416858 UNI-V2 0xF399…6204  ties
+  UNI-V2 0xc18E…F812: 11,357.040870042224976019 UNI-V2 0xc18E…F812 -> 11,357.040870042224976019 UNI-V2 0xc18E…F812  ties
+  UNI-V2 0x03aa…C930: 0.000000000632454532 UNI-V2 0x03aa…C930 -> 0.000000000632454532 UNI-V2 0x03aa…C930  ties
+  UNI-V2 0x0Cab…d828: 0.000000000003999 UNI-V2 0x0Cab…d828 -> 0.000000000003999 UNI-V2 0x0Cab…d828  ties
+  UNI-V2 0x372b…FbEC: 0.000000000006323555 UNI-V2 0x372b…FbEC -> 0.000000000006323555 UNI-V2 0x372b…FbEC  ties
+
+TOTALS BY CATEGORY
+
+WORTH A SECOND LOOK
+  - variableDebtUSDC doesn't tie: it looks like a lending debt token, and what the wallet owes grew by 0.003612 variableDebtUSDC with no transaction, which is how borrow interest shows up.
+  - bUSDC doesn't tie: the closing balance is higher than the transactions explain by 0.002738 bUSDC. Something moved it without a transfer the explorer lists (interest, a rebase, or a missed transaction).
+  - bWPHRS doesn't tie: the closing balance is higher than the transactions explain by 0.000009390004893885 bWPHRS. Something moved it without a transfer the explorer lists (interest, a rebase, or a missed transaction).
+
+FILES (fingerprint ce5b80b241678baf)
+  proof\tieout-f4dfdd-2026-11-01-to-2026-11-09.md
+  proof\tieout-f4dfdd-2026-11-01-to-2026-11-09.csv
+  proof\tieout-f4dfdd-2026-11-01-to-2026-11-09-books.csv
+  proof\tieout-f4dfdd-2026-11-01-to-2026-11-09.pdf
