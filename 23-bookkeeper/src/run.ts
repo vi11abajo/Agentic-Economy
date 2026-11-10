@@ -79,6 +79,9 @@ export function paymentStates(s: Series, journal: JournalEvent[], now: Date): Pa
       if (ev.some((e) => e.kind === "missed")) return out.push({ ...base, status: "missed" });
       const open = openAttempt(ev);
       if (open) return out.push({ ...base, status: "sent", tx: open.tx as Hex });
+      const stuck = ev.find((e) => e.kind === "failed" && e.stuck);
+      if (stuck) return out.push({ ...base, status: "failed", tx: stuck.tx as Hex | undefined, note: "needs you: " + String(stuck.reason) });
+      if (s.status !== "active" && !ev.length) return;
       if (closed) return out.push({ ...base, status: "missed", note: "window closed" });
       const lastNews = [...ev].reverse().find((e) => e.kind === "failed" || e.kind === "short");
       if (lastNews?.kind === "failed") return out.push({ ...base, status: "failed", tx: lastNews.tx as Hex | undefined, note: String(lastNews.reason ?? "") });
@@ -168,8 +171,9 @@ async function payWhatIsDue(ctx: RunCtx, report: RunReport) {
           ev.push(e);
         };
         const value = parseUnits(payee.amount, DECIMALS[s.token]);
-        const authNonce = paymentNonce(wallet, s.id, p, i);
+        const authNonce = paymentNonce(wallet, s.id, s.planId, p, i);
 
+        try {
         const paidNow = (tx: Hex | null, rc?: { blockNumber: bigint; gasUsed: bigint }, note?: string) => {
           write("paid", { tx, block: rc ? Number(rc.blockNumber) : undefined, gasUsed: rc ? Number(rc.gasUsed) : undefined, note });
           report.paid++;
@@ -215,10 +219,27 @@ async function payWhatIsDue(ctx: RunCtx, report: RunReport) {
           } else if (s.token === "USDC" && (await chain.authorizationState(wallet, authNonce))) {
             paidNow((await chain.findAuthorizationUsed(wallet, authNonce, BigInt(Number(open.block ?? 0)))) ?? hash, undefined, "found on chain");
             continue;
-          } else if ((await chain.pendingNonce(wallet)) > Number(open.txNonce)) {
-            // Our account nonce was used by another tx, so these bytes can never be mined any more.
-            write("failed", { tx: hash, reason: "dropped: the node lost it and its nonce was used by another transaction" });
-            report.failed++;
+          } else if ((await chain.latestNonce(wallet)) > Number(open.txNonce)) {
+            // A mined tx already used our account nonce, and it isn't ours (ours would have a receipt): these bytes can
+            // never land. Ask once more after a pause, in case the receipt was just slow to show up.
+            await sleep(RECEIPT_POLL_MS);
+            const late = await chain.receipt(hash);
+            if (late) {
+              if (late.status === "success") paidNow(hash, late);
+              else write("failed", { tx: hash, reason: "the transaction reverted on chain", block: Number(late.blockNumber) });
+              continue;
+            }
+            if (s.token === "USDC") {
+              // Safe to try again: the USDC nonce still guards this period.
+              write("failed", { tx: hash, reason: "dropped: its account nonce was used by another transaction" });
+              report.failed++;
+            } else {
+              // PROS has no such guard. Something else spent this nonce from the bookkeeper's wallet, so we stop and let
+              // the user look rather than guess.
+              write("failed", { tx: hash, stuck: true, reason: "the wallet's nonce for this payment was used by another transaction, so I can't be sure it wasn't paid; check it yourself, I won't retry it on my own" });
+              report.failed++;
+              report.lines.push(`${tag}: stuck, needs the user (nonce ${open.txNonce} used by another tx)`);
+            }
             continue;
           } else {
             try {
@@ -232,6 +253,10 @@ async function payWhatIsDue(ctx: RunCtx, report: RunReport) {
           }
         }
 
+        if (ev.some((e) => e.kind === "failed" && e.stuck)) continue;
+        // A stopped series only finishes what it had already sent; it doesn't collect missed periods either.
+        if (s.status !== "active") continue;
+
         // 2. Too late: never pay a period after its window.
         if (now.getTime() >= nextDue.getTime()) {
           write("missed", { due: due.toISOString(), note: "the period ended before it could be paid" });
@@ -239,7 +264,6 @@ async function payWhatIsDue(ctx: RunCtx, report: RunReport) {
           report.lines.push(`${tag}: missed (period ended ${nextDue.toISOString()})`);
           continue;
         }
-        if (s.status !== "active") continue;
 
         if (!ev.some((e) => e.kind === "due")) write("due", { due: due.toISOString(), block: Number(await chain.blockNumber()) });
 
@@ -289,18 +313,31 @@ async function payWhatIsDue(ctx: RunCtx, report: RunReport) {
         try {
           await chain.sendRaw(built.raw);
         } catch (e) {
-          if (!(await chain.knowsTx(built.hash))) {
-            const reason = (e as Error).message.split("\n")[0];
+          const reason = (e as Error).message.split("\n")[0];
+          if (s.token === "USDC" && !(await chain.knowsTx(built.hash))) {
+            // A USDC payment can be retried freely: if the first one did land after all, the token refuses the second.
             write("failed", { tx: built.hash, reason, stage: "broadcast" });
             report.failed++;
             report.lines.push(`${tag}: the node refused it: ${reason}`);
             continue;
           }
+          // PROS: an unclear answer may still mean the node took it. Keep the attempt open; the next run asks the
+          // chain again and, if needed, re-sends these same bytes (which can only land once).
+          if (s.token === "PROS") report.lines.push(`${tag}: unclear answer from the node (${reason}); keeping this exact tx and checking again next run`);
         }
         write("sent", { tx: built.hash });
         if (s.token === "USDC") usdcLeft -= value;
         prosLeft -= built.gas * built.gasPrice + (s.token === "PROS" ? value : 0n);
         await waitFor(built.hash);
+        } catch (e) {
+          // One payment that can't be checked right now (RPC down, a payee the node rejects at estimate) must not stop
+          // the others. Nothing is written as failed here: an attempt already signed stays open for the next wake.
+          report.lines.push(`${tag}: could not finish this time (${(e as Error).message.split("\n")[0]}); the next run tries again`);
+          if (!openAttempt(ev) && /estimate|execution reverted/i.test((e as Error).message)) {
+            appendJournal(home, { at: at(), series: s.id, period: p, payee: i, kind: "failed", reason: (e as Error).message.split("\n")[0], stage: "estimate" });
+            report.failed++;
+          }
+        }
       }
     }
   }
@@ -316,6 +353,7 @@ async function tellTheUser(ctx: RunCtx, report: RunReport) {
   const deliver = async (card: Card, refs: string[], s?: Series) => {
     try {
       await notify.send(card);
+      for (const ref of refs) done.add(ref);
       for (const ref of refs) appendJournal(home, { at: now.toISOString(), series: s?.id ?? "*", period: -1, payee: -1, kind: "notified", ref, about: card.kind });
     } catch {
       report.undelivered++;
@@ -345,8 +383,8 @@ async function tellTheUser(ctx: RunCtx, report: RunReport) {
       await deliver({ kind: "short", ...common(s, e.period), due, name: payee.name, amount: payee.amount, need: String(e.need), have: String(e.have), asset: String(e.asset), wallet: account.address as Hex }, [`short:${e.series}:${e.period}:${e.payee}`], s);
     if (e.kind === "missed" && !done.has(`missed:${e.series}:${e.period}:${e.payee}`))
       await deliver({ kind: "missed", ...common(s, e.period), due, name: payee.name, amount: payee.amount }, [`missed:${e.series}:${e.period}:${e.payee}`], s);
-    if (e.kind === "failed" && !done.has(`failed:${e.series}:${e.period}:${e.payee}:${e.at}:${e.tx ?? ""}`))
-      await deliver({ kind: "failed", ...common(s, e.period), name: payee.name, amount: payee.amount, reason: String(e.reason), tx: e.tx as Hex | undefined }, [`failed:${e.series}:${e.period}:${e.payee}:${e.at}:${e.tx ?? ""}`], s);
+    if (e.kind === "failed" && !done.has(`failed:${e.series}:${e.period}:${e.payee}:${e.reason}`))
+      await deliver({ kind: "failed", ...common(s, e.period), name: payee.name, amount: payee.amount, reason: String(e.reason), tx: e.tx as Hex | undefined }, [`failed:${e.series}:${e.period}:${e.payee}:${e.reason}`], s);
   }
 
   // Runway: after every payout, and whenever the next period of a series turns out short (once per period).

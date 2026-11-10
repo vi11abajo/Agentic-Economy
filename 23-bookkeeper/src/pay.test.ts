@@ -10,17 +10,18 @@ const agent = privateKeyToAccount(("0x" + "ab".repeat(32)) as `0x${string}`);
 const PETE = "0x1111111111111111111111111111111111111111" as const;
 
 test("the nonce is the same for the same payment and different for any other", () => {
-  const n = paymentNonce(agent.address, "payroll", 3, 0);
-  assert.equal(n, paymentNonce(agent.address, "payroll", 3, 0));
-  assert.notEqual(n, paymentNonce(agent.address, "payroll", 4, 0));
-  assert.notEqual(n, paymentNonce(agent.address, "payroll", 3, 1));
-  assert.notEqual(n, paymentNonce(agent.address, "rent", 3, 0));
-  assert.notEqual(n, paymentNonce(PETE, "payroll", 3, 0));
+  const n = paymentNonce(agent.address, "payroll", "plan1", 3, 0);
+  assert.equal(n, paymentNonce(agent.address, "payroll", "plan1", 3, 0));
+  assert.notEqual(n, paymentNonce(agent.address, "payroll", "plan1", 4, 0));
+  assert.notEqual(n, paymentNonce(agent.address, "payroll", "plan1", 3, 1));
+  assert.notEqual(n, paymentNonce(agent.address, "rent", "plan1", 3, 0));
+  assert.notEqual(n, paymentNonce(agent.address, "payroll", "plan2", 3, 0)); // the same name approved again is a new series
+  assert.notEqual(n, paymentNonce(PETE, "payroll", "plan1", 3, 0));
 });
 
 test("the USDC payment is a transferWithAuthorization signed for USDC v2 on chain 1672 with the period's window", async () => {
   const chain = new FakeChain();
-  const nonce = paymentNonce(agent.address, "payroll", 0, 0);
+  const nonce = paymentNonce(agent.address, "payroll", "plan1", 0, 0);
   const p = await buildUsdcPayment(agent, chain, { to: PETE, value: 50_000_000n, validAfter: 999n, validBefore: 1604800n, nonce });
   const tx = parseTransaction(p.raw);
   assert.equal(tx.to?.toLowerCase(), USDC.toLowerCase());
@@ -45,7 +46,7 @@ test("on the fake chain the same payment goes through once and is refused the se
   const chain = new FakeChain();
   chain.time = 1000n;
   chain.setUsdc(agent.address, 100_000_000n);
-  const nonce = paymentNonce(agent.address, "payroll", 0, 0);
+  const nonce = paymentNonce(agent.address, "payroll", "plan1", 0, 0);
   const one = await buildUsdcPayment(agent, chain, { to: PETE, value: 50_000_000n, validAfter: 999n, validBefore: 2000n, nonce });
   await chain.sendRaw(one.raw);
   assert.equal((await chain.receipt(one.hash))?.status, "success");

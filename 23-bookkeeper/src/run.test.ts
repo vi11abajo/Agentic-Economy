@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { privateKeyToAccount } from "viem/accounts";
@@ -84,7 +84,7 @@ test("a due period is paid to everyone once, one card for the period, and a re-r
 
 test("a payment the chain already has (crash after broadcast) is recorded as paid, nothing is sent", async () => {
   const w = world([payroll({ payees: [{ name: "Pete", address: PETE, amount: "0.1" }] })]);
-  const nonce = paymentNonce(agent.address, "payroll", 0, 0);
+  const nonce = paymentNonce(agent.address, "payroll", "abc", 0, 0);
   w.chain.used.set(`${agent.address.toLowerCase()}:${nonce}`, ("0x" + "cd".repeat(32)) as `0x${string}`);
   const r = await w.at("2026-11-13T09:05:00Z");
   assert.equal(w.chain.sent.length, 0);
@@ -224,4 +224,103 @@ test("after payouts the runway goes out, and a short next period is warned about
   await w.at("2026-11-14T09:00:00Z");
   assert.equal(w.inbox.of("runway").length, 1);
   appendJournal(w.home, { at: "x", series: "payroll", period: -1, payee: -1, kind: "stopped" });
+});
+
+// ---- final review fixes ----
+
+test("PROS: an unclear broadcast that the node did take is never paid twice", async () => {
+  const w = world([payroll({ token: "PROS", payees: [{ name: "Pete", address: PETE, amount: "0.01" }] })]);
+  w.chain.holdInPool = true;
+  w.chain.dropResponse = true;
+  w.chain.hidePool = true; // a lagging node: the tx is in some pool but this one can't see it yet
+  const r1 = await w.at("2026-11-13T09:00:30Z");
+  assert.equal(r1.failed, 0);
+  await w.chain.mine();
+  w.chain.dropResponse = false;
+  const r2 = await w.at("2026-11-13T10:00:00Z");
+  assert.equal(r2.paid, 1);
+  await w.at("2026-11-13T11:00:00Z");
+  assert.equal(w.chain.sent.length, 1);
+  assert.equal(await w.chain.prosBalance(PETE), 10n ** 16n);
+});
+
+test("PROS: a receipt lookup that errors is not read as 'dropped'", async () => {
+  const w = world([payroll({ token: "PROS", payees: [{ name: "Pete", address: PETE, amount: "0.01" }] })]);
+  w.chain.holdInPool = true;
+  await w.at("2026-11-13T09:00:30Z");
+  await w.chain.mine();
+  w.chain.rpcDown = true;
+  const r2 = await w.at("2026-11-13T10:00:00Z");
+  assert.equal(r2.failed, 0);
+  w.chain.rpcDown = false;
+  const r3 = await w.at("2026-11-13T11:00:00Z");
+  assert.equal(r3.paid, 1);
+  assert.equal(w.chain.sent.length, 1);
+  assert.equal(await w.chain.prosBalance(PETE), 10n ** 16n);
+});
+
+test("PROS: a tx whose nonce was taken by another one is flagged for the user, not rebuilt on its own", async () => {
+  const w = world([payroll({ token: "PROS", payees: [{ name: "Pete", address: PETE, amount: "0.01" }] })]);
+  w.chain.holdInPool = true;
+  await w.at("2026-11-13T09:00:30Z");
+  w.chain.pool.clear();
+  w.chain.nonces.set(agent.address.toLowerCase(), 1); // something else used nonce 0
+  await w.at("2026-11-13T10:00:00Z");
+  await w.at("2026-11-13T11:00:00Z");
+  assert.equal(w.chain.sent.length, 1);
+  const failed = w.inbox.of("failed");
+  assert.equal(failed.length, 1);
+  assert.match(failed[0].kind === "failed" ? failed[0].reason : "", /check it yourself/);
+});
+
+test("a stopped series does not pile up missed periods or cards", async () => {
+  const w = world([payroll({ status: "stopped" })]);
+  const r = await w.at("2026-11-27T10:00:00Z");
+  assert.equal(r.missed, 0);
+  assert.equal(w.inbox.cards.length, 0);
+});
+
+test("one payee whose payment can't even be estimated doesn't block the others", async () => {
+  const w = world([payroll({ token: "PROS", payees: [{ name: "Pete", address: PETE, amount: "0.01" }, { name: "Anna", address: ANNA, amount: "0.01" }] })]);
+  w.chain.estimateFailsFor = PETE;
+  const r = await w.at("2026-11-13T09:00:30Z");
+  assert.equal(r.paid, 1);
+  assert.equal(r.failed, 1);
+  assert.equal(await w.chain.prosBalance(ANNA), 10n ** 16n);
+  assert.equal(w.inbox.of("paid").length, 1);
+});
+
+test("the same refusal over many wakes is one card", async () => {
+  const w = world([payroll({ payees: [{ name: "Pete", address: PETE, amount: "0.1" }] })]);
+  w.chain.refuseSimulation = "FiatTokenV2: account is blacklisted";
+  await w.at("2026-11-13T09:00:30Z");
+  await w.at("2026-11-13T10:00:00Z");
+  await w.at("2026-11-13T11:00:00Z");
+  assert.equal(w.inbox.of("failed").length, 1);
+});
+
+test("a lock left by a run that died long ago doesn't stop payments, even if its pid is alive again", async () => {
+  const w = world();
+  writeFileSync(join(w.home, "run.lock"), `${process.pid} ${Date.now() - 40 * 60_000}`);
+  const r = await w.at("2026-11-13T09:00:30Z");
+  assert.equal(r.skipped, undefined);
+  assert.equal(r.paid, 2);
+});
+
+test("a lock file being written right now (still empty) counts as held", async () => {
+  const w = world();
+  writeFileSync(join(w.home, "run.lock"), "");
+  const r = await w.at("2026-11-13T09:00:30Z");
+  assert.equal(r.skipped, "locked");
+});
+
+test("an old lock holding only a pid that Windows gave to another live process is stale", async () => {
+  const w = world();
+  const f = join(w.home, "run.lock");
+  writeFileSync(f, String(process.pid));
+  const old = new Date(Date.now() - 40 * 60_000);
+  utimesSync(f, old, old);
+  const r = await w.at("2026-11-13T09:00:30Z");
+  assert.equal(r.skipped, undefined);
+  assert.equal(r.paid, 2);
 });
