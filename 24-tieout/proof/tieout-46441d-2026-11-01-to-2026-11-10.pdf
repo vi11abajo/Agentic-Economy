@@ -1,0 +1,1266 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [13 0 R 41 0 R 71 0 R 100 0 R 132 0 R 134 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 6974 >>
+stream
+BT 0 g /F2 18 Tf 40.00 529.00 Td (Wallet activity report) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 510.50 Td (Wallet 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb on Pharos mainnet \(chain 1672\)) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 493.00 Td (Period 2026-11-01 00:00 to 2026-11-10 18:00 \(UTC\). Opening state after block 21807389 \(2026-10-31 23:59:59\), closing state after block 22676031 \(2026-11-10 18:00:00\).) Tj ET
+BT 0 g /F2 14 Tf 40.00 466.00 Td (Summary) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 447.50 Td (Wallet 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb, from 2026-11-01 00:00 to 2026-11-10 18:00 \(UTC\): Pharos blocks 21807390 to 22676031.) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 430.00 Td (The wallet sent 64 transactions itself \(gas: 0.071051857 PROS\) and was on the receiving end of 18 sent by others.) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 412.50 Td (By kind: 3 transfers in, 44 transfers out, 1 swap, 6 approvals and 28 contract interactions.) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 395.00 Td (The books tie out: for all 8 assets the opening balance plus what came in minus what went out \(and gas\) equals the closing balance read from the chain, to the last unit.) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 377.50 Td (Approvals in the period went to 4 token and spender pairs; 1 of them still open at the end.) Tj ET
+BT 0 g /F2 14 Tf 40.00 350.50 Td (Does it add up) Tj ET
+BT 0.25 g /F2 7.5 Tf 43.00 335.50 Td (Asset) Tj ET
+BT 0.25 g /F2 7.5 Tf 193.36 335.50 Td (Opening) Tj ET
+BT 0.25 g /F2 7.5 Tf 319.87 335.50 Td (In) Tj ET
+BT 0.25 g /F2 7.5 Tf 416.49 335.50 Td (Out) Tj ET
+BT 0.25 g /F2 7.5 Tf 483.29 335.50 Td (Gas) Tj ET
+BT 0.25 g /F2 7.5 Tf 547.84 335.50 Td (Expected closing) Tj ET
+BT 0.25 g /F2 7.5 Tf 659.67 335.50 Td (Closing on chain) Tj ET
+BT 0.25 g /F2 7.5 Tf 724.99 335.50 Td (Result) Tj ET
+0.4 G 0.5 w 40 330.50 m 802 330.50 l S
+BT 0 g /F1 7.5 Tf 43.00 321.50 Td (PROS) Tj ET
+BT 0 g /F1 7.5 Tf 184.07 321.50 Td (0.10463686) Tj ET
+BT 0 g /F1 7.5 Tf 316.13 321.50 Td (0.1) Tj ET
+BT 0 g /F1 7.5 Tf 348.12 321.50 Td (0.130690564420247154) Tj ET
+BT 0 g /F1 7.5 Tf 454.22 321.50 Td (0.071051857) Tj ET
+BT 0 g /F1 7.5 Tf 527.18 321.50 Td (0.002894438579752846) Tj ET
+BT 0 g /F1 7.5 Tf 637.67 321.50 Td (0.002894438579752846) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 321.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 316.50 m 802 316.50 l S
+BT 0 g /F1 7.5 Tf 43.00 307.50 Td (USDC) Tj ET
+BT 0 g /F1 7.5 Tf 192.41 307.50 Td (2.953684) Tj ET
+BT 0 g /F1 7.5 Tf 295.29 307.50 Td (3.408501) Tj ET
+BT 0 g /F1 7.5 Tf 398.16 307.50 Td (5.872395) Tj ET
+BT 0 g /F1 7.5 Tf 498.01 307.50 Td () Tj ET
+BT 0 g /F1 7.5 Tf 581.39 307.50 Td (0.48979) Tj ET
+BT 0 g /F1 7.5 Tf 691.88 307.50 Td (0.48979) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 307.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 302.50 m 802 302.50 l S
+BT 0 g /F1 7.5 Tf 43.00 293.50 Td (pCARR) Tj ET
+BT 0 g /F1 7.5 Tf 219.52 293.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 322.39 293.50 Td (1) Tj ET
+BT 0 g /F1 7.5 Tf 425.26 293.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 498.01 293.50 Td () Tj ET
+BT 0 g /F1 7.5 Tf 604.33 293.50 Td (1) Tj ET
+BT 0 g /F1 7.5 Tf 714.82 293.50 Td (1) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 293.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 288.50 m 802 288.50 l S
+BT 0 g /F1 7.5 Tf 43.00 279.50 Td (pTACO) Tj ET
+BT 0 g /F1 7.5 Tf 219.52 279.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 322.39 279.50 Td (1) Tj ET
+BT 0 g /F1 7.5 Tf 425.26 279.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 498.01 279.50 Td () Tj ET
+BT 0 g /F1 7.5 Tf 604.33 279.50 Td (1) Tj ET
+BT 0 g /F1 7.5 Tf 714.82 279.50 Td (1) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 279.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 274.50 m 802 274.50 l S
+BT 0 g /F1 7.5 Tf 43.00 265.50 Td (pMusk) Tj ET
+BT 0 g /F1 7.5 Tf 127.78 265.50 Td (1,120.260278420511658401) Tj ET
+BT 0 g /F1 7.5 Tf 236.91 265.50 Td (265.415865562746072472) Tj ET
+BT 0 g /F1 7.5 Tf 425.26 265.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 498.01 265.50 Td () Tj ET
+BT 0 g /F1 7.5 Tf 512.59 265.50 Td (1,385.676143983257730873) Tj ET
+BT 0 g /F1 7.5 Tf 623.08 265.50 Td (1,385.676143983257730873) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 265.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 260.50 m 802 260.50 l S
+BT 0 g /F1 7.5 Tf 43.00 251.50 Td (sbUSDC-ph-eco) Tj ET
+BT 0 g /F1 7.5 Tf 219.52 251.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 245.25 251.50 Td (0.896111322636741101) Tj ET
+BT 0 g /F1 7.5 Tf 348.12 251.50 Td (0.896111322636741101) Tj ET
+BT 0 g /F1 7.5 Tf 498.01 251.50 Td () Tj ET
+BT 0 g /F1 7.5 Tf 604.33 251.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 714.82 251.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 251.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 246.50 m 802 246.50 l S
+BT 0 g /F1 7.5 Tf 43.00 237.50 Td (Wrapped PROS) Tj ET
+BT 0 g /F1 7.5 Tf 219.52 237.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 316.13 237.50 Td (0.2) Tj ET
+BT 0 g /F1 7.5 Tf 419.00 237.50 Td (0.2) Tj ET
+BT 0 g /F1 7.5 Tf 498.01 237.50 Td () Tj ET
+BT 0 g /F1 7.5 Tf 604.33 237.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 714.82 237.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 237.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 232.50 m 802 232.50 l S
+BT 0 g /F1 7.5 Tf 43.00 223.50 Td (APT) Tj ET
+BT 0 g /F1 7.5 Tf 219.52 223.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 245.25 223.50 Td (1.981532393711254967) Tj ET
+BT 0 g /F1 7.5 Tf 348.12 223.50 Td (1.981532393711254967) Tj ET
+BT 0 g /F1 7.5 Tf 498.01 223.50 Td () Tj ET
+BT 0 g /F1 7.5 Tf 604.33 223.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 714.82 223.50 Td (0) Tj ET
+BT 0 g /F1 7.5 Tf 724.99 223.50 Td (ties) Tj ET
+0.85 G 0.5 w 40 218.50 m 802 218.50 l S
+BT 0 g /F2 14 Tf 40.00 188.50 Td (Totals by category) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 173.00 Td (Category) Tj ET
+BT 0.25 g /F2 8 Tf 216.60 173.00 Td (Transactions) Tj ET
+BT 0.25 g /F2 8 Tf 271.60 173.00 Td (In) Tj ET
+BT 0.25 g /F2 8 Tf 477.34 173.00 Td (Out) Tj ET
+BT 0.25 g /F2 8 Tf 764.74 173.00 Td (Gas paid) Tj ET
+0.4 G 0.5 w 40 168.00 m 802 168.00 l S
+BT 0 g /F1 8 Tf 43.00 158.50 Td (Transfers in) Tj ET
+BT 0 g /F1 8 Tf 261.15 158.50 Td (3) Tj ET
+BT 0 g /F1 8 Tf 271.60 158.50 Td (2.498501 USDC) Tj ET
+BT 0 g /F1 8 Tf 271.60 148.00 Td (1 pCARR) Tj ET
+BT 0 g /F1 8 Tf 477.34 158.50 Td () Tj ET
+BT 0 g /F1 8 Tf 799.00 158.50 Td () Tj ET
+0.85 G 0.5 w 40 143.00 m 802 143.00 l S
+BT 0 g /F1 8 Tf 43.00 133.50 Td (Transfers out) Tj ET
+BT 0 g /F1 8 Tf 256.70 133.50 Td (44) Tj ET
+BT 0 g /F1 8 Tf 271.60 133.50 Td () Tj ET
+BT 0 g /F1 8 Tf 477.34 133.50 Td (0.02 PROS) Tj ET
+BT 0 g /F1 8 Tf 477.34 123.00 Td (2.962393 USDC) Tj ET
+BT 0 g /F1 8 Tf 727.40 133.50 Td (0.032191943 PROS) Tj ET
+0.85 G 0.5 w 40 118.00 m 802 118.00 l S
+BT 0 g /F1 8 Tf 43.00 108.50 Td (Swaps) Tj ET
+BT 0 g /F1 8 Tf 261.15 108.50 Td (1) Tj ET
+BT 0 g /F1 8 Tf 271.60 108.50 Td (1 pTACO) Tj ET
+BT 0 g /F1 8 Tf 477.34 108.50 Td (0.008690564420247154 PROS) Tj ET
+BT 0 g /F1 8 Tf 731.85 108.50 Td (0.00123527 PROS) Tj ET
+0.85 G 0.5 w 40 103.50 m 802 103.50 l S
+BT 0 g /F1 8 Tf 43.00 94.00 Td (Approvals) Tj ET
+BT 0 g /F1 8 Tf 261.15 94.00 Td (6) Tj ET
+BT 0 g /F1 8 Tf 271.60 94.00 Td () Tj ET
+BT 0 g /F1 8 Tf 477.34 94.00 Td () Tj ET
+BT 0 g /F1 8 Tf 731.85 94.00 Td (0.00296834 PROS) Tj ET
+0.85 G 0.5 w 40 89.00 m 802 89.00 l S
+BT 0.5 g /F1 7 Tf 40 22 Td (page 1 of 6) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 305.50 64.25 315.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0xc879c018db60520f4355c26ed1a6d572cdac1815) >> >>
+endobj
+7 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 291.50 68.42 301.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0xd6d6c5b012a81d793dead821d1dd05446e1118c5) >> >>
+endobj
+8 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 277.50 68.00 287.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x52acdeb49056518578c7af788ae2c367132e2db5) >> >>
+endobj
+9 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 263.50 65.09 273.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0xe318ac4113324841265d270dc2393f1bf742a7f8) >> >>
+endobj
+10 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 249.50 97.59 259.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x15c25ed222fc498f672af5c3adb5ed0a96e1aff1) >> >>
+endobj
+11 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 235.50 96.77 245.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x52c48d4213107b20bc583832b0d951fb9ca8f0b0) >> >>
+endobj
+12 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 221.50 57.59 231.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x13282289b8b241cf16eb5b8bad401c7c2fdab0f8) >> >>
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R /Annots [6 0 R 7 0 R 8 0 R 9 0 R 10 0 R 11 0 R 12 0 R] >>
+endobj
+14 0 obj
+<< /Length 6487 >>
+stream
+BT 0.25 g /F2 8 Tf 43.00 545.50 Td (Category) Tj ET
+BT 0.25 g /F2 8 Tf 216.60 545.50 Td (Transactions) Tj ET
+BT 0.25 g /F2 8 Tf 271.60 545.50 Td (In) Tj ET
+BT 0.25 g /F2 8 Tf 477.34 545.50 Td (Out) Tj ET
+BT 0.25 g /F2 8 Tf 764.74 545.50 Td (Gas paid) Tj ET
+0.4 G 0.5 w 40 540.50 m 802 540.50 l S
+BT 0 g /F1 8 Tf 43.00 531.00 Td (Contract interactions) Tj ET
+BT 0 g /F1 8 Tf 256.70 531.00 Td (28) Tj ET
+BT 0 g /F1 8 Tf 271.60 531.00 Td (0.91 USDC) Tj ET
+BT 0 g /F1 8 Tf 271.60 520.50 Td (1.981532393711254967 APT) Tj ET
+BT 0 g /F1 8 Tf 271.60 510.00 Td (0.1 PROS) Tj ET
+BT 0 g /F1 8 Tf 271.60 499.50 Td (0.2 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 271.60 489.00 Td (0.896111322636741101 sbUSDC-ph-eco) Tj ET
+BT 0 g /F1 8 Tf 271.60 478.50 Td (265.415865562746072472 pMusk) Tj ET
+BT 0 g /F1 8 Tf 477.34 531.00 Td (2.910002 USDC) Tj ET
+BT 0 g /F1 8 Tf 477.34 520.50 Td (1.981532393711254967 APT) Tj ET
+BT 0 g /F1 8 Tf 477.34 510.00 Td (0.102 PROS) Tj ET
+BT 0 g /F1 8 Tf 477.34 499.50 Td (0.2 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 477.34 489.00 Td (0.896111322636741101 sbUSDC-ph-eco) Tj ET
+BT 0 g /F1 8 Tf 727.40 531.00 Td (0.034656304 PROS) Tj ET
+0.85 G 0.5 w 40 473.50 m 802 473.50 l S
+BT 0 g /F1 8 Tf 43.00 464.00 Td (Failed transactions) Tj ET
+BT 0 g /F1 8 Tf 261.15 464.00 Td (0) Tj ET
+BT 0 g /F1 8 Tf 271.60 464.00 Td () Tj ET
+BT 0 g /F1 8 Tf 477.34 464.00 Td () Tj ET
+BT 0 g /F1 8 Tf 799.00 464.00 Td () Tj ET
+0.85 G 0.5 w 40 459.00 m 802 459.00 l S
+BT 0 g /F2 14 Tf 40.00 429.00 Td (Worth a second look) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 413.50 Td (Why) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 413.50 Td (Link) Tj ET
+0.4 G 0.5 w 40 408.50 m 802 408.50 l S
+BT 0 g /F1 8 Tf 43.00 399.00 Td (USDC approval to Morpho is still open at the end of the period \(0.000006 USDC left\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 399.00 Td (0xf60d336b65719366\205) Tj ET
+0.85 G 0.5 w 40 394.00 m 802 394.00 l S
+BT 0 g /F1 8 Tf 43.00 384.50 Td (first payment ever to 0xa991\2054348: 0.02 PROS) Tj ET
+BT 0 g /F1 8 Tf 652.60 384.50 Td (0x9abadabd20ef973f\205) Tj ET
+0.85 G 0.5 w 40 379.50 m 802 379.50 l S
+BT 0 g /F1 8 Tf 43.00 370.00 Td (first payment ever to 0xC5F6\2050F45: 0.00001 USDC) Tj ET
+BT 0 g /F1 8 Tf 652.60 370.00 Td (0x1c2ed683b9d7231f\205) Tj ET
+0.85 G 0.5 w 40 365.00 m 802 365.00 l S
+BT 0 g /F1 8 Tf 43.00 355.50 Td (first payment ever to 0x2Cfa\205a971: 0.00001 USDC) Tj ET
+BT 0 g /F1 8 Tf 652.60 355.50 Td (0x1c2ed683b9d7231f\205) Tj ET
+0.85 G 0.5 w 40 350.50 m 802 350.50 l S
+BT 0 g /F1 8 Tf 43.00 341.00 Td (first payment ever to 0xb143\205B048: 0.00001 USDC) Tj ET
+BT 0 g /F1 8 Tf 652.60 341.00 Td (0x1c2ed683b9d7231f\205) Tj ET
+0.85 G 0.5 w 40 336.00 m 802 336.00 l S
+BT 0 g /F1 8 Tf 43.00 326.50 Td (first payment ever to 0x4FFD\2050002: 0.00001 USDC) Tj ET
+BT 0 g /F1 8 Tf 652.60 326.50 Td (0x1c2ed683b9d7231f\205) Tj ET
+0.85 G 0.5 w 40 321.50 m 802 321.50 l S
+BT 0 g /F1 8 Tf 43.00 312.00 Td (and 28 more like that \(all in the CSV\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 312.00 Td () Tj ET
+0.85 G 0.5 w 40 307.00 m 802 307.00 l S
+BT 0 g /F1 8 Tf 43.00 297.50 Td (first call to T0Vault \(Deposit\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 297.50 Td (0xb39f087712be2c91\205) Tj ET
+0.85 G 0.5 w 40 292.50 m 802 292.50 l S
+BT 0 g /F1 8 Tf 43.00 283.00 Td (first call to Morpho \(Supply Collateral\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 283.00 Td (0x73727a3617fb12ad\205) Tj ET
+0.85 G 0.5 w 40 278.00 m 802 278.00 l S
+BT 0 g /F1 8 Tf 43.00 268.50 Td (first call to sbUSDC-ph-eco \(Deposit\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 268.50 Td (0x6ce1e4f28e09adb7\205) Tj ET
+0.85 G 0.5 w 40 263.50 m 802 263.50 l S
+BT 0 g /F1 8 Tf 43.00 254.00 Td (first call to 0x14f0\2059d0A \(Swap Eth For Exact Tokens\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 254.00 Td (0xb096cf58ef2f6f4a\205) Tj ET
+0.85 G 0.5 w 40 249.00 m 802 249.00 l S
+BT 0 g /F1 8 Tf 43.00 239.50 Td (largest outgoing USDC in the period: 2.929983 USDC \(of 47\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 239.50 Td (0xa70e41ecdf783e52\205) Tj ET
+0.85 G 0.5 w 40 234.50 m 802 234.50 l S
+BT 0 g /F1 8 Tf 43.00 225.00 Td (largest outgoing PROS in the period: 0.05 PROS \(of 6\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 225.00 Td (0xd064b4371d27f9ba\205) Tj ET
+0.85 G 0.5 w 40 220.00 m 802 220.00 l S
+BT 0 g /F1 8 Tf 43.00 210.50 Td (largest outgoing Wrapped PROS in the period: 0.05 Wrapped PROS \(of 4\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 210.50 Td (0x73727a3617fb12ad\205) Tj ET
+0.85 G 0.5 w 40 205.50 m 802 205.50 l S
+BT 0 g /F1 8 Tf 43.00 196.00 Td (largest incoming Wrapped PROS in the period: 0.05 Wrapped PROS \(of 4\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 196.00 Td (0xd064b4371d27f9ba\205) Tj ET
+0.85 G 0.5 w 40 191.00 m 802 191.00 l S
+BT 0 g /F1 8 Tf 43.00 181.50 Td (largest incoming USDC in the period: 1.998501 USDC \(of 5\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 181.50 Td (0xbce35645531c6b61\205) Tj ET
+0.85 G 0.5 w 40 176.50 m 802 176.50 l S
+BT 0 g /F1 8 Tf 43.00 167.00 Td (largest incoming PROS in the period: 0.05 PROS \(of 2\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 167.00 Td (0x2a68bfa2ef4aa7ee\205) Tj ET
+0.85 G 0.5 w 40 162.00 m 802 162.00 l S
+BT 0 g /F1 8 Tf 43.00 152.50 Td (largest incoming pMusk in the period: 132.707950331018235611 pMusk \(of 2\)) Tj ET
+BT 0 g /F1 8 Tf 652.60 152.50 Td (0x44057f9b8db4fc1e\205) Tj ET
+0.85 G 0.5 w 40 147.50 m 802 147.50 l S
+BT 0 g /F2 14 Tf 40.00 117.50 Td (Approvals given in the period) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 102.00 Td (Token) Tj ET
+BT 0.25 g /F2 8 Tf 180.16 102.00 Td (Spender) Tj ET
+BT 0.25 g /F2 8 Tf 471.84 102.00 Td (Given) Tj ET
+BT 0.25 g /F2 8 Tf 553.77 102.00 Td (Left at the end) Tj ET
+BT 0.25 g /F2 8 Tf 614.50 102.00 Td (Tx) Tj ET
+0.4 G 0.5 w 40 97.00 m 802 97.00 l S
+BT 0 g /F1 8 Tf 43.00 87.50 Td (USDC) Tj ET
+BT 0 g /F1 8 Tf 180.16 87.50 Td (T0Vault) Tj ET
+BT 0 g /F1 8 Tf 489.75 87.50 Td (2) Tj ET
+BT 0 g /F1 8 Tf 604.05 87.50 Td (0) Tj ET
+BT 0 g /F1 8 Tf 614.50 87.50 Td (0xf135b2a7c199ece2\205) Tj ET
+0.85 G 0.5 w 40 82.50 m 802 82.50 l S
+BT 0 g /F1 8 Tf 43.00 73.00 Td (Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 180.16 73.00 Td (Morpho) Tj ET
+BT 0 g /F1 8 Tf 478.63 73.00 Td (0.05) Tj ET
+BT 0 g /F1 8 Tf 604.05 73.00 Td (0) Tj ET
+BT 0 g /F1 8 Tf 614.50 73.00 Td (0xafe43a9a63e58561\205) Tj ET
+0.85 G 0.5 w 40 68.00 m 802 68.00 l S
+BT 0 g /F1 8 Tf 43.00 58.50 Td (USDC) Tj ET
+BT 0 g /F1 8 Tf 180.16 58.50 Td (Morpho) Tj ET
+BT 0 g /F1 8 Tf 460.84 58.50 Td (0.005007) Tj ET
+BT 0 g /F1 8 Tf 575.14 58.50 Td (0.000006) Tj ET
+BT 0 g /F1 8 Tf 614.50 58.50 Td (0xf60d336b65719366\205) Tj ET
+0.85 G 0.5 w 40 53.50 m 802 53.50 l S
+BT 0.5 g /F1 7 Tf 40 22 Td (page 2 of 6) Tj ET
+endstream
+endobj
+15 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 397.00 737.99 407.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xf60d336b65719366d29f44d0f4f49c79f215a274ac2c5203ff152335e5113998) >> >>
+endobj
+16 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 382.50 735.77 392.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x9abadabd20ef973f75720ab5a7ab38e0a73a3ddc2ec430e31208982c4a8f385f) >> >>
+endobj
+17 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 368.00 737.54 378.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e) >> >>
+endobj
+18 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 353.50 737.54 363.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e) >> >>
+endobj
+19 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 339.00 737.54 349.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e) >> >>
+endobj
+20 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 324.50 737.54 334.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e) >> >>
+endobj
+21 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 295.50 737.54 305.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xb39f087712be2c910b680feb567006a5e2b3c614b35bdde889eb67126a27fe97) >> >>
+endobj
+22 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 281.00 737.99 291.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x73727a3617fb12adcb07181a91d7bf8cb19f5ea736abfc750e2e1cc94f0954c7) >> >>
+endobj
+23 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 266.50 737.54 276.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x6ce1e4f28e09adb78290237fe02f7337bcbb1fcfc8cf27d5e5e1e56b297afa7d) >> >>
+endobj
+24 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 252.00 730.87 262.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xb096cf58ef2f6f4acd01aaa7ac34ed1d95acc9497d8dfccd1e8c69ca5d5f8baf) >> >>
+endobj
+25 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 237.50 737.54 247.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa70e41ecdf783e522d60bf6c140473c8db71ae0efed8cc7643c2696b5b3d698b) >> >>
+endobj
+26 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 223.00 737.99 233.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xd064b4371d27f9ba65ebdb7b0ef48b30ac5d3f44ac20bdbeaf3ec62af08ee749) >> >>
+endobj
+27 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 208.50 737.99 218.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x73727a3617fb12adcb07181a91d7bf8cb19f5ea736abfc750e2e1cc94f0954c7) >> >>
+endobj
+28 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 194.00 737.99 204.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xd064b4371d27f9ba65ebdb7b0ef48b30ac5d3f44ac20bdbeaf3ec62af08ee749) >> >>
+endobj
+29 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 179.50 739.32 189.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xbce35645531c6b61a5756370fe054d77bda98af5ead00dd608cb9b7bf565b09f) >> >>
+endobj
+30 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 165.00 735.77 175.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x2a68bfa2ef4aa7ee208da2ec4a6cee706e61581b84ac9b88a10e05c3e64a28d7) >> >>
+endobj
+31 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 150.50 735.32 160.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x44057f9b8db4fc1ee0f902cc9c2c31887495e98a163798f09678dfef2ff67aa9) >> >>
+endobj
+32 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 85.50 65.66 95.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0xc879c018db60520f4355c26ed1a6d572cdac1815) >> >>
+endobj
+33 0 obj
+<< /Type /Annot /Subtype /Link /Rect [180.16 85.50 207.73 95.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x921974d7b1a2dbaccaf5ba893a3a1500638cea6b) >> >>
+endobj
+34 0 obj
+<< /Type /Annot /Subtype /Link /Rect [614.50 85.50 699.00 95.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xf135b2a7c199ece28320bc8028cb5f7d45c6da965abef2303097f28a8682f8fb) >> >>
+endobj
+35 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 71.00 100.35 81.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x52c48d4213107b20bc583832b0d951fb9ca8f0b0) >> >>
+endobj
+36 0 obj
+<< /Type /Annot /Subtype /Link /Rect [180.16 71.00 207.28 81.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb) >> >>
+endobj
+37 0 obj
+<< /Type /Annot /Subtype /Link /Rect [614.50 71.00 699.89 81.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xafe43a9a63e58561e4e1c996b86aa2c242dd2c5ac40b0d4a250fc91652524775) >> >>
+endobj
+38 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 56.50 65.66 66.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0xc879c018db60520f4355c26ed1a6d572cdac1815) >> >>
+endobj
+39 0 obj
+<< /Type /Annot /Subtype /Link /Rect [180.16 56.50 207.28 66.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x18573fa18fd17ddfd790b4a5b5b2977aad3b4efb) >> >>
+endobj
+40 0 obj
+<< /Type /Annot /Subtype /Link /Rect [614.50 56.50 699.89 66.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xf60d336b65719366d29f44d0f4f49c79f215a274ac2c5203ff152335e5113998) >> >>
+endobj
+41 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 14 0 R /Annots [15 0 R 16 0 R 17 0 R 18 0 R 19 0 R 20 0 R 21 0 R 22 0 R 23 0 R 24 0 R 25 0 R 26 0 R 27 0 R 28 0 R 29 0 R 30 0 R 31 0 R 32 0 R 33 0 R 34 0 R 35 0 R 36 0 R 37 0 R 38 0 R 39 0 R 40 0 R] >>
+endobj
+42 0 obj
+<< /Length 9443 >>
+stream
+BT 0.25 g /F2 8 Tf 43.00 545.50 Td (Token) Tj ET
+BT 0.25 g /F2 8 Tf 180.16 545.50 Td (Spender) Tj ET
+BT 0.25 g /F2 8 Tf 471.84 545.50 Td (Given) Tj ET
+BT 0.25 g /F2 8 Tf 553.77 545.50 Td (Left at the end) Tj ET
+BT 0.25 g /F2 8 Tf 614.50 545.50 Td (Tx) Tj ET
+0.4 G 0.5 w 40 540.50 m 802 540.50 l S
+BT 0 g /F1 8 Tf 43.00 531.00 Td (USDC) Tj ET
+BT 0 g /F1 8 Tf 180.16 531.00 Td (sbUSDC-ph-eco) Tj ET
+BT 0 g /F1 8 Tf 483.08 531.00 Td (0.9) Tj ET
+BT 0 g /F1 8 Tf 604.05 531.00 Td (0) Tj ET
+BT 0 g /F1 8 Tf 614.50 531.00 Td (0x9cdedf240aff2e67\205) Tj ET
+0.85 G 0.5 w 40 526.00 m 802 526.00 l S
+BT 0 g /F2 12 Tf 40.00 498.00 Td (Transfers in \(3\)) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 482.50 Td (Time \(UTC\)) Tj ET
+BT 0.25 g /F2 8 Tf 157.30 482.50 Td (What happened) Tj ET
+BT 0.25 g /F2 8 Tf 598.56 482.50 Td (Gas \(PROS\)) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 482.50 Td (Tx) Tj ET
+0.4 G 0.5 w 40 477.50 m 802 477.50 l S
+BT 0 g /F1 8 Tf 43.00 468.00 Td (2026-11-03 04:44:03) Tj ET
+BT 0 g /F1 8 Tf 157.30 468.00 Td (received 1.998501 USDC from ERC1967Proxy) Tj ET
+BT 0 g /F1 8 Tf 646.60 468.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 468.00 Td (0xbce35645531c6b61\205) Tj ET
+0.85 G 0.5 w 40 463.00 m 802 463.00 l S
+BT 0 g /F1 8 Tf 43.00 453.50 Td (2026-11-04 22:15:49) Tj ET
+BT 0 g /F1 8 Tf 157.30 453.50 Td (received 0.5 USDC from 0xdCbb\20536E7) Tj ET
+BT 0 g /F1 8 Tf 646.60 453.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 453.50 Td (0xda0cb6116c877341\205) Tj ET
+0.85 G 0.5 w 40 448.50 m 802 448.50 l S
+BT 0 g /F1 8 Tf 43.00 439.00 Td (2026-11-05 18:29:46) Tj ET
+BT 0 g /F1 8 Tf 157.30 439.00 Td (received 1 pCARR from Uniswap V2) Tj ET
+BT 0 g /F1 8 Tf 646.60 439.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 439.00 Td (0x3b533789503df7ed\205) Tj ET
+0.85 G 0.5 w 40 434.00 m 802 434.00 l S
+BT 0 g /F2 12 Tf 40.00 406.00 Td (Transfers out \(44\)) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 390.50 Td (Time \(UTC\)) Tj ET
+BT 0.25 g /F2 8 Tf 157.30 390.50 Td (What happened) Tj ET
+BT 0.25 g /F2 8 Tf 598.56 390.50 Td (Gas \(PROS\)) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 390.50 Td (Tx) Tj ET
+0.4 G 0.5 w 40 385.50 m 802 385.50 l S
+BT 0 g /F1 8 Tf 43.00 376.00 Td (2026-11-01 15:49:17) Tj ET
+BT 0 g /F1 8 Tf 157.30 376.00 Td (sent 0.02 PROS to 0xa991\2054348) Tj ET
+BT 0 g /F1 8 Tf 617.69 376.00 Td (0.00021) Tj ET
+BT 0 g /F1 8 Tf 652.60 376.00 Td (0x9abadabd20ef973f\205) Tj ET
+0.85 G 0.5 w 40 371.00 m 802 371.00 l S
+BT 0 g /F1 8 Tf 43.00 361.50 Td (2026-11-01 15:49:56) Tj ET
+BT 0 g /F1 8 Tf 157.30 361.50 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 361.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 361.50 Td (0x223912b11d21a380\205) Tj ET
+0.85 G 0.5 w 40 356.50 m 802 356.50 l S
+BT 0 g /F1 8 Tf 43.00 347.00 Td (2026-11-01 15:50:41) Tj ET
+BT 0 g /F1 8 Tf 157.30 347.00 Td (sent 0.002 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 347.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 347.00 Td (0x0e2ae82659cd53ab\205) Tj ET
+0.85 G 0.5 w 40 342.00 m 802 342.00 l S
+BT 0 g /F1 8 Tf 43.00 332.50 Td (2026-11-01 15:51:09) Tj ET
+BT 0 g /F1 8 Tf 157.30 332.50 Td (sent 0.002 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 332.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 332.50 Td (0x5d10732468bb5315\205) Tj ET
+0.85 G 0.5 w 40 327.50 m 802 327.50 l S
+BT 0 g /F1 8 Tf 43.00 318.00 Td (2026-11-01 15:51:20) Tj ET
+BT 0 g /F1 8 Tf 157.30 318.00 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 318.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 318.00 Td (0x447a2d981e3df7ac\205) Tj ET
+0.85 G 0.5 w 40 313.00 m 802 313.00 l S
+BT 0 g /F1 8 Tf 43.00 303.50 Td (2026-11-01 21:00:46) Tj ET
+BT 0 g /F1 8 Tf 157.30 303.50 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 303.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 303.50 Td (0x6cb2da76313f06b5\205) Tj ET
+0.85 G 0.5 w 40 298.50 m 802 298.50 l S
+BT 0 g /F1 8 Tf 43.00 289.00 Td (2026-11-01 21:09:04) Tj ET
+BT 0 g /F1 8 Tf 157.30 289.00 Td (sent 0.002 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 289.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 289.00 Td (0x7995b5afbdc80ec7\205) Tj ET
+0.85 G 0.5 w 40 284.00 m 802 284.00 l S
+BT 0 g /F1 8 Tf 43.00 274.50 Td (2026-11-01 21:09:15) Tj ET
+BT 0 g /F1 8 Tf 157.30 274.50 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 274.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 274.50 Td (0xa8e48e2ab0c1f7ec\205) Tj ET
+0.85 G 0.5 w 40 269.50 m 802 269.50 l S
+BT 0 g /F1 8 Tf 43.00 260.00 Td (2026-11-01 21:12:18) Tj ET
+BT 0 g /F1 8 Tf 157.30 260.00 Td (sent 0.002 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 260.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 260.00 Td (0xc9522a660bf6f2be\205) Tj ET
+0.85 G 0.5 w 40 255.00 m 802 255.00 l S
+BT 0 g /F1 8 Tf 43.00 245.50 Td (2026-11-01 21:12:27) Tj ET
+BT 0 g /F1 8 Tf 157.30 245.50 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 245.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 245.50 Td (0x106497964b2b3df0\205) Tj ET
+0.85 G 0.5 w 40 240.50 m 802 240.50 l S
+BT 0 g /F1 8 Tf 43.00 231.00 Td (2026-11-01 21:15:19) Tj ET
+BT 0 g /F1 8 Tf 157.30 231.00 Td (sent 0.002 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 231.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 231.00 Td (0x71596a64a50bd04b\205) Tj ET
+0.85 G 0.5 w 40 226.00 m 802 226.00 l S
+BT 0 g /F1 8 Tf 43.00 216.50 Td (2026-11-01 21:15:27) Tj ET
+BT 0 g /F1 8 Tf 157.30 216.50 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 216.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 216.50 Td (0x2f34ab37c8366b32\205) Tj ET
+0.85 G 0.5 w 40 211.50 m 802 211.50 l S
+BT 0 g /F1 8 Tf 43.00 202.00 Td (2026-11-01 21:51:17) Tj ET
+BT 0 g /F1 8 Tf 157.30 202.00 Td (sent 0.002 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 202.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 202.00 Td (0x70afa445588009bd\205) Tj ET
+0.85 G 0.5 w 40 197.00 m 802 197.00 l S
+BT 0 g /F1 8 Tf 43.00 187.50 Td (2026-11-01 21:51:26) Tj ET
+BT 0 g /F1 8 Tf 157.30 187.50 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 187.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 187.50 Td (0xc1a260a38b199eb1\205) Tj ET
+0.85 G 0.5 w 40 182.50 m 802 182.50 l S
+BT 0 g /F1 8 Tf 43.00 173.00 Td (2026-11-01 21:54:08) Tj ET
+BT 0 g /F1 8 Tf 157.30 173.00 Td (sent 0.002 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 173.00 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 173.00 Td (0xe7f886751a45e8b4\205) Tj ET
+0.85 G 0.5 w 40 168.00 m 802 168.00 l S
+BT 0 g /F1 8 Tf 43.00 158.50 Td (2026-11-01 21:54:23) Tj ET
+BT 0 g /F1 8 Tf 157.30 158.50 Td (sent 0.001 USDC to 0xa991\2054348 \(the transaction was sent by 0xa991\2054348\)) Tj ET
+BT 0 g /F1 8 Tf 646.60 158.50 Td () Tj ET
+BT 0 g /F1 8 Tf 652.60 158.50 Td (0x914998b826936a51\205) Tj ET
+0.85 G 0.5 w 40 153.50 m 802 153.50 l S
+BT 0 g /F1 8 Tf 43.00 144.00 Td (2026-11-04 11:40:19) Tj ET
+BT 0 g /F1 8 Tf 157.30 144.00 Td (sent 0.0001 USDC to 0xC5F6\2050F45, 0x2Cfa\205a971, 0xb143\205B048, 0x4FFD\2050002, 0x2830\205b8CC,) Tj ET
+BT 0 g /F1 8 Tf 157.30 133.50 Td (0x1684\2057AfE, 0x9238\2051B21, 0x64f2\2050f7C, 0x25fd\205B058 and 0x2D57\2053AB9) Tj ET
+BT 0 g /F1 8 Tf 599.90 144.00 Td (0.006951516) Tj ET
+BT 0 g /F1 8 Tf 652.60 144.00 Td (0x1c2ed683b9d7231f\205) Tj ET
+0.85 G 0.5 w 40 128.50 m 802 128.50 l S
+BT 0 g /F1 8 Tf 43.00 119.00 Td (2026-11-04 12:05:43) Tj ET
+BT 0 g /F1 8 Tf 157.30 119.00 Td (sent 0.0001 USDC to 0xda82\2052C85, 0x5DF7\205a197, 0x17B9\2053364, 0x64f2\2050f7C, 0x1684\2057AfE,) Tj ET
+BT 0 g /F1 8 Tf 157.30 108.50 Td (0xb3Cc\205D4DC, 0x1F35\205c85C, 0xF05A\2056c13, 0xD634\205623D and 0x16A1\205701A) Tj ET
+BT 0 g /F1 8 Tf 599.90 119.00 Td (0.006951252) Tj ET
+BT 0 g /F1 8 Tf 652.60 119.00 Td (0x2eb371bf2e11ae1d\205) Tj ET
+0.85 G 0.5 w 40 103.50 m 802 103.50 l S
+BT 0 g /F1 8 Tf 43.00 94.00 Td (2026-11-04 13:18:51) Tj ET
+BT 0 g /F1 8 Tf 157.30 94.00 Td (sent 2.929983 USDC to 0xdCbb\20536E7) Tj ET
+BT 0 g /F1 8 Tf 599.90 94.00 Td (0.000603885) Tj ET
+BT 0 g /F1 8 Tf 652.60 94.00 Td (0xa70e41ecdf783e52\205) Tj ET
+0.85 G 0.5 w 40 89.00 m 802 89.00 l S
+BT 0 g /F1 8 Tf 43.00 79.50 Td (2026-11-04 23:22:08) Tj ET
+BT 0 g /F1 8 Tf 157.30 79.50 Td (sent 0.00001 USDC to 0x28b3\20550d9) Tj ET
+BT 0 g /F1 8 Tf 604.34 79.50 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 79.50 Td (0x69dbf1fe0017e07b\205) Tj ET
+0.85 G 0.5 w 40 74.50 m 802 74.50 l S
+BT 0 g /F1 8 Tf 43.00 65.00 Td (2026-11-04 23:22:13) Tj ET
+BT 0 g /F1 8 Tf 157.30 65.00 Td (sent 0.00001 USDC to 0x3BCF\2051267) Tj ET
+BT 0 g /F1 8 Tf 604.34 65.00 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 65.00 Td (0xdb25043242f0d2b3\205) Tj ET
+0.85 G 0.5 w 40 60.00 m 802 60.00 l S
+BT 0 g /F1 8 Tf 43.00 50.50 Td (2026-11-04 23:22:17) Tj ET
+BT 0 g /F1 8 Tf 157.30 50.50 Td (sent 0.00001 USDC to 0x09FE\2055930) Tj ET
+BT 0 g /F1 8 Tf 604.34 50.50 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 50.50 Td (0x5d4677cf67c4d552\205) Tj ET
+0.85 G 0.5 w 40 45.50 m 802 45.50 l S
+BT 0.5 g /F1 7 Tf 40 22 Td (page 3 of 6) Tj ET
+endstream
+endobj
+43 0 obj
+<< /Type /Annot /Subtype /Link /Rect [43.00 529.00 65.66 539.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0xc879c018db60520f4355c26ed1a6d572cdac1815) >> >>
+endobj
+44 0 obj
+<< /Type /Annot /Subtype /Link /Rect [180.16 529.00 238.39 539.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/address/0x15c25ed222fc498f672af5c3adb5ed0a96e1aff1) >> >>
+endobj
+45 0 obj
+<< /Type /Annot /Subtype /Link /Rect [614.50 529.00 695.00 539.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x9cdedf240aff2e67be730fb16f6f079d7175d5da5c4bea7f36070efc47b0bf5b) >> >>
+endobj
+46 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 466.00 739.32 476.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xbce35645531c6b61a5756370fe054d77bda98af5ead00dd608cb9b7bf565b09f) >> >>
+endobj
+47 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 451.50 739.32 461.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xda0cb6116c877341c60f4e7c2f60d99edbfd8f3531ad1acf2669cdf1ebfb2f88) >> >>
+endobj
+48 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 437.00 737.99 447.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x3b533789503df7ed35273cb2a3dd700a7eeec434f0df683acda03274ad1ee36b) >> >>
+endobj
+49 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 374.00 735.77 384.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x9abadabd20ef973f75720ab5a7ab38e0a73a3ddc2ec430e31208982c4a8f385f) >> >>
+endobj
+50 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 359.50 740.22 369.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x223912b11d21a38045370ff68cb5f9711fe010ca987e81ab646cc1b11f24c409) >> >>
+endobj
+51 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 345.00 739.77 355.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x0e2ae82659cd53ab1d53671a1983f2da191d0e8434c7d5ef61ab2815e4908fbb) >> >>
+endobj
+52 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 330.50 740.22 340.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x5d10732468bb5315a63705e6fadd9290f4260b9a66411371ba52ad63716ff834) >> >>
+endobj
+53 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 316.00 737.54 326.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x447a2d981e3df7ace404644cda04d26f2a97ed30cac37b12246a2d503b9c8ef8) >> >>
+endobj
+54 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 301.50 737.54 311.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x6cb2da76313f06b5f581329a925cc0df8d2a2c2bcbfb6c6cecd90d5f2ead8a38) >> >>
+endobj
+55 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 287.00 737.10 297.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x7995b5afbdc80ec7e75203243141f11b4145ac5c1014c1e2502b743ba1273f51) >> >>
+endobj
+56 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 272.50 737.10 282.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa8e48e2ab0c1f7ecafb1e14ae0282b86170ae1363eb13b31996da8c1799ae1fd) >> >>
+endobj
+57 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 258.00 735.32 268.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xc9522a660bf6f2bec77da248b5e0e852e3143358b55355f7fa93722154966391) >> >>
+endobj
+58 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 243.50 737.99 253.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x106497964b2b3df037744e0fc8c1e3b0e0543fdf107b89b4f8577093fcc96b47) >> >>
+endobj
+59 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 229.00 740.22 239.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x71596a64a50bd04b3e195df149b5b209ab003b8b27b7c411b9328e86a87e4c5c) >> >>
+endobj
+60 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 214.50 737.54 224.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x2f34ab37c8366b32a3092222e9ea2150fcf9365c1117d4a0ca01225dc3c275db) >> >>
+endobj
+61 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 200.00 737.99 210.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x70afa445588009bdd44fa34d9c5bb797a2668baffcfd80c29b958c3af9678792) >> >>
+endobj
+62 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 185.50 739.77 195.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xc1a260a38b199eb18e979f50d7fa402769c662cae190b0cdeb0efea14b7324e0) >> >>
+endobj
+63 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 171.00 737.99 181.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xe7f886751a45e8b49d3894a5f6f6c9bdf1ddb180ba512c4f31e3d72a0a99dbec) >> >>
+endobj
+64 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 156.50 740.22 166.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x914998b826936a5146c778ff78aec2f46e56a232caffbb661507b38114892d76) >> >>
+endobj
+65 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 142.00 737.54 152.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x1c2ed683b9d7231fd38019a2c4dd420e0259e6579d765b07d9554a6abb821d3e) >> >>
+endobj
+66 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 117.00 737.99 127.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x2eb371bf2e11ae1de11fb4fa534ca9177e2ebc0447f75f067481f724932bd434) >> >>
+endobj
+67 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 92.00 737.54 102.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa70e41ecdf783e522d60bf6c140473c8db71ae0efed8cc7643c2696b5b3d698b) >> >>
+endobj
+68 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 77.50 735.77 87.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x69dbf1fe0017e07bf22dccebdc827b5fcbc6f058cf89542b5cbd79a0070782c2) >> >>
+endobj
+69 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 63.00 737.99 73.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xdb25043242f0d2b34defb8db3655b9c8b8a702f3fbf367c134d8b557f8123cac) >> >>
+endobj
+70 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 48.50 737.10 58.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x5d4677cf67c4d5520e958d5b6fd33fbd009f8d9f18e63e1ff256c86a86934e53) >> >>
+endobj
+71 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 42 0 R /Annots [43 0 R 44 0 R 45 0 R 46 0 R 47 0 R 48 0 R 49 0 R 50 0 R 51 0 R 52 0 R 53 0 R 54 0 R 55 0 R 56 0 R 57 0 R 58 0 R 59 0 R 60 0 R 61 0 R 62 0 R 63 0 R 64 0 R 65 0 R 66 0 R 67 0 R 68 0 R 69 0 R 70 0 R] >>
+endobj
+72 0 obj
+<< /Length 8835 >>
+stream
+BT 0.25 g /F2 8 Tf 43.00 545.50 Td (Time \(UTC\)) Tj ET
+BT 0.25 g /F2 8 Tf 157.30 545.50 Td (What happened) Tj ET
+BT 0.25 g /F2 8 Tf 598.56 545.50 Td (Gas \(PROS\)) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 545.50 Td (Tx) Tj ET
+0.4 G 0.5 w 40 540.50 m 802 540.50 l S
+BT 0 g /F1 8 Tf 43.00 531.00 Td (2026-11-04 23:26:51) Tj ET
+BT 0 g /F1 8 Tf 157.30 531.00 Td (sent 0.00002 USDC to 0x09FE\2055930) Tj ET
+BT 0 g /F1 8 Tf 604.34 531.00 Td (0.00045035) Tj ET
+BT 0 g /F1 8 Tf 652.60 531.00 Td (0x0e9eb7c68f8aaade\205) Tj ET
+0.85 G 0.5 w 40 526.00 m 802 526.00 l S
+BT 0 g /F1 8 Tf 43.00 516.50 Td (2026-11-04 23:26:56) Tj ET
+BT 0 g /F1 8 Tf 157.30 516.50 Td (sent 0.00002 USDC to 0x7c38\2051F52) Tj ET
+BT 0 g /F1 8 Tf 604.34 516.50 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 516.50 Td (0xe92a26befb8f20b8\205) Tj ET
+0.85 G 0.5 w 40 511.50 m 802 511.50 l S
+BT 0 g /F1 8 Tf 43.00 502.00 Td (2026-11-04 23:40:27) Tj ET
+BT 0 g /F1 8 Tf 157.30 502.00 Td (sent 0.00001 USDC to 0x7c38\2051F52) Tj ET
+BT 0 g /F1 8 Tf 604.34 502.00 Td (0.00045035) Tj ET
+BT 0 g /F1 8 Tf 652.60 502.00 Td (0x33f63a21e4bf4832\205) Tj ET
+0.85 G 0.5 w 40 497.00 m 802 497.00 l S
+BT 0 g /F1 8 Tf 43.00 487.50 Td (2026-11-04 23:40:31) Tj ET
+BT 0 g /F1 8 Tf 157.30 487.50 Td (sent 0.00001 USDC to 0x0a85\2056b3d) Tj ET
+BT 0 g /F1 8 Tf 604.34 487.50 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 487.50 Td (0x89fba9b0d321147c\205) Tj ET
+0.85 G 0.5 w 40 482.50 m 802 482.50 l S
+BT 0 g /F1 8 Tf 43.00 473.00 Td (2026-11-04 23:40:35) Tj ET
+BT 0 g /F1 8 Tf 157.30 473.00 Td (sent 0.00001 USDC to 0x28b3\20550d9) Tj ET
+BT 0 g /F1 8 Tf 604.34 473.00 Td (0.00045035) Tj ET
+BT 0 g /F1 8 Tf 652.60 473.00 Td (0x5309c79efddb279f\205) Tj ET
+0.85 G 0.5 w 40 468.00 m 802 468.00 l S
+BT 0 g /F1 8 Tf 43.00 458.50 Td (2026-11-04 23:43:34) Tj ET
+BT 0 g /F1 8 Tf 157.30 458.50 Td (sent 0.00002 USDC to 0x7c38\2051F52) Tj ET
+BT 0 g /F1 8 Tf 604.34 458.50 Td (0.00045035) Tj ET
+BT 0 g /F1 8 Tf 652.60 458.50 Td (0x81957991ee48b812\205) Tj ET
+0.85 G 0.5 w 40 453.50 m 802 453.50 l S
+BT 0 g /F1 8 Tf 43.00 444.00 Td (2026-11-04 23:43:38) Tj ET
+BT 0 g /F1 8 Tf 157.30 444.00 Td (sent 0.00002 USDC to 0x28b3\20550d9) Tj ET
+BT 0 g /F1 8 Tf 604.34 444.00 Td (0.00045035) Tj ET
+BT 0 g /F1 8 Tf 652.60 444.00 Td (0xa6aaf4acf3f22a36\205) Tj ET
+0.85 G 0.5 w 40 439.00 m 802 439.00 l S
+BT 0 g /F1 8 Tf 43.00 429.50 Td (2026-11-04 23:49:57) Tj ET
+BT 0 g /F1 8 Tf 157.30 429.50 Td (sent 0.00001 USDC to 0x5C6a\205De82) Tj ET
+BT 0 g /F1 8 Tf 604.34 429.50 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 429.50 Td (0x4b556c22159d94dd\205) Tj ET
+0.85 G 0.5 w 40 424.50 m 802 424.50 l S
+BT 0 g /F1 8 Tf 43.00 415.00 Td (2026-11-04 23:50:02) Tj ET
+BT 0 g /F1 8 Tf 157.30 415.00 Td (sent 0.00001 USDC to 0xcC1E\2055632) Tj ET
+BT 0 g /F1 8 Tf 604.34 415.00 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 415.00 Td (0x8da38db7113c4b85\205) Tj ET
+0.85 G 0.5 w 40 410.00 m 802 410.00 l S
+BT 0 g /F1 8 Tf 43.00 400.50 Td (2026-11-04 23:50:06) Tj ET
+BT 0 g /F1 8 Tf 157.30 400.50 Td (sent 0.00001 USDC to 0x3571\2056812) Tj ET
+BT 0 g /F1 8 Tf 604.34 400.50 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 400.50 Td (0x7f0757343342bec9\205) Tj ET
+0.85 G 0.5 w 40 395.50 m 802 395.50 l S
+BT 0 g /F1 8 Tf 43.00 386.00 Td (2026-11-04 23:52:51) Tj ET
+BT 0 g /F1 8 Tf 157.30 386.00 Td (sent 0.00002 USDC to 0xFfe3\2057732) Tj ET
+BT 0 g /F1 8 Tf 604.34 386.00 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 386.00 Td (0xa0c1671b040eea93\205) Tj ET
+0.85 G 0.5 w 40 381.00 m 802 381.00 l S
+BT 0 g /F1 8 Tf 43.00 371.50 Td (2026-11-04 23:52:56) Tj ET
+BT 0 g /F1 8 Tf 157.30 371.50 Td (sent 0.00002 USDC to 0xA97f\2052609) Tj ET
+BT 0 g /F1 8 Tf 604.34 371.50 Td (0.00062135) Tj ET
+BT 0 g /F1 8 Tf 652.60 371.50 Td (0x477abd8f7c73409e\205) Tj ET
+0.85 G 0.5 w 40 366.50 m 802 366.50 l S
+BT 0 g /F1 8 Tf 43.00 357.00 Td (2026-11-10 16:44:05) Tj ET
+BT 0 g /F1 8 Tf 157.30 357.00 Td (sent 0.001 USDC to 0x3759\205A6e9) Tj ET
+BT 0 g /F1 8 Tf 604.34 357.00 Td (0.00100376) Tj ET
+BT 0 g /F1 8 Tf 652.60 357.00 Td (0x700555689b265cc5\205) Tj ET
+0.85 G 0.5 w 40 352.00 m 802 352.00 l S
+BT 0 g /F1 8 Tf 43.00 342.50 Td (2026-11-10 16:44:11) Tj ET
+BT 0 g /F1 8 Tf 157.30 342.50 Td (sent 0.001 USDC to 0x3923\205900A) Tj ET
+BT 0 g /F1 8 Tf 604.34 342.50 Td (0.00100356) Tj ET
+BT 0 g /F1 8 Tf 652.60 342.50 Td (0xa8af4483e4f1589e\205) Tj ET
+0.85 G 0.5 w 40 337.50 m 802 337.50 l S
+BT 0 g /F1 8 Tf 43.00 328.00 Td (2026-11-10 16:44:15) Tj ET
+BT 0 g /F1 8 Tf 157.30 328.00 Td (sent 0.001 USDC to 0xd47f\205ee51) Tj ET
+BT 0 g /F1 8 Tf 604.34 328.00 Td (0.00100356) Tj ET
+BT 0 g /F1 8 Tf 652.60 328.00 Td (0x7d786d2e3d62cfec\205) Tj ET
+0.85 G 0.5 w 40 323.00 m 802 323.00 l S
+BT 0 g /F1 8 Tf 43.00 313.50 Td (2026-11-10 16:49:06) Tj ET
+BT 0 g /F1 8 Tf 157.30 313.50 Td (sent 0.001 USDC to 0x3759\205A6e9) Tj ET
+BT 0 g /F1 8 Tf 604.34 313.50 Td (0.00083256) Tj ET
+BT 0 g /F1 8 Tf 652.60 313.50 Td (0x4dba8abdc391c27b\205) Tj ET
+0.85 G 0.5 w 40 308.50 m 802 308.50 l S
+BT 0 g /F1 8 Tf 43.00 299.00 Td (2026-11-10 16:49:10) Tj ET
+BT 0 g /F1 8 Tf 157.30 299.00 Td (sent 0.001 USDC to 0x3923\205900A) Tj ET
+BT 0 g /F1 8 Tf 604.34 299.00 Td (0.00083244) Tj ET
+BT 0 g /F1 8 Tf 652.60 299.00 Td (0x8955ca5fc2580f65\205) Tj ET
+0.85 G 0.5 w 40 294.00 m 802 294.00 l S
+BT 0 g /F1 8 Tf 43.00 284.50 Td (2026-11-10 16:49:13) Tj ET
+BT 0 g /F1 8 Tf 157.30 284.50 Td (sent 0.001 USDC to 0xd47f\205ee51) Tj ET
+BT 0 g /F1 8 Tf 604.34 284.50 Td (0.00083256) Tj ET
+BT 0 g /F1 8 Tf 652.60 284.50 Td (0x282a289f98b19f29\205) Tj ET
+0.85 G 0.5 w 40 279.50 m 802 279.50 l S
+BT 0 g /F1 8 Tf 43.00 270.00 Td (2026-11-10 17:40:05) Tj ET
+BT 0 g /F1 8 Tf 157.30 270.00 Td (sent 0.001 USDC to 0x3759\205A6e9) Tj ET
+BT 0 g /F1 8 Tf 604.34 270.00 Td (0.00083264) Tj ET
+BT 0 g /F1 8 Tf 652.60 270.00 Td (0xa693412381423412\205) Tj ET
+0.85 G 0.5 w 40 265.00 m 802 265.00 l S
+BT 0 g /F1 8 Tf 43.00 255.50 Td (2026-11-10 17:40:16) Tj ET
+BT 0 g /F1 8 Tf 157.30 255.50 Td (sent 0.001 USDC to 0x3923\205900A) Tj ET
+BT 0 g /F1 8 Tf 604.34 255.50 Td (0.00083256) Tj ET
+BT 0 g /F1 8 Tf 652.60 255.50 Td (0xa1a21c612d9a9998\205) Tj ET
+0.85 G 0.5 w 40 250.50 m 802 250.50 l S
+BT 0 g /F1 8 Tf 43.00 241.00 Td (2026-11-10 17:40:21) Tj ET
+BT 0 g /F1 8 Tf 157.30 241.00 Td (sent 0.001 USDC to 0xd47f\205ee51) Tj ET
+BT 0 g /F1 8 Tf 604.34 241.00 Td (0.00083264) Tj ET
+BT 0 g /F1 8 Tf 652.60 241.00 Td (0x3b2ac2982f444a1e\205) Tj ET
+0.85 G 0.5 w 40 236.00 m 802 236.00 l S
+BT 0 g /F1 8 Tf 43.00 226.50 Td (2026-11-10 17:40:27) Tj ET
+BT 0 g /F1 8 Tf 157.30 226.50 Td (sent 0.001 USDC to 0x36FC\205BCc8) Tj ET
+BT 0 g /F1 8 Tf 604.34 226.50 Td (0.00100376) Tj ET
+BT 0 g /F1 8 Tf 652.60 226.50 Td (0x9ae64ca6c05fc23f\205) Tj ET
+0.85 G 0.5 w 40 221.50 m 802 221.50 l S
+BT 0 g /F2 12 Tf 40.00 193.50 Td (Swaps \(1\)) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 178.00 Td (Time \(UTC\)) Tj ET
+BT 0.25 g /F2 8 Tf 157.30 178.00 Td (What happened) Tj ET
+BT 0.25 g /F2 8 Tf 598.56 178.00 Td (Gas \(PROS\)) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 178.00 Td (Tx) Tj ET
+0.4 G 0.5 w 40 173.00 m 802 173.00 l S
+BT 0 g /F1 8 Tf 43.00 163.50 Td (2026-11-05 18:29:33) Tj ET
+BT 0 g /F1 8 Tf 157.30 163.50 Td (swapped 0.008690564420247154 PROS for 1 pTACO via 0x14f0\2059d0A) Tj ET
+BT 0 g /F1 8 Tf 604.34 163.50 Td (0.00123527) Tj ET
+BT 0 g /F1 8 Tf 652.60 163.50 Td (0xb096cf58ef2f6f4a\205) Tj ET
+0.85 G 0.5 w 40 158.50 m 802 158.50 l S
+BT 0 g /F2 12 Tf 40.00 130.50 Td (Approvals \(6\)) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 115.00 Td (Time \(UTC\)) Tj ET
+BT 0.25 g /F2 8 Tf 157.30 115.00 Td (What happened) Tj ET
+BT 0.25 g /F2 8 Tf 598.56 115.00 Td (Gas \(PROS\)) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 115.00 Td (Tx) Tj ET
+0.4 G 0.5 w 40 110.00 m 802 110.00 l S
+BT 0 g /F1 8 Tf 43.00 100.50 Td (2026-11-01 11:09:41) Tj ET
+BT 0 g /F1 8 Tf 157.30 100.50 Td (allowed T0Vault to spend 2 USDC) Tj ET
+BT 0 g /F1 8 Tf 604.34 100.50 Td (0.00055425) Tj ET
+BT 0 g /F1 8 Tf 652.60 100.50 Td (0xf135b2a7c199ece2\205) Tj ET
+0.85 G 0.5 w 40 95.50 m 802 95.50 l S
+BT 0 g /F1 8 Tf 43.00 86.00 Td (2026-11-01 11:11:49) Tj ET
+BT 0 g /F1 8 Tf 157.30 86.00 Td (allowed Morpho to spend 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 86.00 Td (0.00046111) Tj ET
+BT 0 g /F1 8 Tf 652.60 86.00 Td (0x62d6ecc52a33a65e\205) Tj ET
+0.85 G 0.5 w 40 81.00 m 802 81.00 l S
+BT 0 g /F1 8 Tf 43.00 71.50 Td (2026-11-01 11:12:56) Tj ET
+BT 0 g /F1 8 Tf 157.30 71.50 Td (allowed Morpho to spend 0.005007 USDC) Tj ET
+BT 0 g /F1 8 Tf 604.34 71.50 Td (0.00055425) Tj ET
+BT 0 g /F1 8 Tf 652.60 71.50 Td (0x8493a476f473baf0\205) Tj ET
+0.85 G 0.5 w 40 66.50 m 802 66.50 l S
+BT 0 g /F1 8 Tf 43.00 57.00 Td (2026-11-01 12:51:41) Tj ET
+BT 0 g /F1 8 Tf 157.30 57.00 Td (allowed sbUSDC-ph-eco to spend 0.9 USDC) Tj ET
+BT 0 g /F1 8 Tf 604.34 57.00 Td (0.00055437) Tj ET
+BT 0 g /F1 8 Tf 652.60 57.00 Td (0x9cdedf240aff2e67\205) Tj ET
+0.85 G 0.5 w 40 52.00 m 802 52.00 l S
+BT 0.5 g /F1 7 Tf 40 22 Td (page 4 of 6) Tj ET
+endstream
+endobj
+73 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 529.00 737.54 539.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x0e9eb7c68f8aaadea0426e5d95fe98af2ba9c1d26d1798e8cf22b5090d63f046) >> >>
+endobj
+74 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 514.50 735.77 524.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xe92a26befb8f20b81bc0b782753dd38a0eeb238c867be9a736284fa9ba4cf567) >> >>
+endobj
+75 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 500.00 735.77 510.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x33f63a21e4bf4832a66976b9928020143864a56bf1371b9050baadd974d6cc8c) >> >>
+endobj
+76 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 485.50 737.54 495.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x89fba9b0d321147c2dd6d0dea517db7dc403c28767aadc3692722624f211ecf4) >> >>
+endobj
+77 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 471.00 735.32 481.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x5309c79efddb279f196acf16f632ace3bce81294f9125075dd67db83db5fed33) >> >>
+endobj
+78 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 456.50 740.22 466.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x81957991ee48b812eb27828c867d9f6fa22bc2c9702ad062995a89a32c1ea978) >> >>
+endobj
+79 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 442.00 733.10 452.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa6aaf4acf3f22a3652337509e1f7c622bbb13f7cfdeb8221e4d1039bf2dc85c4) >> >>
+endobj
+80 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 427.50 739.77 437.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x4b556c22159d94dd794083998f6d23081d97fecebff44e90e6653da283c76277) >> >>
+endobj
+81 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 413.00 739.77 423.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x8da38db7113c4b855fea14ec4c6f4cf054680b5477f940bae56aa9d1f0360af0) >> >>
+endobj
+82 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 398.50 737.54 408.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x7f0757343342bec9ecdbdbc1902a6cfdb3f2e70a9f4230ae54072e405a6477e7) >> >>
+endobj
+83 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 384.00 739.77 394.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa0c1671b040eea93368c4cfe24c92835b137079061e0d78290c785c4f562080f) >> >>
+endobj
+84 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 369.50 737.54 379.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x477abd8f7c73409e5dd831e77941009618dceb4c724377c1ae188b64cce7dbf5) >> >>
+endobj
+85 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 355.00 739.32 365.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x700555689b265cc5dfdec87dc64afe2c2f1e083d9eafd88c930ddeb49fb8da5b) >> >>
+endobj
+86 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 340.50 735.77 350.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa8af4483e4f1589ece83a33d618ce795fd74390023b007952265d57630d42375) >> >>
+endobj
+87 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 326.00 737.10 336.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x7d786d2e3d62cfeca21eb6addc6e4d5b045a529bbff37d6e31832172b0ec865a) >> >>
+endobj
+88 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 311.50 739.32 321.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x4dba8abdc391c27b510556dd9b1572c60facaea51abff57cd36186b1f53efa0d) >> >>
+endobj
+89 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 297.00 734.87 307.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x8955ca5fc2580f65ff2419d0b2a926caf6d42ade31a5d70ec6b1610ce014e93d) >> >>
+endobj
+90 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 282.50 735.77 292.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x282a289f98b19f2943772f63c943d979e139082d549b930772107641a62d9e30) >> >>
+endobj
+91 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 268.00 740.22 278.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa69341238142341292083d79926411b916240bc46e4afa6bc910b4fe787d2998) >> >>
+endobj
+92 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 253.50 739.77 263.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa1a21c612d9a99986afc2a36b45e0f219df07b6e924d2382abddd943597ec2b0) >> >>
+endobj
+93 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 239.00 737.54 249.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x3b2ac2982f444a1eb82719f57f843584108dd8f05528c52987a46cc6088c85cc) >> >>
+endobj
+94 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 224.50 734.42 234.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x9ae64ca6c05fc23fce815791adad2ccd014682cb46215fdeea61a2e15a7a1f7d) >> >>
+endobj
+95 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 161.50 730.87 171.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xb096cf58ef2f6f4acd01aaa7ac34ed1d95acc9497d8dfccd1e8c69ca5d5f8baf) >> >>
+endobj
+96 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 98.50 737.10 108.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xf135b2a7c199ece28320bc8028cb5f7d45c6da965abef2303097f28a8682f8fb) >> >>
+endobj
+97 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 84.00 739.32 94.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x62d6ecc52a33a65e763c7ea8d6be83ba9dd279f501c2053f0f02e916296e9ee7) >> >>
+endobj
+98 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 69.50 735.77 79.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x8493a476f473baf004d9bf2555a675edf76d530014540a6594ea3139aad3b325) >> >>
+endobj
+99 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 55.00 733.10 65.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x9cdedf240aff2e67be730fb16f6f079d7175d5da5c4bea7f36070efc47b0bf5b) >> >>
+endobj
+100 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 72 0 R /Annots [73 0 R 74 0 R 75 0 R 76 0 R 77 0 R 78 0 R 79 0 R 80 0 R 81 0 R 82 0 R 83 0 R 84 0 R 85 0 R 86 0 R 87 0 R 88 0 R 89 0 R 90 0 R 91 0 R 92 0 R 93 0 R 94 0 R 95 0 R 96 0 R 97 0 R 98 0 R 99 0 R] >>
+endobj
+101 0 obj
+<< /Length 9976 >>
+stream
+BT 0.25 g /F2 8 Tf 43.00 545.50 Td (Time \(UTC\)) Tj ET
+BT 0.25 g /F2 8 Tf 157.30 545.50 Td (What happened) Tj ET
+BT 0.25 g /F2 8 Tf 598.56 545.50 Td (Gas \(PROS\)) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 545.50 Td (Tx) Tj ET
+0.4 G 0.5 w 40 540.50 m 802 540.50 l S
+BT 0 g /F1 8 Tf 43.00 531.00 Td (2026-11-01 12:53:51) Tj ET
+BT 0 g /F1 8 Tf 157.30 531.00 Td (allowed Morpho to spend 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 531.00 Td (0.00046111) Tj ET
+BT 0 g /F1 8 Tf 652.60 531.00 Td (0xafe43a9a63e58561\205) Tj ET
+0.85 G 0.5 w 40 526.00 m 802 526.00 l S
+BT 0 g /F1 8 Tf 43.00 516.50 Td (2026-11-01 12:54:59) Tj ET
+BT 0 g /F1 8 Tf 157.30 516.50 Td (allowed Morpho to spend 0.005007 USDC) Tj ET
+BT 0 g /F1 8 Tf 604.34 516.50 Td (0.00038325) Tj ET
+BT 0 g /F1 8 Tf 652.60 516.50 Td (0xf60d336b65719366\205) Tj ET
+0.85 G 0.5 w 40 511.50 m 802 511.50 l S
+BT 0 g /F2 12 Tf 40.00 483.50 Td (Contract interactions \(28\)) Tj ET
+BT 0.25 g /F2 8 Tf 43.00 468.00 Td (Time \(UTC\)) Tj ET
+BT 0.25 g /F2 8 Tf 157.30 468.00 Td (What happened) Tj ET
+BT 0.25 g /F2 8 Tf 598.56 468.00 Td (Gas \(PROS\)) Tj ET
+BT 0.25 g /F2 8 Tf 652.60 468.00 Td (Tx) Tj ET
+0.4 G 0.5 w 40 463.00 m 802 463.00 l S
+BT 0 g /F1 8 Tf 43.00 453.50 Td (2026-11-01 11:09:44) Tj ET
+BT 0 g /F1 8 Tf 157.30 453.50 Td (Deposit on T0Vault: sent 2 USDC and got back 1.981532393711254967 APT) Tj ET
+BT 0 g /F1 8 Tf 604.34 453.50 Td (0.01171008) Tj ET
+BT 0 g /F1 8 Tf 652.60 453.50 Td (0xb39f087712be2c91\205) Tj ET
+0.85 G 0.5 w 40 448.50 m 802 448.50 l S
+BT 0 g /F1 8 Tf 43.00 439.00 Td (2026-11-01 11:11:46) Tj ET
+BT 0 g /F1 8 Tf 157.30 439.00 Td (Deposit on Wrapped PROS: sent 0.05 PROS and got back 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 439.00 Td (0.00044942) Tj ET
+BT 0 g /F1 8 Tf 652.60 439.00 Td (0xd064b4371d27f9ba\205) Tj ET
+0.85 G 0.5 w 40 434.00 m 802 434.00 l S
+BT 0 g /F1 8 Tf 43.00 424.50 Td (2026-11-01 11:11:52) Tj ET
+BT 0 g /F1 8 Tf 157.30 424.50 Td (Supply Collateral on Morpho: sent 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 424.50 Td (0.00064937) Tj ET
+BT 0 g /F1 8 Tf 652.60 424.50 Td (0x73727a3617fb12ad\205) Tj ET
+0.85 G 0.5 w 40 419.50 m 802 419.50 l S
+BT 0 g /F1 8 Tf 43.00 410.00 Td (2026-11-01 11:11:55) Tj ET
+BT 0 g /F1 8 Tf 157.30 410.00 Td (Borrow on Morpho: got back 0.005 USDC) Tj ET
+BT 0 g /F1 8 Tf 604.34 410.00 Td (0.00119118) Tj ET
+BT 0 g /F1 8 Tf 652.60 410.00 Td (0xbd33f2eaa089ffb5\205) Tj ET
+0.85 G 0.5 w 40 405.00 m 802 405.00 l S
+BT 0 g /F1 8 Tf 43.00 395.50 Td (2026-11-01 11:13:00) Tj ET
+BT 0 g /F1 8 Tf 157.30 395.50 Td (Repay on Morpho: sent 0.005001 USDC) Tj ET
+BT 0 g /F1 8 Tf 608.79 395.50 Td (0.0010143) Tj ET
+BT 0 g /F1 8 Tf 652.60 395.50 Td (0x638d64e1aeee32d7\205) Tj ET
+0.85 G 0.5 w 40 390.50 m 802 390.50 l S
+BT 0 g /F1 8 Tf 43.00 381.00 Td (2026-11-01 11:13:03) Tj ET
+BT 0 g /F1 8 Tf 157.30 381.00 Td (Withdraw Collateral on Morpho: got back 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 381.00 Td (0.00096173) Tj ET
+BT 0 g /F1 8 Tf 652.60 381.00 Td (0x7f502ebecc9a678d\205) Tj ET
+0.85 G 0.5 w 40 376.00 m 802 376.00 l S
+BT 0 g /F1 8 Tf 43.00 366.50 Td (2026-11-01 11:13:06) Tj ET
+BT 0 g /F1 8 Tf 157.30 366.50 Td (Withdraw on Wrapped PROS: sent 0.05 Wrapped PROS and got back 0.05 PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 366.50 Td (0.00030459) Tj ET
+BT 0 g /F1 8 Tf 652.60 366.50 Td (0x2a68bfa2ef4aa7ee\205) Tj ET
+0.85 G 0.5 w 40 361.50 m 802 361.50 l S
+BT 0 g /F1 8 Tf 43.00 352.00 Td (2026-11-01 11:14:11) Tj ET
+BT 0 g /F1 8 Tf 157.30 352.00 Td (Request Redeem on T0Vault: sent 1.981532393711254967 APT) Tj ET
+BT 0 g /F1 8 Tf 604.34 352.00 Td (0.00352753) Tj ET
+BT 0 g /F1 8 Tf 652.60 352.00 Td (0x32f982e73251cf20\205) Tj ET
+0.85 G 0.5 w 40 347.00 m 802 347.00 l S
+BT 0 g /F1 8 Tf 43.00 337.50 Td (2026-11-01 12:51:44) Tj ET
+BT 0 g /F1 8 Tf 157.30 337.50 Td (Deposit on sbUSDC-ph-eco: sent 0.9 USDC and got back 0.896111322636741101 sbUSDC-ph-eco) Tj ET
+BT 0 g /F1 8 Tf 604.34 337.50 Td (0.00178034) Tj ET
+BT 0 g /F1 8 Tf 652.60 337.50 Td (0x6ce1e4f28e09adb7\205) Tj ET
+0.85 G 0.5 w 40 332.50 m 802 332.50 l S
+BT 0 g /F1 8 Tf 43.00 323.00 Td (2026-11-01 12:53:47) Tj ET
+BT 0 g /F1 8 Tf 157.30 323.00 Td (Deposit on Wrapped PROS: sent 0.05 PROS and got back 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 323.00 Td (0.00044942) Tj ET
+BT 0 g /F1 8 Tf 652.60 323.00 Td (0xf43ce1889a02529c\205) Tj ET
+0.85 G 0.5 w 40 318.00 m 802 318.00 l S
+BT 0 g /F1 8 Tf 43.00 308.50 Td (2026-11-01 12:53:54) Tj ET
+BT 0 g /F1 8 Tf 157.30 308.50 Td (Supply Collateral on Morpho: sent 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 308.50 Td (0.00064937) Tj ET
+BT 0 g /F1 8 Tf 652.60 308.50 Td (0xdb1fa56db7f1fdfc\205) Tj ET
+0.85 G 0.5 w 40 303.50 m 802 303.50 l S
+BT 0 g /F1 8 Tf 43.00 294.00 Td (2026-11-01 12:53:57) Tj ET
+BT 0 g /F1 8 Tf 157.30 294.00 Td (Borrow on Morpho: got back 0.005 USDC) Tj ET
+BT 0 g /F1 8 Tf 604.34 294.00 Td (0.00119118) Tj ET
+BT 0 g /F1 8 Tf 652.60 294.00 Td (0x917ccc7664021454\205) Tj ET
+0.85 G 0.5 w 40 289.00 m 802 289.00 l S
+BT 0 g /F1 8 Tf 43.00 279.50 Td (2026-11-01 12:55:03) Tj ET
+BT 0 g /F1 8 Tf 157.30 279.50 Td (Repay on Morpho: sent 0.005001 USDC) Tj ET
+BT 0 g /F1 8 Tf 608.79 279.50 Td (0.0010143) Tj ET
+BT 0 g /F1 8 Tf 652.60 279.50 Td (0x3a6df25036994399\205) Tj ET
+0.85 G 0.5 w 40 274.50 m 802 274.50 l S
+BT 0 g /F1 8 Tf 43.00 265.00 Td (2026-11-01 12:55:07) Tj ET
+BT 0 g /F1 8 Tf 157.30 265.00 Td (Withdraw Collateral on Morpho: got back 0.05 Wrapped PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 265.00 Td (0.00096173) Tj ET
+BT 0 g /F1 8 Tf 652.60 265.00 Td (0x11ee94c455b0aa1c\205) Tj ET
+0.85 G 0.5 w 40 260.00 m 802 260.00 l S
+BT 0 g /F1 8 Tf 43.00 250.50 Td (2026-11-01 12:55:10) Tj ET
+BT 0 g /F1 8 Tf 157.30 250.50 Td (Withdraw on Wrapped PROS: sent 0.05 Wrapped PROS and got back 0.05 PROS) Tj ET
+BT 0 g /F1 8 Tf 604.34 250.50 Td (0.00030459) Tj ET
+BT 0 g /F1 8 Tf 652.60 250.50 Td (0xcb51393052cd3f6a\205) Tj ET
+0.85 G 0.5 w 40 245.50 m 802 245.50 l S
+BT 0 g /F1 8 Tf 43.00 236.00 Td (2026-11-01 12:56:20) Tj ET
+BT 0 g /F1 8 Tf 157.30 236.00 Td (Redeem on sbUSDC-ph-eco: sent 0.896111322636741101 sbUSDC-ph-eco and got back 0.9 USDC) Tj ET
+BT 0 g /F1 8 Tf 604.34 236.00 Td (0.00158211) Tj ET
+BT 0 g /F1 8 Tf 652.60 236.00 Td (0x20a4f8b671c10948\205) Tj ET
+0.85 G 0.5 w 40 231.00 m 802 231.00 l S
+BT 0 g /F1 8 Tf 43.00 221.50 Td (2026-11-04 17:18:04) Tj ET
+BT 0 g /F1 8 Tf 157.30 221.50 Td (a call to 0x5c3E\2058B7F \(method 0x383f5607\): sent 0.001 PROS and got back 132.707950331018235611 pMusk) Tj ET
+BT 0 g /F1 8 Tf 599.90 221.50 Td (0.001275692) Tj ET
+BT 0 g /F1 8 Tf 652.60 221.50 Td (0x44057f9b8db4fc1e\205) Tj ET
+0.85 G 0.5 w 40 216.50 m 802 216.50 l S
+BT 0 g /F1 8 Tf 43.00 207.00 Td (2026-11-04 17:18:41) Tj ET
+BT 0 g /F1 8 Tf 157.30 207.00 Td (a call to 0x5c3E\2058B7F \(method 0x383f5607\): sent 0.001 PROS and got back 132.707915231727836861 pMusk) Tj ET
+BT 0 g /F1 8 Tf 599.90 207.00 Td (0.001275692) Tj ET
+BT 0 g /F1 8 Tf 652.60 207.00 Td (0xb8be6167abfefb28\205) Tj ET
+0.85 G 0.5 w 40 202.00 m 802 202.00 l S
+BT 0 g /F1 8 Tf 43.00 192.50 Td (2026-11-04 23:22:00) Tj ET
+BT 0 g /F1 8 Tf 157.30 192.50 Td (a transaction to itself, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 192.50 Td (0.00033448) Tj ET
+BT 0 g /F1 8 Tf 652.60 192.50 Td (0xd4f122fe0327fbcc\205) Tj ET
+0.85 G 0.5 w 40 187.50 m 802 187.50 l S
+BT 0 g /F1 8 Tf 43.00 178.00 Td (2026-11-04 23:26:40) Tj ET
+BT 0 g /F1 8 Tf 157.30 178.00 Td (a transaction to itself, no money moved) Tj ET
+BT 0 g /F1 8 Tf 608.79 178.00 Td (0.0003638) Tj ET
+BT 0 g /F1 8 Tf 652.60 178.00 Td (0x8f9c6075eefba8b0\205) Tj ET
+0.85 G 0.5 w 40 173.00 m 802 173.00 l S
+BT 0 g /F1 8 Tf 43.00 163.50 Td (2026-11-04 23:40:18) Tj ET
+BT 0 g /F1 8 Tf 157.30 163.50 Td (a transaction to itself, no money moved) Tj ET
+BT 0 g /F1 8 Tf 608.79 163.50 Td (0.0003346) Tj ET
+BT 0 g /F1 8 Tf 652.60 163.50 Td (0xd5c97c4d0a7e3b19\205) Tj ET
+0.85 G 0.5 w 40 158.50 m 802 158.50 l S
+BT 0 g /F1 8 Tf 43.00 149.00 Td (2026-11-04 23:43:23) Tj ET
+BT 0 g /F1 8 Tf 157.30 149.00 Td (a transaction to itself, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 149.00 Td (0.00036748) Tj ET
+BT 0 g /F1 8 Tf 652.60 149.00 Td (0xd3514ffe6e91c8bc\205) Tj ET
+0.85 G 0.5 w 40 144.00 m 802 144.00 l S
+BT 0 g /F1 8 Tf 43.00 134.50 Td (2026-11-04 23:49:48) Tj ET
+BT 0 g /F1 8 Tf 157.30 134.50 Td (a transaction to itself, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 134.50 Td (0.00033448) Tj ET
+BT 0 g /F1 8 Tf 652.60 134.50 Td (0xa8af5d14dd0dfe35\205) Tj ET
+0.85 G 0.5 w 40 129.50 m 802 129.50 l S
+BT 0 g /F1 8 Tf 43.00 120.00 Td (2026-11-04 23:52:40) Tj ET
+BT 0 g /F1 8 Tf 157.30 120.00 Td (a transaction to itself, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 120.00 Td (0.00036748) Tj ET
+BT 0 g /F1 8 Tf 652.60 120.00 Td (0x6d14d16a8d2fa09a\205) Tj ET
+0.85 G 0.5 w 40 115.00 m 802 115.00 l S
+BT 0 g /F1 8 Tf 43.00 105.50 Td (2026-11-07 21:17:55) Tj ET
+BT 0 g /F1 8 Tf 157.30 105.50 Td (Transfer on USDC, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 105.50 Td (0.00037435) Tj ET
+BT 0 g /F1 8 Tf 652.60 105.50 Td (0xfe7f9b7ac88a1171\205) Tj ET
+0.85 G 0.5 w 40 100.50 m 802 100.50 l S
+BT 0 g /F1 8 Tf 43.00 91.00 Td (2026-11-07 21:18:10) Tj ET
+BT 0 g /F1 8 Tf 157.30 91.00 Td (Receive With Authorization on USDC, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 91.00 Td (0.00075623) Tj ET
+BT 0 g /F1 8 Tf 652.60 91.00 Td (0x79d346c3beed0ca2\205) Tj ET
+0.85 G 0.5 w 40 86.00 m 802 86.00 l S
+BT 0 g /F1 8 Tf 43.00 76.50 Td (2026-11-07 21:33:35) Tj ET
+BT 0 g /F1 8 Tf 157.30 76.50 Td (Transfer on USDC, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 76.50 Td (0.00037435) Tj ET
+BT 0 g /F1 8 Tf 652.60 76.50 Td (0xe19215fb91bcb05d\205) Tj ET
+0.85 G 0.5 w 40 71.50 m 802 71.50 l S
+BT 0 g /F1 8 Tf 43.00 62.00 Td (2026-11-07 21:53:19) Tj ET
+BT 0 g /F1 8 Tf 157.30 62.00 Td (Receive With Authorization on USDC, no money moved) Tj ET
+BT 0 g /F1 8 Tf 604.34 62.00 Td (0.00075643) Tj ET
+BT 0 g /F1 8 Tf 652.60 62.00 Td (0xfb883c8bd2600a9a\205) Tj ET
+0.85 G 0.5 w 40 57.00 m 802 57.00 l S
+BT 0.5 g /F1 7 Tf 40 22 Td (page 5 of 6) Tj ET
+endstream
+endobj
+102 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 529.00 737.99 539.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xafe43a9a63e58561e4e1c996b86aa2c242dd2c5ac40b0d4a250fc91652524775) >> >>
+endobj
+103 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 514.50 737.99 524.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xf60d336b65719366d29f44d0f4f49c79f215a274ac2c5203ff152335e5113998) >> >>
+endobj
+104 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 451.50 737.54 461.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xb39f087712be2c910b680feb567006a5e2b3c614b35bdde889eb67126a27fe97) >> >>
+endobj
+105 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 437.00 737.99 447.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xd064b4371d27f9ba65ebdb7b0ef48b30ac5d3f44ac20bdbeaf3ec62af08ee749) >> >>
+endobj
+106 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 422.50 737.99 432.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x73727a3617fb12adcb07181a91d7bf8cb19f5ea736abfc750e2e1cc94f0954c7) >> >>
+endobj
+107 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 408.00 733.54 418.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xbd33f2eaa089ffb541cbe789569f3db7620c51c41c12ea824766eb1cf0bfc7de) >> >>
+endobj
+108 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 393.50 740.22 403.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x638d64e1aeee32d7c53cd489bc37d5041cdfe27a784fd4df52e9e5c6b316fa5b) >> >>
+endobj
+109 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 379.00 737.10 389.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x7f502ebecc9a678dc74c790dbfe61dc339a5227a932a1f8e2a623a95ebf3e21e) >> >>
+endobj
+110 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 364.50 735.77 374.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x2a68bfa2ef4aa7ee208da2ec4a6cee706e61581b84ac9b88a10e05c3e64a28d7) >> >>
+endobj
+111 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 350.00 735.32 360.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x32f982e73251cf20646935f9e3f8c19a0e459093831f5161b2ecba4f024c55ac) >> >>
+endobj
+112 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 335.50 737.54 345.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x6ce1e4f28e09adb78290237fe02f7337bcbb1fcfc8cf27d5e5e1e56b297afa7d) >> >>
+endobj
+113 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 321.00 737.10 331.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xf43ce1889a02529c5e289b2d3c40c49910e7a584988e2c6c134d1fb0c1b8fc0c) >> >>
+endobj
+114 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 306.50 730.87 316.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xdb1fa56db7f1fdfcfa8918067fd03ae8938abe65321d6ee5bf94cc5884ad02e3) >> >>
+endobj
+115 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 292.00 738.87 302.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x917ccc76640214547ebb73e2d59cc009296257c19812a0b9fa552cc0c1470311) >> >>
+endobj
+116 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 277.50 737.99 287.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x3a6df25036994399e9d4fd6d6cd776d4cd9cf9f2e9a60c94636644c4d452349b) >> >>
+endobj
+117 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 263.00 739.32 273.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x11ee94c455b0aa1cd491449b46f035fd55f7f7c3d51300687a701c6b173d3599) >> >>
+endobj
+118 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 248.50 737.10 258.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xcb51393052cd3f6a16334fd0f44c175940d97495b53baccae443238b0f5a6f1b) >> >>
+endobj
+119 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 234.00 737.54 244.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x20a4f8b671c109482678ba9b0415dd22eea6521c1f6a0227b98807893b90ce93) >> >>
+endobj
+120 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 219.50 735.32 229.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x44057f9b8db4fc1ee0f902cc9c2c31887495e98a163798f09678dfef2ff67aa9) >> >>
+endobj
+121 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 205.00 735.77 215.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xb8be6167abfefb28aac89a774b7a3227203514c246fcabfb8ef5ea91314f147d) >> >>
+endobj
+122 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 190.50 732.65 200.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xd4f122fe0327fbcc4750f479149be5f332106b8979241a629ef89da24f08c5bb) >> >>
+endobj
+123 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 176.00 735.32 186.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x8f9c6075eefba8b007bd79258f0280afee75cb543fe714839700e6c44d17537e) >> >>
+endobj
+124 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 161.50 739.32 171.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xd5c97c4d0a7e3b19a5fdbb21eb99a86d22534fc4154b000971b11591fe2be071) >> >>
+endobj
+125 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 147.00 734.87 157.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xd3514ffe6e91c8bcb022896c5582321157d8f7fd2e3f39e4ec0571af12c001b9) >> >>
+endobj
+126 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 132.50 735.77 142.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xa8af5d14dd0dfe35c180b4c961fd1c16399ee2ffecd70b1e3a08c04f1021604b) >> >>
+endobj
+127 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 118.00 737.99 128.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x6d14d16a8d2fa09a633aee5b3c18ce67cd33a95c19d82e417952637ede05d54e) >> >>
+endobj
+128 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 103.50 735.32 113.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xfe7f9b7ac88a11715c56d6d9687fb34b067da90e8900c04d4e0d0c14bbb64863) >> >>
+endobj
+129 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 89.00 739.32 99.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0x79d346c3beed0ca2b704cbb68ebbfaf3b761d329c9906bfaef74b23af77d45fe) >> >>
+endobj
+130 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 74.50 737.54 84.50] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xe19215fb91bcb05d1ed2cbdad23c5d1e5d221ab8a26c80c35b1d9fa2000848d4) >> >>
+endobj
+131 0 obj
+<< /Type /Annot /Subtype /Link /Rect [652.60 60.00 737.54 70.00] /Border [0 0 0] /A << /S /URI /URI (https://www.pharosscan.xyz/tx/0xfb883c8bd2600a9ab9d7f5c600c62d6c31149063e09d2b1173c1dd8bff7c47c1) >> >>
+endobj
+132 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 101 0 R /Annots [102 0 R 103 0 R 104 0 R 105 0 R 106 0 R 107 0 R 108 0 R 109 0 R 110 0 R 111 0 R 112 0 R 113 0 R 114 0 R 115 0 R 116 0 R 117 0 R 118 0 R 119 0 R 120 0 R 121 0 R 122 0 R 123 0 R 124 0 R 125 0 R 126 0 R 127 0 R 128 0 R 129 0 R 130 0 R 131 0 R] >>
+endobj
+133 0 obj
+<< /Length 682 >>
+stream
+BT 0 g /F2 12 Tf 40.00 535.00 Td (How this was put together) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 516.50 Td (The explorer \(socialscan\) is only an index of which transactions touched the wallet. Token amounts and gas come from each transaction's receipt, native PROS from the transaction) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 504.00 Td (value and internal calls. Balances are read with eth_getBalance and balanceOf at blocks 21807389 and 22676031 on Pharos RPC.) Tj ET
+BT 0 g /F1 9.5 Tf 40.00 486.50 Td (Generated 2026-11-10T19:42:54Z by tieout. Fingerprint of the data: d4bd87708ca2307c \(same wallet and period give the same fingerprint\).) Tj ET
+BT 0.5 g /F1 7 Tf 40 22 Td (page 6 of 6) Tj ET
+endstream
+endobj
+134 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 133 0 R >>
+endobj
+xref
+0 135
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000160 00000 n 
+0000000257 00000 n 
+0000000359 00000 n 
+0000007385 00000 n 
+0000007586 00000 n 
+0000007787 00000 n 
+0000007988 00000 n 
+0000008189 00000 n 
+0000008391 00000 n 
+0000008593 00000 n 
+0000008795 00000 n 
+0000008987 00000 n 
+0000015527 00000 n 
+0000015750 00000 n 
+0000015973 00000 n 
+0000016196 00000 n 
+0000016419 00000 n 
+0000016642 00000 n 
+0000016865 00000 n 
+0000017088 00000 n 
+0000017311 00000 n 
+0000017534 00000 n 
+0000017757 00000 n 
+0000017980 00000 n 
+0000018203 00000 n 
+0000018426 00000 n 
+0000018649 00000 n 
+0000018872 00000 n 
+0000019095 00000 n 
+0000019318 00000 n 
+0000019518 00000 n 
+0000019720 00000 n 
+0000019941 00000 n 
+0000020142 00000 n 
+0000020344 00000 n 
+0000020565 00000 n 
+0000020765 00000 n 
+0000020967 00000 n 
+0000021188 00000 n 
+0000021518 00000 n 
+0000031014 00000 n 
+0000031216 00000 n 
+0000031420 00000 n 
+0000031643 00000 n 
+0000031866 00000 n 
+0000032089 00000 n 
+0000032312 00000 n 
+0000032535 00000 n 
+0000032758 00000 n 
+0000032981 00000 n 
+0000033204 00000 n 
+0000033427 00000 n 
+0000033650 00000 n 
+0000033873 00000 n 
+0000034096 00000 n 
+0000034319 00000 n 
+0000034542 00000 n 
+0000034765 00000 n 
+0000034988 00000 n 
+0000035211 00000 n 
+0000035434 00000 n 
+0000035657 00000 n 
+0000035880 00000 n 
+0000036103 00000 n 
+0000036326 00000 n 
+0000036548 00000 n 
+0000036769 00000 n 
+0000036990 00000 n 
+0000037211 00000 n 
+0000037555 00000 n 
+0000046443 00000 n 
+0000046666 00000 n 
+0000046889 00000 n 
+0000047112 00000 n 
+0000047335 00000 n 
+0000047558 00000 n 
+0000047781 00000 n 
+0000048004 00000 n 
+0000048227 00000 n 
+0000048450 00000 n 
+0000048673 00000 n 
+0000048896 00000 n 
+0000049119 00000 n 
+0000049342 00000 n 
+0000049565 00000 n 
+0000049788 00000 n 
+0000050011 00000 n 
+0000050234 00000 n 
+0000050457 00000 n 
+0000050680 00000 n 
+0000050903 00000 n 
+0000051126 00000 n 
+0000051349 00000 n 
+0000051572 00000 n 
+0000051794 00000 n 
+0000052015 00000 n 
+0000052236 00000 n 
+0000052457 00000 n 
+0000052795 00000 n 
+0000062825 00000 n 
+0000063049 00000 n 
+0000063273 00000 n 
+0000063497 00000 n 
+0000063721 00000 n 
+0000063945 00000 n 
+0000064169 00000 n 
+0000064393 00000 n 
+0000064617 00000 n 
+0000064841 00000 n 
+0000065065 00000 n 
+0000065289 00000 n 
+0000065513 00000 n 
+0000065737 00000 n 
+0000065961 00000 n 
+0000066185 00000 n 
+0000066409 00000 n 
+0000066633 00000 n 
+0000066857 00000 n 
+0000067081 00000 n 
+0000067305 00000 n 
+0000067529 00000 n 
+0000067753 00000 n 
+0000067977 00000 n 
+0000068201 00000 n 
+0000068425 00000 n 
+0000068649 00000 n 
+0000068873 00000 n 
+0000069095 00000 n 
+0000069317 00000 n 
+0000069539 00000 n 
+0000069929 00000 n 
+0000070664 00000 n 
+trailer
+<< /Size 135 /Root 1 0 R >>
+startxref
+70804
+%%EOF

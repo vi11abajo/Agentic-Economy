@@ -1,0 +1,22 @@
+wallet 0xf4dfdd6407a63a36bd26af92b593e7fdc913a989, opening block 21807389, closing block 22606123, rpc https://rpc.pharos.xyz
+asset | opening (file / chain) | closing (file / chain) | in, out, gas re-added from the transactions file
+ok   PROS | 0.16387038 / same | 0.16387038 / same | same | books say ties=yes
+ok   USDC | 0.14 / same | 0.14 / same | same | books say ties=yes
+ok   variableDebtUSDC | 4.59174 / same | 4.595352 / same | same | books say ties=no
+ok   UNI-V2 0x040c…c1FB | 0.555791395362828406 / same | 0.555791395362828406 / same | same | books say ties=yes
+ok   UNI-V2 0x2A32…88c6 | 20.031716403614541767 / same | 20.031716403614541767 / same | same | books say ties=yes
+ok   bUSDC | 6.070607 / same | 6.073345 / same | same | books say ties=no
+ok   UNI-V2 0x9439…7238 | 0.453154571879236615 / same | 0.453154571879236615 / same | same | books say ties=yes
+ok   UNI-V2 0x91e3…D6e1 | 0.03749999999132267 / same | 0.03749999999132267 / same | same | books say ties=yes
+ok   UNI-V2 0xd3c5…F8dE | 7.755553124981515713 / same | 7.755553124981515713 / same | same | books say ties=yes
+ok   UNI-V2 0x193E…b445 | 0.08 / same | 0.08 / same | same | books say ties=yes
+ok   DLP_5c83673e | 0.999999999999998999 / same | 0.999999999999998999 / same | same | books say ties=yes
+ok   DLP_fef4ad62 | 199.999999999999998999 / same | 199.999999999999998999 / same | same | books say ties=yes
+ok   bWPHRS | 0.100025044899776191 / same | 0.100034434904670076 / same | same | books say ties=no
+ok   UNI-V2 0xcFaC…76CD | 0.0000000006 / same | 0.0000000006 / same | same | books say ties=yes
+ok   UNI-V2 0xF399…6204 | 0.069167961159416858 / same | 0.069167961159416858 / same | same | books say ties=yes
+ok   UNI-V2 0xc18E…F812 | 11357.040870042224976019 / same | 11357.040870042224976019 / same | same | books say ties=yes
+ok   UNI-V2 0x03aa…C930 | 0.000000000632454532 / same | 0.000000000632454532 / same | same | books say ties=yes
+ok   UNI-V2 0x0Cab…d828 | 0.000000000003999 / same | 0.000000000003999 / same | same | books say ties=yes
+ok   UNI-V2 0x372b…FbEC | 0.000000000006323555 / same | 0.000000000006323555 / same | same | books say ties=yes
+all 19 assets agree with the chain and with the transactions file

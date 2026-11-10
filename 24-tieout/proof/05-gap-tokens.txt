@@ -1,0 +1,27 @@
+What are the three assets that did not tie for 0xF4DFDD6407a63A36bD26af92b593E7fdC913A989 (2026-11-01 to 2026-11-09 UTC)?
+eth_call against rpc.pharos.xyz on 2026-11-10.
+
+bUSDC 0x9dcf4b664Fd2c8f0F5147eA469Afe1cBc9e69D96
+  name()                     OpenFi USDC
+  UNDERLYING_ASSET_ADDRESS() 0xC879C018dB60520F4355C26eD1a6D572cdAC1815
+  POOL()                     0x30B2E1411FD2ed9F1f46f59497e2186cE5BE3b26
+  balanceOf at block 21807389  6070607
+  balanceOf at block 22606123  6073345  (+2738)
+
+bWPHRS 0x4d1C33B59B8D4B98DbB61fAaF49cdd0e597e19e9
+  name()                     OpenFi WPHRS
+  UNDERLYING_ASSET_ADDRESS() 0x52C48d4213107b20bC583832b0d951FB9CA8F0B0
+  POOL()                     0x30B2E1411FD2ed9F1f46f59497e2186cE5BE3b26
+  balanceOf at block 21807389  100025044899776191
+  balanceOf at block 22606123  100034434904670076  (+9390004893885)
+
+variableDebtUSDC 0x4939e1Af23ee8f375dD6105B79b40F5EFD229d1D
+  name()                     OpenFi Variable Debt USDC
+  UNDERLYING_ASSET_ADDRESS() 0xC879C018dB60520F4355C26eD1a6D572cdAC1815
+  POOL()                     0x30B2E1411FD2ed9F1f46f59497e2186cE5BE3b26
+  balanceOf at block 21807389  4591740
+  balanceOf at block 22606123  4595352  (+3612)
+
+All three answer POOL() with the same lending pool, OpenFi (an Aave fork). Their balances changed while the
+explorer lists no transaction at all for this wallet in the period, so no list of transactions can explain the
+change. The tie-out shows it as a gap instead of hiding it.
