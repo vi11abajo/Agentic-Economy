@@ -1,0 +1,163 @@
+{
+  "target": "0xc879c018db60520f4355c26ed1a6d572cdac1815",
+  "kind": "contract",
+  "name": "FiatTokenV2_2",
+  "head": 22696231,
+  "time": 1794352336,
+  "me": "0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+  "findings": [
+    {
+      "id": "kind",
+      "title": "What it is",
+      "level": "info",
+      "said": "A contract the explorer calls FiatTokenV2_2.",
+      "why": "",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "0xc879…1815",
+          "url": "https://www.pharosscan.xyz/address/0xc879c018db60520f4355c26ed1a6d572cdac1815"
+        }
+      ]
+    },
+    {
+      "id": "contract_age",
+      "title": "How old the contract is",
+      "level": "ok",
+      "said": "It was created 8 months ago, in block 4035507 (the chain has no code at this address one block earlier).",
+      "why": "",
+      "source": "chain+explorer",
+      "evidence": [
+        {
+          "label": "creation tx 0xe2cc…7d1b",
+          "url": "https://www.pharosscan.xyz/tx/0xe2ccd8054a290f5e5be6ecbf99ec8480df017f27d6516a373b39bd81cb2d7d1b"
+        },
+        {
+          "label": "block 4035507",
+          "url": "https://www.pharosscan.xyz/block/4035507"
+        }
+      ]
+    },
+    {
+      "id": "verified_source",
+      "title": "Can anyone read the code",
+      "level": "ok",
+      "said": "The source of the code behind this proxy (0xc35b…eae8) is published and verified on pharosscan.",
+      "why": "",
+      "source": "explorer",
+      "evidence": [
+        {
+          "label": "0xc35b…eae8 code",
+          "url": "https://www.pharosscan.xyz/address/0xc35becb283fec66626220467265f6d3b3f8ceae8"
+        }
+      ]
+    },
+    {
+      "id": "upgradeable",
+      "title": "Can its code be swapped",
+      "level": "medium",
+      "said": "Yes, by one private key: it is a proxy running 0xc35b…eae8, and its proxy admin is a plain wallet, 0x46f9…3f1b.",
+      "why": "Whoever holds that one key can swap the code at any moment, without asking anyone, including for code that drains what you approved.",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "proxy admin 0x46f9…3f1b",
+          "url": "https://www.pharosscan.xyz/address/0x46f958bdeffd33495e058873cdd114c79ec13f1b"
+        },
+        {
+          "label": "implementation 0xc35b…eae8",
+          "url": "https://www.pharosscan.xyz/address/0xc35becb283fec66626220467265f6d3b3f8ceae8"
+        }
+      ]
+    },
+    {
+      "id": "code_changed",
+      "title": "Has its code been swapped",
+      "level": "ok",
+      "said": "No: the same implementation has been in place since the contract was created (block 4035507).",
+      "why": "",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "block 4035507",
+          "url": "https://www.pharosscan.xyz/block/4035507"
+        }
+      ]
+    },
+    {
+      "id": "exposure",
+      "title": "Who has approved it",
+      "level": "info",
+      "said": "Nobody approved it to move their tokens in the last 100000 blocks (about 26 hours).",
+      "why": "",
+      "source": "chain",
+      "evidence": []
+    },
+    {
+      "id": "powers",
+      "title": "What its owner can do",
+      "level": "info",
+      "said": "Its bytecode has functions to create new tokens out of nothing (mint); freeze all transfers (pause); block particular addresses from moving their tokens (blacklist).",
+      "why": "These are normal in many tokens, but each one is a lever someone holds over your money. The source is verified, so you can read who may pull it.",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "0xc35b…eae8 code",
+          "url": "https://www.pharosscan.xyz/address/0xc35becb283fec66626220467265f6d3b3f8ceae8"
+        }
+      ]
+    },
+    {
+      "id": "first_contact",
+      "title": "Have you dealt with it before",
+      "level": "info",
+      "said": "Yes: it appears 38 times in your history, the last time 6 hours ago.",
+      "why": "",
+      "source": "you",
+      "evidence": [
+        {
+          "label": "tx 0x9ae6…1f7d",
+          "url": "https://www.pharosscan.xyz/tx/0x9ae64ca6c05fc23fce815791adad2ccd014682cb46215fdeea61a2e15a7a1f7d"
+        }
+      ]
+    },
+    {
+      "id": "look_alike",
+      "title": "Does it imitate someone you pay",
+      "level": "ok",
+      "said": "No: none of the 52 addresses you've paid shares its first and last four characters.",
+      "why": "",
+      "source": "you",
+      "evidence": [
+        {
+          "label": "your history",
+          "url": "https://www.pharosscan.xyz/address/0x46441dc99f8000959e9c48cf2a01a018d131d3bb"
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "risk": "MEDIUM",
+    "reasons": [
+      {
+        "id": "upgradeable",
+        "title": "Can its code be swapped",
+        "level": "medium",
+        "said": "Yes, by one private key: it is a proxy running 0xc35b…eae8, and its proxy admin is a plain wallet, 0x46f9…3f1b.",
+        "why": "Whoever holds that one key can swap the code at any moment, without asking anyone, including for code that drains what you approved.",
+        "source": "chain",
+        "evidence": [
+          {
+            "label": "proxy admin 0x46f9…3f1b",
+            "url": "https://www.pharosscan.xyz/address/0x46f958bdeffd33495e058873cdd114c79ec13f1b"
+          },
+          {
+            "label": "implementation 0xc35b…eae8",
+            "url": "https://www.pharosscan.xyz/address/0xc35becb283fec66626220467265f6d3b3f8ceae8"
+          }
+        ]
+      }
+    ],
+    "unchecked": []
+  }
+}

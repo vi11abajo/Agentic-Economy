@@ -1,0 +1,180 @@
+{
+  "target": "0x04a6dd7907fff325c580dc84829f0379de49dc22",
+  "kind": "contract",
+  "name": null,
+  "head": 22696147,
+  "time": 1794352253,
+  "me": null,
+  "findings": [
+    {
+      "id": "kind",
+      "title": "What it is",
+      "level": "info",
+      "said": "A contract with no name on the explorer.",
+      "why": "",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "0x04a6…dc22",
+          "url": "https://www.pharosscan.xyz/address/0x04a6dd7907fff325c580dc84829f0379de49dc22"
+        }
+      ]
+    },
+    {
+      "id": "contract_age",
+      "title": "How old the contract is",
+      "level": "ok",
+      "said": "It was created 21 days ago, in block 20817840 (the chain has no code at this address one block earlier).",
+      "why": "",
+      "source": "chain+explorer",
+      "evidence": [
+        {
+          "label": "creation tx 0x1254…8892",
+          "url": "https://www.pharosscan.xyz/tx/0x1254f0427806ffed0be3d2174b268794683ed5a75a8d1fbbe422726df0ab8892"
+        },
+        {
+          "label": "block 20817840",
+          "url": "https://www.pharosscan.xyz/block/20817840"
+        }
+      ]
+    },
+    {
+      "id": "verified_source",
+      "title": "Can anyone read the code",
+      "level": "medium",
+      "said": "The source of the code behind this proxy (0xc404…7e0e) is not verified: all anyone can see is bytecode.",
+      "why": "Unverified code is a black box. You'd be trusting it without anyone being able to check what it does with your tokens.",
+      "source": "explorer",
+      "evidence": [
+        {
+          "label": "0xc404…7e0e code",
+          "url": "https://www.pharosscan.xyz/address/0xc404caf08732517ac9c0d4851e3d4336fb4e7e0e"
+        }
+      ]
+    },
+    {
+      "id": "upgradeable",
+      "title": "Can its code be swapped",
+      "level": "medium",
+      "said": "Yes, by one private key: it is a proxy running 0xc404…7e0e, and its owner() is a plain wallet, 0x54f8…5ff4.",
+      "why": "Whoever holds that one key can swap the code at any moment, without asking anyone, including for code that drains what you approved.",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "owner() 0x54f8…5ff4",
+          "url": "https://www.pharosscan.xyz/address/0x54f856b5837aad58267fa6c37f901fa79b465ff4"
+        },
+        {
+          "label": "implementation 0xc404…7e0e",
+          "url": "https://www.pharosscan.xyz/address/0xc404caf08732517ac9c0d4851e3d4336fb4e7e0e"
+        }
+      ]
+    },
+    {
+      "id": "code_changed",
+      "title": "Has its code been swapped",
+      "level": "high",
+      "said": "Yes: the code running today was put in 19 hours ago, in block 22622345, 20 days after the contract went live (pharosscan still shows the older 0xafbe…60ac; the chain says 0xc404…7e0e).",
+      "why": "The contract you'd be trusting changed this week, and nobody can read the new code. Whatever people trusted it for before doesn't carry over.",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "upgrade tx 0x0570…9558",
+          "url": "https://www.pharosscan.xyz/tx/0x05708140b33ae9d712ab9920672db3f7b15497c12325be05a550cff12daa9558"
+        },
+        {
+          "label": "block 22622345",
+          "url": "https://www.pharosscan.xyz/block/22622345"
+        }
+      ]
+    },
+    {
+      "id": "exposure",
+      "title": "Who has approved it",
+      "level": "info",
+      "said": "In the last 100000 blocks (about 26 hours), 71 wallets approved it to move their tokens (109 approvals, 109 of them unlimited).",
+      "why": "Approvals stay open when the code behind them changes. Everything here is reachable by whoever controls this contract.",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "approval 0xee9b…9ad6",
+          "url": "https://www.pharosscan.xyz/tx/0xee9bfcf755b510c402c40458bc2575c62cc732fbca2e808bd75c76aaaf189ad6"
+        },
+        {
+          "label": "approval 0x657f…d9d1",
+          "url": "https://www.pharosscan.xyz/tx/0x657f80c08913f35377248422e7e38c651d46deb5e1d898b92db4d700c5f5d9d1"
+        }
+      ]
+    },
+    {
+      "id": "powers",
+      "title": "What its owner can do",
+      "level": "info",
+      "said": "Its bytecode has functions to swap in different code (upgrade).",
+      "why": "These are normal in many tokens, but each one is a lever someone holds over your money. With unverified code you can't see who may pull it.",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "0xc404…7e0e code",
+          "url": "https://www.pharosscan.xyz/address/0xc404caf08732517ac9c0d4851e3d4336fb4e7e0e"
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "risk": "HIGH",
+    "reasons": [
+      {
+        "id": "code_changed",
+        "title": "Has its code been swapped",
+        "level": "high",
+        "said": "Yes: the code running today was put in 19 hours ago, in block 22622345, 20 days after the contract went live (pharosscan still shows the older 0xafbe…60ac; the chain says 0xc404…7e0e).",
+        "why": "The contract you'd be trusting changed this week, and nobody can read the new code. Whatever people trusted it for before doesn't carry over.",
+        "source": "chain",
+        "evidence": [
+          {
+            "label": "upgrade tx 0x0570…9558",
+            "url": "https://www.pharosscan.xyz/tx/0x05708140b33ae9d712ab9920672db3f7b15497c12325be05a550cff12daa9558"
+          },
+          {
+            "label": "block 22622345",
+            "url": "https://www.pharosscan.xyz/block/22622345"
+          }
+        ]
+      },
+      {
+        "id": "verified_source",
+        "title": "Can anyone read the code",
+        "level": "medium",
+        "said": "The source of the code behind this proxy (0xc404…7e0e) is not verified: all anyone can see is bytecode.",
+        "why": "Unverified code is a black box. You'd be trusting it without anyone being able to check what it does with your tokens.",
+        "source": "explorer",
+        "evidence": [
+          {
+            "label": "0xc404…7e0e code",
+            "url": "https://www.pharosscan.xyz/address/0xc404caf08732517ac9c0d4851e3d4336fb4e7e0e"
+          }
+        ]
+      },
+      {
+        "id": "upgradeable",
+        "title": "Can its code be swapped",
+        "level": "medium",
+        "said": "Yes, by one private key: it is a proxy running 0xc404…7e0e, and its owner() is a plain wallet, 0x54f8…5ff4.",
+        "why": "Whoever holds that one key can swap the code at any moment, without asking anyone, including for code that drains what you approved.",
+        "source": "chain",
+        "evidence": [
+          {
+            "label": "owner() 0x54f8…5ff4",
+            "url": "https://www.pharosscan.xyz/address/0x54f856b5837aad58267fa6c37f901fa79b465ff4"
+          },
+          {
+            "label": "implementation 0xc404…7e0e",
+            "url": "https://www.pharosscan.xyz/address/0xc404caf08732517ac9c0d4851e3d4336fb4e7e0e"
+          }
+        ]
+      }
+    ],
+    "unchecked": []
+  }
+}
