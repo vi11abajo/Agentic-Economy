@@ -62,8 +62,10 @@ export const UNLIMITED = 2n ** 255n;
 const MAX_PER_KIND = 5;
 
 export const short = (a: string) => `${getAddress(a).slice(0, 6)}…${getAddress(a).slice(-4)}`;
-export const nameOf = (r: Pick<Report, "names" | "wallet">, a: string) =>
-  a.toLowerCase() === r.wallet.toLowerCase() ? "this wallet" : r.names.get(a.toLowerCase()) ?? short(a);
+// A token contract goes by the label the report gives the asset ("Wrapped PROS", not the bare "PROS" the explorer
+// has for it), anything else by the explorer's name, or by its short address.
+export const nameOf = (r: Pick<Report, "names" | "wallet"> & Partial<Pick<Report, "assets">>, a: string) =>
+  a.toLowerCase() === r.wallet.toLowerCase() ? "this wallet" : r.assets?.get(a.toLowerCase())?.label ?? r.names.get(a.toLowerCase()) ?? short(a);
 
 export interface Progress {
   (step: string): void;

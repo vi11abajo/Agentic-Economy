@@ -23,7 +23,9 @@ export function describe(r: Report, e: Entry): string {
   const outs = e.flows.filter((f) => f.dir === "out");
   const ins = e.flows.filter((f) => f.dir === "in");
   const target = e.target ? nameOf(r, e.target) : "a new contract";
-  const call = e.method ? `${e.method} on ${target}` : `a call to ${target}`;
+  // the explorer decodes most method names; when it couldn't, the 4-byte id is all there is
+  const raw = /^0x[0-9a-f]*$/i.test(e.method);
+  const call = e.method && !raw ? `${e.method} on ${target}` : `a call to ${target}${e.method.length === 10 ? ` (method ${e.method})` : ""}`;
   switch (e.category) {
     case "transfer_out":
       return `sent ${summed(r, outs)} to ${people(r, outs)}${e.mine ? "" : ` (the transaction was sent by ${nameOf(r, e.sender)})`}`;
@@ -44,6 +46,7 @@ export function describe(r: Report, e: Entry): string {
     case "contract": {
       const parts = [outs.length ? `sent ${summed(r, outs)}` : "", ins.length ? `got back ${summed(r, ins)}` : ""].filter(Boolean);
       if (!e.mine) return `${nameOf(r, e.sender)} called ${call}${parts.length ? `: this wallet ${list(parts)}` : ""}`;
+      if (e.target === e.sender && !parts.length) return "a transaction to itself, no money moved";
       return `${call}${parts.length ? `: ${list(parts)}` : ", no money moved"}`;
     }
   }
