@@ -1,0 +1,59 @@
+# run.log: every wake of the OS scheduler during the live run (every minute + exact wake at each due time)
+
+2026-11-10T16:44:00.264Z run: paid 3, short 0, failed 0, missed 0
+  Team payroll (live demo) #1 Employee 1 0.001 USDC: paid 0x700555689b265cc5dfdec87dc64afe2c2f1e083d9eafd88c930ddeb49fb8da5b
+  Team payroll (live demo) #1 Employee 2 0.001 USDC: paid 0xa8af4483e4f1589ece83a33d618ce795fd74390023b007952265d57630d42375
+  Team payroll (live demo) #1 Employee 3 0.001 USDC: paid 0x7d786d2e3d62cfeca21eb6addc6e4d5b045a529bbff37d6e31832172b0ec865a
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:49:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:49:00
+2026-11-10T16:45:01.462Z run: paid 0, short 0, failed 0, missed 0
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:49:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:49:00
+2026-11-10T16:46:01.477Z run: paid 0, short 0, failed 0, missed 0
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:49:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:49:00
+2026-11-10T16:47:01.656Z run: paid 0, short 0, failed 0, missed 0
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:49:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:49:00
+2026-11-10T16:48:01.900Z run: paid 0, short 0, failed 0, missed 0
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:49:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:49:00
+2026-11-10T16:49:00.177Z run: paid 2, short 0, failed 0, missed 0
+  Team payroll (live demo) #2 Employee 1 0.001 USDC: paid 0x4dba8abdc391c27b510556dd9b1572c60facaea51abff57cd36186b1f53efa0d
+  Team payroll (live demo) #2 Employee 2 0.001 USDC: could not finish this time (RPC Request failed.); the next run tries again
+  Team payroll (live demo) #2 Employee 3 0.001 USDC: paid 0x282a289f98b19f2943772f63c943d979e139082d549b930772107641a62d9e30
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:54:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:54:00
+2026-11-10T16:50:01.488Z run: paid 1, short 0, failed 0, missed 0
+  Team payroll (live demo) #2 Employee 2 0.001 USDC: paid 0x8955ca5fc2580f65ff2419d0b2a926caf6d42ade31a5d70ec6b1610ce014e93d
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:54:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:54:00
+2026-11-10T16:51:02.006Z run: paid 0, short 0, failed 0, missed 0
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:54:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:54:00
+2026-11-10T16:52:01.464Z run: paid 0, short 0, failed 0, missed 0
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:54:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:54:00
+2026-11-10T16:53:01.397Z run: paid 0, short 0, failed 0, missed 0
+  Team payroll (live demo): covers 2 more
+  next payment: 2026-11-10T16:54:00.000Z
+  scheduler: bookkeeper-check: every 1 min from 2026-11-10T17:44:00
+  scheduler: bookkeeper-due: once at 2026-11-10T17:54:00

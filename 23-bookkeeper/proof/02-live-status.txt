@@ -1,0 +1,13 @@
+# bookkeeper status after the live run (series stopped by the user at 18:02 Europe/Paris)
+# command: bookkeeper status
+
+paying wallet 0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb: 0.49379 USDC, 0.006396038579752846 PROS
+
+Team payroll (live demo) [team-payroll-live-demo] - STOPPED: Employee 1 0.001, Employee 2 0.001, Employee 3 0.001 USDC, every 5 minutes (Europe/Paris)
+  paid 6, waiting for money 0, sent 0, failed (retrying) 0, missed 0, due now 0
+  #1 Tue 10 Nov 2026, 17:44 (Europe/Paris) Employee 1 0.001 USDC: paid https://www.pharosscan.xyz/tx/0x700555689b265cc5dfdec87dc64afe2c2f1e083d9eafd88c930ddeb49fb8da5b
+  #1 Tue 10 Nov 2026, 17:44 (Europe/Paris) Employee 2 0.001 USDC: paid https://www.pharosscan.xyz/tx/0xa8af4483e4f1589ece83a33d618ce795fd74390023b007952265d57630d42375
+  #1 Tue 10 Nov 2026, 17:44 (Europe/Paris) Employee 3 0.001 USDC: paid https://www.pharosscan.xyz/tx/0x7d786d2e3d62cfeca21eb6addc6e4d5b045a529bbff37d6e31832172b0ec865a
+  #2 Tue 10 Nov 2026, 17:49 (Europe/Paris) Employee 1 0.001 USDC: paid https://www.pharosscan.xyz/tx/0x4dba8abdc391c27b510556dd9b1572c60facaea51abff57cd36186b1f53efa0d
+  #2 Tue 10 Nov 2026, 17:49 (Europe/Paris) Employee 2 0.001 USDC: paid https://www.pharosscan.xyz/tx/0x8955ca5fc2580f65ff2419d0b2a926caf6d42ade31a5d70ec6b1610ce014e93d
+  #2 Tue 10 Nov 2026, 17:49 (Europe/Paris) Employee 3 0.001 USDC: paid https://www.pharosscan.xyz/tx/0x282a289f98b19f2943772f63c943d979e139082d549b930772107641a62d9e30
