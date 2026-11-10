@@ -1,0 +1,5 @@
+Pharos block 22633325, timestamp 1794294258; throwaway wallet 0x1c8643fb0F142042141E90fEa6aa862DFC9C46b3, 1 USDC by state override
+window open (due a minute ago, next due in a week): goes through
+window not open yet (due tomorrow): refused - execution reverted: FiatTokenV2: authorization is not yet valid
+window closed (period ended a minute ago): refused - execution reverted: FiatTokenV2: authorization is expired
+window open, wallet empty: refused - execution reverted: ERC20: transfer amount exceeds balance
