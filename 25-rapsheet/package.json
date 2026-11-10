@@ -1,0 +1,22 @@
+{
+  "name": "rapsheet",
+  "version": "1.0.0",
+  "description": "rapsheet: pull an address's whole record on Pharos before you pay, approve or call it, and say in plain words what should make you hesitate",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "rapsheet": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
