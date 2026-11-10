@@ -85,3 +85,29 @@ test("approve turns the draft on once and remembers the names", () => {
   assert.throws(() => approve(h, r.plan.planId, NOW), /already approved/);
   assert.throws(() => approve(h, "nope", NOW), /No draft/);
 });
+
+test("a payee given only by address is asked about and named by its short address, never 'undefined'", () => {
+  const q = questions(draft({ ...full, payees: [{ address: PETE }] as DraftInput["payees"] }, { Anna: ANNA }, NOW));
+  assert.deepEqual(q, ["How much should 0x1111…1111 get each time?"]);
+  const r = draft({ ...full, payees: [{ address: PETE, amount: "1" }] as DraftInput["payees"] }, { Anna: ANNA }, NOW);
+  assert.ok("plan" in r);
+  assert.equal(r.plan.payees[0].name, "0x1111…1111");
+});
+
+test("an address-only payee does not land in the address book under its short address", () => {
+  const h = mkdtempSync(join(tmpdir(), "bookkeeper-"));
+  const r = draft({ ...full, payees: [{ address: PETE, amount: "1" }, { name: "Anna", address: ANNA, amount: "2" }] as DraftInput["payees"] }, {}, NOW, h);
+  assert.ok("plan" in r);
+  approve(h, r.plan.planId, NOW);
+  assert.deepEqual(loadPeople(h), { Anna: ANNA });
+});
+
+test("a lower-case address-only payee also stays out of the address book", () => {
+  const h = mkdtempSync(join(tmpdir(), "bookkeeper-"));
+  const lower = "0x3759d28c86476de18a901747c68816369006a6e9";
+  const r = draft({ ...full, payees: [{ address: lower, amount: "1" }] as DraftInput["payees"] }, {}, NOW, h);
+  assert.ok("plan" in r);
+  assert.equal(r.plan.payees[0].name, "0x3759…A6e9");
+  approve(h, r.plan.planId, NOW);
+  assert.deepEqual(loadPeople(h), {});
+});
