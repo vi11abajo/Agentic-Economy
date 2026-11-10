@@ -126,8 +126,13 @@ async function main() {
       const input = JSON.parse(readFileSync(arg === "-" ? 0 : arg, "utf8")) as DraftInput;
       const r = draft(input, loadPeople(home), now, home);
       // The plan can be talked through before there is a wallet, but nothing pays without one, so say so early.
-      if (!readSecrets(home).privateKey) print(`NO WALLET YET: run bookkeeper init and have the user fill ${join(home, ".env")} before approving.
+      // Same as init when there is no .env yet, so the path given to the user always points at a real file.
+      if (!readSecrets(home).privateKey) {
+        const { envPath } = initHome(home, null);
+        writeLauncher(home, process.argv[1]);
+        print(`NO WALLET YET: ask the user to fill ${envPath} (key line and a report channel) and save it. Nothing can be approved before that.
 `);
+      }
       if ("missing" in r) {
         print("STILL NEED (ask the user, one at a time):");
         for (const q of r.missing) print(`- ${q}`);
