@@ -12,11 +12,13 @@ export const TACO = "0x00000000000000000000000000000000000000c1" as Hex;
 export const ROUTER = "0x00000000000000000000000000000000000000d0" as Hex;
 export const VAULT = "0x00000000000000000000000000000000000000d1" as Hex;
 export const POOL = "0x00000000000000000000000000000000000000d2" as Hex;
+export const WPROS = "0x00000000000000000000000000000000000000c2" as Hex;
 
 export const word = (a: string) => ("0x" + a.slice(2).padStart(64, "0")) as Hex;
 export const amountData = (v: bigint) => ("0x" + v.toString(16).padStart(64, "0")) as Hex;
 export const transferLog = (token: Hex, from: Hex, to: Hex, v: bigint): Log => ({ address: token, topics: [TOPIC.transfer, word(from), word(to)], data: amountData(v) });
 export const approvalLog = (token: Hex, owner: Hex, spender: Hex, v: bigint): Log => ({ address: token, topics: [TOPIC.approval, word(owner), word(spender)], data: amountData(v) });
+export const wrapLog = (token: Hex, topic: Hex, who: Hex, v: bigint): Log => ({ address: token, topics: [topic, word(who)], data: amountData(v) });
 export const swapLog = (pool: Hex): Log => ({ address: pool, topics: [TOPIC.swapV3, word(ROUTER), word(ME)], data: "0x" });
 
 export const hashOf = (n: number) => ("0x" + n.toString(16).padStart(64, "0")) as Hex;
@@ -117,7 +119,7 @@ export class FakeWorld {
       nativeBalance: async (_who, block) => this.balanceAt("native", block),
       tokenBalance: async (token, _who, block) => this.balanceAt(token, block),
       allowance: async (token, _owner, spender) => this.allowances.get(`${token}:${spender}`) ?? 0n,
-      tokenInfo: async (token) => ({ symbol: token === USDC ? "USDC" : "TACO", decimals: 6 }),
+      tokenInfo: async (token) => (token === WPROS ? { symbol: "WPROS", decimals: 18 } : { symbol: token === USDC ? "USDC" : "TACO", decimals: 6 }),
     };
   }
 }

@@ -63,6 +63,9 @@ export const TOPIC = {
   // Uniswap V2 and V3 style pools (Faroswap runs V3 pools)
   swapV2: "0xd78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822",
   swapV3: "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+  // WETH-style wrapper: Deposit(address indexed dst, uint wad) / Withdrawal(address indexed src, uint wad)
+  wrap: "0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c",
+  unwrap: "0x7fcf532c15f0a6db0bd6d0e038bea71d30d808c7d98cb3bf7268a95bf5081b65",
 } as const;
 
 // Method ids whose whole point is to set an allowance.
@@ -136,6 +139,16 @@ export function buildEntries(wallet: Hex, h: History, receipts: Map<Hex, Receipt
     for (const log of receipt.logs) {
       const t0 = log.topics[0];
       if (t0 === TOPIC.swapV2 || t0 === TOPIC.swapV3) swapped = true;
+      if (log.topics.length === 2 && topicAddress(log.topics[1]) === me && (t0 === TOPIC.wrap || t0 === TOPIC.unwrap)) {
+        // Wrapped PROS works like WETH: wrapping emits Deposit(dst, wad) and unwrapping Withdrawal(src, wad), no
+        // Transfer at all. Plenty of other contracts use the same event shape, so it only counts as a wrap when the
+        // same amount of native PROS went into (or came out of) that very contract in this transaction.
+        const wad = BigInt(log.data === "0x" ? 0 : log.data);
+        const wrap = t0 === TOPIC.wrap;
+        const pros = flows.find((f) => f.asset === NATIVE && f.counterparty === log.address && f.amount === wad && f.dir === (wrap ? "out" : "in"));
+        if (pros && wad > 0n) flows.push({ asset: log.address, dir: wrap ? "in" : "out", amount: wad, counterparty: log.address });
+        continue;
+      }
       if (log.topics.length !== 3) continue;
       if (t0 === TOPIC.transfer) {
         const from = topicAddress(log.topics[1]);

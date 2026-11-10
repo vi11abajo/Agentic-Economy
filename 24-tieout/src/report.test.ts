@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { booksCsv, fingerprint, transactionsCsv } from "./csv.js";
-import { ALICE, BOB, FakeWorld, ME, POOL, ROUTER, T0, TACO, USDC, VAULT, approvalLog, swapLog, transferLog } from "./fake.js";
+import { ALICE, BOB, FakeWorld, ME, POOL, ROUTER, T0, TACO, USDC, VAULT, WPROS, approvalLog, swapLog, transferLog, wrapLog } from "./fake.js";
+import { TOPIC } from "./ledger.js";
 import type { Hex } from "./explorer.js";
 import { markdown } from "./markdown.js";
 import { pdf } from "./pdf.js";
@@ -149,4 +150,23 @@ test("the Markdown and the PDF carry the same tie-out and link every transaction
   const xrefAt = Number(/startxref\n(\d+)/.exec(file)![1]);
   const offsets = file.slice(xrefAt).match(/^\d{10} 00000 n $/gm)!.map((l) => Number(l.slice(0, 10)));
   offsets.forEach((o, i) => assert.ok(file.startsWith(`${i + 1} 0 obj`, o), `object ${i + 1} offset`));
+});
+
+test("wrapping PROS shows up although Wrapped PROS emits no Transfer, and a look-alike Deposit event is ignored", async () => {
+  const w = new FakeWorld();
+  w.move("native", 1, 10n * E18);
+  const half = 5n * 10n ** 16n;
+  const wrap = w.add({ n: 1, block: 110, to: WPROS, value: "0.05", method: "Deposit", logs: [wrapLog(WPROS, TOPIC.wrap, ME, half)] });
+  w.move(WPROS, 110, half);
+  const unwrap = w.add({ n: 2, block: 120, to: WPROS, method: "Withdraw", internals: [{ from: WPROS, to: ME, value: "0.05" }], logs: [wrapLog(WPROS, TOPIC.unwrap, ME, half)] });
+  w.move(WPROS, 120, -half);
+  // a vault that happens to use the same Deposit(address,uint256) shape, with no PROS going in: not a wrap
+  const decoy = w.add({ n: 3, block: 130, to: VAULT, method: "Deposit", logs: [wrapLog(VAULT, TOPIC.wrap, ME, 7n)] });
+  const r = await report(w);
+  assert.match(words(r, entry(r, wrap)), /^Deposit on WPROS: sent 0\.05 PROS and got back 0\.05 WPROS$/);
+  assert.match(words(r, entry(r, unwrap)), /^Withdraw on WPROS: sent 0\.05 WPROS and got back 0\.05 PROS$/);
+  assert.equal(entry(r, decoy).flows.length, 0);
+  const wpros = r.books.find((l) => l.asset === WPROS)!;
+  assert.deepEqual([wpros.in, wpros.out, wpros.gap], [half, half, 0n]);
+  assert.ok(r.books.every((l) => l.gap === 0n));
 });
