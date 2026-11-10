@@ -1,5 +1,6 @@
 // The record of a contract: how old it is, whether anyone can read its code, whether someone can swap that code, and
 // whether they already did. Each of those is checked on the chain; the explorer only tells us where to look.
+import { approvalsNaming } from "./approvals.js";
 import { PROXY_LAYOUTS, slotAddress, type Chain } from "./chain.js";
 import type { Explorer, Hex, Profile } from "./explorer.js";
 import { addressLink, ago, blockLink, days, plural, short, txLink, type Finding } from "./finding.js";
@@ -13,6 +14,8 @@ export interface Look {
   now: number;
   profile: Profile;
   code: Hex;
+  /** Recent blocks to scan for approvals that name it. */
+  window: number;
 }
 
 export const CONTRACT_LIMITS = {
@@ -213,6 +216,24 @@ export async function contractRecord(l: Look): Promise<Finding[]> {
       });
     }
   }
+
+  // Who has already handed it the keys to their tokens? That's what is at stake if this code turns bad: approvals
+  // stay open across upgrades.
+  const { logs, span } = await approvalsNaming(l.chain, l.target, l.head, l.window);
+  const owners = new Set(logs.map((x) => x.owner));
+  const unlimited = logs.filter((x) => x.value >= 2n ** 128n).length;
+  out.push({
+    id: "exposure",
+    title: "Who has approved it",
+    level: "info",
+    said:
+      owners.size === 0
+        ? `Nobody approved it to move their tokens in ${span}.`
+        : `In ${span}, ${plural(owners.size, "wallet")} approved it to move their tokens (${plural(logs.length, "approval")}${unlimited ? `, ${unlimited} of them unlimited` : ""}).`,
+    why: owners.size === 0 ? "" : "Approvals stay open when the code behind them changes. Everything here is reachable by whoever controls this contract.",
+    source: "chain",
+    evidence: logs.slice(0, 2).map((x) => txLink(x.hash, `approval ${short(x.hash)}`)),
+  });
 
   const runs = impl ? await l.chain.code(impl) : l.code;
   const found = powersIn(runs);
