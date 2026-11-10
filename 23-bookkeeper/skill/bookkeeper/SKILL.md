@@ -24,13 +24,32 @@ requires:
 
 ## First time
 
-1. `bookkeeper init` makes the data folder, a fresh wallet key in its `.env` and the launcher the OS scheduler
-   starts. It prints the paying wallet address. Never open, print or ask for the `.env` contents: the key is the
-   user's money. If the user wants to use a wallet they already have, `bookkeeper init --no-key` leaves the key
-   line empty and they paste it in themselves.
-2. Tell the user to send USDC (or PROS) for the payouts plus a little PROS for gas to that address.
-3. For reports, the user fills `BOOKKEEPER_TELEGRAM_BOT_TOKEN` (from @BotFather) and/or `BOOKKEEPER_DISCORD_WEBHOOK`
-   in the `.env` themselves, sends `/start` to their bot, and you run `bookkeeper notify-test` (it finds the chat id).
+1. `bookkeeper init` makes the data folder, the launcher the OS scheduler starts, and a `.env` with empty lines.
+   It prints the full path of the `.env` and which lines are empty.
+2. Give the user that path and ask them to open it in a text editor, fill these lines after `=` and save:
+   - `BOOKKEEPER_PRIVATE_KEY=` the private key of the wallet the bookkeeper pays from (best a separate wallet that
+     holds only what the payouts need, plus a little PROS for gas);
+   - `BOOKKEEPER_DISCORD_WEBHOOK=` and/or `BOOKKEEPER_TELEGRAM_BOT_TOKEN=` where the reports go (at least one).
+   Keep it to that short request. Give the step-by-step guide below only if the user asks how to get a key, a
+   bot token or a webhook. If they'd rather have a brand-new wallet, `bookkeeper init --new-key` makes one and
+   prints only its address.
+3. Never ask the user to paste a key, token or webhook into the chat, and never read, print or `cat` the `.env`.
+   `bookkeeper settings` tells which lines are filled without showing them.
+4. When they say it's saved: `bookkeeper settings`, then `bookkeeper notify-test` (for Telegram it finds the chat id
+   once the user has sent `/start` to their bot), then `bookkeeper wallet` to show the address and balances.
+
+### Guide, only when the user asks
+
+- **Telegram bot:** in Telegram open @BotFather and send `/newbot`; send a name for the bot; send a username of
+  5-32 Latin letters, digits or `_` ending in `bot`; BotFather answers with a token like `110201543:AAHdqTcv...`,
+  that goes after `BOOKKEEPER_TELEGRAM_BOT_TOKEN=`; open the new bot (the t.me link BotFather gives) and press
+  Start or send `/start`. The chat id line stays empty: notify-test fills it.
+- **Discord webhook:** in the server's Server Settings open Integrations; create a webhook (Create Webhook / New
+  Webhook), pick the text channel it posts to; press Copy Webhook URL and paste it after
+  `BOOKKEEPER_DISCORD_WEBHOOK=`. No Integrations there means no right to manage webhooks on that server (their own
+  server works).
+- **Private key:** most wallets export it from the account's settings ("Show/Export private key"). Suggest a fresh
+  account made only for payouts rather than their main one.
 
 ## Setting up payments
 

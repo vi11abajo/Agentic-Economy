@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // bookkeeper: recurring payments on Pharos from the bookkeeper's own wallet, once the user approves the plan.
-//   init [--no-key]          data folder, wallet key (never printed), launcher
+//   init [--new-key]         .env with empty lines for the user to fill (or a fresh wallet), launcher
+//   settings                 which .env lines are filled (names only)
 //   wallet                   address, balances, how long the money lasts
 //   draft <file.json|->      what the agent understood -> open questions, or the plan to show the user
 //   approve <planId>         the user said yes: switch it on, put it in the OS scheduler, pay if already due
@@ -24,7 +25,8 @@ import { applySchedule, scheduleFor, showSchedule, writeLauncher } from "./sched
 import { ENV_KEYS, appendJournal, homeDir, initHome, loadPeople, loadSeries, readJournal, readSecrets, saveSeries, type Hex } from "./store.js";
 
 const HELP = `bookkeeper: recurring payments on Pharos from its own wallet, once you approve the plan
-  init [--no-key]          data folder, wallet key (never printed), launcher
+  init [--new-key]         data folder, .env with empty lines to fill (or a fresh wallet), launcher
+  settings                 which .env lines are filled (names only, never values)
   wallet                   address, balances, how long the money lasts
   draft <file.json|->      what the agent understood -> open questions, or the plan to show the user
   approve <planId>         the user said yes: switch it on, put it in the OS scheduler, pay if already due
@@ -60,6 +62,19 @@ function wallet() {
   return privateKeyToAccount(key);
 }
 
+/** Which settings lines are filled - names only, never the values. */
+function envState(): string {
+  const s = readSecrets(home);
+  const line = (k: string, ok: boolean, what: string) => `  ${k}: ${ok ? "filled" : `EMPTY - ${what}`}`;
+  return [
+    `settings (${join(home, ".env")}):`,
+    line(ENV_KEYS.privateKey, !!s.privateKey, "the private key of the wallet that pays"),
+    line(ENV_KEYS.telegramToken, !!s.telegramToken, "Telegram bot token (optional if Discord is set)"),
+    line(ENV_KEYS.telegramChatId, !!s.telegramChatId, "filled by notify-test after /start to the bot"),
+    line(ENV_KEYS.discordWebhook, !!s.discordWebhook, "Discord webhook URL (optional if Telegram is set)"),
+  ].join("\n");
+}
+
 function reschedule(now: Date): string[] {
   try {
     return applySchedule(scheduleFor(loadSeries(home), now), home);
@@ -85,14 +100,19 @@ async function main() {
   const now = new Date();
   switch (cmd) {
     case "init": {
-      const r = initHome(home, bool("--no-key") ? null : () => generatePrivateKey());
+      // By default the user brings the wallet: the .env gets an empty key line they fill in themselves.
+      // --new-key makes a fresh wallet instead (its key is written to the file and never printed).
+      const r = initHome(home, bool("--new-key") ? () => generatePrivateKey() : null);
       const run = writeLauncher(home, process.argv[1]);
       print(`data folder: ${home}`);
-      print(`settings file: ${r.envPath} (wallet key and Telegram/Discord; never paste it into a chat)`);
-      print(r.address ? `paying wallet: ${r.address}${r.created ? " (new key made just now)" : " (key already there, kept)"}` : `no wallet key yet: paste one into ${ENV_KEYS.privateKey} in the settings file`);
+      print(`settings file: ${r.envPath} (never paste its contents into a chat)`);
+      print(r.address ? `paying wallet: ${r.address}${r.created ? " (new key made just now)" : " (key already there, kept)"}` : `no wallet key yet`);
       print(`launcher for the OS scheduler: ${run}`);
+      print(envState());
       return;
     }
+    case "settings":
+      return print(envState());
     case "wallet": {
       const a = wallet().address as Hex;
       const c = viemChain();
