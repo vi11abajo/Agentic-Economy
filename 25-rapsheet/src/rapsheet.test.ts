@@ -215,8 +215,8 @@ test("a plain wallet holding someone else's open approval is HIGH; a closed one 
   const token = A(0x70c), victim = A(0x51c), careful = A(0x5af);
   explorer.profiles.set(w, profile(w, { firstTx: { hash: H(1), block: blockAgo(90), time: timeAgo(90) } }));
   chain.approvalLogs.set(w, [
-    { token, owner: victim, block: HEAD - 5000, hash: H(70) },
-    { token, owner: careful, block: HEAD - 4000, hash: H(71) },
+    { token, owner: victim, value: 114072n, block: HEAD - 5000, hash: H(70) },
+    { token, owner: careful, value: 5n, block: HEAD - 4000, hash: H(71) },
   ]);
   chain.allowances.set(`${token}:${victim}:${w}`, 114072n);
   const r = await rapsheet(w, chain, explorer, { now: NOW, window: 20_000 });

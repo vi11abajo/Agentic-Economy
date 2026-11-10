@@ -102,7 +102,7 @@ export async function rapsheet(target: Hex, chain: Chain, explorer: Explorer, op
 
   let txs: Listing<Tx> | null = null;
   if (isContract) {
-    findings.push(...(await contractRecord({ target: t, chain, explorer, head, now, profile, code })));
+    findings.push(...(await contractRecord({ target: t, chain, explorer, head, now, profile, code, window: opts.window ?? DEFAULT_WINDOW })));
   } else {
     txs = await explorer.txs(t);
     findings.push(...(await walletRecord({ target: t, chain, explorer, now, head, window: opts.window ?? DEFAULT_WINDOW, profile, txs })));

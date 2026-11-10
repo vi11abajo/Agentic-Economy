@@ -1,6 +1,7 @@
 // The record of a plain wallet: how long it has existed, who paid for its first gas and what that payer was doing at
 // the time, and which approvals it left open. That last one also matters for you: a wallet that hands unlimited
 // allowances to strangers is either careless or a drainer's helper, and you'd be trusting it either way.
+import { approvalsNaming } from "./approvals.js";
 import type { ApprovalLog, Chain } from "./chain.js";
 import type { Explorer, Hex, Listing, Profile, Tx } from "./explorer.js";
 import { addressLink, ago, days, plural, short, txLink, type Finding } from "./finding.js";
@@ -224,17 +225,9 @@ async function approvals(l: WalletLook): Promise<Finding[]> {
 // account (or a very unusual setup). No index lists approvals by spender, so this one is a log scan over a recent
 // window, and the report says how far back it looked.
 async function approvalsReceived(l: WalletLook): Promise<Finding[]> {
-  const from = Math.max(0, l.head - l.window + 1);
-  const spans: [number, number][] = [];
-  for (let b = from; b <= l.head; b += 1000) spans.push([b, Math.min(b + 999, l.head)]);
-  const got: ApprovalLog[] = [];
-  for (let i = 0; i < spans.length; i += 4) {
-    const batch = await Promise.all(spans.slice(i, i + 4).map(([a, b]) => l.chain.approvalsTo(l.target, a, b)));
-    for (const x of batch) got.push(...x);
-  }
-  const span = `the last ${plural(l.head - from + 1, "block")} (about ${ago((await l.chain.blockTime(l.head)) - (await l.chain.blockTime(from)))})`;
+  const { logs, span } = await approvalsNaming(l.chain, l.target, l.head, l.window);
   const latest = new Map<string, ApprovalLog>();
-  for (const a of got.sort((x, y) => y.block - x.block)) if (a.owner !== l.target && !latest.has(`${a.token}:${a.owner}`)) latest.set(`${a.token}:${a.owner}`, a);
+  for (const a of logs) if (a.owner !== l.target && !latest.has(`${a.token}:${a.owner}`)) latest.set(`${a.token}:${a.owner}`, a);
 
   const open: { a: ApprovalLog; left: bigint }[] = [];
   for (const a of latest.values()) {

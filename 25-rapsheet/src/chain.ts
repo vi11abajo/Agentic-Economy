@@ -35,6 +35,8 @@ export const APPROVAL_TOPIC: Hex = "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7
 export interface ApprovalLog {
   token: Hex;
   owner: Hex;
+  /** The allowance set by this event. */
+  value: bigint;
   block: number;
   hash: Hex;
 }
@@ -138,6 +140,7 @@ export function viemChain(rpc = PHAROS_RPC): Chain {
         .map((l) => ({
           token: String(l.address).toLowerCase() as Hex,
           owner: `0x${String(l.topics[1]).slice(-40).toLowerCase()}` as Hex,
+          value: l.data && l.data !== "0x" ? BigInt(String(l.data).slice(0, 66)) : 0n,
           block: Number(l.blockNumber),
           hash: String(l.transactionHash).toLowerCase() as Hex,
         }));
