@@ -1,0 +1,38 @@
+# bookkeeper log: the journal as the agent reads it (signed raw bytes are left out)
+# command: bookkeeper log
+
+2026-11-10T16:42:33.162Z team-payroll-live-demo approved planId=3b951d0edc label=Team payroll (live demo)
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 1 0.001 USDC due due=2026-11-10T16:44:00.000Z block=22671021
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 1 0.001 USDC signed tx=0x700555689b265cc5dfdec87dc64afe2c2f1e083d9eafd88c930ddeb49fb8da5b txNonce=570 authNonce=0xe3c4134d8a10f5dde0b474a64a6b19a9dd2d033a48d2fb8d89dd492cdd8f309a gas=157312 gasPrice=10000000000 block=22671021
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 1 0.001 USDC sent tx=0x700555689b265cc5dfdec87dc64afe2c2f1e083d9eafd88c930ddeb49fb8da5b
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 1 0.001 USDC paid tx=0x700555689b265cc5dfdec87dc64afe2c2f1e083d9eafd88c930ddeb49fb8da5b block=22671025 gasUsed=100376
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 2 0.001 USDC due due=2026-11-10T16:44:00.000Z block=22671026
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 2 0.001 USDC signed tx=0xa8af4483e4f1589ece83a33d618ce795fd74390023b007952265d57630d42375 txNonce=571 authNonce=0xc7ada2b920141ee220aa9164e0def97c0aa993e4996ba8f877fe9da606b8913a gas=157281 gasPrice=10000000000 block=22671026
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 2 0.001 USDC sent tx=0xa8af4483e4f1589ece83a33d618ce795fd74390023b007952265d57630d42375
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 2 0.001 USDC paid tx=0xa8af4483e4f1589ece83a33d618ce795fd74390023b007952265d57630d42375 block=22671031 gasUsed=100356
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 3 0.001 USDC due due=2026-11-10T16:44:00.000Z block=22671031
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 3 0.001 USDC signed tx=0x7d786d2e3d62cfeca21eb6addc6e4d5b045a529bbff37d6e31832172b0ec865a txNonce=572 authNonce=0x24bcb13009d674ae056f545177241cb737861e5fc788c07685d940a223f6914d gas=157281 gasPrice=10000000000 block=22671031
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 3 0.001 USDC sent tx=0x7d786d2e3d62cfeca21eb6addc6e4d5b045a529bbff37d6e31832172b0ec865a
+2026-11-10T16:44:00.264Z team-payroll-live-demo #1 Employee 3 0.001 USDC paid tx=0x7d786d2e3d62cfeca21eb6addc6e4d5b045a529bbff37d6e31832172b0ec865a block=22671035 gasUsed=100356
+2026-11-10T16:44:00.264Z team-payroll-live-demo notified ref=paid:team-payroll-live-demo:0:0 about=paid
+2026-11-10T16:44:00.264Z team-payroll-live-demo notified ref=paid:team-payroll-live-demo:0:1 about=paid
+2026-11-10T16:44:00.264Z team-payroll-live-demo notified ref=paid:team-payroll-live-demo:0:2 about=paid
+2026-11-10T16:44:00.264Z * notified ref=runway:paid:2026-11-10T16:44:00.264Z about=runway
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 1 0.001 USDC due due=2026-11-10T16:49:00.000Z block=22671368
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 1 0.001 USDC signed tx=0x4dba8abdc391c27b510556dd9b1572c60facaea51abff57cd36186b1f53efa0d txNonce=573 authNonce=0x3cef23aded5bd2de8941f167f8383d269df88b2a76b0232f95afba2efdaabaf8 gas=131082 gasPrice=10000000000 block=22671368
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 1 0.001 USDC sent tx=0x4dba8abdc391c27b510556dd9b1572c60facaea51abff57cd36186b1f53efa0d
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 1 0.001 USDC paid tx=0x4dba8abdc391c27b510556dd9b1572c60facaea51abff57cd36186b1f53efa0d block=22671373 gasUsed=83256
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 2 0.001 USDC due due=2026-11-10T16:49:00.000Z block=22671373
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 2 0.001 USDC signed tx=0x8955ca5fc2580f65ff2419d0b2a926caf6d42ade31a5d70ec6b1610ce014e93d txNonce=574 authNonce=0x193815b35347b958fb9b49d85e32bc51c5e8197d5f462754945b99493a302917 gas=131064 gasPrice=10000000000 block=22671373
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 2 0.001 USDC sent tx=0x8955ca5fc2580f65ff2419d0b2a926caf6d42ade31a5d70ec6b1610ce014e93d
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 3 0.001 USDC due due=2026-11-10T16:49:00.000Z block=22671373
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 3 0.001 USDC signed tx=0x282a289f98b19f2943772f63c943d979e139082d549b930772107641a62d9e30 txNonce=575 authNonce=0x5c9b63080401031e90c84aa79f13e03cf927694066df739703d4984979a94aab gas=131082 gasPrice=10000000000 block=22671373
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 3 0.001 USDC sent tx=0x282a289f98b19f2943772f63c943d979e139082d549b930772107641a62d9e30
+2026-11-10T16:49:00.177Z team-payroll-live-demo #2 Employee 3 0.001 USDC paid tx=0x282a289f98b19f2943772f63c943d979e139082d549b930772107641a62d9e30 block=22671381 gasUsed=83256
+2026-11-10T16:49:00.177Z team-payroll-live-demo notified ref=paid:team-payroll-live-demo:1:0 about=paid
+2026-11-10T16:49:00.177Z team-payroll-live-demo notified ref=paid:team-payroll-live-demo:1:2 about=paid
+2026-11-10T16:49:00.177Z * notified ref=runway:paid:2026-11-10T16:49:00.177Z about=runway
+2026-11-10T16:50:01.488Z team-payroll-live-demo #2 Employee 2 0.001 USDC paid tx=0x8955ca5fc2580f65ff2419d0b2a926caf6d42ade31a5d70ec6b1610ce014e93d block=22671378 gasUsed=83244
+2026-11-10T16:50:01.488Z team-payroll-live-demo notified ref=paid:team-payroll-live-demo:1:1 about=paid
+2026-11-10T16:50:01.488Z * notified ref=runway:paid:2026-11-10T16:50:01.488Z about=runway
+2026-11-10T17:02:29.308Z team-payroll-live-demo stopped
