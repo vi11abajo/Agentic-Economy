@@ -140,7 +140,7 @@ test("the Markdown and the PDF carry the same tie-out and link every transaction
   assert.match(md, /## Does it add up/);
   assert.match(md, /\| \[TACO\]\([^)]+\) \| 0 \| 5 \| 0 \| {2}\| 5 \| 5 \| ✔ ties \|/);
   assert.ok(md.includes(`https://www.pharosscan.xyz/tx/${h.paidCarol}`));
-  assert.doesNotMatch(md, /—/);
+  assert.doesNotMatch(md, /\u2014/);
 
   const file = pdf(r, new Date("2026-11-10T00:00:00Z")).toString("latin1");
   assert.ok(file.startsWith("%PDF-1.4"));
