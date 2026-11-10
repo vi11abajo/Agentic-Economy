@@ -20,6 +20,14 @@ export class FakeChain implements Chain {
   dropResponse = false;
   /** When true, accepted txs stay in the pool until mine() is called. */
   holdInPool = false;
+  /** A lagging node: txs waiting in the pool are invisible to knowsTx. */
+  hidePool = false;
+  /** Receipt and tx lookups fail like a throttled RPC. */
+  rpcDown = false;
+  /** estimateGas throws for payments to this address (a contract that rejects PROS, say). */
+  estimateFailsFor: Hex | null = null;
+  /** simulate answers this for every USDC payment. */
+  refuseSimulation: string | null = null;
 
   setUsdc(a: Hex, v: bigint) {
     this.usdc.set(a.toLowerCase(), v);
@@ -40,14 +48,20 @@ export class FakeChain implements Chain {
     return this.used.get(`${w.toLowerCase()}:${n}`) ?? null;
   }
   async estimateGas(tx: { to: Hex; data?: Hex }) {
+    if (this.estimateFailsFor && tx.to.toLowerCase() === this.estimateFailsFor.toLowerCase()) throw new Error("execution reverted");
     return tx.data ? 80_000n : 21_000n;
   }
   async gasPrice() {
     return 10_000_000_000n;
   }
   nonces = new Map<string, number>();
-  async pendingNonce(a: Hex) {
+  async latestNonce(a: Hex) {
     return this.nonces.get(a.toLowerCase()) ?? 0;
+  }
+  async pendingNonce(a: Hex) {
+    let inPool = 0;
+    for (const h of this.pool) if ((await recoverTransactionAddress({ serializedTransaction: this.rawOf.get(h)! as `0x02${string}` })).toLowerCase() === a.toLowerCase()) inPool++;
+    return (await this.latestNonce(a)) + inPool;
   }
   async blockNumber() {
     return this.block;
@@ -73,7 +87,7 @@ export class FakeChain implements Chain {
   }
 
   async simulate(tx: { from: Hex; to: Hex; data?: Hex; value?: bigint }) {
-    if (tx.data && getAddress(tx.to) === getAddress(USDC)) return this.usdcRule(tx.from, tx.data, false);
+    if (tx.data && getAddress(tx.to) === getAddress(USDC)) return this.refuseSimulation ?? this.usdcRule(tx.from, tx.data, false);
     return (await this.prosBalance(tx.from)) < (tx.value ?? 0n) ? "insufficient funds" : null;
   }
 
@@ -114,9 +128,11 @@ export class FakeChain implements Chain {
   rawOf = new Map<Hex, Hex>();
 
   async receipt(hash: Hex) {
+    if (this.rpcDown) throw new Error("HTTP request failed: 429");
     return this.receipts.get(hash) ?? null;
   }
   async knowsTx(hash: Hex) {
-    return this.receipts.has(hash) || this.pool.has(hash);
+    if (this.rpcDown) throw new Error("HTTP request failed: 429");
+    return this.receipts.has(hash) || (!this.hidePool && this.pool.has(hash));
   }
 }

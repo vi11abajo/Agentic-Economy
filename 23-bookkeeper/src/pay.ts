@@ -22,12 +22,15 @@ export const AUTH_TYPES = {
   ],
 } as const;
 
-/** The same series, period and payee always give the same nonce; anything else gives another one. */
-export function paymentNonce(wallet: Hex, seriesId: string, period: number, payee: number): Hex {
+/**
+ * The same series, period and payee always give the same nonce; anything else gives another one. The plan id is in
+ * it too, so "Payroll" approved again later (new plan) is a new series and not mistaken for the old one's payments.
+ */
+export function paymentNonce(wallet: Hex, seriesId: string, planId: string, period: number, payee: number): Hex {
   return keccak256(
     encodeAbiParameters(
-      [{ type: "string" }, { type: "address" }, { type: "string" }, { type: "uint256" }, { type: "uint256" }],
-      ["bookkeeper/v1", wallet, seriesId, BigInt(period), BigInt(payee)],
+      [{ type: "string" }, { type: "address" }, { type: "string" }, { type: "string" }, { type: "uint256" }, { type: "uint256" }],
+      ["bookkeeper/v1", wallet, seriesId, planId, BigInt(period), BigInt(payee)],
     ),
   );
 }

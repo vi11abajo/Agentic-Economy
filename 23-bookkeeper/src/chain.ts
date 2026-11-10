@@ -1,6 +1,6 @@
 // Everything the bookkeeper asks Pharos goes through this interface, so the payment logic can be tested against a
 // fake chain and run against the real one without changes.
-import { createPublicClient, getAddress, http, parseAbi, parseAbiItem, type Hex as VHex } from "viem";
+import { TransactionNotFoundError, TransactionReceiptNotFoundError, createPublicClient, getAddress, http, parseAbi, parseAbiItem, type Hex as VHex } from "viem";
 import type { Hex } from "./store.js";
 
 export const CHAIN_ID = 1672;
@@ -34,11 +34,13 @@ export interface Chain {
   estimateGas(tx: { from: Hex; to: Hex; data?: Hex; value?: bigint }): Promise<bigint>;
   gasPrice(): Promise<bigint>;
   pendingNonce(a: Hex): Promise<number>;
+  /** Nonce of the account counting mined txs only. */
+  latestNonce(a: Hex): Promise<number>;
   blockNumber(): Promise<bigint>;
   sendRaw(raw: Hex): Promise<Hex>;
-  /** null while the node doesn't know the tx or it isn't mined yet. */
+  /** null while the node doesn't know the tx or it isn't mined yet. Throws when the node can't be asked. */
   receipt(hash: Hex): Promise<Receipt | null>;
-  /** True when the node knows the tx at all (mined or still in the pool). */
+  /** True when the node knows the tx at all (mined or still in the pool). Throws when the node can't be asked. */
   knowsTx(hash: Hex): Promise<boolean>;
 }
 
@@ -74,22 +76,26 @@ export function viemChain(rpc = PHAROS_RPC): Chain {
     estimateGas: (tx) => c.estimateGas({ account: tx.from, to: tx.to, data: tx.data as VHex | undefined, value: tx.value }),
     gasPrice: () => c.getGasPrice(),
     pendingNonce: (a) => c.getTransactionCount({ address: a, blockTag: "pending" }),
+    latestNonce: (a) => c.getTransactionCount({ address: a, blockTag: "latest" }),
     blockNumber: () => c.getBlockNumber(),
     sendRaw: (raw) => c.sendRawTransaction({ serializedTransaction: raw }) as Promise<Hex>,
     async receipt(hash) {
       try {
         const r = await c.getTransactionReceipt({ hash });
         return { status: r.status, blockNumber: r.blockNumber, gasUsed: r.gasUsed };
-      } catch {
-        return null;
+      } catch (e) {
+        // "not found" is an answer; a timeout or a 429 is not, and must not be read as one
+        if (e instanceof TransactionReceiptNotFoundError) return null;
+        throw e;
       }
     },
     async knowsTx(hash) {
       try {
         await c.getTransaction({ hash });
         return true;
-      } catch {
-        return false;
+      } catch (e) {
+        if (e instanceof TransactionNotFoundError) return false;
+        throw e;
       }
     },
   };
