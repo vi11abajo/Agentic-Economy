@@ -44,5 +44,5 @@ export function ago(seconds: number): string {
   return plural(Math.round(s / (30 * DAY)), "month");
 }
 
-export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+export const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : word.endsWith("s") ? "es" : "s"}`;
 export const days = (seconds: number) => seconds / DAY;
