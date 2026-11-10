@@ -1,7 +1,7 @@
 // The record of a plain wallet: how long it has existed, who paid for its first gas and what that payer was doing at
 // the time, and which approvals it left open. That last one also matters for you: a wallet that hands unlimited
 // allowances to strangers is either careless or a drainer's helper, and you'd be trusting it either way.
-import type { Chain } from "./chain.js";
+import type { ApprovalLog, Chain } from "./chain.js";
 import type { Explorer, Hex, Listing, Profile, Tx } from "./explorer.js";
 import { addressLink, ago, days, plural, short, txLink, type Finding } from "./finding.js";
 
@@ -27,6 +27,9 @@ export interface WalletLook {
   chain: Chain;
   explorer: Explorer;
   now: number;
+  head: number;
+  /** How many recent blocks to scan for approvals naming this wallet. */
+  window: number;
   profile: Profile;
   txs: Listing<Tx>;
 }
@@ -216,6 +219,67 @@ async function approvals(l: WalletLook): Promise<Finding[]> {
   return out;
 }
 
+// The other side of an approval drain: who has given THIS wallet the right to move their tokens? Apps take
+// approvals through contracts, so a plain wallet holding open allowances from other people is the drainer's own
+// account (or a very unusual setup). No index lists approvals by spender, so this one is a log scan over a recent
+// window, and the report says how far back it looked.
+async function approvalsReceived(l: WalletLook): Promise<Finding[]> {
+  const from = Math.max(0, l.head - l.window + 1);
+  const spans: [number, number][] = [];
+  for (let b = from; b <= l.head; b += 1000) spans.push([b, Math.min(b + 999, l.head)]);
+  const got: ApprovalLog[] = [];
+  for (let i = 0; i < spans.length; i += 4) {
+    const batch = await Promise.all(spans.slice(i, i + 4).map(([a, b]) => l.chain.approvalsTo(l.target, a, b)));
+    for (const x of batch) got.push(...x);
+  }
+  const span = `the last ${plural(l.head - from + 1, "block")} (about ${ago((await l.chain.blockTime(l.head)) - (await l.chain.blockTime(from)))})`;
+  const latest = new Map<string, ApprovalLog>();
+  for (const a of got.sort((x, y) => y.block - x.block)) if (a.owner !== l.target && !latest.has(`${a.token}:${a.owner}`)) latest.set(`${a.token}:${a.owner}`, a);
+
+  const open: { a: ApprovalLog; left: bigint }[] = [];
+  for (const a of latest.values()) {
+    const left = await l.chain.allowance(a.token, a.owner, l.target);
+    if (left) open.push({ a, left });
+  }
+  if (open.length > 0) {
+    const owners = new Set(open.map((o) => o.a.owner));
+    const first = open[0];
+    return [
+      {
+        id: "approvals_received",
+        title: "Who lets it move their tokens",
+        level: "high",
+        said:
+          `${plural(owners.size, "other wallet")} gave this plain wallet the right to move their tokens, and ${open.length === 1 ? "it is" : "they are"} still open: ` +
+          `${short(first.a.owner)} on token ${short(first.a.token)}${first.left >= WALLET_LIMITS.unlimited ? " (unlimited)" : ""}${open.length > 1 ? `, and ${open.length - 1} more` : ""}. Seen in ${span}.`,
+        why: "Apps take approvals through contracts. A bare wallet collecting other people's approvals can pull their tokens whenever it likes: that's how approval drainers get paid.",
+        source: "chain",
+        evidence: open.slice(0, 3).flatMap((o) => [txLink(o.a.hash, `approval ${short(o.a.hash)}`), addressLink(o.a.owner, `owner ${short(o.a.owner)}`)]),
+      },
+    ];
+  }
+  return [
+    {
+      id: "approvals_received",
+      title: "Who lets it move their tokens",
+      level: "ok",
+      said: latest.size === 0 ? `Nobody approved it to move their tokens in ${span}.` : `${plural(latest.size, "approval")} named it in ${span}, all closed again since.`,
+      why: "",
+      source: "chain",
+      evidence: [addressLink(l.target)],
+    },
+    {
+      id: "approvals_received_older",
+      title: "Approvals given to it earlier",
+      level: "unchecked",
+      said: `Approvals older than ${span} weren't scanned (no index lists them by spender).`,
+      why: "",
+      source: "chain",
+      evidence: [addressLink(l.target)],
+    },
+  ];
+}
+
 export async function walletRecord(l: WalletLook): Promise<Finding[]> {
-  return [age(l), ...(await funding(l)), ...(await approvals(l))];
+  return [age(l), ...(await funding(l)), ...(await approvals(l)), ...(await approvalsReceived(l))];
 }

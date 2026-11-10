@@ -210,6 +210,23 @@ test("seen from your history: a look-alike of someone you paid, plus dust it sen
   assert.equal(r.verdict.risk, "HIGH");
 });
 
+test("a plain wallet holding someone else's open approval is HIGH; a closed one only counts as seen", async () => {
+  const { chain, explorer, w } = walletWorld();
+  const token = A(0x70c), victim = A(0x51c), careful = A(0x5af);
+  explorer.profiles.set(w, profile(w, { firstTx: { hash: H(1), block: blockAgo(90), time: timeAgo(90) } }));
+  chain.approvalLogs.set(w, [
+    { token, owner: victim, block: HEAD - 5000, hash: H(70) },
+    { token, owner: careful, block: HEAD - 4000, hash: H(71) },
+  ]);
+  chain.allowances.set(`${token}:${victim}:${w}`, 114072n);
+  const r = await rapsheet(w, chain, explorer, { now: NOW, window: 20_000 });
+  const got = pick(r.findings, "approvals_received")[0];
+  assert.equal(got.level, "high");
+  assert.match(got.said, /^1 other wallet gave this plain wallet the right to move their tokens/);
+  assert.match(got.said, /the last 20000 blocks/);
+  assert.equal(r.verdict.risk, "HIGH");
+});
+
 test("a counterparty on your watchlist is HIGH and names your reason and source", async () => {
   const { chain, explorer, w } = walletWorld();
   const bad = A(0xdead);
@@ -228,7 +245,7 @@ test("the card and the markdown carry the level, the rule and every evidence lin
   const r = await rapsheet(w, chain, explorer, { now: NOW });
   const text = card(r);
   assert.match(text, /RISK: LOW - no red flags/);
-  assert.match(text, /Not checked: who paid for its first gas; older history\./);
+  assert.match(text, /Not checked: who paid for its first gas; older history; approvals given to it earlier\./);
   assert.match(text, /not proof of a crime/);
   const md = markdown(r);
   for (const x of r.findings) for (const e of x.evidence) assert.ok(md.includes(e.url));

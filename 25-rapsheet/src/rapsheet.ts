@@ -13,7 +13,12 @@ export interface WatchEntry {
   source: string;
 }
 
+/** About a day of Pharos blocks (they come roughly every 0.94 s). */
+export const DEFAULT_WINDOW = 100_000;
+
 export interface Options {
+  /** Recent blocks to scan for approvals that name a wallet as spender. */
+  window?: number;
   me?: Hex;
   watchlist?: WatchEntry[];
   now?: number;
@@ -100,7 +105,7 @@ export async function rapsheet(target: Hex, chain: Chain, explorer: Explorer, op
     findings.push(...(await contractRecord({ target: t, chain, explorer, head, now, profile, code })));
   } else {
     txs = await explorer.txs(t);
-    findings.push(...(await walletRecord({ target: t, chain, explorer, now, profile, txs })));
+    findings.push(...(await walletRecord({ target: t, chain, explorer, now, head, window: opts.window ?? DEFAULT_WINDOW, profile, txs })));
   }
 
   if (opts.me) {

@@ -1,7 +1,7 @@
 // What rapsheet asks Pharos itself. Anything the verdict leans on is read here, not taken from the explorer: whether
 // there is code, when it appeared, which implementation a proxy points at right now and since when, who owns it, and
 // whether an approval is still open. Behind an interface so the signals run against a fake chain in the tests.
-import { createPublicClient, erc20Abi, http, parseAbi } from "viem";
+import { createPublicClient, erc20Abi, http, parseAbi, toHex } from "viem";
 import type { Hex } from "./explorer.js";
 
 export const PHAROS_RPC = process.env.PHAROS_RPC_URL ?? "https://rpc.pharos.xyz";
@@ -29,6 +29,16 @@ export interface UpgradeLog {
   impl: Hex;
 }
 
+// Approval(address indexed owner, address indexed spender, uint256 value), copied from a real Pharos receipt
+export const APPROVAL_TOPIC: Hex = "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925";
+
+export interface ApprovalLog {
+  token: Hex;
+  owner: Hex;
+  block: number;
+  hash: Hex;
+}
+
 export interface Chain {
   head(): Promise<number>;
   blockTime(n: number): Promise<number>;
@@ -41,6 +51,8 @@ export interface Chain {
   allowance(token: Hex, owner: Hex, spender: Hex): Promise<bigint | null>;
   /** Upgraded events emitted by `a` in [from, to]; the caller keeps the span within what the node allows. */
   upgrades(a: Hex, from: number, to: number): Promise<UpgradeLog[]>;
+  /** ERC-20 Approval events naming `spender`, in [from, to] (at most 1,000 blocks: the node's limit). */
+  approvalsTo(spender: Hex, from: number, to: number): Promise<ApprovalLog[]>;
   /** Block and sender of a mined transaction, null if the node doesn't know it. */
   txBlock(hash: Hex): Promise<{ block: number; from: Hex } | null>;
   /** Calldata of a transaction, null if the node doesn't know it. */
@@ -48,7 +60,8 @@ export interface Chain {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const throttled = (e: unknown) => /too fast|cu limit|rate limit|429/i.test(String((e as { details?: string })?.details ?? "") + String((e as Error)?.message ?? e));
+// \b429\b and not just 429: an error that quotes an address like 0x...b4429621... is not a rate limit
+const throttled = (e: unknown) => /too fast|cu limit|rate limit|\b429\b/i.test(String((e as { details?: string })?.details ?? "") + String((e as Error)?.message ?? e));
 
 /**
  * The public Pharos RPC answers "cu limit exceeded; Request too fast per second" (code -32011) when pushed, and viem
@@ -77,6 +90,8 @@ export function viemChain(rpc = PHAROS_RPC): Chain {
   const c = createPublicClient({ transport: http(rpc, { batch: { batchSize: 20 }, retryCount: 4, retryDelay: 1500 }) });
   const times = new Map<number, number>();
   const at = (block?: number) => (block === undefined ? {} : { blockNumber: BigInt(block) });
+  // Straight eth_getLogs: viem's getLogs drops a raw `topics` filter without a word and returns every log in range.
+  const rawLogs = (filter: Record<string, unknown>) => patiently(() => c.request({ method: "eth_getLogs", params: [filter] } as any)) as Promise<any[]>;
   return {
     head: async () => Number(await patiently(() => c.getBlockNumber())),
     async blockTime(n) {
@@ -107,13 +122,25 @@ export function viemChain(rpc = PHAROS_RPC): Chain {
       }
     },
     async upgrades(a, from, to) {
-      const logs = await patiently(() => c.getLogs({ address: a, fromBlock: BigInt(from), toBlock: BigInt(to), topics: [UPGRADED_TOPIC] } as any));
+      const logs = await rawLogs({ address: a, fromBlock: toHex(from), toBlock: toHex(to), topics: [UPGRADED_TOPIC] });
       return (logs as any[]).map((l) => ({
         block: Number(l.blockNumber),
         hash: String(l.transactionHash).toLowerCase() as Hex,
         // EIP-1967 indexes the implementation; the ZeppelinOS event doesn't, so there it sits in the data
         impl: `0x${String(l.topics[1] ?? l.data).slice(-40).toLowerCase()}` as Hex,
       }));
+    },
+    async approvalsTo(spender, from, to) {
+      const topic = `0x${spender.slice(2).toLowerCase().padStart(64, "0")}` as Hex;
+      const logs = await rawLogs({ fromBlock: toHex(from), toBlock: toHex(to), topics: [APPROVAL_TOPIC, null, topic] });
+      return (logs as any[])
+        .filter((l) => l.topics.length === 3)
+        .map((l) => ({
+          token: String(l.address).toLowerCase() as Hex,
+          owner: `0x${String(l.topics[1]).slice(-40).toLowerCase()}` as Hex,
+          block: Number(l.blockNumber),
+          hash: String(l.transactionHash).toLowerCase() as Hex,
+        }));
     },
     async txBlock(hash) {
       try {
