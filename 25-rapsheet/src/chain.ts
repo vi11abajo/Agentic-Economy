@@ -12,6 +12,14 @@ export const EXPLORER_BLOCK = "https://www.pharosscan.xyz/block/";
 // EIP-1967: keccak256("eip1967.proxy.implementation") - 1 and keccak256("eip1967.proxy.admin") - 1.
 export const IMPL_SLOT: Hex = "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc";
 export const ADMIN_SLOT: Hex = "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103";
+// The older ZeppelinOS layout, keccak256("org.zeppelinos.proxy.implementation" / ".admin") with no -1. Circle's
+// USDC on Pharos uses it, so a checker that only knows EIP-1967 calls USDC "not upgradeable".
+export const OLD_IMPL_SLOT: Hex = "0x7050c9e0f4ca769c69bd3a8ef740bc37934f8e2c036e5a723fd8ee048ed3f8c3";
+export const OLD_ADMIN_SLOT: Hex = "0x10d6a54a4754c8869d6886b5f5d7fbfa5b4522237ea5c60d11bc4e7a1ff9390b";
+export const PROXY_LAYOUTS = [
+  { name: "EIP-1967", impl: IMPL_SLOT, admin: ADMIN_SLOT },
+  { name: "ZeppelinOS", impl: OLD_IMPL_SLOT, admin: OLD_ADMIN_SLOT },
+] as const;
 // Upgraded(address indexed implementation)
 export const UPGRADED_TOPIC: Hex = "0xbc7cd75a20ee27fd9adebab32041f755214dbc6bffa90cc0225b39da2e5c2d3b";
 
@@ -103,7 +111,8 @@ export function viemChain(rpc = PHAROS_RPC): Chain {
       return (logs as any[]).map((l) => ({
         block: Number(l.blockNumber),
         hash: String(l.transactionHash).toLowerCase() as Hex,
-        impl: `0x${String(l.topics[1]).slice(-40).toLowerCase()}` as Hex,
+        // EIP-1967 indexes the implementation; the ZeppelinOS event doesn't, so there it sits in the data
+        impl: `0x${String(l.topics[1] ?? l.data).slice(-40).toLowerCase()}` as Hex,
       }));
     },
     async txBlock(hash) {
