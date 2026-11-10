@@ -1,0 +1,12 @@
+scout: last 100000 blocks of Pharos mainnet, up to 22695820
+
+3789 Approval events naming 54 spenders. Plain wallets among the spenders:
+  0x19d2ed9bc8d3f83f86fe30a017abb55e6a85466e  approved by 1 owner(s), last in tx 0xc76fd41aa7c2de16c20afae1a13360102db155406176b4b21337f506e9272cec
+
+117 Upgraded events. Proxies upgraded more than a day after they were created:
+  0x04a6dd7907fff325c580dc84829f0379de49dc22  created 2026-10-21, upgraded 19.8 days later in tx 0x05708140b33ae9d712ab9920672db3f7b15497c12325be05a550cff12daa9558 (unverified)
+  0x8e634f8af1cca10cacb85c23fedd6171a31f7997  created 2026-09-16, upgraded 54.9 days later in tx 0x13cba65a04fbd5f386f086a4795513aa90dd2b02e1caf492d37413080cff7a40 (unverified)
+  0x6b48372da45301c54720724adff6b1dd4b26c8a7  created 2026-09-16, upgraded 54.9 days later in tx 0x13cba65a04fbd5f386f086a4795513aa90dd2b02e1caf492d37413080cff7a40 (unverified)
+  0xc612d80ac6fd41f29a547766ae6a0a26a2e22925  created 2026-04-14, upgraded 209.7 days later in tx 0x843bf51a32037870b682b6c8cb5c10923c663c7b7840c400480d3383b3490b79 (unverified)
+
+These are candidates, not verdicts: run rapsheet on each to see the full record.

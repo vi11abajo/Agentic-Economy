@@ -1,0 +1,132 @@
+{
+  "target": "0x46441dc99f8000959e9c48cf2a01a018d131d3bb",
+  "kind": "wallet",
+  "name": null,
+  "head": 22696327,
+  "time": 1794352430,
+  "me": null,
+  "findings": [
+    {
+      "id": "kind",
+      "title": "What it is",
+      "level": "info",
+      "said": "A plain wallet: someone's private key, no code.",
+      "why": "",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "0x4644…d3bb",
+          "url": "https://www.pharosscan.xyz/address/0x46441dc99f8000959e9c48cf2a01a018d131d3bb"
+        }
+      ]
+    },
+    {
+      "id": "wallet_age",
+      "title": "How long the wallet has existed",
+      "level": "ok",
+      "said": "Its first transaction was 6 months ago (block 6802423).",
+      "why": "",
+      "source": "explorer",
+      "evidence": [
+        {
+          "label": "first tx 0x9f1f…6291",
+          "url": "https://www.pharosscan.xyz/tx/0x9f1f1d17d3bd846793837941070bb493c7e27d96566dd9a4b5351c500c8c6291"
+        }
+      ]
+    },
+    {
+      "id": "fresh_funding",
+      "title": "Who paid for its first gas",
+      "level": "ok",
+      "said": "0x0be4…5026 sent it 2 PROS 6 months ago, and it has sent 580 transactions of its own since.",
+      "why": "",
+      "source": "chain+explorer",
+      "evidence": [
+        {
+          "label": "funding tx 0x9f1f…6291",
+          "url": "https://www.pharosscan.xyz/tx/0x9f1f1d17d3bd846793837941070bb493c7e27d96566dd9a4b5351c500c8c6291"
+        },
+        {
+          "label": "funder 0x0be4…5026",
+          "url": "https://www.pharosscan.xyz/address/0x0be4258e804482e8ab608039357ea983d2615026"
+        }
+      ]
+    },
+    {
+      "id": "funder",
+      "title": "What the funder was doing",
+      "level": "ok",
+      "said": "Within an hour of funding it, 0x0be4…5026 sent PROS to 1 wallet. The funder itself is 6 months old with 2072 transactions.",
+      "why": "",
+      "source": "explorer",
+      "evidence": [
+        {
+          "label": "funder 0x0be4…5026",
+          "url": "https://www.pharosscan.xyz/address/0x0be4258e804482e8ab608039357ea983d2615026"
+        }
+      ]
+    },
+    {
+      "id": "open_approvals",
+      "title": "Approvals it left open",
+      "level": "ok",
+      "said": "Of 7 approvals we looked up on the chain, 2 are still open: none to a plain wallet, and no unlimited one to an unverified contract or one younger than 14 days.",
+      "why": "",
+      "source": "chain+explorer",
+      "evidence": [
+        {
+          "label": "0x4644…d3bb",
+          "url": "https://www.pharosscan.xyz/address/0x46441dc99f8000959e9c48cf2a01a018d131d3bb"
+        }
+      ]
+    },
+    {
+      "id": "approvals_received",
+      "title": "Who lets it move their tokens",
+      "level": "ok",
+      "said": "Nobody approved it to move their tokens in the last 100000 blocks (about 26 hours).",
+      "why": "",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "0x4644…d3bb",
+          "url": "https://www.pharosscan.xyz/address/0x46441dc99f8000959e9c48cf2a01a018d131d3bb"
+        }
+      ]
+    },
+    {
+      "id": "approvals_received_older",
+      "title": "Approvals given to it earlier",
+      "level": "unchecked",
+      "said": "Approvals older than the last 100000 blocks (about 26 hours) weren't scanned (no index lists them by spender).",
+      "why": "",
+      "source": "chain",
+      "evidence": [
+        {
+          "label": "0x4644…d3bb",
+          "url": "https://www.pharosscan.xyz/address/0x46441dc99f8000959e9c48cf2a01a018d131d3bb"
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "risk": "LOW",
+    "reasons": [],
+    "unchecked": [
+      {
+        "id": "approvals_received_older",
+        "title": "Approvals given to it earlier",
+        "level": "unchecked",
+        "said": "Approvals older than the last 100000 blocks (about 26 hours) weren't scanned (no index lists them by spender).",
+        "why": "",
+        "source": "chain",
+        "evidence": [
+          {
+            "label": "0x4644…d3bb",
+            "url": "https://www.pharosscan.xyz/address/0x46441dc99f8000959e9c48cf2a01a018d131d3bb"
+          }
+        ]
+      }
+    ]
+  }
+}
