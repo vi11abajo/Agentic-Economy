@@ -49,18 +49,21 @@ export function transactionsCsv(r: Report): string {
 }
 
 export function booksCsv(r: Report): string {
-  const lines = [row(["asset", "token_address", "opening", "in", "out", "gas", "expected_closing", "closing_on_chain", "gap", "ties"])];
+  // the two blocks go into every row, so this file alone is enough to re-check the balances on chain
+  const lines = [row(["asset", "token_address", "opening_block", "opening", "in", "out", "gas", "expected_closing", "closing_block", "closing_on_chain", "gap", "ties"])];
   for (const l of r.books) {
     const d = r.assets.get(l.asset)?.decimals ?? 18;
     lines.push(
       row([
         r.assets.get(l.asset)?.label ?? l.asset,
         l.asset === NATIVE ? "" : getAddress(l.asset),
+        r.openBlock,
         plain(l.opening, d),
         plain(l.in, d),
         plain(l.out, d),
         plain(l.fees, d),
         plain(l.expected, d),
+        r.closeBlock,
         plain(l.closing, d),
         l.gap === null ? "unknown" : plain(l.gap, d),
         l.gap === 0n ? "yes" : "no",

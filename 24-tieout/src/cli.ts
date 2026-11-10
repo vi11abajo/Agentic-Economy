@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // tieout: a plain-language activity report for a Pharos wallet over a period, with the books checked against the chain.
 import { mkdirSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 import { getAddress, isAddress } from "viem";
 import { EXPLORER_TX, viemChain } from "./chain.js";
 import { booksCsv, fingerprint, transactionsCsv } from "./csv.js";
@@ -90,7 +90,8 @@ async function main() {
   for (const n of report.notables) print(`  - ${n.why}${n.hash ? `  ${EXPLORER_TX}${n.hash}` : ""}`);
   print();
   print(`FILES (fingerprint ${fingerprint(report)})`);
-  for (const w of written) print(`  ${w}`);
+  // relative to where it was started, so a pasted output doesn't carry the user's folders around
+  for (const w of written) print(`  ${relative(process.cwd(), w) || w}`);
 }
 
 main().catch((e) => fail(`tieout: ${e instanceof Error ? e.message : String(e)}`));

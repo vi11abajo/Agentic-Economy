@@ -126,7 +126,7 @@ test("CSV puts gas on one row per transaction and the fingerprint only changes w
   assert.equal(rows[0].split(",")[12], "gas_fee_pros");
   const gasCells = rows.slice(1).filter((l) => l.split(",")[12] !== "");
   assert.equal(gasCells.length, 7, "seven transactions were sent by the wallet itself");
-  assert.match(booksCsv(r), /\nUSDC,0x00000000000000000000000000000000000000C0,/);
+  assert.match(booksCsv(r), /\nUSDC,0x00000000000000000000000000000000000000C0,100,/);
   assert.equal(fingerprint(r), fingerprint(await report(busyWallet().w)));
   const { w: w2 } = busyWallet();
   w2.move(TACO, 190, 1n);
