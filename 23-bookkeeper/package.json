@@ -1,0 +1,22 @@
+{
+  "name": "bookkeeper",
+  "version": "1.0.0",
+  "description": "bookkeeper: pays recurring payments (payroll, rent, subscriptions) on Pharos from its own wallet once you approve the plan, never twice for one period, and reports every payout to Telegram and Discord",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "bookkeeper": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
