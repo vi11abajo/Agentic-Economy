@@ -32,58 +32,113 @@ const sum = (xs: string[]) => {
   return d ? `${s.slice(0, -d)}.${s.slice(-d)}`.replace(/\.?0+$/, "") : s;
 };
 
-/** One card as plain lines; link(text, url) decides the markup of each channel. */
-function lines(c: Card, link: (text: string, url: string) => string, bold: (s: string) => string, txt: (s: string) => string): { title: string; body: string[] } {
+/** Amounts for people: at most 6 decimals, no trailing zeros (0.008893598579752846 -> 0.008894). */
+export const pretty = (x: string, max = 6) => {
+  const n = Number(x);
+  return Number.isFinite(n) ? String(+n.toFixed(max)) : x;
+};
+
+const link = {
+  tg: (t: string, u: string) => `<a href="${u}">${esc(t)}</a>`,
+  dc: (t: string, u: string) => `[${t}](${u})`,
+};
+const dcText = (s: string) => s.replace(/([*_`~|\\])/g, "\\$1");
+
+export function telegramHtml(c: Card): string {
+  const b = (s: string) => `<b>${esc(s)}</b>`;
   switch (c.kind) {
     case "paid":
-      return {
-        title: `✅ ${bold(txt(c.label))} · payment #${c.period + 1} paid`,
-        body: [
-          localTime(c.at, c.tz),
-          ...c.lines.map((l) => `• ${txt(l.name)} — ${l.amount} ${c.token} to ${short(l.address)} · ${link(`tx ${short(l.tx)}`, EXPLORER_TX + l.tx)}`),
-          ...(c.lines.length > 1 ? [`Total: ${sum(c.lines.map((l) => l.amount))} ${c.token}`] : []),
-        ],
-      };
+      return [
+        `✅ ${b(c.label)}`,
+        `Payment #${c.period + 1} paid · ${localTime(c.at, c.tz)}`,
+        "",
+        ...c.lines.flatMap((l) => [`👤 ${b(l.name)} — ${l.amount} ${c.token}`, `     <code>${short(l.address)}</code> · ${link.tg(`tx ${short(l.tx)}`, EXPLORER_TX + l.tx)}`]),
+        "",
+        ...(c.lines.length > 1 ? [`${b("Total:")} ${sum(c.lines.map((l) => l.amount))} ${c.token}`] : []),
+        ...(c.next ? [`⏭ Next payment: ${localTime(c.next, c.tz)}`] : []),
+      ].join("\n");
     case "short":
-      return {
-        title: `⚠️ ${bold(txt(c.label))} · payment #${c.period + 1} to ${txt(c.name)} is waiting`,
-        body: [`Due ${localTime(c.due, c.tz)}: ${c.amount} ${c.token}.`, `The wallet needs ${c.need} ${c.asset} and has ${c.have}.`, `Top up ${c.wallet} and I'll pay it on the next check, and only once.`],
-      };
+      return [
+        `⚠️ ${b(c.label)}`,
+        `Payment #${c.period + 1} to ${b(c.name)} is waiting for money`,
+        "",
+        `Due: ${localTime(c.due, c.tz)} · ${c.amount} ${c.token}`,
+        `The wallet needs ${pretty(c.need)} ${esc(c.asset)} and has ${pretty(c.have)}.`,
+        "",
+        `Top up <code>${c.wallet}</code> and I'll pay it on the next check, and only once.`,
+      ].join("\n");
     case "missed":
-      return {
-        title: `⛔ ${bold(txt(c.label))} · payment #${c.period + 1} to ${txt(c.name)} was missed`,
-        body: [`It was due ${localTime(c.due, c.tz)} (${c.amount} ${c.token}) and the period ended before it could be paid.`, `I won't pay it late on my own; ask me if you want it paid now.`],
-      };
+      return [`⛔ ${b(c.label)}`, `Payment #${c.period + 1} to ${b(c.name)} was missed`, "", `It was due ${localTime(c.due, c.tz)} (${c.amount} ${c.token}) and the period ended before it could be paid.`, `I won't pay it late on my own; ask me if you want it paid now.`].join("\n");
     case "failed":
-      return {
-        title: `❗ ${bold(txt(c.label))} · payment #${c.period + 1} to ${txt(c.name)} did not go through`,
-        body: [`${c.amount} ${c.token}: ${txt(c.reason)}`, ...(c.tx ? [link(`tx ${short(c.tx)}`, EXPLORER_TX + c.tx)] : []), `I'll try again on the next check; it can still be paid only once.`],
-      };
+      return [`❗ ${b(c.label)}`, `Payment #${c.period + 1} to ${b(c.name)} did not go through`, "", `${c.amount} ${c.token}: ${esc(c.reason)}`, ...(c.tx ? [link.tg(`tx ${short(c.tx)}`, EXPLORER_TX + c.tx)] : []), `I'll try again on the next check; it can still be paid only once.`].join("\n");
     case "runway":
-      return {
-        title: `💼 Wallet ${short(c.wallet)}: ${c.usdc} USDC, ${c.pros} PROS`,
-        body: c.lines.map((l) =>
+      return [
+        `💼 ${b("Wallet")} <code>${short(c.wallet)}</code>`,
+        `${pretty(c.usdc)} USDC · ${pretty(c.pros)} PROS`,
+        "",
+        ...c.lines.map((l) =>
           l.nextShort
-            ? `⚠️ ${txt(l.label)}: the next payment (${localTime(l.nextDue!, l.tz)}, ${l.perPeriod} ${l.token}) is not covered. Top up before then.`
-            : `• ${txt(l.label)}: ${l.perPeriod} ${l.token} per period, enough for ${l.coversPeriods >= 52 ? "52+" : l.coversPeriods} more (until ${localTime(l.until!, l.tz)})`,
+            ? `⚠️ ${b(l.label)}: the next payment (${localTime(l.nextDue!, l.tz)}, ${l.perPeriod} ${l.token}) is not covered. Top up before then.`
+            : `📆 ${b(l.label)}: ${l.perPeriod} ${l.token} per period, enough for ${l.coversPeriods >= 52 ? "52+" : l.coversPeriods} more (until ${localTime(l.until!, l.tz)})`,
         ),
-      };
+      ].join("\n");
     case "test":
-      return { title: "🔔 bookkeeper is connected", body: [c.wallet ? `Paying wallet: ${c.wallet}` : "No paying wallet yet: run bookkeeper init."] };
+      return [`🔔 ${b("bookkeeper is connected")}`, c.wallet ? `Paying wallet: <code>${c.wallet}</code>` : "No paying wallet yet: fill BOOKKEEPER_PRIVATE_KEY."].join("\n");
   }
 }
 
-export function telegramHtml(c: Card): string {
-  const l = lines(c, (t, u) => `<a href="${u}">${esc(t)}</a>`, (s) => `<b>${s}</b>`, esc);
-  return [l.title, ...l.body].join("\n");
-}
-
 const COLORS: Record<Card["kind"], number> = { paid: 0x2e9e5b, short: 0xe0a100, missed: 0xc0392b, failed: 0xc0392b, runway: 0x3b6fd8, test: 0x888888 };
+const FOOT = "bookkeeper · Pharos mainnet";
 
 export function discordEmbed(c: Card): object {
-  const l = lines(c, (t, u) => `[${t}](${u})`, (s) => s, (s) => s.replace(/([*_`~|\\])/g, "\\$1"));
-  return { title: l.title.slice(0, 256), description: l.body.join("\n").slice(0, 4000), color: COLORS[c.kind] };
+  const base = { color: COLORS[c.kind] };
+  const foot = (extra?: string) => ({ footer: { text: extra ? `${FOOT} · ${extra}` : FOOT } });
+  switch (c.kind) {
+    case "paid":
+      return {
+        ...base,
+        title: `✅ ${c.label} · payment #${c.period + 1} paid`.slice(0, 256),
+        description: `🗓 ${localTime(c.at, c.tz)}${c.lines.length > 1 ? `\nTotal **${sum(c.lines.map((l) => l.amount))} ${c.token}** to ${c.lines.length} people` : ""}`,
+        fields: c.lines.slice(0, 25).map((l) => ({ name: l.name.slice(0, 256), value: `**${l.amount} ${c.token}**\n\`${short(l.address)}\`\n${link.dc(`tx ${short(l.tx)}`, EXPLORER_TX + l.tx)}`, inline: true })),
+        ...foot(c.next ? `Next payment: ${localTime(c.next, c.tz)}` : undefined),
+        timestamp: c.at,
+      };
+    case "short":
+      return {
+        ...base,
+        title: `⚠️ ${c.label} · payment #${c.period + 1} to ${c.name} is waiting`.slice(0, 256),
+        description: `Due ${localTime(c.due, c.tz)}: **${c.amount} ${c.token}**. I'll pay it on the next check after a top-up, and only once.`,
+        fields: [
+          { name: "Needs", value: `${pretty(c.need)} ${c.asset}`, inline: true },
+          { name: "Has", value: `${pretty(c.have)} ${c.asset}`, inline: true },
+          { name: "Top up", value: `\`${c.wallet}\``, inline: false },
+        ],
+        ...foot(),
+      };
+    case "missed":
+      return { ...base, title: `⛔ ${c.label} · payment #${c.period + 1} to ${c.name} was missed`.slice(0, 256), description: `It was due ${localTime(c.due, c.tz)} (**${c.amount} ${c.token}**) and the period ended before it could be paid.\nI won't pay it late on my own; ask me if you want it paid now.`, ...foot() };
+    case "failed":
+      return { ...base, title: `❗ ${c.label} · payment #${c.period + 1} to ${c.name} did not go through`.slice(0, 256), description: `**${c.amount} ${c.token}**: ${dcText(c.reason)}${c.tx ? `\n${link.dc(`tx ${short(c.tx)}`, EXPLORER_TX + c.tx)}` : ""}\nI'll try again on the next check; it can still be paid only once.`.slice(0, 4000), ...foot() };
+    case "runway":
+      return {
+        ...base,
+        title: `💼 Wallet ${short(c.wallet)}`,
+        fields: [
+          { name: "USDC", value: pretty(c.usdc), inline: true },
+          { name: "PROS (gas)", value: pretty(c.pros), inline: true },
+          ...c.lines.slice(0, 20).map((l) => ({
+            name: dcText(l.label).slice(0, 256),
+            value: l.nextShort ? `⚠️ The next payment (${localTime(l.nextDue!, l.tz)}, **${l.perPeriod} ${l.token}**) is not covered. Top up before then.` : `📆 ${l.perPeriod} ${l.token} per period · enough for **${l.coversPeriods >= 52 ? "52+" : l.coversPeriods} more** (until ${localTime(l.until!, l.tz)})`,
+            inline: false,
+          })),
+        ],
+        ...foot(),
+      };
+    case "test":
+      return { ...base, title: "🔔 bookkeeper is connected", description: c.wallet ? `Paying wallet: \`${c.wallet}\`` : "No paying wallet yet: fill BOOKKEEPER_PRIVATE_KEY.", ...foot() };
+  }
 }
+
 
 export function makeNotifier(s: Secrets, net: Net = fetch): Notifier {
   const channels = [s.telegramToken && s.telegramChatId ? "telegram" : null, s.discordWebhook ? "discord" : null].filter((x): x is string => !!x);
