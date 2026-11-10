@@ -36,3 +36,23 @@ test("amounts are exact both ways: explorer decimals in, every unit out", () => 
   assert.equal(formatAmount(-250_000n, 6), "-0.25");
   assert.equal(formatAmount(0n, 6), "0");
 });
+
+test("a throttled RPC is asked again, any other error is not", async () => {
+  const { patiently } = await import("./chain.js");
+  let calls = 0;
+  const v = await patiently(async () => {
+    if (++calls < 3) throw Object.assign(new Error("RPC Request failed."), { details: "cu limit exceeded; Request too fast per second." });
+    return 42;
+  }, 5, 1);
+  assert.equal(v, 42);
+  assert.equal(calls, 3);
+  let once = 0;
+  await assert.rejects(
+    patiently(async () => {
+      once++;
+      throw new Error("execution reverted");
+    }, 5, 1),
+    /reverted/,
+  );
+  assert.equal(once, 1);
+});

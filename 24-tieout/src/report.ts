@@ -125,13 +125,19 @@ async function describeAssets(chain: Chain, h: History, entries: Entry[]): Promi
     const onChain = await chain.tokenInfo(asset as Hex);
     found.set(asset, { symbol: onChain?.symbol ?? info.symbol, name: info.name, decimals: onChain?.decimals ?? info.decimals ?? 18 });
   }
-  const bySymbol = new Map<string, number>();
-  for (const v of found.values()) bySymbol.set(v.symbol, (bySymbol.get(v.symbol) ?? 0) + 1);
+  const count = (key: (v: { symbol: string; name: string }) => string) => {
+    const m = new Map<string, number>();
+    for (const v of found.values()) m.set(key(v), (m.get(key(v)) ?? 0) + 1);
+    return (v: { symbol: string; name: string }) => (m.get(key(v)) ?? 0) > 1;
+  };
+  const symbolClash = count((v) => v.symbol);
+  const nameClash = count((v) => v.name);
   const out = new Map<string, AssetInfo>();
   for (const [asset, v] of found) {
-    const clash = (bySymbol.get(v.symbol) ?? 0) > 1;
-    // native PROS keeps its name; a token wearing the same symbol (Wrapped PROS) goes by its full name instead
-    const label = asset === NATIVE || !clash ? v.symbol : v.name && v.name !== v.symbol ? v.name : `${v.symbol} (${short(asset)})`;
+    // Native PROS keeps its name. A token wearing the same symbol (Wrapped PROS) goes by its full name, and when even
+    // the names repeat (ten pools all called "Uniswap V2") only the address tells them apart.
+    let label = v.symbol;
+    if (asset !== NATIVE && symbolClash(v)) label = v.name && v.name !== v.symbol && !nameClash(v) ? v.name : `${v.symbol} ${short(asset)}`;
     out.set(asset, { symbol: v.symbol, decimals: v.decimals ?? 18, label });
   }
   return out;
@@ -172,12 +178,18 @@ function notablesOf(r: Report, h: History): Notable[] {
 
   for (const l of r.books)
     if (l.gap === null) out.push({ kind: "gap", why: `${label(l.asset)}: the chain wouldn't give the closing balance, so this one can't be checked` });
-    else if (l.gap !== 0n)
+    else if (l.gap !== 0n) {
+      const size = amount(l.asset, l.gap < 0n ? -l.gap : l.gap);
+      // Lending-pool debt tokens are named that way on purpose ("variableDebtUSDC"); their balance is what is owed.
+      const debt = /debt/i.test(r.assets.get(l.asset)?.symbol ?? "");
       out.push({
         kind: "gap",
-        why: `${label(l.asset)} doesn't tie: the closing balance is ${l.gap > 0n ? "higher" : "lower"} than the transactions explain by ${amount(l.asset, l.gap < 0n ? -l.gap : l.gap)}. Something moved it without a transfer the explorer lists (interest, a rebase, or a missed transaction).`,
+        why: debt
+          ? `${label(l.asset)} doesn't tie: it looks like a lending debt token, and what the wallet owes ${l.gap > 0n ? "grew" : "shrank"} by ${size} with no transaction, which is how borrow interest shows up.`
+          : `${label(l.asset)} doesn't tie: the closing balance is ${l.gap > 0n ? "higher" : "lower"} than the transactions explain by ${size}. Something moved it without a transfer the explorer lists (interest, a rebase, or a missed transaction).`,
         address: l.asset === NATIVE ? undefined : (l.asset as Hex),
       });
+    }
 
   capped(
     "failed",
