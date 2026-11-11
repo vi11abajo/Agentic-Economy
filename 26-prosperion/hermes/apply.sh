@@ -27,3 +27,9 @@ touch "$ENV"; chmod 600 "$ENV"
 grep -q '^API_SERVER_ENABLED=' "$ENV" || echo 'API_SERVER_ENABLED=true' >> "$ENV"
 grep -q '^API_SERVER_KEY=' "$ENV" || echo "API_SERVER_KEY=$(openssl rand -hex 32)" >> "$ENV"
 echo "applied; api key present: $(grep -c '^API_SERVER_KEY=' "$ENV")"
+
+# The agent's identity plus the Prosper codex, in one SOUL.md (the skills toolset is off, so it cannot edit them).
+if [ -f "$HOME/prosperion/hermes/SOUL.md" ]; then
+  { cat "$HOME/prosperion/hermes/SOUL.md"; echo; awk 'f>=2{print} /^---$/{f++}' "$HOME/prosperion/skill/prosperion/SKILL.md"; } > "$HOME/.hermes/SOUL.md"
+  echo "SOUL.md written ($(wc -c < "$HOME/.hermes/SOUL.md") bytes)"
+fi
