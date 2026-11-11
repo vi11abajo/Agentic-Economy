@@ -34,6 +34,10 @@ async function readLimits(owner: Address): Promise<GateLimits | null> {
   return maxPerBuy === 0n ? null : { maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl };
 }
 
+// Each copy of Prosperion brings its own Telegram bot, or none. The username comes from Telegram itself (getMe),
+// so the token is the only thing an operator sets. Until it answers, the page treats this copy as bot-less.
+let botName: string | null = null;
+
 const api = createApi({
   store,
   gate: GATE,
@@ -43,6 +47,7 @@ const api = createApi({
   listVaults,
   explainNavMove,
   agent: chatAgent,
+  telegramBot: () => botName,
   perMinute: Number(env.CHAT_PER_MINUTE ?? 20),
   dailyCap: Number(env.AGENT_DAILY_CAP ?? 300),
   now: () => Math.floor(Date.now() / 1000),
@@ -65,11 +70,13 @@ if (token) {
     void onLaunch(l, store, { telegram: tg, askAgent: (p) => askAgent(p), agentTimeoutMs: 180_000 })
       .catch((e) => console.error(`[alerts] ${(e as Error).message}`));
   });
+  tg.api("getMe", {})
+    .then((me: { username?: string }) => { botName = me.username ?? null; console.log(`[tg] bot @${botName} polling`); })
+    .catch((e) => console.error(`[tg] the token did not work: ${(e as Error).message}`));
   void pollTelegram(store, tg, () => false);
-  console.log("[tg] bot polling");
 } else {
   watcher.on("launch", (l: Launch) => { store.saveLaunch(l); console.log(`[watcher] launch ${l.market} (no bot token, stored only)`); });
-  console.log("[tg] TELEGRAM_BOT_TOKEN not set: launches are stored, nobody is pinged");
+  console.log("[tg] TELEGRAM_BOT_TOKEN not set: no bot on this copy, launches are stored and shown, nobody is pinged");
 }
 watcher.start(1000);
 console.log(`[watcher] following Prosper's factory${GATE ? `, gate ${GATE}` : ", gate not deployed yet"}`);

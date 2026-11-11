@@ -29,6 +29,7 @@ async function serve(over: Partial<ApiDeps> = {}) {
     listVaults: async () => [{ vaultName: "Barker Neutral Carry", r25Vault: "0x3ed49843a55952a399db99c8949f67a9d821611c" }],
     explainNavMove: async () => ({ ok: true }),
     agent: async () => new Response("data: {\"choices\":[{\"delta\":{\"content\":\"hi\"}}]}\n\ndata: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } }),
+    telegramBot: () => null,
     perMinute: 20,
     dailyCap: 300,
     now: () => 1_800_000_000,
@@ -120,5 +121,23 @@ test("the vault list is served for the pages", async () => {
   try {
     const r = await (await fetch(`${s.base}/api/vaults`)).json();
     assert.equal(r[0].vaultName, "Barker Neutral Carry");
+  } finally { await s.close(); }
+});
+
+test("the page can ask whether this copy has a Telegram bot at all", async () => {
+  const none = await serve({ telegramBot: () => null });
+  const some = await serve({ telegramBot: () => "my_prosperion_bot" });
+  try {
+    assert.deepEqual(await (await fetch(`${none.base}/api/alerts`)).json(), { bot: null });
+    assert.deepEqual(await (await fetch(`${some.base}/api/alerts`)).json(), { bot: "my_prosperion_bot" });
+  } finally { await none.close(); await some.close(); }
+});
+
+test("no bot, no link codes: the link button says so instead of pointing at a bot nobody runs", async () => {
+  const s = await serve({ telegramBot: () => null });
+  try {
+    const r = await fetch(`${s.base}/api/telegram/link`, { method: "POST" });
+    assert.equal(r.status, 409);
+    assert.match((await r.json()).error, /no telegram bot/i);
   } finally { await s.close(); }
 });
