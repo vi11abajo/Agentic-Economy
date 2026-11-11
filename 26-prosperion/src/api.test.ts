@@ -26,6 +26,7 @@ async function serve(over: Partial<ApiDeps> = {}) {
     check: async () => check(),
     readLimits: async () => ({ maxPerBuy: 10n ** 18n, maxPerDay: 10n ** 19n, maxReserveBefore: 0n, acceptedMarketImpl: IMPL }),
     readVault: async () => ({ ok: true }),
+    listVaults: async () => [{ vaultName: "Barker Neutral Carry", r25Vault: "0x3ed49843a55952a399db99c8949f67a9d821611c" }],
     explainNavMove: async () => ({ ok: true }),
     agent: async () => new Response("data: {\"choices\":[{\"delta\":{\"content\":\"hi\"}}]}\n\ndata: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } }),
     perMinute: 20,
@@ -111,5 +112,13 @@ test("with the agent down, chat says so and the chain pages keep working", async
     assert.equal(chat.status, 503);
     assert.match((await chat.json()).error, /agent unavailable/i);
     assert.equal((await fetch(`${s.base}/api/vault/0x3ed49843a55952a399db99c8949f67a9d821611c`)).status, 200);
+  } finally { await s.close(); }
+});
+
+test("the vault list is served for the pages", async () => {
+  const s = await serve();
+  try {
+    const r = await (await fetch(`${s.base}/api/vaults`)).json();
+    assert.equal(r[0].vaultName, "Barker Neutral Carry");
   } finally { await s.close(); }
 });

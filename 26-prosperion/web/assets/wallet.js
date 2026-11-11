@@ -117,3 +117,19 @@ export async function readAllowance(p, token, owner, spender) {
   const data = "0xdd62ed3e" + pad(owner) + pad(spender);
   return BigInt(await p.request({ method: "eth_call", params: [{ to: token, data }, "latest"] }));
 }
+
+/** EIP-4361 sign-in text. Readable on the wallet screen; not a transaction. */
+export function siweMessage({ domain, origin, address, nonce, issuedAt }) {
+  return [
+    `${domain} wants you to sign in with your Ethereum account:`,
+    address,
+    "",
+    "Sign in to Prosperion. This is not a transaction and costs nothing.",
+    "",
+    `URI: ${origin}`,
+    "Version: 1",
+    "Chain ID: 1672",
+    `Nonce: ${nonce}`,
+    `Issued At: ${issuedAt}`,
+  ].join("\n");
+}

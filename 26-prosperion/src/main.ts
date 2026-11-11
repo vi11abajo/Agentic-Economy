@@ -12,6 +12,7 @@ import { checkMarket } from "./market.js";
 import { startMcpHttp } from "./mcpHttp.js";
 import { explainNavMove } from "./navmove.js";
 import { openStore, type Launch } from "./store.js";
+import { listVaults } from "./prosperApi.js";
 import { pollTelegram, telegramChannel } from "./telegram.js";
 import { readVault } from "./vault.js";
 import { LaunchWatcher, rpcWatcherDeps } from "./watcher.js";
@@ -39,6 +40,7 @@ const api = createApi({
   check: checkMarket,
   readLimits,
   readVault,
+  listVaults,
   explainNavMove,
   agent: chatAgent,
   perMinute: Number(env.CHAT_PER_MINUTE ?? 20),

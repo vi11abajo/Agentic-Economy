@@ -73,3 +73,13 @@ test("a buy request keeps its parameters exactly", () => {
   assert.equal(r.params.amountWei, "10000000000000000");
   assert.equal(s.getRequest("nope"), null);
 });
+
+test("the sign-in message the page builds is accepted, even with a lowercase address", async () => {
+  // @ts-ignore: browser module
+  const { siweMessage } = await import("../web/assets/wallet.js");
+  const s = openStore(":memory:");
+  const acct = privateKeyToAccount(generatePrivateKey());
+  const message = siweMessage({ domain: SIWE_DOMAIN, origin: `https://${SIWE_DOMAIN}`, address: acct.address.toLowerCase(), nonce: newNonce(s), issuedAt: new Date().toISOString() });
+  const signature = await acct.signMessage({ message });
+  assert.equal((await verifySiwe(s, message, signature))?.toLowerCase(), acct.address.toLowerCase());
+});
