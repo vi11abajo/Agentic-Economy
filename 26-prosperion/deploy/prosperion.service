@@ -1,0 +1,23 @@
+# Prosperion's node side: the API the pages call, the MCP server Hermes calls, the launch watcher and the
+# Telegram bot. Runs next to prosperion-hermes.service under the same unprivileged user.
+[Unit]
+Description=Prosperion API, MCP and launch watcher
+After=network-online.target prosperion-hermes.service
+Wants=network-online.target
+
+[Service]
+User=prosperion
+Group=prosperion
+WorkingDirectory=/opt/prosperion/app
+EnvironmentFile=/opt/prosperion/.env
+Environment=PROSPERION_DB=/opt/prosperion/data/prosperion.db
+ExecStart=/usr/bin/node --no-warnings dist/main.js
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/prosperion/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
