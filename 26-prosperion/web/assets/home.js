@@ -71,7 +71,11 @@ $("#ask-form").addEventListener("submit", async (ev) => {
       if (!data || data === "[DONE]") continue;
       try {
         const j = JSON.parse(data);
-        if (event === "hermes.tool.progress") { status.textContent = `Checking: ${j.tool_name || j.name || j.tool || "a tool"}...`; continue; }
+        // Hermes sends {tool, label, status: "running" | "completed"}; MCP tools arrive as mcp__<server>__<name>.
+        if (event === "hermes.tool.progress") {
+          if (j.status === "running") status.textContent = `Checking: ${String(j.tool || "a tool").replace(/^mcp__([a-z-]+)__/, "$1 ")}...`;
+          continue;
+        }
         const delta = j.choices?.[0]?.delta?.content;
         if (delta) { text += delta; out.textContent = text; }
       } catch {}
