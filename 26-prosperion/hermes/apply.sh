@@ -5,7 +5,7 @@ set -euo pipefail
 H="$HOME/.local/bin/hermes"
 
 "$H" config set model.provider antigravity-subscription-directsdk
-"$H" config set model.default gemini-3.1-pro
+"$H" config set model.default gemini-3.8-flash
 
 # The agent reads the chain and explains it. Everything that could touch the
 # box, the web or its own memory is switched off, everywhere.
