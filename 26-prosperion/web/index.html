@@ -4,63 +4,37 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prosperion</title>
-<meta name="description" content="See what is really behind a Prosper vault on Pharos, and catch new Prosper launches you sign for yourself.">
+<meta name="description" content="Ask an agent what is really behind a Prosper vault on Pharos, and catch new Prosper launches you sign for yourself.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/style.css">
 </head>
-<body>
-<main>
-  <header class="site">
-    <a class="wordmark" href="/">Prosper<span>ion</span></a>
-    <nav class="site"><a href="/" aria-current="page">Home</a><a href="/vault/">Vaults</a><a href="#alerts">Alerts</a></nav>
-  </header>
-
-  <h1>Know what is behind a Prosper vault before you put money in.</h1>
-  <p class="lede">Prosperion reads every vault on Pharos and shows how much of its NAV you can check on chain and how much you take on the operator's word. When a new Prosper market launches, it checks it and sends you a link to buy in, which you sign in your own wallet.</p>
-
-  <section aria-labelledby="ask">
-    <h2 id="ask">Ask the agent</h2>
-    <p class="muted small">It reads the chain through Prosperion's tools and the Pharos Chain MCP, and quotes the block for every number. It cannot sign or send anything.</p>
-    <div class="chat" id="chat" aria-live="polite"></div>
-    <form id="ask-form" class="row" style="margin-top:12px">
-      <input id="ask-input" style="flex:1 1 320px" placeholder="Why did Barker Neutral Carry's NAV jump on Nov 10?" autocomplete="off" aria-label="Your question">
-      <button type="submit">Ask</button>
-    </form>
-  </section>
-
-  <section aria-labelledby="launches">
-    <h2 id="launches">New launches</h2>
-    <p class="muted small">Every market Prosper's factory creates, checked the moment it appears.</p>
-    <div id="launch-list"><p class="muted">Loading...</p></div>
-  </section>
-
-  <section aria-labelledby="vaults">
-    <h2 id="vaults">Vaults</h2>
-    <p class="muted small">Names come from Prosper; open one to see its numbers read from the chain.</p>
-    <table><thead><tr><th>Vault</th><th>Token</th><th>Status</th></tr></thead><tbody id="vault-list"><tr><td colspan="3" class="muted">Loading...</td></tr></tbody></table>
-  </section>
-
-  <section aria-labelledby="alerts">
-    <h2 id="alerts">Launch alerts for you</h2>
-    <p id="alerts-intro">Sign in with your wallet (a message, not a transaction), set how much you would put into a fresh launch, and link Telegram. When a launch passes the checks you get its facts and a link right away, and the agent's notes a minute later.</p>
-    <div class="panel" id="alert-panel">
-      <div id="signin-step"><button id="signin-btn" type="button">Sign in with your wallet</button> <span id="signin-status" class="muted small"></span></div>
-      <form id="watch-form" hidden>
-        <label for="per-buy">PROS per buy</label>
-        <input id="per-buy" type="number" min="0.01" max="1000" step="0.01" value="1">
-        <label for="max-reserve">Only alert while at most this much PROS is already in the curve</label>
-        <input id="max-reserve" type="number" min="0" step="0.1" value="0">
-        <p class="muted small">0 means: only launches nobody has bought into yet.</p>
-        <div class="row"><button type="submit">Save my watch</button><button class="quiet" type="button" id="tg-btn">Link Telegram</button></div>
-        <p id="watch-status" class="small"></p>
+<body data-page="chat">
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <main class="main chatmain" id="chatmain">
+    <section class="chat-wrap" aria-label="Chat with Prosperion">
+      <div class="hello">
+        <h1>What should we check on Prosper?</h1>
+        <p>Ask about a vault, a launch or your own position. Every number comes with the block it was read at.</p>
+      </div>
+      <div class="thread" id="chat" aria-live="polite"></div>
+      <form class="composer" id="ask-form">
+        <textarea id="ask-input" rows="3" placeholder="Ask Prosperion about a vault, a launch or your position..." aria-label="Your question"></textarea>
+        <button class="send" id="send" type="submit" aria-label="Send" disabled></button>
       </form>
-    </div>
-  </section>
-
-  <footer class="muted small" style="margin-top:56px">Pharos mainnet. No keys on our side: every transaction is signed by you, in your wallet. <a href="https://github.com/vi11abajo/Agentic-Economy/tree/main/26-prosperion">Source</a></footer>
-</main>
+      <div class="chips" id="chips">
+        <button type="button" class="chip" data-tip="What is really behind Barker Neutral Carry's NAV right now?">Barker Neutral Carry</button>
+        <button type="button" class="chip" data-tip="Show the newest Prosper launches and whether anyone has bought in yet.">Newest launches</button>
+        <button type="button" class="chip" data-tip="How fresh are the prices behind Barker Neutral Carry's NAV?">Price freshness</button>
+        <button type="button" class="chip" data-tip="What do I hold in Prosper right now, and what is it worth?">My position</button>
+      </div>
+      <p class="fine">Reads Pharos mainnet through Prosperion's tools and the Pharos Chain MCP. It cannot sign or send anything.</p>
+    </section>
+  </main>
+</div>
 <script type="module" src="/assets/home.js"></script>
 </body>
 </html>
