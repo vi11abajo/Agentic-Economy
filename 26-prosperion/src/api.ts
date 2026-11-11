@@ -31,6 +31,8 @@ export interface ApiDeps {
   listVaults: () => Promise<unknown[]>;
   explainNavMove: (vault: Address, from: bigint, to: bigint) => Promise<unknown>;
   agent: (messages: ChatMessage[], env: WalletEnv, sessionKey: string, signal?: AbortSignal) => Promise<Response>;
+  /** The bot's username, or null when whoever runs this copy has not set up their own bot (then no alerts go out). */
+  telegramBot: () => string | null;
   perMinute: number;
   dailyCap: number;
   /** unix seconds; injectable for tests */
@@ -200,11 +202,14 @@ export function createApi(d: ApiDeps) {
           return send(res, 200, d.store.watchesFor(me)[0]);
         }
       }
+      if (req.method === "GET" && path === "/alerts") return send(res, 200, { bot: d.telegramBot() });
       if (req.method === "POST" && path === "/telegram/link") {
+        const bot = d.telegramBot();
+        if (!bot) return send(res, 409, { error: "This copy of Prosperion has no Telegram bot, so it sends no alerts." });
         const me = signedIn(req);
         if (!me) return send(res, 401, { error: "sign in first" });
         if (!d.store.watchesFor(me).length) return send(res, 400, { error: "save a watch first" });
-        return send(res, 200, { code: d.store.newLinkCode(me), bot: process.env.TELEGRAM_BOT_USERNAME ?? null });
+        return send(res, 200, { code: d.store.newLinkCode(me), bot });
       }
       send(res, 404, { error: "not found" });
     } catch (e) {
