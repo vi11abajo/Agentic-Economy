@@ -21,7 +21,7 @@ tar -czf - package.json package-lock.json --exclude='*.test.js' dist web deploy 
   if [ ! -f /opt/prosperion/.env ]; then
     key=$(grep -E "^API_SERVER_KEY=" /opt/prosperion/home/.hermes/.env | cut -d= -f2-)
     umask 027
-    printf "HERMES_API_KEY=%s\nAGENT_DAILY_CAP=200\nTELEGRAM_BOT_TOKEN=\nTELEGRAM_BOT_USERNAME=\nPROSPERION_GATE=\n" "$key" > /opt/prosperion/.env
+    printf "HERMES_API_KEY=%s\nAGENT_DAILY_CAP=200\nTELEGRAM_BOT_TOKEN=\nPROSPERION_GATE=\n" "$key" > /opt/prosperion/.env
     chown root:prosperion /opt/prosperion/.env
   fi
 
