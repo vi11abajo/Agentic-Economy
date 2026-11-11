@@ -3,6 +3,9 @@
 // offer no button at all.
 import { $, api, esc, pros, blockLink, addrLink, walletEnv, walletLinks, connect, ensurePharos, EXPLORER } from "./app.js";
 import { sendOne } from "./wallet.js";
+import { mountShell } from "./shell.js";
+
+mountShell();
 
 const id = new URLSearchParams(location.search).get("r") || "";
 const out = $("#out");

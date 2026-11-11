@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alerts · Prosperion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="/assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body data-page="alerts">
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <main class="main"><div class="page">
+    <h1>Launch alerts</h1>
+    <p class="lede" id="alerts-intro">Sign in with your wallet (a message, not a transaction), set how much you would put into a fresh launch, and link Telegram. When a launch passes the checks you get its facts and a link right away, and the agent's notes a minute later.</p>
+    <div class="panel" id="alert-panel">
+      <div id="signin-step" class="row"><button id="signin-btn" type="button">Sign in with your wallet</button> <span id="signin-status" class="muted small"></span></div>
+      <form id="watch-form" hidden>
+        <label for="per-buy">PROS per buy</label>
+        <input id="per-buy" type="number" min="0.01" max="1000" step="0.01" value="1">
+        <label for="max-reserve">Only alert while at most this much PROS is already in the curve</label>
+        <input id="max-reserve" type="number" min="0" step="0.1" value="0">
+        <p class="muted small">0 means: only launches nobody has bought into yet.</p>
+        <div class="row"><button type="submit">Save my watch</button><button class="quiet" type="button" id="tg-btn">Link Telegram</button></div>
+        <p id="watch-status" class="small"></p>
+      </form>
+    </div>
+  </div></main>
+</div>
+<script type="module" src="/assets/alerts.js"></script>
+</body>
+</html>
