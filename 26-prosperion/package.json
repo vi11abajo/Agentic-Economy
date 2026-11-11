@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node --no-warnings dist/main.js",
-    "test": "node --no-warnings --test \"dist/**/*.test.js\""
+    "test": "node --no-warnings --test --test-concurrency=1 \"dist/**/*.test.js\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
