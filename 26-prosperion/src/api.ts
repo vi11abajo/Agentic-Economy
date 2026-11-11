@@ -28,6 +28,7 @@ export interface ApiDeps {
   check: (market: Address, amountIn: bigint) => Promise<MarketCheck>;
   readLimits: (owner: Address) => Promise<GateLimits | null>;
   readVault: (vault: Address, block?: bigint) => Promise<unknown>;
+  listVaults: () => Promise<unknown[]>;
   explainNavMove: (vault: Address, from: bigint, to: bigint) => Promise<unknown>;
   agent: (messages: ChatMessage[], env: WalletEnv, sessionKey: string, signal?: AbortSignal) => Promise<Response>;
   perMinute: number;
@@ -138,6 +139,7 @@ export function createApi(d: ApiDeps) {
         const amount = BigInt(url.searchParams.get("amountWei") ?? "0");
         return send(res, 200, await d.check(getAddress(seg[1]), amount));
       }
+      if (req.method === "GET" && path === "/vaults") return send(res, 200, await d.listVaults());
       if (req.method === "GET" && path === "/launches") return send(res, 200, d.store.listLaunches(30));
       if (req.method === "GET" && path === "/decisions") return send(res, 200, d.store.decisions(50));
 
