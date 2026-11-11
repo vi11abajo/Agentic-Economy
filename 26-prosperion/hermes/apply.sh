@@ -15,7 +15,7 @@ H="$HOME/.local/bin/hermes"
 "$H" config set max_concurrent_sessions 2
 
 # Read-only tools. send_raw_transaction is cut so the agent can never broadcast.
-"$H" config set mcp_servers '{
+"$H" config set --force mcp_servers '{
   "pharos-chain": {"url": "https://mcp.pharos.xyz/mcp", "tools": {"exclude": ["send_raw_transaction"]}},
   "pharos-docs":  {"url": "https://docs.pharos.xyz/~gitbook/mcp"},
   "prosperion":   {"url": "http://127.0.0.1:18621/mcp"}

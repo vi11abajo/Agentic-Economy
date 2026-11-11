@@ -5,7 +5,7 @@
 set -euo pipefail
 HOST=${HOST:-pharos-server}
 
-tar -czf - package.json package-lock.json --exclude='*.test.js' dist web deploy | ssh "$HOST" 'set -e
+tar -czf - package.json package-lock.json --exclude='*.test.js' dist web deploy hermes skill | ssh "$HOST" 'set -e
   stage=$(mktemp -d)
   tar -xzf - -C "$stage"
   install -d -o prosperion -g prosperion /opt/prosperion/app /opt/prosperion/data
@@ -25,6 +25,12 @@ tar -czf - package.json package-lock.json --exclude='*.test.js' dist web deploy 
     chown root:prosperion /opt/prosperion/.env
   fi
 
+  # the agent: its role and the Prosper codex become SOUL.md, Hermes is restarted below to read it
+  rm -rf /opt/prosperion/home/prosperion && install -d -o prosperion -g prosperion /opt/prosperion/home/prosperion
+  cp -r "$stage/hermes" "$stage/skill" /opt/prosperion/home/prosperion/
+  chown -R prosperion:prosperion /opt/prosperion/home/prosperion
+  sudo -u prosperion -H bash /opt/prosperion/home/prosperion/hermes/apply.sh | grep -v "^✓"
+
   cp "$stage/deploy/prosperion.service" /etc/systemd/system/prosperion.service
   site=/etc/nginx/sites-available/prosperion.pharosfdv.xyz
   cp "$site" "$site.prev"
@@ -33,6 +39,7 @@ tar -czf - package.json package-lock.json --exclude='*.test.js' dist web deploy 
   systemctl daemon-reload
   systemctl enable --now prosperion.service
   systemctl restart prosperion.service
+  sleep 2 && systemctl restart prosperion-hermes   # after the MCP port is back, so it connects at once
   systemctl reload nginx
   rm -rf "$stage"
   echo deployed'
