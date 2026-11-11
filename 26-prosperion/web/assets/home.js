@@ -121,6 +121,17 @@ $("#tg-btn").addEventListener("click", async () => {
   } catch (e) { $("#watch-status").textContent = e.message; }
 });
 
+// ---- alerts need a Telegram bot, and every copy of Prosperion brings its own (or none). Without one we say so
+// instead of offering a sign-in that leads to a bot nobody runs.
+const OWN_BOT_STEPS = "https://github.com/vi11abajo/Agentic-Economy/tree/main/26-prosperion#your-own-telegram-bot";
+async function loadAlerts() {
+  const { bot } = await api("/alerts").catch(() => ({ bot: null }));
+  if (bot) return;
+  $("#alerts-intro").textContent = "This copy runs without a Telegram bot, so it sends no alerts. New launches still show up above with their checks, and the agent will look into any of them.";
+  $("#alert-panel").innerHTML = `<p>Alerts come from a bot you own: run Prosperion yourself, make a bot with <a href="https://t.me/BotFather">@BotFather</a> and give your copy its token. <a href="${OWN_BOT_STEPS}">The steps are in the README.</a></p>`;
+}
+
+loadAlerts();
 loadLaunches();
 loadVaults();
 setInterval(loadLaunches, 30_000);
