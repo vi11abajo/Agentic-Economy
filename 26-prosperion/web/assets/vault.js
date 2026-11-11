@@ -1,4 +1,7 @@
 import { $, api, esc, usdc, blockLink, addrLink } from "./app.js";
+import { mountShell } from "./shell.js";
+
+mountShell();
 
 const perShare = (raw) => (Number(BigInt(raw)) / 1e6).toFixed(6);
 
@@ -10,7 +13,14 @@ const nameOf = async (addr) => (await listing).find((x) => x.r25Vault.toLowerCas
 async function init() {
   const v = params.get("v");
   if (v) show(v);
+  else $("#out").innerHTML = `<h1>Vaults</h1><p class="lede">Names come from Prosper; open one to see what is behind its NAV, read from the chain.</p><div class="tablewrap" id="vault-list"><p class="muted">Loading...</p></div>`;
   const vaults = await listing;
+  if (!v) {
+    $("#vault-list").innerHTML = vaults.length
+      ? `<table><thead><tr><th>Vault</th><th>Token</th><th>Status</th></tr></thead><tbody>${vaults.map((x) =>
+          `<tr><td><a href="/vault/?v=${x.r25Vault}">${esc(x.vaultName)}</a></td><td>${esc(x.pVaultSymbol)}</td><td class="muted">${esc(x.status)}</td></tr>`).join("")}</tbody></table>`
+      : `<p class="muted">Prosper's vault list did not load. Try again in a minute.</p>`;
+  }
   $("#vault-select").innerHTML += vaults
     .map((x) => `<option value="${x.r25Vault}">${esc(x.vaultName)} (${esc(x.pVaultSymbol)})</option>`).join("");
   const opt = v && [...$("#vault-select").options].find((o) => o.value.toLowerCase() === v.toLowerCase());
