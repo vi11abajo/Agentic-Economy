@@ -1,137 +1,147 @@
-import { $, api, esc, pros, blockLink, addrLink, walletEnv, signIn, EXPLORER } from "./app.js";
+import { $, esc, walletEnv } from "./app.js";
+import { mountShell, ICONS } from "./shell.js";
 
-// ---- launches
-async function loadLaunches() {
-  const box = $("#launch-list");
-  try {
-    const list = await api("/launches");
-    if (!list.length) { box.innerHTML = `<p class="muted">No launch seen since the watcher started.</p>`; return; }
-    box.innerHTML = list.map((l) => {
-      const c = l.checks;
-      const tag = !c ? `<span class="tag">not checked</span>`
-        : !c.genuine ? `<span class="tag taken">not a Prosper market</span>`
-        : c.phase !== 0 ? `<span class="tag">off the curve</span>`
-        : BigInt(c.reserveBefore) === 0n ? `<span class="tag fresh">nobody in yet</span>` : `<span class="tag taken">${pros(c.reserveBefore)} PROS in</span>`;
-      return `<div class="launch"><div>Market ${addrLink(l.market)}, token ${addrLink(l.pToken)}<br><span class="muted small">${blockLink(l.block)}, <a href="${EXPLORER}/tx/${l.tx}">creation tx</a></span></div><div>${tag}</div></div>`;
-    }).join("");
-  } catch (e) { box.innerHTML = `<p class="muted">Could not load launches: ${esc(e.message)}</p>`; }
+mountShell();
+$("#send").innerHTML = ICONS.send;
+
+// ---- the conversation lives in this tab: it survives a trip to the Vaults page, and "New Chat" starts over.
+const SAVE = "ps_thread";
+const history = (() => { try { return JSON.parse(sessionStorage.getItem(SAVE) || "[]"); } catch { return []; } })();
+const keep = () => { try { sessionStorage.setItem(SAVE, JSON.stringify(history)); } catch {} };
+const chatId = (() => {
+  try { return localStorage.getItem("ps_chat") || (localStorage.setItem("ps_chat", crypto.randomUUID()), localStorage.getItem("ps_chat")); }
+  catch { return crypto.randomUUID(); }
+})();
+
+$('[data-k="chat"]').addEventListener("click", (e) => {
+  e.preventDefault();
+  history.length = 0;
+  keep();
+  $("#chat").innerHTML = "";
+  $("#chatmain").classList.remove("started");
+  document.body.classList.remove("side-open");
+  $("#ask-input").focus();
+});
+
+// The agent writes light markdown. Everything is escaped first, so only these few shapes become HTML,
+// and links must be https.
+// A bare link shows where it goes, not the whole URL: the agent links every address it cites.
+const linkName = (url) => {
+  try { const h = new URL(url.replace(/&amp;/g, "&")).hostname.replace(/^www\./, ""); return h === "pharosscan.xyz" ? "pharosscan" : h; }
+  catch { return "link"; }
+};
+function md(src) {
+  const inline = (s) => s
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/(^|[\s(])(https:\/\/[^\s<)]+)/g, (_m, pre, url) => `${pre}<a href="${url}" target="_blank" rel="noopener">${linkName(url)}</a>`);
+  let html = "", list = null, para = [];
+  const flushPara = () => { if (para.length) { html += `<p>${inline(para.join("<br>"))}</p>`; para = []; } };
+  const flushList = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (const line of esc(src).split("\n")) {
+    const bullet = /^\s*[-*]\s+(.*)$/.exec(line), num = /^\s*\d+[.)]\s+(.*)$/.exec(line), head = /^#{1,4}\s+(.*)$/.exec(line);
+    if (bullet || num) {
+      flushPara();
+      const want = bullet ? "ul" : "ol";
+      if (list !== want) { flushList(); html += `<${want}>`; list = want; }
+      html += `<li>${inline((bullet || num)[1])}</li>`;
+    } else if (head) { flushPara(); flushList(); html += `<h3>${inline(head[1])}</h3>`; }
+    else if (!line.trim()) { flushPara(); flushList(); }
+    else { flushList(); para.push(line); }
+  }
+  flushPara(); flushList();
+  return html;
 }
-
-// ---- vaults
-async function loadVaults() {
-  const body = $("#vault-list");
-  try {
-    const list = await api("/vaults");
-    body.innerHTML = list.map((v) => `<tr><td><a href="/vault/?v=${v.r25Vault}">${esc(v.vaultName)}</a></td><td>${esc(v.pVaultSymbol)}</td><td class="muted">${esc(v.status)}</td></tr>`).join("");
-  } catch (e) { body.innerHTML = `<tr><td colspan="3" class="muted">Could not load vaults: ${esc(e.message)}</td></tr>`; }
-}
-
-// ---- chat (history stays in this tab; the server adds what it knows about your wallet)
-const history = [];
-const chatId = (() => { try { return localStorage.getItem("ps_chat") || (localStorage.setItem("ps_chat", crypto.randomUUID()), localStorage.getItem("ps_chat")); } catch { return crypto.randomUUID(); } })();
 
 function bubble(cls, text) {
   const d = document.createElement("div");
   d.className = `msg ${cls}`;
-  d.textContent = text;
+  if (cls === "agent") d.innerHTML = md(text); else d.textContent = text;
   $("#chat").appendChild(d);
-  d.scrollIntoView({ block: "nearest" });
+  $("#chat").scrollTop = $("#chat").scrollHeight;
   return d;
 }
 
-$("#ask-form").addEventListener("submit", async (ev) => {
-  ev.preventDefault();
-  const q = $("#ask-input").value.trim();
-  if (!q) return;
-  $("#ask-input").value = "";
-  history.push({ role: "user", content: q });
-  bubble("you", q);
-  const env = await walletEnv();
-  let address;
-  try { address = env.providerObj ? (await env.providerObj.request({ method: "eth_accounts" }))[0] : undefined; } catch {}
-  let chainId;
-  try { chainId = env.providerObj ? parseInt(await env.providerObj.request({ method: "eth_chainId" }), 16) : undefined; } catch {}
-  const sendEnv = { provider: env.provider, rdns: env.rdns, inWalletBrowser: env.inWalletBrowser, desktopExtension: env.desktopExtension, chainId, address };
-  const res = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: history, env: sendEnv, chatId }) });
-  if (!res.ok) { bubble("agent", (await res.json().catch(() => ({}))).error || `Error ${res.status}`); return; }
-  const out = bubble("agent", "");
-  const status = bubble("tool", "Reading the chain...");
-  let text = "", buf = "";
-  const reader = res.body.getReader();
-  const dec = new TextDecoder();
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    let i;
-    while ((i = buf.indexOf("\n\n")) >= 0) {
-      const frame = buf.slice(0, i); buf = buf.slice(i + 2);
-      const event = /^event: (.+)$/m.exec(frame)?.[1];
-      const data = /^data: (.+)$/m.exec(frame)?.[1];
-      if (!data || data === "[DONE]") continue;
-      try {
-        const j = JSON.parse(data);
-        // Hermes sends {tool, label, status: "running" | "completed"}; MCP tools arrive as mcp__<server>__<name>.
-        if (event === "hermes.tool.progress") {
-          if (j.status === "running") status.textContent = `Checking: ${String(j.tool || "a tool").replace(/^mcp__([a-z-]+)__/, "$1 ")}...`;
-          continue;
-        }
-        const delta = j.choices?.[0]?.delta?.content;
-        if (delta) { text += delta; out.textContent = text; }
-      } catch {}
-    }
-  }
-  status.remove();
-  history.push({ role: "assistant", content: text });
-});
-
-// ---- alerts
-$("#signin-btn").addEventListener("click", async () => {
-  const env = await walletEnv();
-  const st = $("#signin-status");
-  if (!env.providerObj) {
-    st.textContent = env.mobile ? "Open this page inside your wallet app (OKX, Rabby or MetaMask) to sign in." : "No wallet found in this browser. Install a wallet extension, or open the page in your phone wallet.";
-    return;
-  }
-  try {
-    st.textContent = "Check your wallet...";
-    const r = await signIn(env.providerObj);
-    st.textContent = `Signed in as ${r.address}.`;
-    $("#watch-form").hidden = false;
-    const w = await api("/watch").catch(() => null);
-    if (w) { $("#per-buy").value = Number(BigInt(w.maxPerBuyWei)) / 1e18; $("#max-reserve").value = Number(BigInt(w.maxReserveBeforeWei)) / 1e18; }
-  } catch (e) { st.textContent = `Sign-in did not go through: ${e.message}`; }
-});
-
-const toWei = (x) => BigInt(Math.round(Number(x) * 1e6)) * 10n ** 12n;
-$("#watch-form").addEventListener("submit", async (ev) => {
-  ev.preventDefault();
-  try {
-    await api("/watch", { method: "POST", body: JSON.stringify({ maxPerBuyWei: toWei($("#per-buy").value).toString(), maxReserveBeforeWei: toWei($("#max-reserve").value).toString() }) });
-    $("#watch-status").textContent = "Saved. Now link Telegram so the alerts have somewhere to go.";
-  } catch (e) { $("#watch-status").textContent = e.message; }
-});
-$("#tg-btn").addEventListener("click", async () => {
-  try {
-    const { code, bot } = await api("/telegram/link", { method: "POST" });
-    const link = bot ? `https://t.me/${bot}?start=${code}` : null;
-    $("#watch-status").innerHTML = link
-      ? `Open <a href="${link}">${esc(link)}</a> and press Start. The code works once, for ten minutes.`
-      : `Send <code>/start ${code}</code> to the Prosperion bot. The code works once, for ten minutes.`;
-  } catch (e) { $("#watch-status").textContent = e.message; }
-});
-
-// ---- alerts need a Telegram bot, and every copy of Prosperion brings its own (or none). Without one we say so
-// instead of offering a sign-in that leads to a bot nobody runs.
-const OWN_BOT_STEPS = "https://github.com/vi11abajo/Agentic-Economy/tree/main/26-prosperion#your-own-telegram-bot";
-async function loadAlerts() {
-  const { bot } = await api("/alerts").catch(() => ({ bot: null }));
-  if (bot) return;
-  $("#alerts-intro").textContent = "This copy runs without a Telegram bot, so it sends no alerts. New launches still show up above with their checks, and the agent will look into any of them.";
-  $("#alert-panel").innerHTML = `<p>Alerts come from a bot you own: run Prosperion yourself, make a bot with <a href="https://t.me/BotFather">@BotFather</a> and give your copy its token. <a href="${OWN_BOT_STEPS}">The steps are in the README.</a></p>`;
+if (history.length) {
+  $("#chatmain").classList.add("started");
+  for (const m of history) bubble(m.role === "user" ? "you" : "agent", m.content);
 }
 
-loadAlerts();
-loadLaunches();
-loadVaults();
-setInterval(loadLaunches, 30_000);
+// ---- composer: Enter sends, Shift+Enter is a new line, the box grows with the text
+const input = $("#ask-input");
+const fit = () => { input.style.height = "auto"; input.style.height = `${Math.min(input.scrollHeight, 240)}px`; $("#send").disabled = !input.value.trim(); };
+input.addEventListener("input", fit);
+input.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("#ask-form").requestSubmit(); }
+});
+for (const c of document.querySelectorAll(".chip")) {
+  c.addEventListener("click", () => { input.value = c.dataset.tip; fit(); $("#ask-form").requestSubmit(); });
+}
+
+let busy = false;
+$("#ask-form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const q = input.value.trim();
+  if (!q || busy) return;
+  busy = true;
+  input.value = ""; fit();
+  $("#chatmain").classList.add("started");
+  history.push({ role: "user", content: q });
+  keep();
+  bubble("you", q);
+  const status = bubble("tool", "Reading the chain...");
+  try {
+    const env = await walletEnv();
+    let address, chainId;
+    try { address = env.providerObj ? (await env.providerObj.request({ method: "eth_accounts" }))[0] : undefined; } catch {}
+    try { chainId = env.providerObj ? parseInt(await env.providerObj.request({ method: "eth_chainId" }), 16) : undefined; } catch {}
+    const sendEnv = { provider: env.provider, rdns: env.rdns, inWalletBrowser: env.inWalletBrowser, desktopExtension: env.desktopExtension, chainId, address };
+    const res = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: history, env: sendEnv, chatId }) });
+    if (!res.ok) {
+      status.remove();
+      bubble("error", (await res.json().catch(() => ({}))).error || `The agent did not answer (${res.status}). Try again in a moment.`);
+      history.pop(); keep();
+      return;
+    }
+    let out = null, text = "", buf = "";
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const frame = buf.slice(0, i); buf = buf.slice(i + 2);
+        const event = /^event: (.+)$/m.exec(frame)?.[1];
+        const data = /^data: (.+)$/m.exec(frame)?.[1];
+        if (!data || data === "[DONE]") continue;
+        try {
+          const j = JSON.parse(data);
+          // Hermes sends {tool, label, status: "running" | "completed"}; MCP tools arrive as mcp__<server>__<name>.
+          if (event === "hermes.tool.progress") {
+            if (j.status === "running") status.textContent = `Checking: ${String(j.tool || "a tool").replace(/^mcp__([a-z-]+)__/, "$1 ")}...`;
+            continue;
+          }
+          const delta = j.choices?.[0]?.delta?.content;
+          if (delta) {
+            text += delta;
+            if (!out) { out = bubble("agent", ""); $("#chat").insertBefore(out, status); }
+            out.innerHTML = md(text);
+            $("#chat").scrollTop = $("#chat").scrollHeight;
+          }
+        } catch {}
+      }
+    }
+    status.remove();
+    if (text) { history.push({ role: "assistant", content: text }); keep(); }
+    else bubble("error", "The agent finished without an answer. Ask again.");
+  } catch (e) {
+    status.remove();
+    bubble("error", `Lost the connection to the agent: ${e.message}`);
+  } finally {
+    busy = false;
+    input.focus();
+  }
+});
