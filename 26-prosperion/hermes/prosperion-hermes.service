@@ -1,0 +1,22 @@
+# Hermes for Prosperion. Runs as its own user so it never sees root's files
+# or the other Hermes gateway on this box. API on 127.0.0.1:8642 only.
+[Unit]
+Description=Prosperion agent (Hermes API server)
+After=network-online.target
+
+[Service]
+User=prosperion
+Group=prosperion
+WorkingDirectory=/opt/prosperion/home
+Environment=HOME=/opt/prosperion/home
+Environment=HERMES_HOME=/opt/prosperion/home/.hermes
+Environment=PATH=/opt/prosperion/home/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/opt/prosperion/home/.local/bin/hermes gateway run
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=full
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
