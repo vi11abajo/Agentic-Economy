@@ -68,7 +68,10 @@ export async function chatAgent(messages: ChatMessage[], env: WalletEnv, session
     body: JSON.stringify({
       model: "hermes-agent",
       stream: true,
-      messages: [{ role: "system", content: `${ROLE_NOTE}\n\n${walletNote(env)}` }, ...clean(messages)],
+      // Hermes names a header-less session sha256(system prompt + first question) and runs one turn at a time per
+      // session, so the chat's own key goes in here: otherwise two visitors who both click the same chip share
+      // one session and the second waits for the first.
+      messages: [{ role: "system", content: `${ROLE_NOTE}\n\n${walletNote(env)}\n\nChat: ${sessionKey}` }, ...clean(messages)],
     }),
     signal,
   });
