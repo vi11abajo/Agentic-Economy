@@ -1,23 +1,24 @@
-import { $, api, esc, walletEnv, signIn } from "./app.js";
-import { mountShell } from "./shell.js";
+import { $, api, esc } from "./app.js";
+import { mountShell, whoAmI, connectWallet } from "./shell.js";
 
 mountShell();
 
+// One sign-in for the whole site: if the wallet button already signed in, the watch form is open straight away.
+async function openWatch(address) {
+  $("#signin-status").textContent = `Signed in as ${address}.`;
+  $("#watch-form").hidden = false;
+  const w = await api("/watch").catch(() => null);
+  if (w) { $("#per-buy").value = Number(BigInt(w.maxPerBuyWei)) / 1e18; $("#max-reserve").value = Number(BigInt(w.maxReserveBeforeWei)) / 1e18; }
+}
+whoAmI().then((me) => { if (me.address) openWatch(me.address); });
+
 $("#signin-btn").addEventListener("click", async () => {
-  const env = await walletEnv();
   const st = $("#signin-status");
-  if (!env.providerObj) {
-    st.textContent = env.mobile ? "Open this page inside your wallet app (OKX, Rabby or MetaMask) to sign in." : "No wallet found in this browser. Install a wallet extension, or open the page in your phone wallet.";
-    return;
-  }
   try {
     st.textContent = "Check your wallet...";
-    const r = await signIn(env.providerObj);
-    st.textContent = `Signed in as ${r.address}.`;
-    $("#watch-form").hidden = false;
-    const w = await api("/watch").catch(() => null);
-    if (w) { $("#per-buy").value = Number(BigInt(w.maxPerBuyWei)) / 1e18; $("#max-reserve").value = Number(BigInt(w.maxReserveBeforeWei)) / 1e18; }
-  } catch (e) { st.textContent = `Sign-in did not go through: ${e.message}`; }
+    const me = await connectWallet();
+    await openWatch(me.address);
+  } catch (e) { st.textContent = e.message; }
 });
 
 const toWei = (x) => BigInt(Math.round(Number(x) * 1e6)) * 10n ** 12n;
