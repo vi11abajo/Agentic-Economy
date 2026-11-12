@@ -46,7 +46,7 @@ const api = createApi({
   readVault,
   listVaults,
   explainNavMove,
-  agent: chatAgent,
+  agent: (messages, env, key, signal) => chatAgent(messages, env, key, signal, botName),
   telegramBot: () => botName,
   perMinute: Number(env.CHAT_PER_MINUTE ?? 3),
   userDaily: Number(env.USER_DAILY_TURNS ?? 30),
