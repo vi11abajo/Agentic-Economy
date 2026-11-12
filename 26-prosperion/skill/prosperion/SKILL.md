@@ -78,4 +78,6 @@ table is measured on a 7-day NAV median and the reward weight formula is not on 
 ## Cross-check
 
 Before stating a vault's total assets or a market's reserve, read the same value through the pharos-chain `eth_call`
-tool at the same block and say it matched.
+tool at the same block and say it matched. For a vault, vault_picture returns `crossCheck`: each entry is the exact
+`to`, `data` and `block` to pass to `eth_call` and the value it must return. Copy them as they are; never work out a
+function selector yourself.
