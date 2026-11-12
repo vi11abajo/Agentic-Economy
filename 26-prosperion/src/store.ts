@@ -41,6 +41,9 @@ export interface TxRequest {
 const LINK_TTL_MS = 10 * 60_000;
 const json = (x: unknown) => JSON.stringify(x, (_k, v) => (typeof v === "bigint" ? v.toString() : v));
 
+const walletNode = (a: Address) => `w:${a.toLowerCase()}`;
+const ipNode = (ip: string) => `ip:${ip}`;
+
 export function openStore(path: string) {
   const db = new DatabaseSync(path);
   db.exec(`
@@ -51,7 +54,10 @@ export function openStore(path: string) {
     CREATE TABLE IF NOT EXISTS link_codes (code TEXT PRIMARY KEY, address TEXT, created INTEGER, used INTEGER DEFAULT 0);
     CREATE TABLE IF NOT EXISTS decisions (at INTEGER, kind TEXT, subject TEXT, reason TEXT, block TEXT);
     CREATE TABLE IF NOT EXISTS requests (id TEXT PRIMARY KEY, kind TEXT, params TEXT, created_block TEXT, created INTEGER);
-    CREATE TABLE IF NOT EXISTS turns (ip TEXT, day TEXT, n INTEGER, PRIMARY KEY (ip, day));
+    CREATE TABLE IF NOT EXISTS id_nodes (node TEXT PRIMARY KEY, root TEXT NOT NULL);
+    CREATE INDEX IF NOT EXISTS id_nodes_root ON id_nodes (root);
+    CREATE TABLE IF NOT EXISTS chat_turns (id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER, ip TEXT, wallet TEXT);
+    CREATE INDEX IF NOT EXISTS chat_turns_at ON chat_turns (at);
     CREATE TABLE IF NOT EXISTS nonces (nonce TEXT PRIMARY KEY, created INTEGER, used INTEGER DEFAULT 0);
     CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, address TEXT, expires INTEGER);
   `);
@@ -131,14 +137,48 @@ export function openStore(path: string) {
       return r ? { id, kind: r.kind as RequestKind, params: JSON.parse(r.params as string), createdBlock: BigInt(r.created_block as string) } : null;
     },
 
-    addTurn(ip: string, day: string) {
-      db.prepare("INSERT INTO turns VALUES (?, ?, 1) ON CONFLICT(ip, day) DO UPDATE SET n = n + 1").run(ip, day);
+    // ---- who is one user. A wallet and an IP are linked only when a signed-in wallet makes a request from
+    // that IP; nothing else joins them. Each group keeps one root, so finding a user is a single lookup.
+    linkIdentity(wallet: Address, ip: string) {
+      const w = walletNode(wallet), i = ipNode(ip);
+      db.exec("BEGIN IMMEDIATE");
+      try {
+        const add = db.prepare("INSERT OR IGNORE INTO id_nodes (node, root) VALUES (?, ?)");
+        add.run(w, w);
+        add.run(i, i);
+        const rootOf = db.prepare("SELECT root FROM id_nodes WHERE node = ?");
+        const rw = (rootOf.get(w) as { root: string }).root, ri = (rootOf.get(i) as { root: string }).root;
+        if (rw !== ri) db.prepare("UPDATE id_nodes SET root = ? WHERE root = ?").run(rw, ri);
+        db.exec("COMMIT");
+      } catch (e) { db.exec("ROLLBACK"); throw e; }
     },
-    countTurns(ip: string, day: string): number {
-      return ((db.prepare("SELECT n FROM turns WHERE ip = ? AND day = ?").get(ip, day) as { n: number } | undefined)?.n) ?? 0;
+    userOf(wallet: Address): { wallets: Address[]; ips: string[] } {
+      const w = walletNode(wallet);
+      const nodes = (db.prepare("SELECT node FROM id_nodes WHERE root = (SELECT root FROM id_nodes WHERE node = ?)").all(w) as { node: string }[])
+        .map((r) => r.node);
+      if (!nodes.length) return { wallets: [getAddress(wallet)], ips: [] };
+      return {
+        wallets: nodes.filter((n) => n.startsWith("w:")).map((n) => getAddress(n.slice(2))),
+        ips: nodes.filter((n) => n.startsWith("ip:")).map((n) => n.slice(3)),
+      };
     },
-    totalTurns(day: string): number {
-      return ((db.prepare("SELECT COALESCE(SUM(n), 0) AS n FROM turns WHERE day = ?").get(day) as { n: number }).n);
+    /** Returns the turn's id, so a turn the agent never answered can be dropped again. */
+    addChatTurn(at: number, ip: string, wallet: Address): number {
+      return Number(db.prepare("INSERT INTO chat_turns (at, ip, wallet) VALUES (?, ?, ?)").run(at, ip, getAddress(wallet)).lastInsertRowid);
+    },
+    dropChatTurn(id: number) {
+      db.prepare("DELETE FROM chat_turns WHERE id = ?").run(id);
+    },
+    /** Questions asked since `since` (ms) by any wallet or from any IP of this wallet's user. */
+    userTurnsSince(wallet: Address, since: number): number {
+      const u = this.userOf(wallet);
+      const ph = (n: number) => Array(n).fill("?").join(",");
+      const sql = `SELECT COUNT(*) AS n FROM chat_turns WHERE at >= ? AND (wallet IN (${ph(u.wallets.length)})` +
+        (u.ips.length ? ` OR ip IN (${ph(u.ips.length)}))` : ")");
+      return (db.prepare(sql).get(since, ...u.wallets, ...u.ips) as { n: number }).n;
+    },
+    allTurnsSince(since: number): number {
+      return (db.prepare("SELECT COUNT(*) AS n FROM chat_turns WHERE at >= ?").get(since) as { n: number }).n;
     },
 
     // used by auth.ts

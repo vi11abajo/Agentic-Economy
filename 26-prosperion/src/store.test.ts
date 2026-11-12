@@ -51,14 +51,44 @@ test("a signature made for another site does not sign you in here", async () => 
   assert.equal(await verifySiwe(s, message, await acct.signMessage({ message })), null);
 });
 
-test("agent turns are counted per IP per day", () => {
+const W1 = "0x1111111111111111111111111111111111111111";
+const W2 = "0x2222222222222222222222222222222222222222";
+const W3 = "0x3333333333333333333333333333333333333333";
+
+test("a wallet and an IP join one user only when they show up together", () => {
   const s = openStore(":memory:");
-  s.addTurn("1.2.3.4", "2026-11-11");
-  s.addTurn("1.2.3.4", "2026-11-11");
-  s.addTurn("5.6.7.8", "2026-11-11");
-  assert.equal(s.countTurns("1.2.3.4", "2026-11-11"), 2);
-  assert.equal(s.countTurns("1.2.3.4", "2026-11-12"), 0);
-  assert.equal(s.totalTurns("2026-11-11"), 3);
+  s.linkIdentity(W1, "1.1.1.1");          // phone
+  s.linkIdentity(W1, "2.2.2.2");          // same wallet from home
+  s.linkIdentity(W2, "2.2.2.2");          // a second wallet from home
+  s.linkIdentity(W3, "3.3.3.3");          // somebody else
+  const g = s.userOf(W2);
+  assert.deepEqual(g.wallets.sort(), [W1, W2]);
+  assert.deepEqual(g.ips.sort(), ["1.1.1.1", "2.2.2.2"]);
+  assert.deepEqual(s.userOf(W3), { wallets: [W3], ips: ["3.3.3.3"] });
+});
+
+test("questions count for the whole user, including ones asked before two parts were linked", () => {
+  const s = openStore(":memory:");
+  s.linkIdentity(W1, "1.1.1.1");
+  s.linkIdentity(W2, "2.2.2.2");
+  s.addChatTurn(1_000, "1.1.1.1", W1);
+  s.addChatTurn(2_000, "2.2.2.2", W2);
+  assert.equal(s.userTurnsSince(W1, 0), 1);
+  s.linkIdentity(W1, "2.2.2.2");          // now we know it is one person
+  assert.equal(s.userTurnsSince(W1, 0), 2);
+  assert.equal(s.userTurnsSince(W2, 0), 2);
+  assert.equal(s.userTurnsSince(W1, 1_500), 1);
+  s.linkIdentity(W3, "3.3.3.3");
+  assert.equal(s.userTurnsSince(W3, 0), 0);
+  assert.equal(s.allTurnsSince(0), 2);
+});
+
+test("a turn the agent never answered can be taken back", () => {
+  const s = openStore(":memory:");
+  s.linkIdentity(W1, "1.1.1.1");
+  const id = s.addChatTurn(1_000, "1.1.1.1", W1);
+  s.dropChatTurn(id);
+  assert.equal(s.userTurnsSince(W1, 0), 0);
 });
 
 test("a buy request keeps its parameters exactly", () => {
