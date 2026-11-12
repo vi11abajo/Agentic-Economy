@@ -16,6 +16,12 @@ tar -czf - package.json package-lock.json --exclude='*.test.js' dist web deploy 
 
   # pages: replace everything except the wallet test page that already lives there
   find /opt/prosperion/www -mindepth 1 -maxdepth 1 ! -name wallet-test -exec rm -rf {} +
+  # Cloudflare in front of the box turns our "no-cache" on /assets/ into max-age=14400, so a browser can mix
+  # yesterday's shell.js with today's alerts.js and the whole module graph fails to load. Every deploy stamps
+  # its own ?v= on each script and stylesheet the pages and modules ask for; the pages themselves stay no-cache.
+  v=$(date +%s)
+  find "$stage/web" -name "*.html" -exec sed -i -E "s#((src|href)=\"/assets/[a-z]+\.(js|css))\"#\1?v=$v\"#g" {} +
+  find "$stage/web/assets" -name "*.js" -exec sed -i -E "s#from \"\./([a-z]+\.js)\"#from \"./\1?v=$v\"#g" {} +
   cp -r "$stage/web/." /opt/prosperion/www/
 
   if [ ! -f /opt/prosperion/.env ]; then
