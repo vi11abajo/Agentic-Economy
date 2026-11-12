@@ -3,6 +3,11 @@ import { mountShell } from "./shell.js";
 
 mountShell();
 
+// Opens a fresh chat that asks the agent about this vault. Only the address travels in the link: the chat page
+// writes the question itself, so a link someone pastes cannot make your browser ask the agent anything else.
+const askLink = (addr) => `<p class="ask-row"><a class="btn" href="/?vault=${encodeURIComponent(addr)}">Ask the agent about this vault</a>
+  <span class="small muted">Starts a new chat and uses one of your questions for today.</span></p>`;
+
 const perShare = (raw) => (Number(BigInt(raw)) / 1e6).toFixed(6);
 
 const params = new URLSearchParams(location.search);
@@ -40,7 +45,7 @@ async function show(addr) {
   out.innerHTML = `<h1>Vault ${esc(addr)}</h1><p class="muted">Reading the vault's contracts on Pharos...</p>`;
   let p, name;
   try { [p, name] = await Promise.all([api(`/vault/${addr}`), nameOf(addr)]); }
-  catch (e) { out.innerHTML += `<p>${esc(e.message)}</p>`; return; }
+  catch (e) { out.innerHTML += `<p>${esc(e.message)}</p>${askLink(addr)}`; return; }
 
   const total = BigInt(p.totalAssets);
   const onBps = p.verifiableBps;
@@ -48,6 +53,7 @@ async function show(addr) {
   out.innerHTML = `
     <h1>${esc(name)}</h1>
     <p class="lede">NAV ${usdc(total)} USDC, ${perShare(p.navPerShare)} USDC per share. Read at ${blockLink(p.block)}.</p>
+    ${askLink(addr)}
 
     <div class="assay" role="img" aria-label="${(onBps / 100).toFixed(1)} percent can be checked on Pharos, ${(100 - onBps / 100).toFixed(1)} percent is reported by the operator">
       <div class="bar"><div class="on" style="width:${onBps / 100}%"></div><div class="trust" style="width:${100 - onBps / 100}%"></div></div>

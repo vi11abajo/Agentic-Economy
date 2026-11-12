@@ -113,6 +113,7 @@ p { max-width: 68ch; }
 .gate #gate-note.bad { color: var(--bad, #b42318); }
 body.locked .composer { display: none; }
 body.locked .chip { opacity: 0.55; pointer-events: none; }
+.ask-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 0 0 24px; }
 #quota:not(:empty)::after { content: " "; }
 
 .msg { max-width: 100%; overflow-wrap: anywhere; }
