@@ -5,11 +5,11 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { startMcpHttp } from "./mcpHttp.js";
 
 test("the MCP answers over plain HTTP on loopback, the way Hermes will call it", async () => {
-  const srv = await startMcpHttp({ listLaunches: () => [] }, 0);
+  const srv = await startMcpHttp({ listLaunches: () => [], prepareBuy: async () => ({ ok: false, refusal: "test" }) }, 0);
   try {
     const client = new Client({ name: "test", version: "1.0.0" });
     await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${srv.port}/mcp`)));
-    assert.equal((await client.listTools()).tools.length, 9);
+    assert.equal((await client.listTools()).tools.length, 10);
     await client.close();
     const get = await fetch(`http://127.0.0.1:${srv.port}/mcp`);
     assert.equal(get.status, 405);

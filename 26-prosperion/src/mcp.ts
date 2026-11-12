@@ -1,6 +1,7 @@
-// Prosperion's own MCP server: the agent's only way to get Prosper numbers. Everything here is a read, and every
-// answer carries the block it was read at, so the agent can quote the block and cross-check it through the Pharos
-// Chain MCP at that same block. No tool here can build, sign or send a transaction.
+// Prosperion's own MCP server: the agent's only way to get Prosper numbers. Every answer carries the block it was
+// read at, so the agent can quote the block and cross-check it through the Pharos Chain MCP at that same block.
+// One tool writes: prepare_buy saves a request and hands back a link to our sign page. No tool here builds, signs or
+// sends a transaction; the sign page builds it when the visitor's own wallet is about to open.
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { getAddress, isAddress, parseEther, toFunctionSelector, type Address } from "viem";
 import { z } from "zod";
@@ -12,6 +13,7 @@ import { listVaults } from "./prosperApi.js";
 import { rewardUnlock } from "./rewards.js";
 import { readVault } from "./vault.js";
 import { findVault } from "./vaultLookup.js";
+import type { PrepareInput, Prepared } from "./prepare.js";
 
 export interface LaunchRow {
   market: Address;
@@ -22,7 +24,10 @@ export interface LaunchRow {
 }
 export interface McpDeps {
   listLaunches: (limit: number) => LaunchRow[];
+  prepareBuy: (input: PrepareInput) => Promise<Prepared>;
 }
+
+const prosAmount = z.string().regex(/^\d+(\.\d{1,18})?$/);
 
 const addr = z.string().refine(isAddress, "not an address").describe("0x address");
 const blockArg = z.string().regex(/^\d+$/).describe("block number");
@@ -163,6 +168,29 @@ export function createProsperionMcp(deps: McpDeps): McpServer {
       inputSchema: { owner: addr, market: addr },
     },
     async (a) => json(await readPosition(getAddress(a.owner), getAddress(a.market))),
+  );
+
+  server.registerTool(
+    "prepare_buy",
+    {
+      title: "Prepare a first buy for the visitor to sign",
+      description: "Only when the visitor asks to buy into a market and names the PROS amount. owner = the visitor's connected address from the page note, never one typed in the chat. Checks the market again and saves a request; returns a link to the Prosperion sign page, where the visitor's own wallet signs (a one-time limits step, then the buy through the ProsperionGate). The gate reverts if more PROS than maxProsInCurve (default: what is in now) is in the curve when the buy lands. ok=false with a refusal when the market is not genuine, off the curve or already taken.",
+      inputSchema: {
+        market: addr,
+        owner: addr,
+        amountPros: prosAmount.describe("PROS to spend, e.g. \"0.5\""),
+        maxProsInCurve: prosAmount.optional().describe("Go ahead only while at most this much PROS is in the curve"),
+      },
+    },
+    async (a) => {
+      const r = await deps.prepareBuy({
+        market: getAddress(a.market), owner: getAddress(a.owner), amountWei: parseEther(a.amountPros),
+        maxReserveBeforeWei: a.maxProsInCurve === undefined ? undefined : parseEther(a.maxProsInCurve), source: "agent",
+      });
+      return json(r.ok
+        ? { ok: true, url: r.url, block: r.check?.block, prosInCurve: r.check?.reserveBefore, note: "Give the visitor this link. Their own wallet signs on that page; nothing has been sent." }
+        : { ok: false, refusal: r.refusal, block: r.check?.block });
+    },
   );
 
   return server;

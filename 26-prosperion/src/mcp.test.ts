@@ -4,8 +4,9 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createProsperionMcp } from "./mcp.js";
 
+const prepared: any[] = [];
 async function connect() {
-  const server = createProsperionMcp({ listLaunches: () => [] });
+  const server = createProsperionMcp({ listLaunches: () => [], prepareBuy: async (i: any) => (prepared.push(i), { ok: true, id: "abc", url: "https://x/sign/?r=abc" }) });
   const [a, b] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "test", version: "1.0.0" });
   await Promise.all([server.connect(a), client.connect(b)]);
@@ -13,11 +14,11 @@ async function connect() {
 }
 const body = (r: any) => JSON.parse(r.content[0].text);
 
-test("the agent sees exactly our nine read-only tools", async () => {
+test("the agent sees our nine reads plus one tool that only prepares a link for the visitor to sign", async () => {
   const c = await connect();
   const names = (await c.listTools()).tools.map((t) => t.name).sort();
   assert.deepEqual(names, [
-    "list_vaults", "market_check", "nav_move", "oracle_freshness", "position", "protocol_map",
+    "list_vaults", "market_check", "nav_move", "oracle_freshness", "position", "prepare_buy", "protocol_map",
     "recent_launches", "reward_unlock", "vault_picture",
   ]);
 });
@@ -73,4 +74,17 @@ test("market_check hands over the exact eth_call for the reserve cross-check", a
   const c = await connect();
   const r = body(await c.callTool({ name: "market_check", arguments: { market: "0x94228eb493173e75a12e76e667bfe9b0939aae64", amountIn: "1" } }));
   assert.deepEqual(r.crossCheck, [{ what: "market realWrappedNativeReserve()", to: r.market, data: "0x0172d417", block: r.block, expect: r.reserveBefore }]);
+});
+
+test("prepare_buy hands back a sign link and never a transaction", async () => {
+  const c = await connect();
+  const r = body(await c.callTool({ name: "prepare_buy", arguments: {
+    market: "0x94228eb493173e75a12e76e667bfe9b0939aae64", owner: "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb", amountPros: "0.25",
+  } }));
+  assert.equal(r.url, "https://x/sign/?r=abc");
+  assert.equal(r.data, undefined);
+  const sent = prepared.at(-1);
+  assert.equal(sent.amountWei, 25n * 10n ** 16n);
+  assert.equal(sent.source, "agent");
+  assert.equal(sent.owner, "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb");
 });

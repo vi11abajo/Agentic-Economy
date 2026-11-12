@@ -11,6 +11,7 @@ import { client } from "./chain.js";
 import { checkMarket } from "./market.js";
 import { startMcpHttp } from "./mcpHttp.js";
 import { explainNavMove } from "./navmove.js";
+import { prepareBuy } from "./prepare.js";
 import { openStore, type Launch } from "./store.js";
 import { listVaults } from "./prosperApi.js";
 import { pollTelegram, telegramChannel } from "./telegram.js";
@@ -55,7 +56,7 @@ const api = createApi({
 });
 createServer(api).listen(API_PORT, "127.0.0.1", () => console.log(`[api] 127.0.0.1:${API_PORT}`));
 
-await startMcpHttp({ listLaunches: (n) => store.listLaunches(n) }, MCP_PORT);
+await startMcpHttp({ listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i) }, MCP_PORT);
 console.log(`[mcp] 127.0.0.1:${MCP_PORT}/mcp`);
 
 // The quote in an alert uses the biggest per-buy limit anyone set, so the number means something.
