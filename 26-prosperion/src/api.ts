@@ -4,11 +4,12 @@
 // (someone bought first, the market code was upgraded, it left the curve), the answer is a refusal in words and no tx.
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
-import { encodeFunctionData, getAddress, isAddress, parseAbi, type Address, type Hex } from "viem";
+import { encodeFunctionData, getAddress, isAddress, parseAbi, parseEther, type Address, type Hex } from "viem";
 import { SESSION_COOKIE, SESSION_TTL_MS, newNonce, sessionCookie, verifySiwe } from "./auth.js";
 import type { ChatMessage, WalletEnv } from "./agent.js";
 import type { MarketCheck } from "./market.js";
 import type { Store } from "./store.js";
+import { prepareBuy, refusalFor } from "./prepare.js";
 
 export const GATE_ABI = parseAbi([
   "function buy(address market, uint256 minOut, uint256 deadline) payable returns (uint256)",
@@ -64,18 +65,18 @@ const clientIp = (req: IncomingMessage) =>
 const cookie = (req: IncomingMessage, name: string) =>
   (req.headers.cookie ?? "").split(/;\s*/).find((c) => c.startsWith(`${name}=`))?.slice(name.length + 1);
 
-/** Why a buy request should not go ahead right now, in plain words; undefined if it may. */
-export function refusalFor(c: MarketCheck, maxReserveBeforeWei: bigint, acceptedImpl: string): string | undefined {
-  if (!c.genuine) return "Not a Prosper market: the factory does not list it.";
-  if (c.phase !== 0) return `The market left the curve (phase ${c.phase}); there is nothing to be first into.`;
-  if (c.reserveBefore > maxReserveBeforeWei)
-    return `No longer first: ${Number(c.reserveBefore) / 1e18} PROS is already in the curve, your limit was ${Number(maxReserveBeforeWei) / 1e18}.`;
-  if (c.implNow.toLowerCase() !== acceptedImpl.toLowerCase())
-    return `Market code changed since the alert (now ${c.implNow}). Read what changed before agreeing to it again.`;
-  return undefined;
-}
+export { refusalFor };
 
 export function createApi(d: ApiDeps) {
+  // "Prepare first buy" only writes a row, but rows are still rows: a few a minute per wallet is plenty for a person.
+  const prepares = new Map<string, number[]>();
+  const tooManyPrepares = (me: Address) => {
+    const t = d.now(), key = me.toLowerCase();
+    const recent = (prepares.get(key) ?? []).filter((x) => x > t - 60);
+    if (recent.length >= 10) return true;
+    prepares.set(key, [...recent, t]);
+    return false;
+  };
   // A person's turn that is still streaming. Keyed by the group's first wallet, so the same person asking from
   // the laptop while the phone's question runs gets told to wait instead of doubling the load.
   const inFlight = new Set<string>();
@@ -230,6 +231,17 @@ export function createApi(d: ApiDeps) {
           });
           return send(res, 200, d.store.watchesFor(me)[0]);
         }
+      }
+      // The Launches page's "Prepare first buy": always for the signed-in wallet, whatever the body says.
+      if (req.method === "POST" && path === "/prepare") {
+        const me = signedIn(req);
+        if (!me) return send(res, 401, { error: "Connect your wallet first: the buy is prepared for that wallet." });
+        const b = await readJson(req);
+        if (typeof b.market !== "string" || !isAddress(b.market)) return send(res, 400, { error: "market must be an address" });
+        if (typeof b.amountPros !== "string" || !/^\d+(\.\d{1,18})?$/.test(b.amountPros)) return send(res, 400, { error: "amountPros must be a number like 0.5" });
+        if (tooManyPrepares(me)) return send(res, 429, { error: "Ten buys prepared this minute. Wait a moment." });
+        const r = await prepareBuy(d.store, d.check, { market: getAddress(b.market), owner: me, amountWei: parseEther(b.amountPros), source: "page" });
+        return r.ok ? send(res, 200, { url: r.url, check: r.check }) : send(res, 409, { error: r.refusal, check: r.check });
       }
       if (req.method === "GET" && path === "/alerts") return send(res, 200, { bot: d.telegramBot() });
       if (req.method === "POST" && path === "/telegram/link") {
