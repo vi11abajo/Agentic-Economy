@@ -159,6 +159,7 @@ a minute.
 |---|---|
 | ProsperionGate | [`0xd5dB1B4eA7E98Bf57a0d16Bac547f74F727c71F9`](https://www.pharosscan.xyz/address/0xd5dB1B4eA7E98Bf57a0d16Bac547f74F727c71F9) |
 | Deployed | block 22,778,399, [tx](https://www.pharosscan.xyz/tx/0x14178d2d0ace9a458ea74d7181cdca26998fa5a30a9a19ec52e26c2b9c4f5121) |
+| Source | [verified on pharosscan](https://www.pharosscan.xyz/address/0xd5dB1B4eA7E98Bf57a0d16Bac547f74F727c71F9#code), exact match: solc 0.8.24, optimizer 200 runs, EVM cancun |
 | Prosper factory (pinned) | [`0xEfdbb0eA7647B0e21AEf7A3b7a5D6A632c3116C8`](https://www.pharosscan.xyz/address/0xEfdbb0eA7647B0e21AEf7A3b7a5D6A632c3116C8) |
 | Prosper market beacon (pinned) | [`0x30BeBe432fF53c9B6ED28Dd9DAf125902CbABB56`](https://www.pharosscan.xyz/address/0x30BeBe432fF53c9B6ED28Dd9DAf125902CbABB56) |
 
@@ -184,6 +185,12 @@ forge test --fork-url https://rpc.pharos.xyz --fork-block-number <latest block -
 
 ```bash
 cd contracts && forge script script/Deploy.s.sol --rpc-url https://rpc.pharos.xyz --broadcast --interactive
+```
+
+Then publish its source on pharosscan. The constructor arguments are Prosper's factory and market beacon:
+
+```bash
+forge verify-contract <gate address> src/ProsperionGate.sol:ProsperionGate --chain-id 1672 --verifier blockscout --verifier-url https://api.socialscan.io/pharos-mainnet/v1/explorer/command_api/contract --constructor-args $(cast abi-encode "constructor(address,address)" 0xEfdbb0eA7647B0e21AEf7A3b7a5D6A632c3116C8 0x30BeBe432fF53c9B6ED28Dd9DAf125902CbABB56) --watch
 ```
 
 **3. Prepare the server.**
