@@ -1,10 +1,10 @@
-import { $, esc, walletEnv } from "./app.js";
+import { $, api, esc, walletEnv } from "./app.js";
 import { mountShell, ICONS, whoAmI, connectWallet, signedOut } from "./shell.js";
 
 mountShell();
 $("#send").innerHTML = ICONS.send;
 
-// ---- the conversation lives in this tab: it survives a trip to the Vaults page, and "New Chat" starts over.
+// ---- the conversation lives in this tab: it survives a trip to the Vaults page; "Ask the agent" on a vault starts over.
 const SAVE = "ps_thread";
 const history = (() => { try { return JSON.parse(sessionStorage.getItem(SAVE) || "[]"); } catch { return []; } })();
 const keep = () => { try { sessionStorage.setItem(SAVE, JSON.stringify(history)); } catch {} };
@@ -32,11 +32,42 @@ function showQuota() {
 document.addEventListener("prosperion:me", (e) => applyMe(e.detail));
 applyMe(me);
 whoAmI().then(applyMe);
+// ---- "Ask the agent about this vault" lands here as /?vault=<address>. Only an address is accepted and the
+// question is written here, so a pasted link cannot spend someone's questions on a prompt of its own.
+// The parameter is dropped from the address bar at once, or a reload would ask again.
+const fromVault = (() => {
+  const v = new URLSearchParams(location.search).get("vault");
+  if (location.search) window.history.replaceState(null, "", location.pathname);
+  return v && /^0x[0-9a-fA-F]{40}$/.test(v) ? v : null;
+})();
+let pendingAsk = null;
+if (fromVault) {
+  history.length = 0;
+  keep();
+  pendingAsk = api("/vaults").catch(() => []).then((list) => {
+    const name = list.find((x) => String(x.r25Vault).toLowerCase() === fromVault.toLowerCase())?.vaultName?.trim();
+    return `What is really behind ${name ? `${name}'s` : "this vault's"} NAV right now? Vault ${fromVault}.`;
+  });
+  $("#gate-note").textContent = "Sign in and your question about this vault goes out right away. Signing is one message, not a transaction.";
+}
+async function sendPending() {
+  if (!pendingAsk || !me.address) return;
+  // taken before the await: the sign-in event and the /api/me answer can both land here, and it goes out once
+  const waiting = pendingAsk;
+  pendingAsk = null;
+  const q = await waiting;
+  input.value = q;
+  fit();
+  $("#ask-form").requestSubmit();
+}
+document.addEventListener("prosperion:me", () => sendPending());
+whoAmI().then(() => sendPending());
+
 $("#gate-connect").addEventListener("click", async () => {
   const note = $("#gate-note");
   note.classList.remove("bad");
   note.textContent = "Check your wallet: it asks you to sign one message.";
-  try { await connectWallet(); note.textContent = LOCK_NOTE; $("#ask-input").focus(); }
+  try { await connectWallet(); note.textContent = LOCK_NOTE; if (!pendingAsk) $("#ask-input").focus(); }
   catch (e) { note.classList.add("bad"); note.textContent = e.message; }
 });
 
