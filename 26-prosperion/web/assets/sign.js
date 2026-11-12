@@ -1,6 +1,6 @@
-// The page a launch alert links to. Everything here is re-checked on load: the alert is a few minutes old
-// at best, and a launch that was empty then may have buyers now. If the server says no, we show why and
-// offer no button at all.
+// The page every buy link opens: from a Telegram alert, the Launches page or the agent in the chat. Everything
+// here is re-checked on load: the link may be minutes old, and a launch that was empty then may have buyers now.
+// If the server says no, we show why and offer no button at all.
 import { $, api, esc, pros, blockLink, addrLink, walletEnv, walletLinks, connect, ensurePharos, EXPLORER } from "./app.js";
 import { sendOne } from "./wallet.js";
 import { mountShell } from "./shell.js";
@@ -22,12 +22,14 @@ async function load() {
   const p = r.request.params;
   const c = r.freshCheck;
   const amount = BigInt(p.amountWei);
+  // older links carry no source; they all came from alerts
+  const madeBy = { agent: "Prepared by the agent", page: "Prepared on the Launches page" }[p.source] ?? "Alert sent";
   const head = `<h1>Buy into a fresh Prosper launch</h1>
-    <p class="lede">Market ${addrLink(p.market)}${c?.pToken ? `, token ${addrLink(c.pToken)}` : ""}. Alert sent at ${blockLink(r.request.createdBlock)}${c ? `, checked again at ${blockLink(c.block)}` : ""}.</p>`;
+    <p class="lede">Market ${addrLink(p.market)}${c?.pToken ? `, token ${addrLink(c.pToken)}` : ""}. ${madeBy} at ${blockLink(r.request.createdBlock)}${c ? `, checked again at ${blockLink(c.block)}` : ""}.</p>`;
 
   if (r.refusal) {
     out.innerHTML = `${head}<div class="panel refusal"><strong>Not signing this one.</strong><p>${esc(r.refusal)}</p>
-      <p class="small muted">Nothing was sent and nothing is waiting for you. The next launch that passes the checks will come as a new alert.</p></div>`;
+      <p class="small muted">Nothing was sent and nothing is waiting for you. <a href="/launches/">Launches</a> shows which markets are still open.</p></div>`;
     return;
   }
 
@@ -37,7 +39,7 @@ async function load() {
 
   out.innerHTML = `${head}
     <div class="panel ok">
-      <p>${BigInt(c.reserveBefore) === 0n ? "Still nobody ahead of you: the curve is empty." : `${pros(c.reserveBefore)} PROS is in the curve now, within your limit of ${pros(p.maxReserveBeforeWei)}.`} The market is a genuine Prosper one and its code has not changed since the alert.</p>
+      <p>${BigInt(c.reserveBefore) === 0n ? "Still nobody ahead of you: the curve is empty." : `${pros(c.reserveBefore)} PROS is in the curve now, within your limit of ${pros(p.maxReserveBeforeWei)}.`} The market is a genuine Prosper one and its code has not changed since this link was made.</p>
       <p class="bigamount">${pros(amount)} PROS</p>
       <p class="small muted">That is the amount your wallet will ask you to send. Some wallets (OKX) show only the total; check it matches.</p>
     </div>
@@ -63,7 +65,7 @@ async function load() {
       const me = await connect(p0);
       $("#who").textContent = `Connected: ${me}`;
       if (me.toLowerCase() !== String(p.owner).toLowerCase()) {
-        $("#who").innerHTML = `Connected ${esc(me)}, but this alert was made for ${esc(p.owner)}. Switch accounts in your wallet and press the button again.`;
+        $("#who").innerHTML = `Connected ${esc(me)}, but this link was made for ${esc(p.owner)}. Switch accounts in your wallet and press the button again.`;
         go.disabled = false;
         return;
       }
@@ -77,7 +79,7 @@ async function load() {
         st.innerHTML = `Done: ${txLink(hash)}`;
         li.className = "done";
       }
-      act.innerHTML = `<p><strong>Bought.</strong> The tokens are in your wallet; the agent's notes on this launch are in your Telegram.</p>`;
+      act.innerHTML = `<p><strong>Bought.</strong> The tokens are in your wallet.${p.source === "alert" || !p.source ? " The agent's notes on this launch are in your Telegram." : ` <a href="/">Ask the agent</a> about your position.`}</p>`;
     } catch (e) {
       $("#who").textContent = e.message || String(e);
       go.disabled = false;
