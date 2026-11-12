@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { chatAgent, ROLE_NOTE } from "./agent.js";
+import { chatAgent, ROLE_NOTE, siteNote } from "./agent.js";
 
 // What actually leaves for Hermes: grab the body instead of calling the network.
-async function sentBody(messages: unknown[], sessionKey = "t"): Promise<{ messages: { role: string; content: string }[] }> {
+async function sentBody(messages: unknown[], sessionKey = "t", bot: string | null = null): Promise<{ messages: { role: string; content: string }[] }> {
   const real = globalThis.fetch;
   let body = "";
   globalThis.fetch = (async (_url: unknown, init: { body: string }) => {
@@ -11,7 +11,7 @@ async function sentBody(messages: unknown[], sessionKey = "t"): Promise<{ messag
     return new Response("data: [DONE]\n\n", { status: 200 });
   }) as typeof fetch;
   try {
-    await chatAgent(messages as never, {}, sessionKey);
+    await chatAgent(messages as never, {}, sessionKey, undefined, bot);
   } finally {
     globalThis.fetch = real;
   }
@@ -47,4 +47,15 @@ test("two chats that open with the same question still get different Hermes sess
   const a = await sentBody(q, "web-0xaaa-chat1");
   const b = await sentBody(q, "web-0xbbb-chat2");
   assert.notEqual(a.messages[0].content, b.messages[0].content);
+});
+
+// A visitor asked "can you send alerts?" and the agent said no such thing exists. The site has an Alerts page;
+// whether it works depends on this copy having its own Telegram bot, and the agent has to know which it is.
+test("the agent knows the site's pages and whether this copy can send Telegram alerts", async () => {
+  const none = (await sentBody([{ role: "user", content: "can you send me alerts?" }], "t", null)).messages[0].content;
+  const some = (await sentBody([{ role: "user", content: "can you send me alerts?" }], "t", "my_prosperion_bot")).messages[0].content;
+  for (const s of [none, some]) assert.ok(s.includes("/alerts/") && s.includes("/launches/") && s.includes("/vault/"));
+  assert.match(none, /no Telegram bot/i);
+  assert.match(some, /@my_prosperion_bot/);
+  assert.equal(siteNote("x"), siteNote("x"));
 });

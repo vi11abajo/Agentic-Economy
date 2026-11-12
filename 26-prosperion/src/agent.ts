@@ -34,6 +34,24 @@ export const ROLE_NOTE = [
   "Reply in the visitor's language.",
 ].join(" ");
 
+// What the rest of the site does, so the agent can send people there instead of saying a feature does not exist.
+// Alerts depend on this copy having its own Telegram bot; the server knows, and the agent is told which it is.
+export function siteNote(telegramBot: string | null): string {
+  return [
+    "The Prosperion site around this chat:",
+    "/vault/ lists Prosper vaults; a vault's page splits its NAV into what can be checked on Pharos and what the",
+    "operator reports, shows how fresh its prices are, and explains why NAV per share moved between two blocks.",
+    "/launches/ lists new Prosper launches with the checks each one passed or failed.",
+    "/alerts/ is where a visitor signs in, sets how much PROS they would put into a fresh launch and how much may",
+    "already be in its curve, and links Telegram; when a launch passes the checks they get its facts and a link to",
+    "a page where they sign one buy themselves.",
+    telegramBot
+      ? `This copy's Telegram bot is @${telegramBot}, so alerts work once a visitor links it on /alerts/.`
+      : "This copy runs with no Telegram bot, so it sends no alerts; anyone running their own copy with their own bot gets them (the README has the steps). New launches still show up on /launches/.",
+    "You do not send messages yourself: alerts come from the site, and you answer here when asked.",
+  ].join(" ");
+}
+
 export function walletNote(env: WalletEnv): string {
   const where = env.inWalletBrowser
     ? `inside the ${env.inWalletBrowser} wallet's own browser on a phone`
@@ -57,7 +75,9 @@ const clean = (msgs: ChatMessage[]): ChatMessage[] =>
     .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }));
 
 /** Streams a chat turn from Hermes. Throws if Hermes cannot be reached. */
-export async function chatAgent(messages: ChatMessage[], env: WalletEnv, sessionKey: string, signal?: AbortSignal): Promise<Response> {
+export async function chatAgent(
+  messages: ChatMessage[], env: WalletEnv, sessionKey: string, signal?: AbortSignal, telegramBot: string | null = null,
+): Promise<Response> {
   const res = await fetch(`${HERMES_URL}/v1/chat/completions`, {
     method: "POST",
     headers: {
@@ -71,7 +91,7 @@ export async function chatAgent(messages: ChatMessage[], env: WalletEnv, session
       // Hermes names a header-less session sha256(system prompt + first question) and runs one turn at a time per
       // session, so the chat's own key goes in here: otherwise two visitors who both click the same chip share
       // one session and the second waits for the first.
-      messages: [{ role: "system", content: `${ROLE_NOTE}\n\n${walletNote(env)}\n\nChat: ${sessionKey}` }, ...clean(messages)],
+      messages: [{ role: "system", content: `${ROLE_NOTE}\n\n${siteNote(telegramBot)}\n\n${walletNote(env)}\n\nChat: ${sessionKey}` }, ...clean(messages)],
     }),
     signal,
   });
