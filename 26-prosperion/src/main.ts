@@ -48,7 +48,8 @@ const api = createApi({
   explainNavMove,
   agent: chatAgent,
   telegramBot: () => botName,
-  perMinute: Number(env.CHAT_PER_MINUTE ?? 20),
+  perMinute: Number(env.CHAT_PER_MINUTE ?? 3),
+  userDaily: Number(env.USER_DAILY_TURNS ?? 30),
   dailyCap: Number(env.AGENT_DAILY_CAP ?? 300),
   now: () => Math.floor(Date.now() / 1000),
 });

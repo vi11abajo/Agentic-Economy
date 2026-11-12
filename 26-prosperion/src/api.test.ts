@@ -5,6 +5,7 @@ import type { AddressInfo } from "node:net";
 import { decodeFunctionData } from "viem";
 import { createApi, GATE_ABI, type ApiDeps } from "./api.js";
 import { openStore } from "./store.js";
+import { SESSION_COOKIE, SESSION_TTL_MS } from "./auth.js";
 import type { MarketCheck } from "./market.js";
 
 const MARKET = "0x94228EB493173E75a12e76E667bfe9b0939aae64";
@@ -31,6 +32,7 @@ async function serve(over: Partial<ApiDeps> = {}) {
     agent: async () => new Response("data: {\"choices\":[{\"delta\":{\"content\":\"hi\"}}]}\n\ndata: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } }),
     telegramBot: () => null,
     perMinute: 20,
+    userDaily: 30,
     dailyCap: 300,
     now: () => 1_800_000_000,
     ...over,
@@ -95,24 +97,125 @@ test("an unknown request id is a 404", async () => {
   try { assert.equal((await fetch(`${s.base}/api/req/nope`)).status, 404); } finally { await s.close(); }
 });
 
-test("the open chat stops one IP after 20 messages a minute", async () => {
+// A signed-in wallet asking from an IP, the way the page does it after Connect Wallet.
+const W_A = "0xaAaAaAaaAaAaAaaAaAAAAAAAAaaaAaAaAaaAaaAa";
+const W_B = "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB";
+const W_C = "0xcCCccccCcCcCcCCCCccCCcCCCcccCccCCcCcCcCc";
+const asker = (s: { base: string; store: ReturnType<typeof openStore> }) => {
+  const cookies = new Map<string, string>();
+  return (wallet: string | null, ip: string, extra: Record<string, unknown> = {}) => {
+    if (wallet && !cookies.has(wallet)) cookies.set(wallet, `${SESSION_COOKIE}=${s.store.newSession(wallet as `0x${string}`, SESSION_TTL_MS)}`);
+    return fetch(`${s.base}/api/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-real-ip": ip, ...(wallet ? { cookie: cookies.get(wallet)! } : {}) },
+      body: JSON.stringify({ messages: [{ role: "user", content: "hi" }], env: {}, ...extra }),
+    });
+  };
+};
+
+test("the chat stays closed until a wallet signs in", async () => {
   const s = await serve();
   try {
-    const send = () => fetch(`${s.base}/api/chat`, { method: "POST", headers: { "content-type": "application/json", "x-real-ip": "9.9.9.9" },
-      body: JSON.stringify({ messages: [{ role: "user", content: "hi" }], env: {} }) });
-    for (let i = 0; i < 20; i++) assert.equal((await send()).status, 200);
-    assert.equal((await send()).status, 429);
+    const r = await asker(s)(null, "9.9.9.9");
+    assert.equal(r.status, 401);
+    assert.match((await r.json()).error, /connect your wallet/i);
   } finally { await s.close(); }
 });
 
-test("with the agent down, chat says so and the chain pages keep working", async () => {
-  const s = await serve({ agent: async () => { throw Object.assign(new Error("connect ECONNREFUSED 127.0.0.1:8642"), { code: "ECONNREFUSED" }); } });
+test("one person's daily limit holds across their wallets and their IPs, and strangers keep theirs", async () => {
+  const s = await serve({ userDaily: 2 });
+  const ask = asker(s);
   try {
-    const chat = await fetch(`${s.base}/api/chat`, { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages: [{ role: "user", content: "hi" }], env: {} }) });
-    assert.equal(chat.status, 503);
-    assert.match((await chat.json()).error, /agent unavailable/i);
+    assert.equal((await ask(W_A, "1.1.1.1")).status, 200);   // phone
+    assert.equal((await ask(W_A, "2.2.2.2")).status, 200);   // same wallet at home
+    const third = await ask(W_A, "1.1.1.1");
+    assert.equal(third.status, 429);
+    assert.match((await third.json()).error, /today/i);
+    assert.equal((await ask(W_B, "2.2.2.2")).status, 429);   // another wallet from that home IP is the same person
+    assert.equal((await ask(W_C, "3.3.3.3")).status, 200);   // somebody else entirely
+  } finally { await s.close(); }
+});
+
+test("one person gets a few questions a minute, not more", async () => {
+  const s = await serve({ perMinute: 2, userDaily: 100 });
+  const ask = asker(s);
+  try {
+    assert.equal((await ask(W_A, "1.1.1.1")).status, 200);
+    assert.equal((await ask(W_A, "2.2.2.2")).status, 200);
+    const r = await ask(W_A, "1.1.1.1");
+    assert.equal(r.status, 429);
+    assert.match((await r.json()).error, /minute/i);
+  } finally { await s.close(); }
+});
+
+test("one question at a time per person", async () => {
+  let release!: () => void;
+  const held = new Promise<void>((r) => { release = r; });
+  const s = await serve({
+    agent: async () => new Response(new ReadableStream({
+      start(c) { held.then(() => { c.enqueue(new TextEncoder().encode("data: [DONE]\n\n")); c.close(); }); },
+    }), { headers: { "content-type": "text/event-stream" } }),
+  });
+  const ask = asker(s);
+  try {
+    const first = await ask(W_A, "1.1.1.1");
+    assert.equal(first.status, 200);
+    const second = await ask(W_A, "2.2.2.2");
+    assert.equal(second.status, 429);
+    assert.match((await second.json()).error, /one question at a time/i);
+    release();
+    await first.text();
+    assert.equal((await ask(W_A, "2.2.2.2")).status, 200);
+  } finally { release(); await s.close(); }
+});
+
+test("the agent is told the signed-in wallet, not whatever address the page sends", async () => {
+  let seen: any;
+  const s = await serve({ agent: async (_m, env) => { seen = env; return new Response("data: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } }); } });
+  try {
+    await (await asker(s)(W_A, "1.1.1.1", { env: { address: W_B } })).text();
+    assert.equal(seen.address, W_A);
+  } finally { await s.close(); }
+});
+
+test("a question the agent never answered does not count", async () => {
+  let down = true;
+  const s = await serve({
+    userDaily: 1,
+    agent: async () => {
+      if (down) throw Object.assign(new Error("connect ECONNREFUSED 127.0.0.1:8642"), { code: "ECONNREFUSED" });
+      return new Response("data: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } });
+    },
+  });
+  const ask = asker(s);
+  try {
+    const r = await ask(W_A, "1.1.1.1");
+    assert.equal(r.status, 503);
+    assert.match((await r.json()).error, /agent unavailable/i);
     assert.equal((await fetch(`${s.base}/api/vault/0x3ed49843a55952a399db99c8949f67a9d821611c`)).status, 200);
+    down = false;
+    assert.equal((await ask(W_A, "1.1.1.1")).status, 200);
+  } finally { await s.close(); }
+});
+
+test("the page can ask who is signed in and how many questions are left today", async () => {
+  const s = await serve({ userDaily: 5 });
+  const ask = asker(s);
+  try {
+    assert.deepEqual(await (await fetch(`${s.base}/api/me`)).json(), { address: null });
+    await (await ask(W_A, "1.1.1.1")).text();
+    const cookie = `${SESSION_COOKIE}=${s.store.newSession(W_A, SESSION_TTL_MS)}`;
+    const me = await (await fetch(`${s.base}/api/me`, { headers: { cookie, "x-real-ip": "1.1.1.1" } })).json();
+    assert.deepEqual(me, { address: W_A, used: 1, dailyLimit: 5 });
+  } finally { await s.close(); }
+});
+
+test("the agent's answer lands in the decisions log, the way Hermes really spaces its JSON", async () => {
+  const frame = (t: string) => `data: {"choices": [{"index": 0, "delta": {"content": ${JSON.stringify(t)}}}]}\n\n`;
+  const s = await serve({ agent: async () => new Response(frame("Backed by ") + frame("\"real\" carry.") + "data: [DONE]\n\n", { headers: { "content-type": "text/event-stream" } }) });
+  try {
+    await (await asker(s)(W_A, "1.1.1.1")).text();
+    assert.equal(s.store.decisions(5)[0]?.reason, 'Backed by "real" carry.');
   } finally { await s.close(); }
 });
 

@@ -1,5 +1,5 @@
-// Prosperion's HTTP API, behind nginx at /api/. Reads are open; watches need a signed-in address; chat is open but
-// rate limited. The important one is /api/req/:id: a push link opens the sign page, the page asks here, and we
+// Prosperion's HTTP API, behind nginx at /api/. Reads are open; watches and the chat need a signed-in address.
+// Chat limits belong to a person, not to an IP or a wallet: see store.linkIdentity. The important one is /api/req/:id: a push link opens the sign page, the page asks here, and we
 // re-check the market at the current block before handing back a transaction. If anything changed since the alert
 // (someone bought first, the market code was upgraded, it left the curve), the answer is a refusal in words and no tx.
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -33,7 +33,11 @@ export interface ApiDeps {
   agent: (messages: ChatMessage[], env: WalletEnv, sessionKey: string, signal?: AbortSignal) => Promise<Response>;
   /** The bot's username, or null when whoever runs this copy has not set up their own bot (then no alerts go out). */
   telegramBot: () => string | null;
+  /** questions one person (their linked wallets and IPs) may ask per minute */
   perMinute: number;
+  /** questions one person may ask per UTC day */
+  userDaily: number;
+  /** questions everyone together may ask per UTC day: the model bill's ceiling */
   dailyCap: number;
   /** unix seconds; injectable for tests */
   now: () => number;
@@ -72,13 +76,11 @@ export function refusalFor(c: MarketCheck, maxReserveBeforeWei: bigint, accepted
 }
 
 export function createApi(d: ApiDeps) {
-  const minute = new Map<string, { n: number; start: number }>();
-  const overMinute = (ip: string) => {
-    const now = Date.now();
-    const b = minute.get(ip);
-    if (!b || now - b.start > 60_000) { minute.set(ip, { n: 1, start: now }); return false; }
-    return ++b.n > d.perMinute;
-  };
+  // A person's turn that is still streaming. Keyed by the group's first wallet, so the same person asking from
+  // the laptop while the phone's question runs gets told to wait instead of doubling the load.
+  const inFlight = new Set<string>();
+  const personKey = (me: Address) => d.store.userOf(me).wallets.map((w) => w.toLowerCase()).sort()[0] ?? me.toLowerCase();
+  const startOfDay = () => { const t = d.now(); return t - (t % 86_400); };
   const signedIn = (req: IncomingMessage) => {
     const t = cookie(req, SESSION_COOKIE);
     return t ? d.store.sessionAddress(t) : null;
@@ -145,37 +147,63 @@ export function createApi(d: ApiDeps) {
       if (req.method === "GET" && path === "/launches") return send(res, 200, d.store.listLaunches(30));
       if (req.method === "GET" && path === "/decisions") return send(res, 200, d.store.decisions(50));
 
+      if (req.method === "GET" && path === "/me") {
+        const me = signedIn(req);
+        if (!me) return send(res, 200, { address: null });
+        d.store.linkIdentity(me, ip);
+        return send(res, 200, { address: me, used: d.store.userTurnsSince(me, startOfDay()), dailyLimit: d.userDaily });
+      }
+
       if (req.method === "POST" && path === "/chat") {
-        if (overMinute(ip)) return send(res, 429, { error: "Too many messages from you this minute. Give it a moment." });
-        const day = new Date(d.now() * 1000).toISOString().slice(0, 10);
-        if (d.store.totalTurns(day) >= d.dailyCap) return send(res, 429, { error: "The agent's daily budget is used up. The chain pages still work." });
+        const me = signedIn(req);
+        if (!me) return send(res, 401, { error: "Connect your wallet to work with Prosperion." });
+        d.store.linkIdentity(me, ip);
+        const now = d.now();
+        if (d.store.userTurnsSince(me, now - 60) >= d.perMinute)
+          return send(res, 429, { error: "That is enough questions for this minute. Give it a moment." });
+        if (d.store.userTurnsSince(me, startOfDay()) >= d.userDaily)
+          return send(res, 429, { error: `You have asked ${d.userDaily} questions today, the daily limit. It resets at 00:00 UTC.` });
+        if (d.store.allTurnsSince(startOfDay()) >= d.dailyCap)
+          return send(res, 429, { error: "The agent's daily budget is used up. The vault and launch pages still work." });
+        const who = personKey(me);
+        if (inFlight.has(who)) return send(res, 429, { error: "One question at a time: the agent is still answering your last one." });
         const body = await readJson(req);
         const messages: ChatMessage[] = Array.isArray(body.messages) ? body.messages : [];
         if (!messages.length) return send(res, 400, { error: "no messages" });
         const chatId = typeof body.chatId === "string" && /^[\w-]{8,64}$/.test(body.chatId) ? body.chatId : randomUUID();
-        let upstream: Response;
+        // The wallet the agent hears about is the one that signed in, whatever the page claims.
+        const env = { ...((body.env ?? {}) as WalletEnv), address: me };
+        inFlight.add(who);
+        const turn = d.store.addChatTurn(now, ip, me);
         try {
-          upstream = await d.agent(messages, (body.env ?? {}) as WalletEnv, `web-${chatId}`);
-        } catch (e) {
-          return send(res, 503, { error: `Agent unavailable right now (${(e as Error).message}). Vault and market pages still work.` });
-        }
-        d.store.addTurn(ip, day);
-        res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", "x-accel-buffering": "no" });
-        const reader = upstream.body!.getReader();
-        let text = "";
-        const dec = new TextDecoder();
-        for (;;) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          res.write(value);
-          for (const m of dec.decode(value, { stream: true }).matchAll(/"content":"((?:[^"\\]|\\.)*)"/g)) {
-            try { text += JSON.parse(`"${m[1]}"`); } catch { /* partial frame */ }
+          let upstream: Response;
+          try {
+            upstream = await d.agent(messages, env, `web-${me.toLowerCase()}-${chatId}`);
+          } catch (e) {
+            d.store.dropChatTurn(turn);
+            return send(res, 503, { error: `Agent unavailable right now (${(e as Error).message}). Vault and market pages still work.` });
           }
+          res.writeHead(200, { "content-type": "text/event-stream", "cache-control": "no-store", "x-accel-buffering": "no" });
+          res.flushHeaders(); // the page knows the turn was accepted before the agent says its first word
+          const reader = upstream.body!.getReader();
+          let text = "";
+          const dec = new TextDecoder();
+          for (;;) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            res.write(value);
+            // Hermes writes "content": "..." with a space after the colon.
+            for (const m of dec.decode(value, { stream: true }).matchAll(/"content":\s*"((?:[^"\\]|\\.)*)"/g)) {
+              try { text += JSON.parse(`"${m[1]}"`); } catch { /* partial frame */ }
+            }
+          }
+          res.end();
+          const asked = String(messages[messages.length - 1]?.content ?? "").slice(0, 120);
+          if (text) d.store.logDecision({ at: Date.now(), kind: "verdict", subject: asked, reason: text.slice(0, 4000), block: null });
+          return;
+        } finally {
+          inFlight.delete(who);
         }
-        res.end();
-        const asked = String(messages[messages.length - 1]?.content ?? "").slice(0, 120);
-        if (text) d.store.logDecision({ at: Date.now(), kind: "verdict", subject: asked, reason: text.slice(0, 4000), block: null });
-        return;
       }
 
       if (req.method === "GET" && path === "/siwe/nonce") return send(res, 200, { nonce: newNonce(d.store) });
@@ -183,6 +211,7 @@ export function createApi(d: ApiDeps) {
         const b = await readJson(req);
         const address = await verifySiwe(d.store, String(b.message ?? ""), b.signature as Hex);
         if (!address) return send(res, 401, { error: "signature did not check out" });
+        d.store.linkIdentity(address, ip);
         const token = d.store.newSession(address, SESSION_TTL_MS);
         return send(res, 200, { address }, { "set-cookie": sessionCookie(token) });
       }
