@@ -244,3 +244,36 @@ test("no bot, no link codes: the link button says so instead of pointing at a bo
     assert.match((await r.json()).error, /no telegram bot/i);
   } finally { await s.close(); }
 });
+
+test("Prepare first buy needs a signed-in wallet and always prepares it for that wallet", async () => {
+  const s = await serve();
+  try {
+    const post = (headers: Record<string, string>, body: unknown) =>
+      fetch(`${s.base}/api/prepare`, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body) });
+    const anon = await post({}, { market: MARKET, amountPros: "0.5" });
+    assert.equal(anon.status, 401);
+
+    const cookie = `${SESSION_COOKIE}=${s.store.newSession(ME, SESSION_TTL_MS)}`;
+    const ok = await post({ cookie }, { market: MARKET, amountPros: "0.5", owner: "0x000000000000000000000000000000000000dEaD" });
+    assert.equal(ok.status, 200);
+    const r = await ok.json();
+    const id = new URL(r.url).searchParams.get("r")!;
+    const saved = s.store.getRequest(id)!;
+    assert.equal(saved.params.owner, ME);
+    assert.equal(saved.params.amountWei, (5n * 10n ** 17n).toString());
+    assert.equal(saved.params.source, "page");
+
+    const bad = await post({ cookie }, { market: MARKET, amountPros: "lots" });
+    assert.equal(bad.status, 400);
+  } finally { await s.close(); }
+});
+
+test("Prepare first buy on a market someone already left says why, with no link", async () => {
+  const s = await serve({ check: async () => check({ phase: 3 }) });
+  try {
+    const cookie = `${SESSION_COOKIE}=${s.store.newSession(ME, SESSION_TTL_MS)}`;
+    const r = await fetch(`${s.base}/api/prepare`, { method: "POST", headers: { "content-type": "application/json", cookie }, body: JSON.stringify({ market: MARKET, amountPros: "1" }) });
+    assert.equal(r.status, 409);
+    assert.match((await r.json()).error, /left the curve/);
+  } finally { await s.close(); }
+});

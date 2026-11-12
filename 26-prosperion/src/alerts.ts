@@ -5,6 +5,7 @@ import { formatEther } from "viem";
 import { EXPLORER } from "./chain.js";
 import { requestUrl, walletLinks } from "./links.js";
 import { PHASE_NAME } from "./market.js";
+import { MIN_OUT_BPS } from "./prepare.js";
 import type { Launch, Store, Watch } from "./store.js";
 
 export interface Wave1Extras {
@@ -21,8 +22,6 @@ export interface AlertDeps {
   agentTimeoutMs: number;
 }
 
-// Slippage floor baked into the request: the page re-quotes at signing time and asks for at least 98% of it.
-const MIN_OUT_BPS = 9800;
 
 export function wantsThis(w: Watch, l: Launch): boolean {
   const c = l.checks;
@@ -80,6 +79,7 @@ export async function onLaunch(l: Launch, store: Store, deps: AlertDeps): Promis
         maxReserveBeforeWei: w.maxReserveBeforeWei.toString(),
         acceptedImpl: l.checks!.implNow,
         owner: w.address,
+        source: "alert",
       },
     });
     const url = requestUrl(id);
