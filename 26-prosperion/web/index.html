@@ -21,6 +21,11 @@
         <p>Ask about a vault, a launch or your own position. Every number comes with the block it was read at.</p>
       </div>
       <div class="thread" id="chat" aria-live="polite"></div>
+      <div class="gate" id="gate" hidden>
+        <p class="gate-line">Connect your wallet to work with Prosperion.</p>
+        <button type="button" id="gate-connect">Connect Wallet</button>
+        <p class="small muted" id="gate-note">Signing in is one message in your wallet, not a transaction. It costs nothing.</p>
+      </div>
       <form class="composer" id="ask-form">
         <textarea id="ask-input" rows="3" placeholder="Ask Prosperion about a vault, a launch or your position..." aria-label="Your question"></textarea>
         <button class="send" id="send" type="submit" aria-label="Send" disabled></button>
@@ -31,7 +36,7 @@
         <button type="button" class="chip" data-tip="How fresh are the prices behind Barker Neutral Carry's NAV?">Price freshness</button>
         <button type="button" class="chip" data-tip="What do I hold in Prosper right now, and what is it worth?">My position</button>
       </div>
-      <p class="fine">Reads Pharos mainnet through Prosperion's tools and the Pharos Chain MCP. It cannot sign or send anything.</p>
+      <p class="fine"><span id="quota"></span>Reads Pharos mainnet through Prosperion's tools and the Pharos Chain MCP. It cannot sign or send anything.</p>
     </section>
   </main>
 </div>

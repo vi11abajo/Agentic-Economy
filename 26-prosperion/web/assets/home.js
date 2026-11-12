@@ -1,5 +1,5 @@
 import { $, esc, walletEnv } from "./app.js";
-import { mountShell, ICONS } from "./shell.js";
+import { mountShell, ICONS, whoAmI, connectWallet, signedOut } from "./shell.js";
 
 mountShell();
 $("#send").innerHTML = ICONS.send;
@@ -13,14 +13,31 @@ const chatId = (() => {
   catch { return crypto.randomUUID(); }
 })();
 
-$('[data-k="chat"]').addEventListener("click", (e) => {
-  e.preventDefault();
-  history.length = 0;
-  keep();
-  $("#chat").innerHTML = "";
-  $("#chatmain").classList.remove("started");
-  document.body.classList.remove("side-open");
-  $("#ask-input").focus();
+// ---- the gate: no chat until a wallet signs in. The server needs the wallet to keep one person's limits
+// together across their wallets and IPs; the page just mirrors what /api/me says.
+let me = { address: null };
+const LOCK_NOTE = $("#gate-note").textContent;
+function applyMe(next) {
+  me = next || { address: null };
+  const locked = !me.address;
+  document.body.classList.toggle("locked", locked);
+  $("#gate").hidden = !locked;
+  $("#ask-input").disabled = locked;
+  showQuota();
+}
+function showQuota() {
+  const left = me.address && typeof me.dailyLimit === "number" ? Math.max(0, me.dailyLimit - (me.used ?? 0)) : null;
+  $("#quota").textContent = left === null ? "" : `${left} of ${me.dailyLimit} questions left today.`;
+}
+document.addEventListener("prosperion:me", (e) => applyMe(e.detail));
+applyMe(me);
+whoAmI().then(applyMe);
+$("#gate-connect").addEventListener("click", async () => {
+  const note = $("#gate-note");
+  note.classList.remove("bad");
+  note.textContent = "Check your wallet: it asks you to sign one message.";
+  try { await connectWallet(); note.textContent = LOCK_NOTE; $("#ask-input").focus(); }
+  catch (e) { note.classList.add("bad"); note.textContent = e.message; }
 });
 
 // The agent writes light markdown. Everything is escaped first, so only these few shapes become HTML,
@@ -83,7 +100,7 @@ let busy = false;
 $("#ask-form").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const q = input.value.trim();
-  if (!q || busy) return;
+  if (!q || busy || !me.address) return;
   busy = true;
   input.value = ""; fit();
   $("#chatmain").classList.add("started");
@@ -93,13 +110,13 @@ $("#ask-form").addEventListener("submit", async (ev) => {
   const status = bubble("tool", "Reading the chain...");
   try {
     const env = await walletEnv();
-    let address, chainId;
-    try { address = env.providerObj ? (await env.providerObj.request({ method: "eth_accounts" }))[0] : undefined; } catch {}
+    let chainId;
     try { chainId = env.providerObj ? parseInt(await env.providerObj.request({ method: "eth_chainId" }), 16) : undefined; } catch {}
-    const sendEnv = { provider: env.provider, rdns: env.rdns, inWalletBrowser: env.inWalletBrowser, desktopExtension: env.desktopExtension, chainId, address };
+    const sendEnv = { provider: env.provider, rdns: env.rdns, inWalletBrowser: env.inWalletBrowser, desktopExtension: env.desktopExtension, chainId };
     const res = await fetch("/api/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ messages: history, env: sendEnv, chatId }) });
     if (!res.ok) {
       status.remove();
+      if (res.status === 401) signedOut();
       bubble("error", (await res.json().catch(() => ({}))).error || `The agent did not answer (${res.status}). Try again in a moment.`);
       history.pop(); keep();
       return;
@@ -137,6 +154,9 @@ $("#ask-form").addEventListener("submit", async (ev) => {
     status.remove();
     if (text) { history.push({ role: "assistant", content: text }); keep(); }
     else bubble("error", "The agent finished without an answer. Ask again.");
+    // the server counted this turn once the agent took it, answered or not
+    me = { ...me, used: (me.used ?? 0) + 1 };
+    showQuota();
   } catch (e) {
     status.remove();
     bubble("error", `Lost the connection to the agent: ${e.message}`);
