@@ -9,7 +9,7 @@ test("the MCP answers over plain HTTP on loopback, the way Hermes will call it",
   try {
     const client = new Client({ name: "test", version: "1.0.0" });
     await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${srv.port}/mcp`)));
-    assert.equal((await client.listTools()).tools.length, 14);
+    assert.equal((await client.listTools()).tools.length, 15);
     await client.close();
     const get = await fetch(`http://127.0.0.1:${srv.port}/mcp`);
     assert.equal(get.status, 405);
