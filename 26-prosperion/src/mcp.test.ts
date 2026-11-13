@@ -29,11 +29,11 @@ async function connect() {
 }
 const body = (r: any) => JSON.parse(r.content[0].text);
 
-test("the agent sees our thirteen reads plus one tool that only prepares a link for the visitor to sign", async () => {
+test("the agent sees our fourteen reads plus one tool that only prepares a link for the visitor to sign", async () => {
   const c = await connect();
   const names = (await c.listTools()).tools.map((t) => t.name).sort();
   assert.deepEqual(names, [
-    "launch_board", "list_vaults", "market_check", "market_trades", "nav_move", "oracle_freshness", "position", "prepare_buy", "protocol_map",
+    "faroswap_pool", "launch_board", "list_vaults", "market_check", "market_trades", "nav_move", "oracle_freshness", "position", "prepare_buy", "protocol_map",
     "recent_launches", "reward_unlock", "vault_picture", "vault_profile", "wallet_portfolio",
   ]);
 });
@@ -139,4 +139,14 @@ test("prepare_buy hands back a sign link and never a transaction", async () => {
   assert.equal(sent.amountWei, 25n * 10n ** 16n);
   assert.equal(sent.source, "agent");
   assert.equal(sent.owner, "0x46441dc99f8000959e9c48Cf2A01a018D131D3Bb");
+});
+
+test("faroswap_pool prices a graduated pToken from its pair at one block", async () => {
+  const c = await connect();
+  const r = body(await c.callTool({ name: "faroswap_pool", arguments: { market: "0x3f603E94053a6F251B4a98c17e26c3e8F65f2BD7" } }));
+  assert.equal(r.phase, 2);
+  assert.equal(r.pair, "0x0A438d3ecEbb6c4221dD54905C7329975E88584F");
+  assert.ok(Number(r.pool.prosInPool) > 0 && Number(r.pool.prosPerMillionTokens) > 0);
+  const open = body(await c.callTool({ name: "faroswap_pool", arguments: { market: FROG } }));
+  assert.equal(open.pool, null);
 });

@@ -16,6 +16,7 @@ import { findVault } from "./vaultLookup.js";
 import type { PrepareInput, Prepared } from "./prepare.js";
 import { rankBoard, readBoard, readVaultProfile } from "./board.js";
 import { readPortfolio } from "./portfolio.js";
+import { readPool } from "./pool.js";
 import { vaultDetail } from "./prosperApi.js";
 import type { TradeBook } from "./trades.js";
 
@@ -204,6 +205,16 @@ export function createProsperionMcp(deps: McpDeps): McpServer {
         reserveCheck: { block: m.block, prosInCurve: pros(m.reserveBefore), call: { to: market, data: toFunctionSelector("realWrappedNativeReserve()"), block: m.block, expect: m.reserveBefore } },
       });
     },
+  );
+
+  server.registerTool(
+    "faroswap_pool",
+    {
+      title: "Where a graduated pToken trades now",
+      description: "For a graduated market (phase 2): its FaroSwap pair (the market's externalPair), how much PROS and how many tokens sit in it, and the spot price as PROS per million tokens, all at one block. Not for markets still on the curve (use market_check).",
+      inputSchema: { market: addr },
+    },
+    async (a) => json(await readPool(getAddress(a.market))),
   );
 
   server.registerTool(
