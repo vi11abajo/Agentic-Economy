@@ -10,6 +10,7 @@ import type { ChatMessage, WalletEnv } from "./agent.js";
 import type { MarketCheck } from "./market.js";
 import type { Store } from "./store.js";
 import { prepareBuy, refusalFor } from "./prepare.js";
+import { launchRefresher } from "./freshLaunches.js";
 
 export const GATE_ABI = parseAbi([
   "function buy(address market, uint256 minOut, uint256 deadline) payable returns (uint256)",
@@ -94,6 +95,7 @@ export function limitsFromForm(b: Record<string, unknown>, implNow: Address): Ga
 }
 
 export function createApi(d: ApiDeps) {
+  const freshLaunches = launchRefresher(d.store, d.check, d.now);
   // "Prepare first buy" only writes a row, but rows are still rows: a few a minute per wallet is plenty for a person.
   const prepares = new Map<string, number[]>();
   const tooManyPrepares = (me: Address) => {
@@ -179,7 +181,7 @@ export function createApi(d: ApiDeps) {
         return send(res, 200, await d.check(getAddress(seg[1]), amount));
       }
       if (req.method === "GET" && path === "/vaults") return send(res, 200, await d.listVaults());
-      if (req.method === "GET" && path === "/launches") return send(res, 200, d.store.listLaunches(30));
+      if (req.method === "GET" && path === "/launches") return send(res, 200, await freshLaunches(30));
       if (req.method === "GET" && path === "/decisions") return send(res, 200, d.store.decisions(50));
 
       if (req.method === "GET" && path === "/me") {
