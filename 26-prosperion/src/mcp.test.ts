@@ -3,10 +3,25 @@ import assert from "node:assert/strict";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createProsperionMcp } from "./mcp.js";
+import { openStore } from "./store.js";
+import { openTradeBook, type Trade } from "./trades.js";
 
 const prepared: any[] = [];
+// Two real pFROG trades: a 19 PROS buy that is still held and a 0.1 PROS one (txs 0xd73c66a5…, 0xb6e9af8c…).
+const FROG = "0x8DAA60552dbB856A4EEBC271Ff6783F42e63A26E";
+const book = openTradeBook(openStore(":memory:").db);
+const t = (tx: string, block: bigint, trader: string, gross: bigint, tokens: bigint): Trade => ({
+  market: FROG, block, tx: tx as `0x${string}`, logIndex: 4, kind: "buy", trader: trader as `0x${string}`, caller: "0x63FfADf944583D8e4Fdc30144EFdfe3bdC2122f5",
+  prosGross: gross, prosNet: (gross * 99n) / 100n, tokens, fee: gross / 100n,
+});
+book.save([
+  t("0xd73c66a5750a1656ff0ed44e09e961b08429de43e1a25c81c5cca0df5945f004", 22_889_592n, "0x261a31f9bd2789B490bAdF62784D8c58151b1bD2", 19n * 10n ** 18n, 2_499_732n * 10n ** 18n),
+  t("0xb6e9af8ce866d27588ca44b98bdb41ddd777586a0a235598d68ca39bf1046e26", 22_939_812n, "0x12b5329b83dbaEE5e80EbaD2F4297bC065e5C43B", 10n ** 17n, 13_123n * 10n ** 18n),
+]);
+book.setCoverage(22_000_000n, 22_970_000n);
+
 async function connect() {
-  const server = createProsperionMcp({ listLaunches: () => [], prepareBuy: async (i: any) => (prepared.push(i), { ok: true, id: "abc", url: "https://x/sign/?r=abc" }) });
+  const server = createProsperionMcp({ listLaunches: () => [], prepareBuy: async (i: any) => (prepared.push(i), { ok: true, id: "abc", url: "https://x/sign/?r=abc" }), trades: book, head: async () => 22_970_100n });
   const [a, b] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "test", version: "1.0.0" });
   await Promise.all([server.connect(a), client.connect(b)]);
@@ -14,13 +29,50 @@ async function connect() {
 }
 const body = (r: any) => JSON.parse(r.content[0].text);
 
-test("the agent sees our nine reads plus one tool that only prepares a link for the visitor to sign", async () => {
+test("the agent sees our thirteen reads plus one tool that only prepares a link for the visitor to sign", async () => {
   const c = await connect();
   const names = (await c.listTools()).tools.map((t) => t.name).sort();
   assert.deepEqual(names, [
-    "list_vaults", "market_check", "nav_move", "oracle_freshness", "position", "prepare_buy", "protocol_map",
-    "recent_launches", "reward_unlock", "vault_picture",
+    "launch_board", "list_vaults", "market_check", "market_trades", "nav_move", "oracle_freshness", "position", "prepare_buy", "protocol_map",
+    "recent_launches", "reward_unlock", "vault_picture", "vault_profile", "wallet_portfolio",
   ]);
+});
+
+test("market_trades counts buyers from the index and checks the curve on chain", async () => {
+  const c = await connect();
+  const r = body(await c.callTool({ name: "market_trades", arguments: { market: FROG } }));
+  assert.equal(r.buys, 2);
+  assert.equal(r.buyers, 2);
+  assert.equal(r.prosPaidIn, "19.1");
+  assert.equal(r.holdersCount, 2);
+  assert.equal(r.latest[0].tx, "0xb6e9af8ce866d27588ca44b98bdb41ddd777586a0a235598d68ca39bf1046e26", "newest first");
+  assert.equal(r.coverage.blocksBehindHead, "100");
+  assert.match(r.reserveCheck.block, /^\d+$/);
+  assert.equal(r.reserveCheck.call.data, "0x0172d417");
+});
+
+test("launch_board sees every Prosper market, not just the ones the watcher caught", async () => {
+  const c = await connect();
+  const r = body(await c.callTool({ name: "launch_board", arguments: { status: "all", limit: 80 } }));
+  assert.ok(r.totals.markets >= 70, `markets: ${r.totals.markets}`);
+  assert.equal(r.totals.markets, r.totals.onCurve + r.totals.graduated + r.totals.failed);
+  const open = body(await c.callTool({ name: "launch_board", arguments: {} })).markets;
+  for (let i = 1; i < open.length; i++) assert.ok(Number(open[i - 1].prosInCurve) >= Number(open[i].prosInCurve));
+});
+
+test("wallet_portfolio finds a pFROG holder's position in one call", async () => {
+  const c = await connect();
+  const r = body(await c.callTool({ name: "wallet_portfolio", arguments: { owner: "0x261a31f9bd2789B490bAdF62784D8c58151b1bD2" } }));
+  const frog = r.holdings.find((h: any) => h.symbol === "pFROG");
+  assert.ok(frog, JSON.stringify(r.holdings));
+  assert.ok(BigInt(frog.balance) > 0n);
+});
+
+test("vault_profile labels Prosper's fee numbers as the API's and reads the share price on chain", async () => {
+  const c = await connect();
+  const r = body(await c.callTool({ name: "vault_profile", arguments: { vault: "Barker Neutral Carry" } }));
+  assert.match(r.fromProsperApi.note, /not read on chain/);
+  assert.ok(BigInt(r.onChain.navPerShareUsdc) > 1_000_000n);
 });
 
 test("market_check answers with the block it read at", async () => {
