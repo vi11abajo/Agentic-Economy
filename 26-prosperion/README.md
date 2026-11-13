@@ -60,12 +60,14 @@ Every number below comes from Prosperion's own tools and can be re-read at the b
    blocks. **Ask the agent about this vault** opens a fresh chat with that question.
 4. **Launches** lists the markets the watcher saw. On one still on the curve, press **Prepare first buy**, enter an
    amount, and you land on the sign page. Or ask in the chat: *"I want to be first into market 0x… with 0.1 PROS."*
-5. The **sign page** checks the market again at the current block. Then your wallet signs your limits in the gate, if
-   the ones you already set do not cover this buy or what is left of today (no money moves), and the buy itself. It only
-   raises what this buy needs; limits you set higher stay as they are.
+5. The **sign page** checks the market again at the current block. A wallet that never set limits signs them first,
+   sized to this buy (no money moves), then the buy itself. Once you have limits, a link never raises them: a buy above
+   your per-buy or daily limit, or with more PROS in the curve than you allow, is refused with the limit that stopped
+   it, and you change it yourself under Your buy limits. In the chat, a sign link comes with a button, a QR code for a
+   phone wallet's scanner and links that open the page inside OKX, Rabby or MetaMask.
 6. **Your buy limits**, at the top of Launches, shows what the gate holds for your wallet: per buy, per day with
    today's spend, and how much may already be in the curve. Change them, or press **Stop all buys** to clear them so
-   the gate refuses every buy from your wallet. Either is one `setLimits` transaction you sign; no PROS moves.
+   the gate refuses every buy from your wallet and every buy link says so. Either is one `setLimits` transaction you sign; no PROS moves.
 7. **Alerts** lets you leave the page open in Telegram instead: set your amount and how much may already be in the
    curve, link the bot, and each launch that passes the checks arrives with the facts, a sign link and the agent's
    write-up. The live copy runs without a bot; see [Your own Telegram bot](#your-own-telegram-bot).

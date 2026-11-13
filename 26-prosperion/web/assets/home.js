@@ -1,4 +1,4 @@
-import { $, api, esc, walletEnv } from "./app.js";
+import { $, api, esc, walletEnv, walletLinks } from "./app.js";
 import { mountShell, ICONS, whoAmI, connectWallet, signedOut } from "./shell.js";
 
 mountShell();
@@ -96,10 +96,14 @@ const linkName = (url) => {
 };
 function md(src) {
   const inline = (s) => s
+    // a link the agent wrapped in backticks or <angle brackets> is still a link
+    .replace(/`(https:\/\/[^`\s]+)`/g, " $1")
+    .replace(/&lt;(https:\/\/[^\s]+?)&gt;/g, " $1")
     .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\[([^\]]+)\]\((https:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
-    .replace(/(^|[\s(])(https:\/\/[^\s<)]+)/g, (_m, pre, url) => `${pre}<a href="${url}" target="_blank" rel="noopener">${linkName(url)}</a>`);
+    // a bare link, also right after **bold** markup; a full stop or comma after it is the sentence's, not the link's
+    .replace(/(^|[\s(]|(?<!noopener")>)(https:\/\/[^\s<)]+?)([.,;:!?]*)(?=$|[\s<)])/g, (_m, pre, url, tail) => `${pre}<a href="${url}" target="_blank" rel="noopener">${linkName(url)}</a>${tail}`);
   let html = "", list = null, para = [];
   const flushPara = () => { if (para.length) { html += `<p>${inline(para.join("<br>"))}</p>`; para = []; } };
   const flushList = () => { if (list) { html += `</${list}>`; list = null; } };
@@ -118,10 +122,30 @@ function md(src) {
   return html;
 }
 
+// A sign link from prepare_buy gets a card under the answer: a button for this browser, and for a phone wallet the
+// same QR the Telegram alert carries plus links that open the page inside OKX, Rabby or MetaMask. Only an id we can
+// look up is used; the QR itself comes from the server, which refuses ids it never saved.
+function signCards(text) {
+  const ids = [...new Set([...text.matchAll(/https:\/\/[^\s`*<>()]*\/sign\/\?r=([A-Za-z0-9_-]{1,64})/g)].map((m) => m[1]))];
+  return ids.map((id) => {
+    const url = `${location.origin}/sign/?r=${id}`, l = walletLinks(url);
+    return `<div class="signcard">
+      <img src="/api/req/${id}/qr.svg" alt="QR code of the sign page" width="168" height="168">
+      <div>
+        <p><a class="btn" href="${url}">Open the sign page</a></p>
+        <p class="small muted">On a phone, scan this with OKX Wallet, or open the page inside your wallet:</p>
+        <p class="walletlinks"><a href="${l.okx}">OKX Wallet</a><a href="${l.rabby}">Rabby</a><a href="${l.metamask}">MetaMask</a></p>
+        <p class="small muted">Your wallet signs there; nothing has been sent.</p>
+      </div>
+    </div>`;
+  }).join("");
+}
+const agentHtml = (text) => md(text) + signCards(text);
+
 function bubble(cls, text) {
   const d = document.createElement("div");
   d.className = `msg ${cls}`;
-  if (cls === "agent") d.innerHTML = md(text); else d.textContent = text;
+  if (cls === "agent") d.innerHTML = agentHtml(text); else d.textContent = text;
   $("#chat").appendChild(d);
   $("#chat").scrollTop = $("#chat").scrollHeight;
   return d;
@@ -199,6 +223,7 @@ $("#ask-form").addEventListener("submit", async (ev) => {
       }
     }
     status.remove();
+    if (out && text) out.innerHTML = agentHtml(text);
     if (text) { history.push({ role: "assistant", content: text }); keep(); }
     else bubble("error", "The agent finished without an answer. Ask again.");
     // the server counted this turn once the agent took it, answered or not
