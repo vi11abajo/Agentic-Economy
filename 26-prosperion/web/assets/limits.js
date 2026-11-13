@@ -24,9 +24,13 @@ function signedOutView() {
   });
 }
 
+// Stop leaves zeros with the market code in; never-set has no code at all and comes back as null.
+const stopped = (l) => !!l && BigInt(l.maxPerBuy) === 0n;
+
 function summary(s) {
   const l = s.limits;
   if (!l) return `<p>No limits set for ${addrLink(s.address)}, so the gate refuses every buy from it. Set them here, or let your first buy link do it.</p>`;
+  if (stopped(l)) return `<p>You stopped all buys for ${addrLink(s.address)}. The gate refuses every buy and every buy link says so, until you save new limits here.</p>`;
   const resets = new Date(s.dayEndsAt * 1000).toISOString().slice(11, 16);
   return `<p>For ${addrLink(s.address)}: up to <strong>${pros(l.maxPerBuy)} PROS</strong> per buy and <strong>${pros(l.maxPerDay)} PROS</strong> a day
     (${pros(s.spentToday)} used today, the day resets at ${resets} UTC), only while at most <strong>${pros(l.maxReserveBefore)} PROS</strong> is already in the curve.</p>
@@ -34,7 +38,7 @@ function summary(s) {
 }
 
 function signedInView(s) {
-  const l = s.limits;
+  const l = stopped(s.limits) ? null : s.limits;
   box.innerHTML = `<h2>Your buy limits</h2>
     ${summary(s)}
     <form id="limits-form" class="limits-form">
@@ -43,7 +47,7 @@ function signedInView(s) {
       <label>At most this much PROS already in the curve<input name="inCurve" type="number" min="0" step="0.1" required value="${l ? plain(l.maxReserveBefore) : "0"}"></label>
       <div class="row"><button type="submit">Save limits</button>${l ? `<button type="button" class="quiet" id="limits-stop">Stop all buys</button>` : ""}</div>
     </form>
-    <p class="small muted">Saving or stopping is one transaction from your wallet to the <a href="${EXPLORER}/address/${s.gate}#code">gate</a>. No PROS moves, you pay only gas. Stop clears every limit, so no buy link works until you save new ones.</p>
+    <p class="small muted">Saving or stopping is one transaction from your wallet to the <a href="${EXPLORER}/address/${s.gate}#code">gate</a>. No PROS moves, you pay only gas. Buy links never raise these: a buy above them is refused and sent back here. Stop clears every limit, so no buy link works until you save new ones.</p>
     <p class="small" id="limits-note"></p>`;
   $("#limits-form").addEventListener("submit", (e) => {
     e.preventDefault();

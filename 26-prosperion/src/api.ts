@@ -9,8 +9,10 @@ import { SESSION_COOKIE, SESSION_TTL_MS, endedSessionCookie, newNonce, sessionCo
 import type { ChatMessage, WalletEnv } from "./agent.js";
 import type { MarketCheck } from "./market.js";
 import type { Store } from "./store.js";
-import { prepareBuy, refusalFor } from "./prepare.js";
+import { limitsRefusal, prepareBuy, refusalFor } from "./prepare.js";
 import { launchRefresher } from "./freshLaunches.js";
+import QRCode from "qrcode";
+import { requestUrl } from "./links.js";
 
 export const GATE_ABI = parseAbi([
   "function buy(address market, uint256 minOut, uint256 deadline) payable returns (uint256)",
@@ -74,13 +76,13 @@ const cookie = (req: IncomingMessage, name: string) =>
 
 export { refusalFor };
 
-const NO_IMPL = "0x0000000000000000000000000000000000000000" as Address;
 const prosNumber = /^\d+(\.\d{1,18})?$/;
-const bigger = (a: bigint, b: bigint) => (a > b ? a : b);
 
 /** What a person typed into "Your buy limits", as gate limits, or the reason it cannot work. */
 export function limitsFromForm(b: Record<string, unknown>, implNow: Address): GateLimits | string {
-  if (b.stop === true) return { maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n, acceptedMarketImpl: NO_IMPL };
+  // Stop keeps the market code in: all zeros with no code is what a wallet that never set limits looks like, and a
+  // buy link would offer that wallet fresh limits. Zeros with the code read as "stopped" and every link is refused.
+  if (b.stop === true) return { maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n, acceptedMarketImpl: implNow };
   for (const k of ["perBuyPros", "perDayPros", "inCurvePros"]) {
     if (typeof b[k] !== "string" || !prosNumber.test(b[k] as string)) return `${k} must be a number like 0.5`;
   }
@@ -129,21 +131,17 @@ export function createApi(d: ApiDeps) {
     if (!d.gate) return { request: r, freshCheck: fresh, tx: null, setLimits: null, refusal: "The Prosperion gate is not deployed yet." };
 
     const owner = getAddress(p.owner);
+    // Limits are the person's own. A wallet with none gets them offered first, sized to this buy; one that has them
+    // (or stopped all buys) must fit inside them, and the page says which limit is in the way instead of raising it.
+    const have = await d.readLimits(owner);
+    if (have) {
+      const over = limitsRefusal(have, await d.spentToday(owner), amount, fresh.reserveBefore, fresh.implNow);
+      if (over) return { request: r, freshCheck: fresh, tx: null, setLimits: null, refusal: over };
+    }
     const want: GateLimits = {
       maxPerBuy: amount, maxPerDay: amount * 3n, maxReserveBefore: maxReserve, acceptedMarketImpl: getAddress(p.acceptedImpl),
     };
-    const have = await d.readLimits(owner);
-    // The gate also counts the day: a buy that fits per buy but not in what is left of today would only revert.
-    const spent = have ? await d.spentToday(owner) : 0n;
-    const fits = have && have.maxPerBuy >= amount && have.maxReserveBefore >= maxReserve && spent + amount <= have.maxPerDay &&
-      have.acceptedMarketImpl.toLowerCase() === want.acceptedMarketImpl.toLowerCase();
-    // Raise what this buy needs and nothing else: limits someone set higher on purpose stay where they are.
-    if (have) {
-      want.maxPerBuy = bigger(have.maxPerBuy, amount);
-      want.maxPerDay = bigger(have.maxPerDay, bigger(want.maxPerDay, spent + amount));
-      want.maxReserveBefore = bigger(have.maxReserveBefore, maxReserve);
-    }
-    const setLimits = fits ? null : {
+    const setLimits = have ? null : {
       to: d.gate, value: "0",
       data: encodeFunctionData({ abi: GATE_ABI, functionName: "setLimits", args: [want] }),
       limits: want,
@@ -165,6 +163,13 @@ export function createApi(d: ApiDeps) {
       const ip = clientIp(req);
       const seg = path.split("/").filter(Boolean);
 
+      // The same QR the Telegram alert carries, for the chat: a phone wallet's scanner opens the sign page in its browser.
+      if (req.method === "GET" && seg[0] === "req" && seg[1] && seg[2] === "qr.svg") {
+        if (!/^[A-Za-z0-9_-]{1,64}$/.test(seg[1]) || !d.store.getRequest(seg[1])) return send(res, 404, { error: "unknown request" });
+        const svg = await QRCode.toString(requestUrl(seg[1]), { type: "svg", errorCorrectionLevel: "M", margin: 2 });
+        res.writeHead(200, { "content-type": "image/svg+xml", "cache-control": "public, max-age=86400" });
+        return res.end(svg);
+      }
       if (req.method === "GET" && seg[0] === "req" && seg[1]) {
         const out = await buildRequest(seg[1]);
         return out ? send(res, 200, out) : send(res, 404, { error: "unknown request" });
@@ -282,7 +287,7 @@ export function createApi(d: ApiDeps) {
         if (typeof b.market !== "string" || !isAddress(b.market)) return send(res, 400, { error: "market must be an address" });
         if (typeof b.amountPros !== "string" || !/^\d+(\.\d{1,18})?$/.test(b.amountPros)) return send(res, 400, { error: "amountPros must be a number like 0.5" });
         if (tooManyPrepares(me)) return send(res, 429, { error: "Ten buys prepared this minute. Wait a moment." });
-        const r = await prepareBuy(d.store, d.check, { market: getAddress(b.market), owner: me, amountWei: parseEther(b.amountPros), source: "page" });
+        const r = await prepareBuy(d.store, d.check, { market: getAddress(b.market), owner: me, amountWei: parseEther(b.amountPros), source: "page" }, d);
         return r.ok ? send(res, 200, { url: r.url, check: r.check }) : send(res, 409, { error: r.refusal, check: r.check });
       }
       // "Your buy limits" on the Launches page. We only read the gate and encode a setLimits; the wallet signs it.

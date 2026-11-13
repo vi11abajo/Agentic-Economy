@@ -71,3 +71,16 @@ test("zero and absurd amounts are refused before the chain is read", async () =>
   }
   assert.equal(reads, 0);
 });
+
+test("with limits on the gate, an amount above them is refused before a link is made", async () => {
+  const store = openStore(":memory:");
+  const gate = {
+    readLimits: async () => ({ maxPerBuy: parseEther("0.1"), maxPerDay: parseEther("0.3"), maxReserveBefore: 0n, acceptedMarketImpl: IMPL as `0x${string}` }),
+    spentToday: async () => 0n,
+  };
+  const r = await prepareBuy(store, check(), { market: MARKET, owner: ME, amountWei: parseEther("10"), source: "agent" }, gate);
+  assert.equal(r.ok, false);
+  if (!r.ok) assert.match(r.refusal, /above your limit of 0\.1 PROS per buy/);
+  const fits = await prepareBuy(store, check(), { market: MARKET, owner: ME, amountWei: parseEther("0.1"), source: "agent" }, gate);
+  assert.equal(fits.ok, true);
+});
