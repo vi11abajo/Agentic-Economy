@@ -11,6 +11,8 @@ export const pharos = defineChain({
   nativeCurrency: { name: "PROS", symbol: "PROS", decimals: 18 },
   rpcUrls: { default: { http: [PHAROS_RPC] } },
   blockExplorers: { default: { name: "Pharosscan", url: EXPLORER } },
+  // the canonical Multicall3, present on Pharos (getBlockNumber() answers there)
+  contracts: { multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" } },
 });
 
 // The public node says "cu limit exceeded; Request too fast per second" (code -32011) when pushed, and viem does

@@ -17,6 +17,7 @@ import { listVaults } from "./prosperApi.js";
 import { pollTelegram, telegramChannel } from "./telegram.js";
 import { readVault } from "./vault.js";
 import { LaunchWatcher, rpcWatcherDeps } from "./watcher.js";
+import { BUY_TOPIC, SELL_TOPIC, TradeIndexer, openTradeBook, type RawTradeLog } from "./trades.js";
 
 const env = process.env;
 const API_PORT = Number(env.PORT ?? 18620);
@@ -73,7 +74,44 @@ const api = createApi({
 });
 createServer(api).listen(API_PORT, "127.0.0.1", () => console.log(`[api] 127.0.0.1:${API_PORT}`));
 
-await startMcpHttp({ listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i) }, MCP_PORT);
+// Every buy and sell on every Prosper curve, indexed from the first launch on. A fresh database starts an hour before
+// the oldest market Prosper lists and catches up at a few windows a second; after that it follows the head.
+const book = openTradeBook(store.db);
+let marketList: { at: number; markets: Address[] } | null = null;
+async function allMarkets(): Promise<Address[]> {
+  if (!marketList || Date.now() - marketList.at > 10 * 60_000) {
+    const fromApi = await listVaults().then((rows) => rows.map((r) => getAddress(r.market))).catch(() => marketList?.markets ?? []);
+    const seen = store.listLaunches(500).map((l) => getAddress(l.market));
+    marketList = { at: Date.now(), markets: [...new Set([...fromApi, ...seen])] };
+  }
+  return marketList.markets;
+}
+async function blockAtTime(ts: number): Promise<bigint> {
+  let lo = 0n, hi = await client.getBlockNumber({ cacheTime: 0 });
+  while (lo < hi) {
+    const mid = (lo + hi + 1n) / 2n;
+    if (Number((await client.getBlock({ blockNumber: mid })).timestamp) <= ts) lo = mid; else hi = mid - 1n;
+  }
+  return lo;
+}
+const indexer = new TradeIndexer(book, {
+  head: () => client.getBlockNumber({ cacheTime: 0 }),
+  markets: allMarkets,
+  getLogs: (markets, from, to) => client.request({
+    method: "eth_getLogs",
+    params: [{ address: markets, topics: [[BUY_TOPIC, SELL_TOPIC]], fromBlock: `0x${from.toString(16)}`, toBlock: `0x${to.toString(16)}` }],
+  } as never) as Promise<RawTradeLog[]>,
+  startBlock: async () => {
+    const first = (await listVaults()).map((r) => Date.parse(r.createdAt)).filter(Number.isFinite).sort((a, b) => a - b)[0];
+    return blockAtTime(Math.floor(first / 1000) - 3600);
+  },
+});
+void indexer.run((e) => console.error(`[trades] ${e.message}`));
+
+await startMcpHttp({
+  listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i),
+  trades: book, head: () => client.getBlockNumber({ cacheTime: 0 }),
+}, MCP_PORT);
 console.log(`[mcp] 127.0.0.1:${MCP_PORT}/mcp`);
 
 // The quote in an alert uses the biggest per-buy limit anyone set, so the number means something.

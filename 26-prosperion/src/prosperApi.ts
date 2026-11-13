@@ -11,6 +11,7 @@ export interface VaultListing {
   market: Address;
   pToken: Address;
   pVaultSymbol: string;
+  pVaultName?: string;
   status: string;
   createdAt: string;
 }
@@ -39,5 +40,34 @@ export interface Incentives {
   rewardCap: string;
   totalEligibleShares: string;
 }
+
+/** What Prosper's API says about one vault: who curates it, what it charges, what it claims to do. */
+export interface VaultDetail {
+  vaultName: string;
+  r25Vault: Address;
+  share: Address;
+  r25Display: {
+    curator?: { name: string | null; address: string | null };
+    currentNav?: string;
+    currentAum?: string;
+    apy?: string;
+    performanceReturn?: string;
+    currentShareHolders?: number;
+    historicalParticipants?: number;
+    managementFeeRateBps?: number;
+    performanceFeeRateBps?: number;
+    depositFeeRateBps?: number;
+    withdrawalFeeRateBps?: number;
+    withdrawalProcessingDays?: number;
+    subscriptionSettlement?: string;
+    minimumDepositUsdc?: string;
+    strategyDescription?: string;
+    assetPositions?: { symbol: string; weight: number }[];
+    launchpadPerformanceFeeSharePercent?: string;
+    indexedThroughBlock?: string;
+    updatedAt?: number;
+  };
+}
+export const vaultDetail = (vault: Address) => get<VaultDetail>(`/vaults/${vault}`);
 
 export const incentives = (vault: Address) => get<Incentives>(`/vaults/${vault}/incentives`);
