@@ -26,6 +26,8 @@ async function serve(over: Partial<ApiDeps> = {}) {
     gate: GATE,
     check: async () => check(),
     readLimits: async () => ({ maxPerBuy: 10n ** 18n, maxPerDay: 10n ** 19n, maxReserveBefore: 0n, acceptedMarketImpl: IMPL }),
+    spentToday: async () => 0n,
+    marketImpl: async () => IMPL,
     readVault: async () => ({ ok: true }),
     listVaults: async () => [{ vaultName: "Barker Neutral Carry", r25Vault: "0x3ed49843a55952a399db99c8949f67a9d821611c" }],
     explainNavMove: async () => ({ ok: true }),
@@ -275,5 +277,93 @@ test("Prepare first buy on a market someone already left says why, with no link"
     const r = await fetch(`${s.base}/api/prepare`, { method: "POST", headers: { "content-type": "application/json", cookie }, body: JSON.stringify({ market: MARKET, amountPros: "1" }) });
     assert.equal(r.status, 409);
     assert.match((await r.json()).error, /left the curve/);
+  } finally { await s.close(); }
+});
+
+// The Launches page's "Your buy limits": read what the gate holds for the signed-in wallet, and hand back a
+// setLimits transaction for the wallet to sign. The server never sends it.
+const limitsCall = (s: { base: string; store: ReturnType<typeof openStore> }, method: string, body?: unknown, signedIn = true) =>
+  fetch(`${s.base}/api/limits`, {
+    method,
+    headers: { "content-type": "application/json", ...(signedIn ? { cookie: `${SESSION_COOKIE}=${s.store.newSession(ME, SESSION_TTL_MS)}` } : {}) },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+const PROS = 10n ** 18n;
+
+test("your limits are read from the gate for the signed-in wallet, with today's spend", async () => {
+  const s = await serve({ spentToday: async () => 3n * PROS });
+  try {
+    assert.equal((await limitsCall(s, "GET", undefined, false)).status, 401);
+    const r = await (await limitsCall(s, "GET")).json();
+    assert.equal(r.gate.toLowerCase(), GATE.toLowerCase());
+    assert.equal(r.limits.maxPerBuy, PROS.toString());
+    assert.equal(r.limits.maxPerDay, (10n * PROS).toString());
+    assert.equal(r.spentToday, (3n * PROS).toString());
+    assert.equal(r.implAccepted, true);
+    assert.equal(r.dayEndsAt, 1_800_000_000 - (1_800_000_000 % 86_400) + 86_400);
+  } finally { await s.close(); }
+});
+
+test("after Prosper upgrades its market code, your limits say they no longer cover it", async () => {
+  const s = await serve({ marketImpl: async () => "0x0000000000000000000000000000000000000Bad" });
+  try {
+    const r = await (await limitsCall(s, "GET")).json();
+    assert.equal(r.implAccepted, false);
+  } finally { await s.close(); }
+});
+
+test("saving limits gives one setLimits tx for the wallet, accepting the market code as it is now", async () => {
+  const s = await serve();
+  try {
+    const res = await limitsCall(s, "POST", { perBuyPros: "0.5", perDayPros: "2", inCurvePros: "0" });
+    assert.equal(res.status, 200);
+    const r = await res.json();
+    assert.equal(r.tx.to.toLowerCase(), GATE.toLowerCase());
+    assert.equal(r.tx.value, "0");
+    const d = decodeFunctionData({ abi: GATE_ABI, data: r.tx.data });
+    assert.equal(d.functionName, "setLimits");
+    assert.deepEqual(d.args![0], { maxPerBuy: PROS / 2n, maxPerDay: 2n * PROS, maxReserveBefore: 0n, acceptedMarketImpl: IMPL });
+  } finally { await s.close(); }
+});
+
+test("limits that cannot work are refused in words", async () => {
+  const s = await serve();
+  try {
+    const dayBelowBuy = await limitsCall(s, "POST", { perBuyPros: "2", perDayPros: "1", inCurvePros: "0" });
+    assert.equal(dayBelowBuy.status, 400);
+    assert.match((await dayBelowBuy.json()).error, /a day/i);
+    assert.equal((await limitsCall(s, "POST", { perBuyPros: "0", perDayPros: "1", inCurvePros: "0" })).status, 400);
+    assert.equal((await limitsCall(s, "POST", { perBuyPros: "abc", perDayPros: "1", inCurvePros: "0" })).status, 400);
+    assert.equal((await limitsCall(s, "POST", { perBuyPros: "1", perDayPros: "1", inCurvePros: "0" }, false)).status, 401);
+  } finally { await s.close(); }
+});
+
+test("Stop clears every limit, so the gate refuses any buy from this wallet", async () => {
+  const s = await serve();
+  try {
+    const r = await (await limitsCall(s, "POST", { stop: true })).json();
+    const d = decodeFunctionData({ abi: GATE_ABI, data: r.tx.data });
+    assert.deepEqual(d.args![0], { maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n, acceptedMarketImpl: "0x0000000000000000000000000000000000000000" });
+  } finally { await s.close(); }
+});
+
+test("a buy link asks to raise the daily limit when today's spend leaves no room", async () => {
+  // 1 PROS per buy, 10 a day, 9.95 already spent today: the 0.1 buy would revert with OverPerDay
+  const s = await serve({ spentToday: async () => 9_950n * 10n ** 15n });
+  try {
+    const r = await (await fetch(`${s.base}/api/req/${buyRequest(s.store)}`)).json();
+    assert.ok(r.setLimits, "the page needs a setLimits step first");
+    assert.ok(BigInt(r.setLimits.limits.maxPerDay) >= 9_950n * 10n ** 15n + 10n ** 17n);
+  } finally { await s.close(); }
+});
+
+test("a buy link never lowers limits you set higher yourself", async () => {
+  // your own 0.05 per buy is too small for the 0.1 buy, but your 10 a day must stay 10, not drop to 0.3
+  const s = await serve({ readLimits: async () => ({ maxPerBuy: 5n * 10n ** 16n, maxPerDay: 10n * PROS, maxReserveBefore: 2n * PROS, acceptedMarketImpl: IMPL }) });
+  try {
+    const r = await (await fetch(`${s.base}/api/req/${buyRequest(s.store)}`)).json();
+    assert.equal(r.setLimits.limits.maxPerBuy, (10n ** 17n).toString());
+    assert.equal(r.setLimits.limits.maxPerDay, (10n * PROS).toString());
+    assert.equal(r.setLimits.limits.maxReserveBefore, (2n * PROS).toString());
   } finally { await s.close(); }
 });

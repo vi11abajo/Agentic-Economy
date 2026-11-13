@@ -3,7 +3,7 @@
 import { createServer } from "node:http";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { getAddress, isAddress, type Address } from "viem";
+import { getAddress, isAddress, parseAbi, type Address } from "viem";
 import { askAgent, chatAgent } from "./agent.js";
 import { onLaunch } from "./alerts.js";
 import { GATE_ABI, createApi, type GateLimits } from "./api.js";
@@ -26,6 +26,7 @@ const GATE: Address | null = env.PROSPERION_GATE && isAddress(env.PROSPERION_GAT
 
 mkdirSync(dirname(DB), { recursive: true });
 const store = openStore(DB);
+const BEACON_ABI = parseAbi(["function implementation() view returns (address)"]);
 
 async function readLimits(owner: Address): Promise<GateLimits | null> {
   if (!GATE) return null;
@@ -33,6 +34,20 @@ async function readLimits(owner: Address): Promise<GateLimits | null> {
     address: GATE, abi: GATE_ABI, functionName: "limitsOf", args: [owner],
   });
   return maxPerBuy === 0n ? null : { maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl };
+}
+
+async function spentToday(owner: Address): Promise<bigint> {
+  if (!GATE) return 0n;
+  const day = BigInt(Math.floor(Date.now() / 1000 / 86_400)); // the gate's own day: block.timestamp / 1 days
+  return client.readContract({ address: GATE, abi: GATE_ABI, functionName: "spentOn", args: [owner, day] });
+}
+
+// The beacon never moves (it is immutable in the gate), so ask once; what it points at is read every time.
+let beacon: Address | null = null;
+async function marketImpl(): Promise<Address> {
+  if (!GATE) throw new Error("no gate");
+  beacon ??= await client.readContract({ address: GATE, abi: GATE_ABI, functionName: "marketBeacon" });
+  return client.readContract({ address: beacon, abi: BEACON_ABI, functionName: "implementation" });
 }
 
 // Each copy of Prosperion brings its own Telegram bot, or none. The username comes from Telegram itself (getMe),
@@ -44,6 +59,8 @@ const api = createApi({
   gate: GATE,
   check: checkMarket,
   readLimits,
+  spentToday,
+  marketImpl,
   readVault,
   listVaults,
   explainNavMove,
