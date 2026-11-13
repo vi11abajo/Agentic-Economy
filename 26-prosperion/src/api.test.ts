@@ -94,6 +94,18 @@ test("without limits on the gate the page gets a setLimits step first", async ()
   } finally { await s.close(); }
 });
 
+test("a saved sign link has a QR code a phone wallet can scan; an unknown one has none", async () => {
+  const s = await serve();
+  try {
+    const id = buyRequest(s.store);
+    const qr = await fetch(`${s.base}/api/req/${id}/qr.svg`);
+    assert.equal(qr.status, 200);
+    assert.equal(qr.headers.get("content-type"), "image/svg+xml");
+    assert.match(await qr.text(), /^<svg[^>]*viewBox/);
+    assert.equal((await fetch(`${s.base}/api/req/nope/qr.svg`)).status, 404);
+  } finally { await s.close(); }
+});
+
 test("an unknown request id is a 404", async () => {
   const s = await serve();
   try { assert.equal((await fetch(`${s.base}/api/req/nope`)).status, 404); } finally { await s.close(); }
@@ -343,29 +355,52 @@ test("Stop clears every limit, so the gate refuses any buy from this wallet", as
   try {
     const r = await (await limitsCall(s, "POST", { stop: true })).json();
     const d = decodeFunctionData({ abi: GATE_ABI, data: r.tx.data });
-    assert.deepEqual(d.args![0], { maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n, acceptedMarketImpl: "0x0000000000000000000000000000000000000000" });
+    // the market code stays in, so the gate can tell "stopped" from "never set" and no buy link offers limits again
+    assert.deepEqual(d.args![0], { maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n, acceptedMarketImpl: IMPL });
   } finally { await s.close(); }
 });
 
-test("a buy link asks to raise the daily limit when today's spend leaves no room", async () => {
+// Limits are yours. A buy link only ever offers to set them when the gate has none; once set, a buy that does not fit
+// is refused in words and the page points to "Your buy limits". (It used to raise them to fit, so a 0.1 limit became
+// 10 with one more signature.)
+const refusedFor = async (over: Partial<ApiDeps>, maxReserveBeforeWei = "0") => {
+  const s = await serve(over);
+  try { return await (await fetch(`${s.base}/api/req/${buyRequest(s.store, maxReserveBeforeWei)}`)).json(); }
+  finally { await s.close(); }
+};
+
+test("a buy above your per-buy limit is refused, never raised", async () => {
+  const r = await refusedFor({ readLimits: async () => ({ maxPerBuy: 5n * 10n ** 16n, maxPerDay: 10n * PROS, maxReserveBefore: 2n * PROS, acceptedMarketImpl: IMPL }) });
+  assert.match(r.refusal, /above your limit of 0\.05 PROS per buy/);
+  assert.match(r.refusal, /Your buy limits/);
+  assert.equal(r.setLimits, null);
+  assert.equal(r.tx, null);
+});
+
+test("a buy that does not fit in what is left of today is refused", async () => {
   // 1 PROS per buy, 10 a day, 9.95 already spent today: the 0.1 buy would revert with OverPerDay
-  const s = await serve({ spentToday: async () => 9_950n * 10n ** 15n });
-  try {
-    const r = await (await fetch(`${s.base}/api/req/${buyRequest(s.store)}`)).json();
-    assert.ok(r.setLimits, "the page needs a setLimits step first");
-    assert.ok(BigInt(r.setLimits.limits.maxPerDay) >= 9_950n * 10n ** 15n + 10n ** 17n);
-  } finally { await s.close(); }
+  const r = await refusedFor({ spentToday: async () => 9_950n * 10n ** 15n });
+  assert.match(r.refusal, /0\.05 PROS is left of your 10 PROS a day/);
+  assert.equal(r.tx, null);
 });
 
-test("a buy link never lowers limits you set higher yourself", async () => {
-  // your own 0.05 per buy is too small for the 0.1 buy, but your 10 a day must stay 10, not drop to 0.3
-  const s = await serve({ readLimits: async () => ({ maxPerBuy: 5n * 10n ** 16n, maxPerDay: 10n * PROS, maxReserveBefore: 2n * PROS, acceptedMarketImpl: IMPL }) });
-  try {
-    const r = await (await fetch(`${s.base}/api/req/${buyRequest(s.store)}`)).json();
-    assert.equal(r.setLimits.limits.maxPerBuy, (10n ** 17n).toString());
-    assert.equal(r.setLimits.limits.maxPerDay, (10n * PROS).toString());
-    assert.equal(r.setLimits.limits.maxReserveBefore, (2n * PROS).toString());
-  } finally { await s.close(); }
+test("more PROS in the curve than your limit allows is refused, even when the link itself would allow it", async () => {
+  const r = await refusedFor({ check: async () => check({ reserveBefore: 5n * PROS }) }, (10n * PROS).toString());
+  assert.match(r.refusal, /only while at most 0 PROS is in the curve; 5 PROS is in it now/);
+  assert.equal(r.tx, null);
+});
+
+test("after Stop all buys a buy link is refused instead of offering new limits", async () => {
+  const r = await refusedFor({ readLimits: async () => ({ maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n, acceptedMarketImpl: IMPL }) });
+  assert.match(r.refusal, /stopped all buys/);
+  assert.equal(r.setLimits, null);
+  assert.equal(r.tx, null);
+});
+
+test("limits that accepted older market code are refused with a pointer to save them again", async () => {
+  const r = await refusedFor({ readLimits: async () => ({ maxPerBuy: PROS, maxPerDay: 10n * PROS, maxReserveBefore: 0n, acceptedMarketImpl: "0x1111111111111111111111111111111111111111" }) });
+  assert.match(r.refusal, /market code changed since you set your limits/);
+  assert.equal(r.tx, null);
 });
 
 test("Sign out ends the session on the server and clears the cookie, so another wallet can connect", async () => {

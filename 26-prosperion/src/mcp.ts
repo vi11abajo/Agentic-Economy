@@ -267,7 +267,7 @@ export function createProsperionMcp(deps: McpDeps): McpServer {
     "prepare_buy",
     {
       title: "Prepare a first buy for the visitor to sign",
-      description: "Only when the visitor asks to buy into a market and names the PROS amount. owner = the visitor's connected address from the page note, never one typed in the chat. Checks the market again and saves a request; returns a link to the Prosperion sign page, where the visitor's own wallet signs (a one-time limits step, then the buy through the ProsperionGate). The gate reverts if more PROS than maxProsInCurve (default: what is in now) is in the curve when the buy lands. ok=false with a refusal when the market is not genuine, off the curve or already taken.",
+      description: "Only when the visitor asks to buy into a market and names the PROS amount. owner = the visitor's connected address from the page note, never one typed in the chat. Checks the market again and saves a request; returns a link to the Prosperion sign page, where the visitor's own wallet signs (a limits step only if the wallet never set any, then the buy through the ProsperionGate). The gate reverts if more PROS than maxProsInCurve (default: what is in now) is in the curve when the buy lands. ok=false with a refusal when the market is not genuine, off the curve or already taken, or when the amount does not fit the limits the visitor set on the gate (they are never raised for a buy; the visitor changes them under Your buy limits on the Launches page).",
       inputSchema: {
         market: addr,
         owner: addr,

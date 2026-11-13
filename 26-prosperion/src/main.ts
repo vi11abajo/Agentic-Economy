@@ -34,7 +34,8 @@ async function readLimits(owner: Address): Promise<GateLimits | null> {
   const [maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl] = await client.readContract({
     address: GATE, abi: GATE_ABI, functionName: "limitsOf", args: [owner],
   });
-  return maxPerBuy === 0n ? null : { maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl };
+  // all zeros and no market code: never set. Zeros with a code is "Stop all buys", which is not the same thing.
+  return maxPerBuy === 0n && /^0x0{40}$/.test(acceptedMarketImpl) ? null : { maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl };
 }
 
 async function spentToday(owner: Address): Promise<bigint> {
@@ -109,7 +110,7 @@ const indexer = new TradeIndexer(book, {
 void indexer.run((e) => console.error(`[trades] ${e.message}`));
 
 await startMcpHttp({
-  listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i),
+  listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i, { readLimits, spentToday }),
   trades: book, head: () => client.getBlockNumber({ cacheTime: 0 }),
 }, MCP_PORT);
 console.log(`[mcp] 127.0.0.1:${MCP_PORT}/mcp`);
