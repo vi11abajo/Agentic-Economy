@@ -70,6 +70,7 @@ async function load() {
         return;
       }
       await ensurePharos(p0);
+      let lastHash = "";
       for (const s of steps) {
         const li = $(`#step-${s.key}`), st = $(`#st-${s.key}`);
         if (li.classList.contains("done")) continue;
@@ -77,9 +78,13 @@ async function load() {
         const { hash, receipt } = await sendOne(p0, s.tx, { onStatus: (m) => { st.textContent = m; } });
         if (receipt.status !== "0x1") { st.innerHTML = `Reverted: ${txLink(hash)}. Nothing was bought.`; go.disabled = false; return; }
         st.innerHTML = `Done: ${txLink(hash)}`;
+        if (s.key === "buy") lastHash = hash;
         li.className = "done";
       }
-      act.innerHTML = `<p><strong>Bought.</strong> The tokens are in your wallet.${p.source === "alert" || !p.source ? " The agent's notes on this launch are in your Telegram." : ` <a href="/">Ask the agent</a> about your position.`}</p>`;
+      // the chat page writes the question itself from these two values; see home.js
+      const ask = `/?bought=${encodeURIComponent(lastHash)}&market=${encodeURIComponent(p.market)}`;
+      act.innerHTML = `<p><strong>Bought.</strong> The tokens are in your wallet.${p.source === "alert" || !p.source ? " The agent's notes on this launch are in your Telegram." : ""}</p>
+        <p><a class="btn" href="${ask}">Ask the agent about this buy</a></p>`;
     } catch (e) {
       $("#who").textContent = e.message || String(e);
       go.disabled = false;

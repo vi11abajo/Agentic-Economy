@@ -32,24 +32,40 @@ function showQuota() {
 document.addEventListener("prosperion:me", (e) => applyMe(e.detail));
 applyMe(me);
 whoAmI().then(applyMe);
-// ---- "Ask the agent about this vault" lands here as /?vault=<address>. Only an address is accepted and the
-// question is written here, so a pasted link cannot spend someone's questions on a prompt of its own.
-// The parameter is dropped from the address bar at once, or a reload would ask again.
-const fromVault = (() => {
-  const v = new URLSearchParams(location.search).get("vault");
+// ---- "Ask the agent about this vault" lands here as /?vault=<address>, and "Ask the agent" after a buy as
+// /?bought=<tx hash>&market=<address>. Only an address and a hash are accepted and the question is written here,
+// so a pasted link cannot spend someone's questions on a prompt of its own.
+// The parameters are dropped from the address bar at once, or a reload would ask again.
+const isAddr = (v) => (v && /^0x[0-9a-fA-F]{40}$/.test(v) ? v : null);
+const landed = (() => {
+  const q = new URLSearchParams(location.search);
   if (location.search) window.history.replaceState(null, "", location.pathname);
-  return v && /^0x[0-9a-fA-F]{40}$/.test(v) ? v : null;
+  const tx = q.get("bought");
+  return {
+    vault: isAddr(q.get("vault")),
+    bought: tx && /^0x[0-9a-fA-F]{64}$/.test(tx) ? tx : null,
+    market: isAddr(q.get("market")),
+  };
 })();
 let pendingAsk = null;
-if (fromVault) {
-  history.length = 0;
-  keep();
+if (landed.vault) {
+  const fromVault = landed.vault;
   pendingAsk = api("/vaults").catch(() => []).then((list) => {
     const name = list.find((x) => String(x.r25Vault).toLowerCase() === fromVault.toLowerCase())?.vaultName?.trim();
     return `What is really behind ${name ? `${name}'s` : "this vault's"} NAV right now? Vault ${fromVault}.`;
   });
   $("#gate-note").textContent = "Sign in and your question about this vault goes out right away. Signing is one message, not a transaction.";
+} else if (landed.bought && landed.market) {
+  // the market's name comes from the same list the board uses; a launch too new for it goes by its address
+  const { bought, market } = landed;
+  pendingAsk = api("/vaults").catch(() => []).then((list) => {
+    const sym = list.find((x) => String(x.market).toLowerCase() === market.toLowerCase())?.pVaultSymbol?.trim();
+    return `I just bought into ${sym ? `${sym} (market ${market})` : `market ${market}`} in tx ${bought}. ` +
+      "What do I hold there now, what would selling it all pay right now, and who else is in this launch?";
+  });
+  $("#gate-note").textContent = "Sign in and your question about this buy goes out right away. Signing is one message, not a transaction.";
 }
+if (pendingAsk) { history.length = 0; keep(); }
 async function sendPending() {
   if (!pendingAsk || !me.address) return;
   // taken before the await: the sign-in event and the /api/me answer can both land here, and it goes out once
