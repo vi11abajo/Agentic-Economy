@@ -1,6 +1,6 @@
 // The frame every page sits in: the menu on the left (a drawer on phones) and the wallet button at its foot.
 // Each page says who it is with <body data-page="...">, and the matching menu item lights up.
-import { $, api, short, walletEnv, signIn } from "./app.js";
+import { $, api, short, walletEnv, signIn, EXPLORER } from "./app.js";
 
 const icon = (paths) =>
   `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
@@ -44,7 +44,13 @@ export function mountShell() {
       `<a class="item" href="${i.href}"${i.k === page ? ' aria-current="page"' : ""}${i.out ? ' target="_blank" rel="noopener"' : ""} data-k="${i.k}">${ICONS[i.icon]}<span>${i.text}</span></a>`).join("")}</div>`).join("")}
     </nav>
     <div class="side-foot">
-      <button type="button" class="wallet-pill" id="wallet-pill"><span id="wallet-text">Connect Wallet</span><i>${ICONS.wallet}</i></button>
+      <div class="wallet-menu" id="wallet-menu" role="menu" hidden>
+        <p class="wallet-menu-addr" id="wallet-menu-addr"></p>
+        <button type="button" role="menuitem" id="wm-copy">Copy address</button>
+        <a role="menuitem" id="wm-explorer" target="_blank" rel="noopener">View on pharosscan</a>
+        <button type="button" role="menuitem" id="wm-signout">Sign out</button>
+      </div>
+      <button type="button" class="wallet-pill" id="wallet-pill" aria-haspopup="menu" aria-expanded="false"><span id="wallet-text">Connect Wallet</span><i>${ICONS.wallet}</i></button>
       <p class="wallet-note small muted" id="wallet-note" hidden></p>
     </div>`;
 
@@ -98,19 +104,47 @@ export function signedOut() {
 }
 
 async function wireWallet() {
-  const text = $("#wallet-text"), note = $("#wallet-note"), pill = $("#wallet-pill");
+  const text = $("#wallet-text"), note = $("#wallet-note"), pill = $("#wallet-pill"), menu = $("#wallet-menu");
+  let address = null;
+  const openMenu = (on) => {
+    menu.hidden = !on;
+    pill.setAttribute("aria-expanded", String(on));
+  };
   const show = (me) => {
-    pill.classList.toggle("on", !!me.address);
-    text.textContent = me.address ? short(me.address) : "Connect Wallet";
-    pill.title = me.address ? `Signed in as ${me.address}` : "";
+    address = me.address;
+    pill.classList.toggle("on", !!address);
+    text.textContent = address ? short(address) : "Connect Wallet";
+    pill.title = address ? `Signed in as ${address}` : "";
+    if (!address) openMenu(false);
   };
   document.addEventListener("prosperion:me", (e) => show(e.detail));
   const me = await whoAmI();
   show(me);
   announce(me);
-  pill.addEventListener("click", async () => {
-    if (pill.classList.contains("on")) return;
+
+  // Signed in, the pill opens the wallet menu; signed out, it connects.
+  pill.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (address) {
+      $("#wallet-menu-addr").textContent = address;
+      $("#wm-explorer").href = `${EXPLORER}/address/${address}`;
+      return openMenu(menu.hidden);
+    }
     try { await connectWallet(); note.hidden = true; }
-    catch (e) { note.hidden = false; note.textContent = e.message; }
+    catch (err) { note.hidden = false; note.textContent = err.message; }
+  });
+  document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target)) openMenu(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { openMenu(false); pill.focus(); } });
+
+  $("#wm-copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(address); $("#wm-copy").textContent = "Copied"; }
+    catch { $("#wm-copy").textContent = "Copy failed: select the address above"; }
+    setTimeout(() => { $("#wm-copy").textContent = "Copy address"; }, 1500);
+  });
+  $("#wm-signout").addEventListener("click", async () => {
+    try { await api("/signout", { method: "POST" }); }
+    catch (err) { note.hidden = false; note.textContent = `Could not sign out: ${err.message}`; return; }
+    note.hidden = true;
+    signedOut();
   });
 }

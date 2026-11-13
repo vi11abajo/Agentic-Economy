@@ -196,6 +196,9 @@ export function openStore(path: string) {
       db.prepare("INSERT INTO sessions VALUES (?, ?, ?)").run(token, getAddress(address), Date.now() + ttlMs);
       return token;
     },
+    endSession(token: string): void {
+      db.prepare("DELETE FROM sessions WHERE token = ?").run(token);
+    },
     sessionAddress(token: string): Address | null {
       const r = db.prepare("SELECT address, expires FROM sessions WHERE token = ?").get(token) as Record<string, unknown> | undefined;
       return r && (r.expires as number) > Date.now() ? (r.address as Address) : null;

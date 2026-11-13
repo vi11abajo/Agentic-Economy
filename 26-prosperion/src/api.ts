@@ -5,7 +5,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
 import { encodeFunctionData, getAddress, isAddress, parseAbi, parseEther, type Address, type Hex } from "viem";
-import { SESSION_COOKIE, SESSION_TTL_MS, newNonce, sessionCookie, verifySiwe } from "./auth.js";
+import { SESSION_COOKIE, SESSION_TTL_MS, endedSessionCookie, newNonce, sessionCookie, verifySiwe } from "./auth.js";
 import type { ChatMessage, WalletEnv } from "./agent.js";
 import type { MarketCheck } from "./market.js";
 import type { Store } from "./store.js";
@@ -249,6 +249,12 @@ export function createApi(d: ApiDeps) {
         d.store.linkIdentity(address, ip);
         const token = d.store.newSession(address, SESSION_TTL_MS);
         return send(res, 200, { address }, { "set-cookie": sessionCookie(token) });
+      }
+      // The wallet menu's Sign out. The token dies on our side too, not just in this browser's cookie jar.
+      if (req.method === "POST" && path === "/signout") {
+        const t = cookie(req, SESSION_COOKIE);
+        if (t) d.store.endSession(t);
+        return send(res, 200, { address: null }, { "set-cookie": endedSessionCookie });
       }
 
       if (path === "/watch") {
