@@ -383,3 +383,13 @@ test("Sign out ends the session on the server and clears the cookie, so another 
     assert.equal((await fetch(`${s.base}/api/signout`, { method: "POST" })).status, 200);
   } finally { await s.close(); }
 });
+
+test("the Launches list re-checks markets still on the curve before it answers", async () => {
+  const s = await serve({ check: async () => check({ block: 777n, reserveBefore: 18_909n * 10n ** 15n }) });
+  try {
+    s.store.saveLaunch({ market: MARKET, vault: "0x251a68B711EA3967B434EefCA49D43cD133Ef3ee", pToken: "0x14C150c0D60006d0CDdDcA860bA7C50F180baf81", block: 90n, tx: "0xabc", checks: check() });
+    const [l] = await (await fetch(`${s.base}/api/launches`)).json();
+    assert.equal(l.checks.reserveBefore, (18_909n * 10n ** 15n).toString());
+    assert.equal(l.checks.block, "777");
+  } finally { await s.close(); }
+});

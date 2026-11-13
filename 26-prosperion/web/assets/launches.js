@@ -5,7 +5,8 @@ mountShell();
 
 // A launch still on the curve gets "Prepare first buy". It asks for an amount, signs the visitor in if needed, and
 // sends them to the sign page, where the market is checked again and their own wallet does the rest.
-// The tag shows what the watcher saw at creation; the server checks the market again before any link exists.
+// The tag is the server's latest check of the market (re-run on every load for markets still on the curve), with
+// the block it was read at; the server checks once more before any link exists.
 const canTry = (c) => c && c.genuine && c.phase === 0;
 let openForm = null;
 
@@ -19,7 +20,7 @@ function row(l) {
     ? `<button type="button" class="quiet prep-open" data-market="${esc(l.market)}">Prepare first buy</button>`
     : "";
   return `<div class="launch" data-market="${esc(l.market)}">
-    <div>Market ${addrLink(l.market)}, token ${addrLink(l.pToken)}<br><span class="muted small">${blockLink(l.block)}, <a href="${EXPLORER}/tx/${l.tx}">creation tx</a></span></div>
+    <div>Market ${addrLink(l.market)}, token ${addrLink(l.pToken)}<br><span class="muted small">created at ${blockLink(l.block)}, <a href="${EXPLORER}/tx/${l.tx}">creation tx</a>${c ? `; checked at ${blockLink(c.block)}` : ""}</span></div>
     <div class="launch-side">${tag}${act}</div>
     ${canTry(c) ? `<form class="prep" hidden>
       <label>PROS to spend<input name="amount" type="number" min="0.01" max="1000" step="0.01" value="1" required></label>
