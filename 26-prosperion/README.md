@@ -61,8 +61,12 @@ Every number below comes from Prosperion's own tools and can be re-read at the b
 4. **Launches** lists the markets the watcher saw. On one still on the curve, press **Prepare first buy**, enter an
    amount, and you land on the sign page. Or ask in the chat: *"I want to be first into market 0x… with 0.1 PROS."*
 5. The **sign page** checks the market again at the current block. Then your wallet signs your limits in the gate, if
-   the ones you already set do not cover this buy (no money moves), and the buy itself.
-6. **Alerts** lets you leave the page open in Telegram instead: set your amount and how much may already be in the
+   the ones you already set do not cover this buy or what is left of today (no money moves), and the buy itself. It only
+   raises what this buy needs; limits you set higher stay as they are.
+6. **Your buy limits**, at the top of Launches, shows what the gate holds for your wallet: per buy, per day with
+   today's spend, and how much may already be in the curve. Change them, or press **Stop all buys** to clear them so
+   the gate refuses every buy from your wallet. Either is one `setLimits` transaction you sign; no PROS moves.
+7. **Alerts** lets you leave the page open in Telegram instead: set your amount and how much may already be in the
    curve, link the bot, and each launch that passes the checks arrives with the facts, a sign link and the agent's
    write-up. The live copy runs without a bot; see [Your own Telegram bot](#your-own-telegram-bot).
 
@@ -109,6 +113,8 @@ Each chat answer and each launch write-up is logged and readable at `/api/decisi
   - the market code is the implementation you accepted (if Prosper upgrades it, you decide again);
   - the amount fits your per-buy and per-day limits.
 
+  Only your own wallet can set its limits, at any time. A zero per-buy limit (what **Stop all buys** signs) makes every
+  buy revert.
   pTokens go from the market straight to you; any refund is forwarded back in the same call. The gate has no owner,
   no admin and no upgrade path, and it holds nothing between calls.
 - **The chat is wallet-gated.** Limits belong to a person: wallets and IPs are joined only when a signed-in wallet

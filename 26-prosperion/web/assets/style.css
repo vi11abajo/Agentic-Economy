@@ -226,3 +226,11 @@ ol.steps li.now { font-weight: 500; }
 #pick { margin-bottom: 32px; }
 td a { text-decoration: none; }
 td a:hover { text-decoration: underline; }
+
+/* Your buy limits, on the Launches page */
+#limits h2 { margin-top: 0; }
+.limits-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 14px; }
+.limits-form label { margin: 0; font-size: 14px; }
+.limits-form input { width: 150px; display: block; margin-top: 6px; }
+.limits-form .row { flex-basis: 100%; }
+#limits .bad, #limits-note.bad { color: var(--bad, #b42318); }
