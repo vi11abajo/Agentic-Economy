@@ -15,6 +15,8 @@ export const GATE_ABI = parseAbi([
   "function buy(address market, uint256 minOut, uint256 deadline) payable returns (uint256)",
   "function setLimits((uint128 maxPerBuy, uint128 maxPerDay, uint128 maxReserveBefore, address acceptedMarketImpl) l)",
   "function limitsOf(address) view returns (uint128 maxPerBuy, uint128 maxPerDay, uint128 maxReserveBefore, address acceptedMarketImpl)",
+  "function spentOn(address user, uint256 day) view returns (uint256)",
+  "function marketBeacon() view returns (address)",
 ]);
 
 export interface GateLimits {
@@ -28,6 +30,10 @@ export interface ApiDeps {
   gate: Address | null;
   check: (market: Address, amountIn: bigint) => Promise<MarketCheck>;
   readLimits: (owner: Address) => Promise<GateLimits | null>;
+  /** PROS this wallet has put through the gate in the current UTC day, as the gate counts it */
+  spentToday: (owner: Address) => Promise<bigint>;
+  /** the Prosper market code the beacon points at right now */
+  marketImpl: () => Promise<Address>;
   readVault: (vault: Address, block?: bigint) => Promise<unknown>;
   listVaults: () => Promise<unknown[]>;
   explainNavMove: (vault: Address, from: bigint, to: bigint) => Promise<unknown>;
@@ -67,6 +73,26 @@ const cookie = (req: IncomingMessage, name: string) =>
 
 export { refusalFor };
 
+const NO_IMPL = "0x0000000000000000000000000000000000000000" as Address;
+const prosNumber = /^\d+(\.\d{1,18})?$/;
+const bigger = (a: bigint, b: bigint) => (a > b ? a : b);
+
+/** What a person typed into "Your buy limits", as gate limits, or the reason it cannot work. */
+export function limitsFromForm(b: Record<string, unknown>, implNow: Address): GateLimits | string {
+  if (b.stop === true) return { maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n, acceptedMarketImpl: NO_IMPL };
+  for (const k of ["perBuyPros", "perDayPros", "inCurvePros"]) {
+    if (typeof b[k] !== "string" || !prosNumber.test(b[k] as string)) return `${k} must be a number like 0.5`;
+  }
+  const maxPerBuy = parseEther(b.perBuyPros as string), maxPerDay = parseEther(b.perDayPros as string);
+  const maxReserveBefore = parseEther(b.inCurvePros as string);
+  if (maxPerBuy === 0n) return "PROS per buy must be above 0. To switch buys off, use Stop all buys.";
+  if (maxPerBuy > parseEther("1000")) return "PROS per buy is capped at 1000 here.";
+  if (maxPerDay < maxPerBuy) return "PROS a day has to be at least PROS per buy, or no buy could ever pass.";
+  if (maxPerDay > parseEther("10000")) return "PROS a day is capped at 10000 here.";
+  if (maxReserveBefore > parseEther("1000000")) return "PROS already in the curve is capped at 1000000 here.";
+  return { maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl: implNow };
+}
+
 export function createApi(d: ApiDeps) {
   // "Prepare first buy" only writes a row, but rows are still rows: a few a minute per wallet is plenty for a person.
   const prepares = new Map<string, number[]>();
@@ -105,8 +131,16 @@ export function createApi(d: ApiDeps) {
       maxPerBuy: amount, maxPerDay: amount * 3n, maxReserveBefore: maxReserve, acceptedMarketImpl: getAddress(p.acceptedImpl),
     };
     const have = await d.readLimits(owner);
-    const fits = have && have.maxPerBuy >= amount && have.maxReserveBefore >= maxReserve &&
+    // The gate also counts the day: a buy that fits per buy but not in what is left of today would only revert.
+    const spent = have ? await d.spentToday(owner) : 0n;
+    const fits = have && have.maxPerBuy >= amount && have.maxReserveBefore >= maxReserve && spent + amount <= have.maxPerDay &&
       have.acceptedMarketImpl.toLowerCase() === want.acceptedMarketImpl.toLowerCase();
+    // Raise what this buy needs and nothing else: limits someone set higher on purpose stay where they are.
+    if (have) {
+      want.maxPerBuy = bigger(have.maxPerBuy, amount);
+      want.maxPerDay = bigger(have.maxPerDay, bigger(want.maxPerDay, spent + amount));
+      want.maxReserveBefore = bigger(have.maxReserveBefore, maxReserve);
+    }
     const setLimits = fits ? null : {
       to: d.gate, value: "0",
       data: encodeFunctionData({ abi: GATE_ABI, functionName: "setLimits", args: [want] }),
@@ -242,6 +276,28 @@ export function createApi(d: ApiDeps) {
         if (tooManyPrepares(me)) return send(res, 429, { error: "Ten buys prepared this minute. Wait a moment." });
         const r = await prepareBuy(d.store, d.check, { market: getAddress(b.market), owner: me, amountWei: parseEther(b.amountPros), source: "page" });
         return r.ok ? send(res, 200, { url: r.url, check: r.check }) : send(res, 409, { error: r.refusal, check: r.check });
+      }
+      // "Your buy limits" on the Launches page. We only read the gate and encode a setLimits; the wallet signs it.
+      if (path === "/limits") {
+        const me = signedIn(req);
+        if (!me) return send(res, 401, { error: "Connect your wallet to see the limits the gate holds for it." });
+        if (!d.gate) return send(res, 409, { error: "The Prosperion gate is not deployed on this copy." });
+        const implNow = await d.marketImpl();
+        if (req.method === "GET") {
+          const [limits, spentToday] = await Promise.all([d.readLimits(me), d.spentToday(me)]);
+          return send(res, 200, {
+            gate: d.gate, address: me, limits, spentToday, implNow, dayEndsAt: startOfDay() + 86_400,
+            implAccepted: !!limits && limits.acceptedMarketImpl.toLowerCase() === implNow.toLowerCase(),
+          });
+        }
+        if (req.method === "POST") {
+          const l = limitsFromForm(await readJson(req), implNow);
+          if (typeof l === "string") return send(res, 400, { error: l });
+          return send(res, 200, {
+            limits: l,
+            tx: { to: d.gate, value: "0", data: encodeFunctionData({ abi: GATE_ABI, functionName: "setLimits", args: [l] }) },
+          });
+        }
       }
       if (req.method === "GET" && path === "/alerts") return send(res, 200, { bot: d.telegramBot() });
       if (req.method === "POST" && path === "/telegram/link") {
