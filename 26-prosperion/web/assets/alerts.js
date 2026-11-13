@@ -11,6 +11,14 @@ async function openWatch(address) {
   if (w) { $("#per-buy").value = Number(BigInt(w.maxPerBuyWei)) / 1e18; $("#max-reserve").value = Number(BigInt(w.maxReserveBeforeWei)) / 1e18; }
 }
 whoAmI().then((me) => { if (me.address) openWatch(me.address); });
+// Signing in or out from the wallet menu changes whose watch this is.
+document.addEventListener("prosperion:me", (e) => {
+  if (!$("#watch-form")) return; // a bot-less copy replaced the panel
+  if (e.detail.address) return openWatch(e.detail.address);
+  $("#watch-form").hidden = true;
+  $("#signin-status").textContent = "";
+  $("#watch-status").textContent = "";
+});
 
 $("#signin-btn").addEventListener("click", async () => {
   const st = $("#signin-status");

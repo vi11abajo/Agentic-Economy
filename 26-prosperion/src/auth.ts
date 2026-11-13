@@ -35,6 +35,9 @@ export async function verifySiwe(store: Store, message: string, signature: Hex):
   return fields.address;
 }
 
+/** What the browser gets on sign out: the same cookie, empty and already expired. */
+export const endedSessionCookie = `${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+
 export function sessionCookie(token: string): string {
   return `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_TTL_MS / 1000}`;
 }

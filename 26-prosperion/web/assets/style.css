@@ -234,3 +234,19 @@ td a:hover { text-decoration: underline; }
 .limits-form input { width: 150px; display: block; margin-top: 6px; }
 .limits-form .row { flex-basis: 100%; }
 #limits .bad, #limits-note.bad { color: var(--bad, #b42318); }
+
+/* The wallet menu: opens above the pill when signed in */
+.side-foot { position: relative; }
+.wallet-menu {
+  position: absolute; left: 0; right: 0; bottom: calc(100% + 8px); z-index: 30;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.wallet-menu[hidden] { display: none; }
+.wallet-menu-addr { margin: 4px 8px 8px; font: 12px/1.4 ui-monospace, "Cascadia Mono", Consolas, monospace; word-break: break-all; color: var(--muted); }
+.wallet-menu button, .wallet-menu a {
+  display: block; width: 100%; text-align: left; padding: 9px 8px; border: 0; border-radius: 8px;
+  background: none; color: var(--ink); font: 400 15px/1.2 var(--font); text-decoration: none; cursor: pointer; height: auto;
+}
+.wallet-menu button:hover, .wallet-menu a:hover, .wallet-menu button:focus-visible, .wallet-menu a:focus-visible { background: var(--chip); }
+.wallet-menu #wm-signout { color: var(--bad, #b42318); }

@@ -367,3 +367,19 @@ test("a buy link never lowers limits you set higher yourself", async () => {
     assert.equal(r.setLimits.limits.maxReserveBefore, (2n * PROS).toString());
   } finally { await s.close(); }
 });
+
+test("Sign out ends the session on the server and clears the cookie, so another wallet can connect", async () => {
+  const s = await serve();
+  try {
+    const token = s.store.newSession(ME, SESSION_TTL_MS);
+    const cookie = `${SESSION_COOKIE}=${token}`;
+    const out = await fetch(`${s.base}/api/signout`, { method: "POST", headers: { cookie } });
+    assert.equal(out.status, 200);
+    assert.match(out.headers.get("set-cookie") ?? "", new RegExp(`^${SESSION_COOKIE}=;.*Max-Age=0`));
+    assert.equal(s.store.sessionAddress(token), null, "the old token is dead even if a browser keeps sending it");
+    const me = await (await fetch(`${s.base}/api/me`, { headers: { cookie } })).json();
+    assert.equal(me.address, null);
+    // signing out with no session is fine too
+    assert.equal((await fetch(`${s.base}/api/signout`, { method: "POST" })).status, 200);
+  } finally { await s.close(); }
+});
