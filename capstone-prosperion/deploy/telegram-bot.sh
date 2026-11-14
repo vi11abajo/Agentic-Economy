@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Gives your copy of Prosperion its own Telegram bot, so launch alerts have somewhere to go.
-# Make the bot first: talk to @BotFather, send /newbot, copy the token it gives you. Then, from 26-prosperion/:
+# Make the bot first: talk to @BotFather, send /newbot, copy the token it gives you. Then, from capstone-prosperion/:
 #   ssh -t <your-host> 'sudo bash -s' < deploy/telegram-bot.sh
 # The token is typed, not passed as an argument, so it stays out of shell history and the process list.
 set -euo pipefail
