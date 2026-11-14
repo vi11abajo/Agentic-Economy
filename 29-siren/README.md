@@ -86,15 +86,22 @@ siren needs no wallet and no private key: it only reads.
 
 ## Live run
 
-A first run with `--since 1500` on 2026-11-14, console only, read blocks 23043872 to 23045371 in 7.5 s and found
-12 events with the example rules. Two of them, as siren printed them:
+Recorded on 2026-11-14 with a Claude Code agent that installed the skill from this repo, delivering to a real Discord
+channel through the user's own webhook, saved in siren's `.env`. The agent never opened that file.
+
+1. `siren test`: `✓ discord`, and the test message showed up in the channel.
+2. A dry run first, `--since 100000 --once --console-only` in a scratch folder: a day of blocks, one hit.
+3. The real run, `--since 100600` (wider by the minutes the dry run took) with the example rules, read blocks
+   22957587 to 23058430 in 10,000-block rounds: `1 new alert, 1 delivered`. As siren printed it:
 
 ```
-Large WPROS transfer: 1,364.0898 WPROS (from 0x08cd62babd8Dac7404504792Df30C12fC5384Df5, to 0xCb79097744d5266bFca287A43612D9613Be46300, worth now $647.76 at PROS/USD 0.4749, rule 800+ WPROS) https://www.pharosscan.xyz/tx/0x14f5c554d102fa35a2aecf78515de0aaedfa488a8bdbd73a12cfa47e4e9c23af
-DODO swap paid with 50+ PROS: 189.2154 PROS sent with the call (caller 0x482e1427981f9ae4671ee6ae12048aae81b72959, function 0xff84aafa) https://www.pharosscan.xyz/tx/0x6b023a803a34b5114a26b72edeb34c72bce5d81abef22333b9fb9eb8f86bea2c
+Large USDC transfer: 101,196.4227 USDC (from 0x6c4AD865b836f49e4D54ba3F2a21F0a082a46766, to 0x415306DD1a7C5EeD3F4cE6C12E32F9df37a7e584, rule 2500+ USDC) https://www.pharosscan.xyz/tx/0xe51d9ccb1ff866701fcdd71c75d291ec1697c818296081842a777baac8f76a53
 ```
 
-The very next round read blocks 23045372 to 23045380 and queued nothing: the 12 were already in `state.json`.
+   In Discord it arrived as one embed: title "Large USDC transfer" linking to the tx, the amount, from and to in
+   full, rule `2500+ USDC`, block 23029505.
+4. The same command again right after: siren carried on from block 23058431, read 39 new blocks, `0 new alerts`;
+   `siren status` still showed 1 alerted and 0 waiting. Nothing new reached the channel.
 
 ## Layout
 
