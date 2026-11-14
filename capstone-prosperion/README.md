@@ -88,7 +88,7 @@ instructions to the wallet the page detects.
 
 ## How the agent works
 
-The agent is [Hermes Agent](https://github.com/NousResearch/hermes-agent) v0.23.1 running Gemini through the
+The agent runs Gemini through the
 [Antigravity subscription plugin](https://github.com/soyelmismo/hermes-antigravity-subscription). It has three MCP
 servers and nothing else:
 
@@ -125,9 +125,9 @@ Each chat answer and each launch write-up is logged and readable at `/api/decisi
 
 ## Safety
 
-- **No keys.** The agent cannot sign: Hermes runs with its terminal, file, code, browser and web toolsets switched
+- **No keys.** The agent cannot sign: it runs with its terminal, file, code, browser and web toolsets switched
   off, and the Chain MCP's send tool is cut. The pages never see a key. The server holds no wallet key: only the
-  Hermes API key, the model account's login and an optional Telegram bot token.
+  agent's API key, the model account's login and an optional Telegram bot token.
 - **You sign every fund move,** on our sign page, in your own wallet. `prepare_buy`, `prepare_sell` and `/api/prepare` save a request;
   the transaction is built only when the sign page loads, against the current block.
 - **The gate enforces your limits on chain.** `ProsperionGate.buy` reverts unless all of this holds in the same
@@ -167,22 +167,22 @@ Each chat answer and each launch write-up is logged and readable at `/api/decisi
  └────────────┬──────────────────▲───────────┘                     │
               │ chat (SSE)       │ MCP                             │
  ┌────────────▼──────────────────┴───────────┐                     │
- │ prosperion-hermes (Hermes :8642, loopback)│── Chain MCP ────────┘
+ │ prosperion-hermes (agent :8642, loopback) │── Chain MCP ────────┘
  │  Gemini via Antigravity                   │── Docs MCP
  └───────────────────────────────────────────┘
 ```
 
 | Path | What lives there |
 |---|---|
-| `src/` | TypeScript server: `api.ts` (HTTP API), `agent.ts` (talks to Hermes), `mcp.ts` (our MCP tools), `vault.ts`, `navmove.ts`, `market.ts`, `protocol.ts` (Prosper reads), `prepare.ts` + `sell.ts` (sign requests), `watcher.ts` (new markets), `subscriptions.ts` + `rules.ts` + `notifier.ts` + `telegram.ts` (the bot), `store.ts` (SQLite), `auth.ts` (sign-in with Ethereum). |
+| `src/` | TypeScript server: `api.ts` (HTTP API), `agent.ts` (talks to the agent), `mcp.ts` (our MCP tools), `vault.ts`, `navmove.ts`, `market.ts`, `protocol.ts` (Prosper reads), `prepare.ts` + `sell.ts` (sign requests), `watcher.ts` (new markets), `subscriptions.ts` + `rules.ts` + `notifier.ts` + `telegram.ts` (the bot), `store.ts` (SQLite), `auth.ts` (sign-in with Ethereum). |
 | `web/` | Static pages, plain ES modules, no build step. |
 | `contracts/` | `ProsperionGate.sol`, its Foundry tests on a mainnet fork, the deploy script. |
-| `hermes/` | Agent identity (`SOUL.md`), `apply.sh` (Hermes settings: model, MCP servers, disabled toolsets), unit file, smoke test. |
+| `hermes/` | Agent identity (`SOUL.md`), `apply.sh` (agent settings: model, MCP servers, disabled toolsets), unit file, smoke test. |
 | `skill/prosperion/` | The Prosper codex the agent reads: where the contracts live, what NAV is made of, why it moves, launches, the gate, early depositor rewards, cross-checks. |
 | `deploy/` | `push.sh` (ship to the server), unit file, nginx site, `telegram-bot.sh`. |
 
 Chat history lives in the browser tab and is sent with each question (last 12 messages); each chat gets its own
-Hermes session, so two people asking the same thing run in parallel. A typical answer with tool calls takes about
+agent session, so two people asking the same thing run in parallel. A typical answer with tool calls takes about
 a minute.
 
 ## The contract
@@ -227,7 +227,7 @@ forge verify-contract <gate address> src/ProsperionGate.sol:ProsperionGate --cha
 
 **3. Prepare the server.**
 - Create a system user `prosperion` with home `/opt/prosperion/home`.
-- As that user, install Hermes Agent from its repository, then the model plugin:
+- As that user, install the agent runtime from https://github.com/NousResearch/hermes-agent, then the model plugin:
 
   ```bash
   hermes plugins install https://github.com/soyelmismo/hermes-antigravity-subscription
@@ -247,7 +247,7 @@ forge verify-contract <gate address> src/ProsperionGate.sol:ProsperionGate --cha
 HOST=<your-server> bash deploy/push.sh
 ```
 
-On the first run, `push.sh` creates `/opt/prosperion/.env` with the Hermes API key. It then:
+On the first run, `push.sh` creates `/opt/prosperion/.env` with the agent's API key. It then:
 - runs `hermes/apply.sh`, which sets the model, the three MCP servers and the disabled toolsets, and writes SOUL.md;
 - installs the units and the nginx site;
 - restarts everything.
@@ -258,7 +258,7 @@ compares it with the RPC.
 
 | `.env` setting | Default | Meaning |
 |---|---|---|
-| `HERMES_API_KEY` | written by `push.sh` | Key for the local Hermes API. |
+| `HERMES_API_KEY` | written by `push.sh` | Key for the local agent API. |
 | `PROSPERION_GATE` | none | Your gate. Without it, sign links refuse. |
 | `PROSPERION_SITE` | `https://prosperion.pharosfdv.xyz` | Your site, used in sign links. |
 | `TELEGRAM_BOT_TOKEN` | empty | Your bot; see below. |
