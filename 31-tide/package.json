@@ -1,0 +1,22 @@
+{
+  "name": "tide",
+  "version": "1.0.0",
+  "description": "tide: watches Pharos gas, holds a non-urgent tx until it is cheap or its deadline comes, then shows what it saved",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "tide": "skill/tide/scripts/tide.mjs"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/test/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
