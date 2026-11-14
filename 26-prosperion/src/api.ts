@@ -13,7 +13,7 @@ import { sellTxs, type SellReader } from "./sell.js";
 import { limitsRefusal, prepareBuy, refusalFor } from "./prepare.js";
 import { launchRefresher } from "./freshLaunches.js";
 import QRCode from "qrcode";
-import { requestUrl } from "./links.js";
+import { requestUrl, walletLinks } from "./links.js";
 import { parseSubs, type AlertBook } from "./subscriptions.js";
 
 export const GATE_ABI = parseAbi([
@@ -183,10 +183,15 @@ export function createApi(d: ApiDeps) {
       const ip = clientIp(req);
       const seg = path.split("/").filter(Boolean);
 
-      // The same QR the Telegram alert carries, for the chat: a phone wallet's scanner opens the sign page in its browser.
+      // The QR for the chat's sign card. Plain, it is the page (OKX's own scanner opens it). With ?wallet= it holds
+      // that wallet's link, so the phone's camera opens the page straight inside the wallet: Rabby has no scanner
+      // for sites, and this is the only way a QR gets someone into it.
       if (req.method === "GET" && seg[0] === "req" && seg[1] && seg[2] === "qr.svg") {
         if (!/^[A-Za-z0-9_-]{1,64}$/.test(seg[1]) || !d.store.getRequest(seg[1])) return send(res, 404, { error: "unknown request" });
-        const svg = await QRCode.toString(requestUrl(seg[1]), { type: "svg", errorCorrectionLevel: "M", margin: 2 });
+        const wallet = url.searchParams.get("wallet");
+        if (wallet !== null && wallet !== "okx" && wallet !== "rabby" && wallet !== "metamask") return send(res, 400, { error: "wallet is okx, rabby or metamask" });
+        const page = requestUrl(seg[1]);
+        const svg = await QRCode.toString(wallet ? walletLinks(page)[wallet] : page, { type: "svg", errorCorrectionLevel: "M", margin: 2 });
         res.writeHead(200, { "content-type": "image/svg+xml", "cache-control": "public, max-age=86400" });
         return res.end(svg);
       }
