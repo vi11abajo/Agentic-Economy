@@ -75,6 +75,27 @@ token registry. I checked it on chain:
 The one in the x402 guide (`0xE0BE…4ec8`, marked "not official" there) has no `transferWithAuthorization`, so x402
 `exact` can't settle on it.
 
+## Live run
+
+Recorded on 2026-11-14 with a Claude Code agent that installed the skill from this repo and got only the paths of the
+two key files. Before: seller `0xa991…4348` 2 PROS, 0 USDC; buyer `0x4644…D3Bb` 5 PROS, 20 USDC. Then
+`turnstile demo`:
+
+| Step | What happened |
+|---|---|
+| `GET /health` | 200, free |
+| `/v1/pulse` | 402 for 0.001 USDC, signed, 200 with `PAYMENT-RESPONSE` success, tx [`0x2305…dd13`](https://atlantic.pharosscan.xyz/tx/0x230526a69b269946c44241b97dfa10c61b26b26b34bfa42b25d6e0435716dd13), block 32785764 |
+| `/v1/usdc-flows` | 402 for 0.005 USDC, signed, 200, tx [`0x017f…cb77`](https://atlantic.pharosscan.xyz/tx/0x017f71ea861228d3d0a7b4bebe3a2285d5415cd9fef4af80276aa856d1becb77), block 32785770; the data: 251 mainnet USDC transfers, about 26,595 USDC in 1000 blocks |
+| underpay | 0.000999 signed, 402 again: `No matching payment requirements` |
+| forged | one byte of the signature changed, 402 again: `invalid_exact_evm_signature` |
+| `/facilitator/supported` | `exact` on `eip155:688689`, signer `0xa991…4348` |
+
+Both txs read back from the Atlantic RPC: the seller calls `transferWithAuthorization` on USDC `0xcfC8…Fc8B`, the
+receipt holds `AuthorizationUsed` for the buyer's nonce and a `Transfer` of exactly 0.001 / 0.005 USDC from the
+buyer to the seller, status success. After: seller 0.006 USDC and 1.999811496 PROS (it paid both settlements' gas),
+buyer 19.994 USDC and still 5 PROS. The agent then asked Atlantic for each address's tx count: seller 2, buyer 0,
+so neither bad payment ever reached the chain.
+
 ## Layout
 
 `src/atlantic.ts` network facts · `src/keys.ts` env-file keys · `src/facilitator.ts` the facilitator and its HTTP
