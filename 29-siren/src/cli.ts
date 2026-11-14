@@ -47,7 +47,11 @@ async function main(): Promise<number> {
     console.log(`${env.created ? "made" : "kept"} ${env.path}`);
     if (!existsSync(rulesPath)) writeFileSync(rulesPath, EXAMPLE_RULES);
     console.log(`rules: ${rulesPath}`);
-    console.log(`Open the .env, paste your Telegram bot token and/or Discord webhook URL, save. Then: siren connect (Telegram), siren test.`);
+    // name the exact lines: an agent retelling "add DISCORD_WEBHOOK=" sent a newbie to a key siren never reads
+    console.log(`Open the .env and paste after the = sign, no quotes:`);
+    console.log(`  SIREN_TELEGRAM_BOT_TOKEN=  the token from @BotFather (then send /start to the bot and run: siren connect)`);
+    console.log(`  SIREN_DISCORD_WEBHOOK=     the webhook URL (channel settings > Integrations > Webhooks > Copy Webhook URL)`);
+    console.log(`Those lines are already in the file. Save, then: siren test.`);
     return 0;
   }
 
