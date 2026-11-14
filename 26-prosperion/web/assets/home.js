@@ -122,24 +122,57 @@ function md(src) {
   return html;
 }
 
-// A sign link from prepare_buy gets a card under the answer: a button for this browser, and for a phone wallet the
-// same QR the Telegram alert carries plus links that open the page inside OKX, Rabby or MetaMask. Only an id we can
-// look up is used; the QR itself comes from the server, which refuses ids it never saved.
+// A sign link from prepare_buy or prepare_sell gets a card under the answer: a button for this browser, and a QR
+// that holds the chosen wallet's own link, so the phone's camera opens the page straight inside that wallet (Rabby
+// cannot scan sites at all). Only an id we can look up is used; the QR comes from the server, which refuses ids it
+// never saved. Everything on the card opens in a new tab: the chat stays where it is.
+const WALLETS = {
+  okx: { name: "OKX Wallet", how: "Scan with your phone camera: it opens this page inside OKX Wallet." },
+  rabby: { name: "Rabby", how: "Scan with your phone camera: it opens this page inside Rabby. Rabby's own scanner does not open sites." },
+  metamask: { name: "MetaMask", how: "Scan with your phone camera: it opens this page inside MetaMask." },
+};
+const PICKED = "ps_qrwallet";
+// The wallet the visitor named last in this chat ("rabby, confirmed"), else the one they picked on a card before.
+function chosenWallet() {
+  const said = { rabby: /rabby|рабби|раби/i, metamask: /meta\s*mask|метамаск/i, okx: /\bokx\b|окх|окекс/i };
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (history[i].role !== "user") continue;
+    const hit = Object.keys(said).find((k) => said[k].test(history[i].content));
+    if (hit) return hit;
+  }
+  try { const p = localStorage.getItem(PICKED); if (p && WALLETS[p]) return p; } catch {}
+  return "okx";
+}
+const qrSrc = (id, w) => `/api/req/${id}/qr.svg?wallet=${w}`;
 function signCards(text) {
   const ids = [...new Set([...text.matchAll(/https:\/\/[^\s`*<>()]*\/sign\/\?r=([A-Za-z0-9_-]{1,64})/g)].map((m) => m[1]))];
+  const w = chosenWallet();
   return ids.map((id) => {
     const url = `${location.origin}/sign/?r=${id}`, l = walletLinks(url);
-    return `<div class="signcard">
-      <img src="/api/req/${id}/qr.svg" alt="QR code of the sign page" width="168" height="168">
+    return `<div class="signcard" data-id="${id}">
+      <img src="${qrSrc(id, w)}" alt="QR code that opens the sign page in ${WALLETS[w].name}" width="168" height="168">
       <div>
-        <p><a class="btn" href="${url}">Open the sign page</a></p>
-        <p class="small muted">On a phone, scan this with OKX Wallet, or open the page inside your wallet:</p>
-        <p class="walletlinks"><a href="${l.okx}">OKX Wallet</a><a href="${l.rabby}">Rabby</a><a href="${l.metamask}">MetaMask</a></p>
+        <p><a class="btn" href="${url}" target="_blank" rel="noopener">Open the sign page</a></p>
+        <p class="qrpick" role="group" aria-label="Wallet on your phone">${Object.keys(WALLETS).map((k) =>
+          `<button type="button" class="quiet" data-w="${k}" aria-pressed="${k === w}">${WALLETS[k].name}</button>`).join("")}</p>
+        <p class="small muted qrhow">${WALLETS[w].how}</p>
+        <p class="small muted">Already on the phone? Tap to open it in: <span class="walletlinks"><a href="${l.okx}" target="_blank" rel="noopener">OKX Wallet</a><a href="${l.rabby}" target="_blank" rel="noopener">Rabby</a><a href="${l.metamask}" target="_blank" rel="noopener">MetaMask</a></span></p>
         <p class="small muted">Your wallet signs there; nothing has been sent.</p>
       </div>
     </div>`;
   }).join("");
 }
+// one listener for every card, old and new: switching the wallet redraws that card's QR and remembers the pick
+$("#chat").addEventListener("click", (e) => {
+  const b = e.target.closest(".qrpick button");
+  if (!b) return;
+  const card = b.closest(".signcard"), w = b.dataset.w;
+  card.querySelector("img").src = qrSrc(card.dataset.id, w);
+  card.querySelector("img").alt = `QR code that opens the sign page in ${WALLETS[w].name}`;
+  card.querySelector(".qrhow").textContent = WALLETS[w].how;
+  for (const x of card.querySelectorAll(".qrpick button")) x.setAttribute("aria-pressed", String(x === b));
+  try { localStorage.setItem(PICKED, w); } catch {}
+});
 const agentHtml = (text) => md(text) + signCards(text);
 
 function bubble(cls, text) {
