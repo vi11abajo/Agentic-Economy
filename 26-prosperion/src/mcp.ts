@@ -16,6 +16,7 @@ import { readVault } from "./vault.js";
 import { findVault } from "./vaultLookup.js";
 import type { PrepareInput, Prepared } from "./prepare.js";
 import type { PrepareSellInput, PreparedSell, SellPreview } from "./sell.js";
+import type { GateLimitsView } from "./gateView.js";
 import { rankBoard, readBoard, readVaultProfile } from "./board.js";
 import { readPortfolio } from "./portfolio.js";
 import { readPool } from "./pool.js";
@@ -35,6 +36,8 @@ export interface McpDeps {
   /** the arithmetic of a sell on the wallet's own balance; absent where selling is not set up */
   sellQuote?: (market: Address, owner: Address, amount: string) => Promise<SellPreview | { ok: false; refusal: string; block?: bigint }>;
   prepareSell?: (input: PrepareSellInput) => Promise<PreparedSell>;
+  /** the buy limits the gate holds for a wallet, read at one block; absent where no gate is deployed */
+  gateLimits?: (owner: Address) => Promise<GateLimitsView>;
   /** Prosperion's index of every curve buy and sell; null in tests that do not need it */
   trades?: TradeBook | null;
   /** the head block, to say how far behind the trade index is */
@@ -290,6 +293,19 @@ export function createProsperionMcp(deps: McpDeps): McpServer {
         : { ok: false, refusal: r.refusal, block: r.check?.block });
     },
   );
+
+  const { gateLimits } = deps;
+  if (gateLimits) {
+    server.registerTool(
+      "gate_limits",
+      {
+        title: "The buy limits the Prosperion gate holds for a wallet",
+        description: "owner = the visitor's connected address from the page note. Returns, at one block, the limits the visitor set on the Prosperion gate in PROS: per buy, per day (with what is spent and left today), the most PROS already in a curve for a buy to go through, whether the market code they agreed to is still current, and the state: \"not set\", \"stopped\" or \"active\". Use it before any buy talk and whenever they ask about their limits. You cannot change limits: they do it under Your buy limits on the Launches page (changeAt), where their wallet signs one setLimits transaction.",
+        inputSchema: { owner: addr },
+      },
+      async (a) => json(await gateLimits(getAddress(a.owner))),
+    );
+  }
 
   const { sellQuote, prepareSell } = deps;
   if (sellQuote && prepareSell) {
