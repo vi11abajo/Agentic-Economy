@@ -73,6 +73,29 @@ mined in block …: <tx link>
 
 ## Live runs
 
+A real send on 2026-11-14, done by an agent with the skill installed from this repo: 0.001 PROS from
+`0x4644…D3Bb` back to itself, `--deadline 3m --max-gwei 9`. The base fee was 10 gwei at every check, so the line was
+never reached and the deadline decided:
+
+```
+[19:53:23] holding: base fee 10 gwei is over the line (9 gwei), 2 min 51 s to the deadline (block 23053600)
+[19:54:30] holding: base fee 10 gwei is over the line (9 gwei), 1 min 43 s to the deadline (block 23053677)
+[19:55:41] holding: base fee 10 gwei is over the line (9 gwei), 33 s to the deadline (block 23053755)
+[19:55:48] sent 0x867f8842441b9bb332b12dcdfcdfe8f193e7e1ad5537f0e0f9d852c93ad5a6f6 (deadline in 27 s and base fee still 10 gwei (line 9): sending anyway)
+
+mined in block 23053766: https://www.pharosscan.xyz/tx/0x867f8842441b9bb332b12dcdfcdfe8f193e7e1ad5537f0e0f9d852c93ad5a6f6
+  held 2 min 30 s over 25 checks, sent 26 s before the deadline
+  why then: deadline in 27 s and base fee still 10 gwei (line 9): sending anyway
+  paid 10 gwei per gas × 21000 gas = 0.00021000 PROS
+  if sent right at request time (base + tip then): 10 gwei = 0.00021000 PROS  (the same)
+  at eth_gasPrice at request time (what most wallets offer): 10 gwei = 0.00021000 PROS  (the same)
+  the median recent tx paid (30 txs): 10 gwei = 0.00021000 PROS  (the same)
+```
+
+Read back from the RPC: a type 2 tx with `maxPriorityFeePerGas` 0 and `maxFeePerGas` 30 gwei (the 3× cap of a
+forced send), receipt status 1, `gasUsed` 21000, `effectiveGasPrice` 10 gwei. "The same" is the honest result on a
+day when the base fee didn't move; the agent said so instead of claiming a saving.
+
 Dry runs on 2026-11-14 from `0x4644…D3Bb` to `0xa991…4348`, nothing sent:
 
 - **mainnet, `--max-gwei 9 --deadline 50s`.** The base fee stayed at 10 gwei, over the line, so tide held. It went
