@@ -16,7 +16,7 @@ remit holds no key. You sign in your own browser wallet, on a page that checks e
 ```bash
 cd 27-remit && npm ci && npm run build && npm test
 node skill/remit/scripts/remit.mjs read samples/03-audit.pdf
-node skill/remit/scripts/remit.mjs plan samples/04-checkout-qr.png --from <your wallet> --out plan.json
+node skill/remit/scripts/remit.mjs plan samples/03-audit.pdf --from <your wallet> --out plan.json
 node skill/remit/scripts/remit.mjs sign plan.json --detach      # prints a 127.0.0.1 link, your wallet signs
 node skill/remit/scripts/remit.mjs status plan.json             # what the page saw: PAID, or why not
 node skill/remit/scripts/remit.mjs paid <tx hash> plan.json     # check any mined tx against a plan
@@ -100,7 +100,7 @@ small test wallet.
 | `01-hosting.json` | 0.30 USDC, items add up |
 | `02-freelance.md` | 0.004 PROS, table rows as items |
 | `03-audit.pdf` | 0.15 USDC from the PDF text layer |
-| `04-checkout-qr.png` | 0.10 USDC from an EIP-681 QR code |
+| `04-checkout-qr.png` | 0.10 USDC from an EIP-681 QR code; paid in the [live run](#live-run), so now STOP `ALREADY_PAID` with the tx link |
 | `05-totals-disagree.json` | STOP: 0.80 + 0.40 is not 0.90 |
 | `06-no-reference.txt` | STOP: no invoice number |
 | `07-just-dollars.json` | STOP: "$" isn't a token |
