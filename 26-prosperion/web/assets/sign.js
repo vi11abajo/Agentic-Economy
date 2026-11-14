@@ -16,7 +16,8 @@ function txLink(hash) { return `<a href="${EXPLORER}/tx/${hash}">${hash.slice(0,
 function exact(raw, decimals) {
   const v = BigInt(raw), base = 10n ** BigInt(decimals);
   const frac = (v % base).toString().padStart(decimals, "0").replace(/0+$/, "");
-  return `${(v / base).toLocaleString("en-US")}${frac ? `.${frac}` : ""}`;
+  // no thousands commas: this is the number someone types into a wallet's amount field
+  return `${(v / base).toString()}${frac ? `.${frac}` : ""}`;
 }
 const tokens = (raw, decimals) => (Number(BigInt(raw)) / 10 ** decimals).toLocaleString("en-US", { maximumFractionDigits: 4 });
 
