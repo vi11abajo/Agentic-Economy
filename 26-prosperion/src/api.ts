@@ -4,11 +4,12 @@
 // (someone bought first, the market code was upgraded, it left the curve), the answer is a refusal in words and no tx.
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { randomUUID } from "node:crypto";
-import { encodeFunctionData, getAddress, isAddress, parseAbi, parseEther, type Address, type Hex } from "viem";
+import { encodeFunctionData, getAddress, isAddress, parseAbi, parseEther, parseUnits, type Address, type Hex } from "viem";
 import { SESSION_COOKIE, SESSION_TTL_MS, endedSessionCookie, newNonce, sessionCookie, verifySiwe } from "./auth.js";
 import type { ChatMessage, WalletEnv } from "./agent.js";
 import type { MarketCheck } from "./market.js";
-import type { Store } from "./store.js";
+import type { Store, TxRequest } from "./store.js";
+import { sellTxs, type SellReader } from "./sell.js";
 import { limitsRefusal, prepareBuy, refusalFor } from "./prepare.js";
 import { launchRefresher } from "./freshLaunches.js";
 import QRCode from "qrcode";
@@ -44,6 +45,8 @@ export interface ApiDeps {
   agent: (messages: ChatMessage[], env: WalletEnv, sessionKey: string, signal?: AbortSignal) => Promise<Response>;
   /** The bot's username, or null when whoever runs this copy has not set up their own bot (then no alerts go out). */
   telegramBot: () => string | null;
+  /** reads a wallet's pToken, allowance and the curve quote at one block; absent where selling is not set up */
+  readSell?: SellReader;
   /** the bot's subscriptions; absent on a copy without a bot */
   alerts?: AlertBook;
   /** questions one person (their linked wallets and IPs) may ask per minute */
@@ -120,9 +123,23 @@ export function createApi(d: ApiDeps) {
     return t ? d.store.sessionAddress(t) : null;
   };
 
+  // A sell is re-read whole: the balance, what the router may take, the curve's quote. Approve only if needed.
+  async function buildSell(r: TxRequest) {
+    if (!d.readSell) return { request: r, refusal: "Selling is not set up on this copy of Prosperion." };
+    const p = r.params as Record<string, string>;
+    const s = await d.readSell(getAddress(p.market), getAddress(p.owner), (_balance, decimals) => parseUnits(p.amountTokens, decimals));
+    const fresh = {
+      block: s.block, phase: s.phase, symbol: s.symbol, pToken: s.pToken, decimals: s.decimals,
+      balance: s.balance, amount: s.amount, quoteNet: s.quote?.net ?? null, quoteFee: s.quote?.fee ?? null,
+    };
+    const t = sellTxs(s, d.now());
+    return "refusal" in t ? { request: r, sell: fresh, refusal: t.refusal } : { request: r, sell: fresh, approve: t.approve, tx: t.sell };
+  }
+
   async function buildRequest(id: string) {
     const r = d.store.getRequest(id);
     if (!r) return null;
+    if (r.kind === "sell") return buildSell(r);
     if (r.kind !== "buy") return { request: r, freshCheck: null, tx: null, setLimits: null, refusal: "This kind of request is not available yet." };
     const p = r.params as Record<string, string>;
     const market = getAddress(p.market);
