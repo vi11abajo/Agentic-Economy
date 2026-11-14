@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Ship a fresh build to the box: compiled code, pages, unit and nginx files. Secrets never travel with it;
 # /opt/prosperion/.env is created once on the server and only appended to there.
-# Usage (from 26-prosperion/): npm run build && bash deploy/push.sh
+# Usage (from capstone-prosperion/): npm run build && bash deploy/push.sh
 set -euo pipefail
 HOST=${HOST:-pharos-server}
 

@@ -203,7 +203,7 @@ Antigravity (Gemini) subscription for the agent.
 **1. Build and test.**
 
 ```bash
-cd 26-prosperion && npm ci && npm run build && npm test
+cd capstone-prosperion && npm ci && npm run build && npm test
 ```
 
 The tests read Pharos mainnet through `rpc.pharos.xyz`. The contract tests run on a fork:
@@ -241,7 +241,7 @@ forge verify-contract <gate address> src/ProsperionGate.sol:ProsperionGate --cha
 - Replace `prosperion.pharosfdv.xyz` with your domain in `deploy/nginx-prosperion.conf` and `deploy/push.sh`, and set
   `PROSPERION_SITE=https://<your domain>` in `/opt/prosperion/.env` (sign links are built from it).
 
-**4. Ship it.** From `26-prosperion/`, with `HOST` set to your server's ssh name:
+**4. Ship it.** From `capstone-prosperion/`, with `HOST` set to your server's ssh name:
 
 ```bash
 HOST=<your-server> bash deploy/push.sh
@@ -279,7 +279,7 @@ one multicall over every market a minute (progress, phases), portfolios every fi
 and the gate's `LimitsSet`/`Bought` logs every 15 seconds.
 
 To give your own copy a bot: make one with [@BotFather](https://t.me/BotFather) (`/newbot`), then from
-`26-prosperion/` run the line below and paste the token when asked. It is read from the terminal, not passed as an
+`capstone-prosperion/` run the line below and paste the token when asked. It is read from the terminal, not passed as an
 argument, and checked with Telegram before anything is saved.
 
 ```bash

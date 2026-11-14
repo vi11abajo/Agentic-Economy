@@ -30,7 +30,7 @@ const ITEMS = [
   { group: "Act", items: [{ k: "alerts", href: "/alerts/", text: "Alerts", icon: "bell" }] },
   { group: "Pharos", items: [
     { k: "explorer", href: "https://www.pharosscan.xyz", text: "Explorer", icon: "scan", out: true },
-    { k: "source", href: "https://github.com/vi11abajo/Agentic-Economy/tree/main/26-prosperion", text: "Source", icon: "code", out: true },
+    { k: "source", href: "https://github.com/vi11abajo/Agentic-Economy/tree/main/capstone-prosperion", text: "Source", icon: "code", out: true },
   ] },
 ];
 
