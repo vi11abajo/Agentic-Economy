@@ -32,6 +32,7 @@ const home = opt("--home") ?? homeDir();
 const rulesPath = opt("--rules") ?? join(home, "rules.json");
 const statePath = join(home, "state.json");
 const stamp = () => `[${new Date().toISOString()}]`;
+const ONCE_TRIES = 4;
 
 async function rules() {
   if (!existsSync(rulesPath)) throw new RuleError(`no rules file at ${rulesPath}. Run siren init, or pass --rules <file>`);
@@ -123,9 +124,12 @@ async function main(): Promise<number> {
       stop = true;
       console.log(`${stamp()} stopping after this round`);
     });
+    // the public RPC drops a request now and then; --once used to give up right there, mid-way through a --since day
+    let failedInARow = 0;
     for (let first = true; !stop; first = false) {
       // a round reads at most MAX_ROUND blocks; --once keeps going until it reaches the head, so a --since day is a day
       let behind = false;
+      let failed = false;
       try {
         const r = await round(ctx, first && !state.lastBlock ? since : 0n);
         behind = r.to - r.from + 1n >= MAX_ROUND;
@@ -135,10 +139,17 @@ async function main(): Promise<number> {
         console.log(`${stamp()} ${span}: ${r.queued} new alert${r.queued === 1 ? "" : "s"}${r.found > r.queued ? `, ${r.found - r.queued} already sent before` : ""}${f.sent ? `, ${f.sent} ${chans.length ? "delivered" : "printed"}` : ""}${f.waiting ? `, ${f.waiting} waiting` : ""}`);
         for (const p of f.problems) console.log(`${stamp()} ${redact(p, secrets)}`);
       } catch (e) {
+        failed = true;
         saveState(statePath, state);
         console.log(`${stamp()} round failed: ${redact((e as Error).message.split("\n")[0], secrets)}; same blocks again next round`);
       }
+      failedInARow = failed ? failedInARow + 1 : 0;
       if (argv.includes("--once")) {
+        if (failed && failedInARow < ONCE_TRIES) {
+          await new Promise((res) => setTimeout(res, 2000 * failedInARow));
+          continue;
+        }
+        if (failed) return console.error(`${stamp()} the RPC failed ${failedInARow} rounds in a row; stopped at block ${state.lastBlock ?? "(none)"}, run again to carry on`), 3;
         if (behind) continue;
         break;
       }
