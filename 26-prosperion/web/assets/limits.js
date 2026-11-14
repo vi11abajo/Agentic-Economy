@@ -5,8 +5,11 @@ import { sendOne } from "./wallet.js";
 import { whoAmI, connectWallet } from "./shell.js";
 
 const box = $("#limits");
-// inputs want plain numbers; pros() adds thousands separators
-const plain = (raw) => String(Number(BigInt(raw)) / 1e18);
+// inputs want plain numbers; pros() adds separators. Exact, from the wei: a float would round 11415.396508931104 off
+const plain = (raw) => {
+  const w = BigInt(raw), frac = (w % 10n ** 18n).toString().padStart(18, "0").replace(/0+$/, "");
+  return frac ? `${w / 10n ** 18n}.${frac}` : `${w / 10n ** 18n}`;
+};
 
 function say(text, bad = false) {
   const n = $("#limits-note");
@@ -41,10 +44,10 @@ function signedInView(s) {
   const l = stopped(s.limits) ? null : s.limits;
   box.innerHTML = `<h2>Your buy limits</h2>
     ${summary(s)}
-    <form id="limits-form" class="limits-form">
-      <label>PROS per buy<input name="perBuy" type="number" min="0.01" max="1000" step="0.01" required value="${l ? plain(l.maxPerBuy) : "0.1"}"></label>
-      <label>PROS a day<input name="perDay" type="number" min="0.01" max="10000" step="0.01" required value="${l ? plain(l.maxPerDay) : "0.3"}"></label>
-      <label>At most this much PROS already in the curve<input name="inCurve" type="number" min="0" step="0.1" required value="${l ? plain(l.maxReserveBefore) : "0"}"></label>
+    <form id="limits-form" class="limits-form" novalidate>
+      <label>PROS per buy<input name="perBuy" type="number" min="0.01" max="1000" step="any" required value="${l ? plain(l.maxPerBuy) : "0.1"}"></label>
+      <label>PROS a day<input name="perDay" type="number" min="0.01" max="10000" step="any" required value="${l ? plain(l.maxPerDay) : "0.3"}"></label>
+      <label>At most this much PROS already in the curve<input name="inCurve" type="number" min="0" step="any" required value="${l ? plain(l.maxReserveBefore) : "0"}"></label>
       <div class="row"><button type="submit">Save limits</button>${l ? `<button type="button" class="quiet" id="limits-stop">Stop all buys</button>` : ""}</div>
     </form>
     <p class="small muted">Saving or stopping is one transaction from your wallet to the <a href="${EXPLORER}/address/${s.gate}#code">gate</a>. No PROS moves, you pay only gas. Buy links never raise these: a buy above them is refused and sent back here. Stop clears every limit, so no buy link works until you save new ones.</p>

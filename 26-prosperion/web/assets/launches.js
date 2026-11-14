@@ -22,8 +22,8 @@ function row(l) {
   return `<div class="launch" data-market="${esc(l.market)}">
     <div>Market ${addrLink(l.market)}, token ${addrLink(l.pToken)}<br><span class="muted small">created at ${blockLink(l.block)}, <a href="${EXPLORER}/tx/${l.tx}">creation tx</a>${c ? `; checked at ${blockLink(c.block)}` : ""}</span></div>
     <div class="launch-side">${tag}${act}</div>
-    ${canTry(c) ? `<form class="prep" hidden>
-      <label>PROS to spend<input name="amount" type="number" min="0.01" max="1000" step="0.01" value="1" required></label>
+    ${canTry(c) ? `<form class="prep" novalidate hidden>
+      <label>PROS to spend<input name="amount" type="number" min="0.01" max="1000" step="any" value="1" required></label>
       <button type="submit">Continue to signing</button>
       <p class="small muted prep-note">Prosperion checks the market again and makes a link for your wallet. Nothing is sent from here.</p>
     </form>` : ""}
