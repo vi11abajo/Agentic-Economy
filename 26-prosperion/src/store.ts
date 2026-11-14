@@ -113,6 +113,8 @@ export function openStore(path: string) {
       const r = db.prepare("SELECT address, created, used FROM link_codes WHERE code = ?").get(code) as Record<string, unknown> | undefined;
       if (!r || r.used || Date.now() - (r.created as number) > LINK_TTL_MS) return null;
       db.prepare("UPDATE link_codes SET used = 1 WHERE code = ?").run(code);
+      // the watches row is where a wallet's chat lives; alerts are set separately now, so linking makes one if needed
+      db.prepare("INSERT OR IGNORE INTO watches VALUES (?, '0', '0', '[]', NULL, NULL)").run(r.address as string);
       db.prepare("UPDATE watches SET tg_chat = ? WHERE address = ?").run(chatId, r.address as string);
       return r.address as Address;
     },
