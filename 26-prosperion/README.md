@@ -1,4 +1,4 @@
-# 26 · Prosperion
+# Capstone · Prosperion
 
 **Prosperion tells you what is really behind a Prosper vault's NAV, and gets you into a new Prosper launch first,
 with a transaction you sign yourself.**
