@@ -46,8 +46,12 @@ token answers symbol/decimals, the feed answers) and shows the live price next t
   makes a block about every 0.84 s, so 4000 blocks is about an hour and 100000 about a day. At whale-sized lines a
   quiet hour can catch nothing; a day is the better look back.
 - `--once` reads up to the current block and stops (a round takes at most 10,000 blocks, so a `--since` day is
-  a few rounds, about 4 minutes). `--console-only` only prints, even when a channel is set up; what it prints counts
+  a few rounds, about 4 minutes). A round the RPC fails is tried again, up to 4 times, before `--once` gives up and
+  says where it stopped. `--console-only` only prints, even when a channel is set up; what it prints counts
   as alerted, so a later run won't send it again.
+- A dry run before sending: `--console-only --home <scratch folder>` with the same `--rules`. The real run starts
+  later by the minutes in between (about 70 blocks a minute), so add those to its `--since`, or the oldest hits of
+  the dry run fall out of the window.
 - `node scripts/siren.mjs status`: last block read, how many events were alerted, what is still waiting.
 
 Each round prints one line: the block range, how many new alerts, how many were delivered. A channel that fails
