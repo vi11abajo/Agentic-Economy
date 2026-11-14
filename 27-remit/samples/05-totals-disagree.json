@@ -1,0 +1,19 @@
+{
+  "invoiceNumber": "INV-2026-0920",
+  "dueDate": "2026-12-01",
+  "payee": "0xa991B44106b336B547259bD2B9b2f45931414348",
+  "currency": "USDC",
+  "items": [
+    {
+      "description": "Indexer, tier 1",
+      "amount": 0.8
+    },
+    {
+      "description": "Archive add-on",
+      "amount": 0.4
+    }
+  ],
+  "subtotal": 1.2,
+  "tax": 0,
+  "total": 0.9
+}

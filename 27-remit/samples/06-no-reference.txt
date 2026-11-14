@@ -1,0 +1,7 @@
+INVOICE
+
+Date: 2026-11-14
+Pay to: 0xa991B44106b336B547259bD2B9b2f45931414348
+Total: 0.25 PROS
+
+(the issuer forgot the invoice number)

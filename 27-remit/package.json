@@ -1,0 +1,27 @@
+{
+  "name": "remit",
+  "version": "1.0.0",
+  "description": "remit: reads invoices (JSON, Text, PDF, PNG) and prepares checked on-chain payments with embedded invoice references on Pharos Pacific Mainnet",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "remit": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/test/**/*.test.js\""
+  },
+  "dependencies": {
+    "jsqr": "1.4.0",
+    "pngjs": "7.0.0",
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/pngjs": "6.0.5",
+    "@types/qrcode": "1.5.5",
+    "esbuild": "0.28.2",
+    "qrcode": "1.5.4",
+    "typescript": "5.9.3"
+  }
+}

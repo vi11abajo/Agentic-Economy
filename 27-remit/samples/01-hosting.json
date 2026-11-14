@@ -1,0 +1,25 @@
+{
+  "invoiceNumber": "INV-2026-1107",
+  "issueDate": "2026-11-14",
+  "dueDate": "2026-12-14",
+  "issuer": "Lighthouse RPC (sample)",
+  "payee": "0xa991B44106b336B547259bD2B9b2f45931414348",
+  "currency": "USDC",
+  "items": [
+    {
+      "description": "Dedicated RPC endpoint, November",
+      "quantity": 1,
+      "unitPrice": 0.25,
+      "amount": 0.25
+    },
+    {
+      "description": "WebSocket add-on",
+      "quantity": 1,
+      "unitPrice": 0.05,
+      "amount": 0.05
+    }
+  ],
+  "subtotal": 0.3,
+  "tax": 0,
+  "total": 0.3
+}
