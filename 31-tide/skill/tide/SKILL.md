@@ -31,7 +31,10 @@ if it is flat, say so, and say that the saving then comes from not overpaying (t
 1. Ask for: recipient, amount (or calldata), the deadline, and optionally a gwei line. Ask where the key is: an
    env file with `PRIVATE_KEY`. Never ask for the key itself, never print or read the file.
 2. First a dry run, no key needed:
-   `node scripts/tide.mjs send --to <addr> --value <PROS> --deadline 20m [--max-gwei <n>] --dry-run --from <their address>`
+   `node scripts/tide.mjs send --to <addr> --value <PROS> --deadline 45s [--max-gwei <n>] --dry-run --from <their address>`
+   A dry run holds exactly like the real thing, so over the line it waits until near its deadline. Give it a short
+   one (45s is plenty to see the gas estimate, the fees and which way it goes) and keep the person's own deadline
+   for the real send.
 3. When they say go, the same with `--key-env <file>` instead of `--dry-run --from`. tide holds, prints a line when
    the base fee changes, sends, waits for the receipt.
 4. If tide was stopped while holding: `node scripts/tide.mjs resume --key-env <file>`. `jobs` lists everything.
