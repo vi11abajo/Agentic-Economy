@@ -1,0 +1,3 @@
+# plans and signing-page logs are made per run
+plan*.json
+*.sign.log
