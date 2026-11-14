@@ -199,6 +199,24 @@ test("outbox: a failed channel retries alone, the other doesn't get a copy twice
   assert.equal(redact(`POST ${hook} failed`, s), "POST <hidden> failed");
 });
 
+test("discord: a 429 waits the retry_after Discord asks for and tries again, up to a point", async () => {
+  let calls = 0;
+  let busyFor = 2;
+  const waited: number[] = [];
+  const net = (async () => {
+    calls++;
+    if (busyFor-- > 0) return new Response(JSON.stringify({ message: "You are being rate limited.", retry_after: 0.6 }), { status: 429 });
+    return new Response(null, { status: 204 });
+  }) as unknown as Net;
+  const alert = { id: "y", rule: "r", kind: "transfer" as const, title: "t", value: "1 USDC", facts: [], links: [], at: "" };
+  const [discord] = channels({ discordWebhook: "https://discord.com/api/webhooks/1/x" }, net, async (ms) => void waited.push(ms));
+  await discord.send(alert);
+  assert.equal(calls, 3);
+  assert.deepEqual(waited, [600, 600]);
+  busyFor = 99;
+  await assert.rejects(discord.send(alert), /429/);
+});
+
 test("telegram text escapes what could break the HTML", () => {
   const t = telegramText({ id: "1", rule: "r", kind: "call", title: "a<b>&c", value: "v", facts: [["k", "<x>"]], links: [["tx", "https://x/tx?a=1&b=2"]], at: "now" });
   assert.ok(t.includes("a&lt;b&gt;&amp;c"));

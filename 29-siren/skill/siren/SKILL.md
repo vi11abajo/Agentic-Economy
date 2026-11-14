@@ -43,7 +43,8 @@ token answers symbol/decimals, the feed answers) and shows the live price next t
   starts at the current block.
 - `--since <blocks>` on a first run reads that many blocks back, to show what the rules would have caught. Pharos
   makes a block about every 0.84 s, so 4000 blocks is about an hour.
-- `--once` does a single round. `--console-only` runs without Telegram/Discord.
+- `--once` does a single round. `--console-only` only prints, even when a channel is set up; what it prints counts
+  as alerted, so a later run won't send it again.
 - `node scripts/siren.mjs status`: last block read, how many events were alerted, what is still waiting.
 
 Each round prints one line: the block range, how many new alerts, how many were delivered. A channel that fails

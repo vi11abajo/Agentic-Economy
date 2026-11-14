@@ -105,8 +105,10 @@ async function main(): Promise<number> {
 
   if (command === "watch") {
     const cfg = await rules();
-    const chans = channels(secrets);
-    if (!chans.length && !argv.includes("--console-only")) return console.error(`no Telegram or Discord set up in ${envFile(home)}. Run siren init, or add --console-only`), 2;
+    // --console-only means what it says even when a channel is set up: a look back that only prints
+    const consoleOnly = argv.includes("--console-only");
+    const chans = consoleOnly ? [] : channels(secrets);
+    if (!chans.length && !consoleOnly) return console.error(`no Telegram or Discord set up in ${envFile(home)}. Run siren init, or add --console-only`), 2;
     const state = loadState(statePath);
     const since = BigInt(opt("--since") ?? "0");
     console.log(`${stamp()} siren watching Pharos mainnet with ${cfg.rules.length} rules -> ${chans.map((c) => c.name).join(" + ") || "console only"}`);

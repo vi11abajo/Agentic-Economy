@@ -73,6 +73,8 @@ titled "minted", one to it "burned".
   make that overlap harmless.
 - An alert stays in the outbox until every channel took it. A channel that already has it isn't asked again, so a
   Discord error never means a second Telegram message.
+- A Discord webhook takes about 5 messages in 2 seconds. When it answers 429, siren waits the `retry_after` it
+  names and tries again (up to 4 times), so a `--since` replay of a busy hour arrives whole instead of in pieces.
 
 ## Secrets
 
