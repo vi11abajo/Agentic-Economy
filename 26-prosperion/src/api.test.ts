@@ -460,3 +460,32 @@ test("alert settings: saved per wallet, checked kind by kind, and only for the s
     assert.match((await link.json()).code, /^[0-9a-f]{12}$/);
   } finally { await s.close(); }
 });
+
+test("a sell link is re-read on open: approve only when needed, refused when the wallet holds less now", async () => {
+  const PT = "0x05457dA2c193ce92C1877ec2B9eA3966bD54fafE" as const;
+  let held = 10n ** 21n, allowance = 0n;
+  const s = await serve({
+    readSell: async (market, _owner, pick) => {
+      const amount = pick(held, 18);
+      return {
+        market, block: 200n, genuine: true, phase: 0, pToken: PT, symbol: "pANTA", decimals: 18, balance: held, allowance, amount,
+        quote: amount <= held ? { gross: 10n ** 17n, fee: 10n ** 15n, net: 99n * 10n ** 15n } : null,
+      };
+    },
+  });
+  try {
+    const id = s.store.saveRequest({ kind: "sell", createdBlock: 190n, params: { market: MARKET, owner: ME, pToken: PT, symbol: "pANTA", amountTokens: "500", minOutBps: 9800, source: "agent" } });
+    const r = await (await fetch(`${s.base}/api/req/${id}`)).json();
+    assert.equal(r.refusal, undefined);
+    assert.equal(r.approve.to, PT);
+    assert.equal(r.sell.amount, (500n * 10n ** 18n).toString());
+    assert.equal(r.tx.minOut, ((99n * 10n ** 15n * 9800n) / 10_000n).toString());
+    allowance = 10n ** 21n;
+    const again = await (await fetch(`${s.base}/api/req/${id}`)).json();
+    assert.equal(again.approve, null, "the router may already take them");
+    held = 10n ** 20n;
+    const less = await (await fetch(`${s.base}/api/req/${id}`)).json();
+    assert.match(less.refusal, /more than the wallet holds: 100 pANTA/);
+    assert.equal(less.tx, undefined);
+  } finally { await s.close(); }
+});

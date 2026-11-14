@@ -17,6 +17,7 @@ import { checkMarket } from "./market.js";
 import { startMcpHttp } from "./mcpHttp.js";
 import { explainNavMove } from "./navmove.js";
 import { prepareBuy } from "./prepare.js";
+import { chainSellReader, prepareSell, sellQuote } from "./sell.js";
 import { openStore, type Launch } from "./store.js";
 import { listVaults, vaultDetail } from "./prosperApi.js";
 import { BOT_COMMANDS, pollTelegram, telegramChannel } from "./telegram.js";
@@ -62,7 +63,11 @@ async function marketImpl(): Promise<Address> {
 // so the token is the only thing an operator sets. Until it answers, the page treats this copy as bot-less.
 let botName: string | null = null;
 
+// one reader for the agent's sell tools and the sign page, so both see the same numbers
+const readSell = chainSellReader(client, checkMarket);
+
 const api = createApi({
+  readSell,
   store,
   gate: GATE,
   check: checkMarket,
@@ -119,7 +124,10 @@ const indexer = new TradeIndexer(book, {
 void indexer.run((e) => console.error(`[trades] ${e.message}`));
 
 await startMcpHttp({
-  listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i, { readLimits: (a) => readLimits(a), spentToday }),
+  listLaunches: (n) => store.listLaunches(n),
+  sellQuote: (m, o, a) => sellQuote(readSell, m, o, a),
+  prepareSell: (i) => prepareSell(store, readSell, i),
+  prepareBuy: (i) => prepareBuy(store, checkMarket, i, { readLimits: (a) => readLimits(a), spentToday }),
   trades: book, head: () => client.getBlockNumber({ cacheTime: 0 }),
 }, MCP_PORT);
 console.log(`[mcp] 127.0.0.1:${MCP_PORT}/mcp`);

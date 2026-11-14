@@ -1,6 +1,7 @@
-// The page every buy link opens: from a Telegram alert, the Launches page or the agent in the chat. Everything
-// here is re-checked on load: the link may be minutes old, and a launch that was empty then may have buyers now.
-// If the server says no, we show why and offer no button at all.
+// The page every sign link opens: a buy from a Telegram alert, the Launches page or the agent, or a sell the agent
+// worked out with the visitor. Everything here is re-checked on load: the link may be minutes old, a launch that was
+// empty then may have buyers now, a wallet may hold fewer tokens. If the server says no, we show why and offer no
+// button at all.
 import { $, api, esc, pros, blockLink, addrLink, walletEnv, walletLinks, connect, ensurePharos, EXPLORER } from "./app.js";
 import { sendOne } from "./wallet.js";
 import { mountShell } from "./shell.js";
@@ -11,43 +12,24 @@ const id = new URLSearchParams(location.search).get("r") || "";
 const out = $("#out");
 
 function txLink(hash) { return `<a href="${EXPLORER}/tx/${hash}">${hash.slice(0, 10)}...</a>`; }
+// token amounts to the last digit, for the approve screen where some wallets want it typed in
+function exact(raw, decimals) {
+  const v = BigInt(raw), base = 10n ** BigInt(decimals);
+  const frac = (v % base).toString().padStart(decimals, "0").replace(/0+$/, "");
+  return `${(v / base).toLocaleString("en-US")}${frac ? `.${frac}` : ""}`;
+}
+const tokens = (raw, decimals) => (Number(BigInt(raw)) / 10 ** decimals).toLocaleString("en-US", { maximumFractionDigits: 4 });
 
-async function load() {
-  let r;
-  try { r = await api(`/req/${encodeURIComponent(id)}`); }
-  catch (e) {
-    out.innerHTML = `<h1>This link does not work</h1><p>${e.status === 404 ? "We have no request with this id. Links from Telegram are copied in full; try opening it again from the message." : esc(e.message)}</p>`;
-    return;
-  }
-  const p = r.request.params;
-  const c = r.freshCheck;
-  const amount = BigInt(p.amountWei);
-  // older links carry no source; they all came from alerts
-  const madeBy = { agent: "Prepared by the agent", page: "Prepared on the Launches page" }[p.source] ?? "Alert sent";
-  const head = `<h1>Buy into a fresh Prosper launch</h1>
-    <p class="lede">Market ${addrLink(p.market)}${c?.pToken ? `, token ${addrLink(c.pToken)}` : ""}. ${madeBy} at ${blockLink(r.request.createdBlock)}${c ? `, checked again at ${blockLink(c.block)}` : ""}.</p>`;
+function refusalPanel(head, why, more) {
+  out.innerHTML = `${head}<div class="panel refusal"><strong>Not signing this one.</strong><p>${esc(why)}</p>
+    <p class="small muted">Nothing was sent and nothing is waiting for you. ${more}</p></div>`;
+}
 
-  if (r.refusal) {
-    out.innerHTML = `${head}<div class="panel refusal"><strong>Not signing this one.</strong><p>${esc(r.refusal)}</p>
-      <p class="small muted">Nothing was sent and nothing is waiting for you. <a href="/launches/">Launches</a> shows which markets are still open.</p></div>`;
-    return;
-  }
-
-  const steps = [];
-  if (r.setLimits) steps.push({ key: "limits", text: `Set your limits in the gate: up to ${pros(r.setLimits.limits.maxPerBuy)} PROS per buy, ${pros(r.setLimits.limits.maxPerDay)} PROS a day, only while at most ${pros(r.setLimits.limits.maxReserveBefore)} PROS is in the curve. A one-time step; no money moves.`, tx: r.setLimits });
-  steps.push({ key: "buy", text: `Buy: send ${pros(amount)} PROS through the gate. You get at least ${pros(r.tx.minOut)} tokens or the whole thing reverts. The offer expires five minutes after this page loaded.`, tx: r.tx });
-
-  out.innerHTML = `${head}
-    <div class="panel ok">
-      <p>${BigInt(c.reserveBefore) === 0n ? "Still nobody ahead of you: the curve is empty." : `${pros(c.reserveBefore)} PROS is in the curve now, within your limit of ${pros(p.maxReserveBeforeWei)}.`} The market is a genuine Prosper one and its code has not changed since this link was made.</p>
-      <p class="bigamount">${pros(amount)} PROS</p>
-      <p class="small muted">That is the amount your wallet will ask you to send. Some wallets (OKX) show only the total; check it matches.</p>
-    </div>
-    <h2>What you will sign, one at a time</h2>
-    <ol class="steps" id="steps">${steps.map((s, i) => `<li id="step-${s.key}" class="${i === 0 ? "now" : ""}">${s.text}<div class="small" id="st-${s.key}"></div></li>`).join("")}</ol>
-    <div id="act"></div>
-    <p class="small muted">The gate checks all of this again inside the transaction. If someone buys first, or the market code is swapped, it reverts and you lose only gas.</p>`;
-
+/**
+ * Connect, check it is the wallet the link was made for, then send the steps one at a time, each after the last
+ * one confirmed. `done(hashes)` draws what comes after.
+ */
+async function signSteps(owner, steps, done) {
   const env = await walletEnv();
   const act = $("#act");
   if (!env.providerObj) {
@@ -57,6 +39,7 @@ async function load() {
     return;
   }
   act.innerHTML = `<button id="go" type="button">Connect and start</button> <span id="who" class="small muted"></span>`;
+  const hashes = {};
   $("#go").addEventListener("click", async () => {
     const go = $("#go");
     go.disabled = true;
@@ -64,32 +47,107 @@ async function load() {
       const p0 = env.providerObj;
       const me = await connect(p0);
       $("#who").textContent = `Connected: ${me}`;
-      if (me.toLowerCase() !== String(p.owner).toLowerCase()) {
-        $("#who").innerHTML = `Connected ${esc(me)}, but this link was made for ${esc(p.owner)}. Switch accounts in your wallet and press the button again.`;
+      if (me.toLowerCase() !== String(owner).toLowerCase()) {
+        $("#who").innerHTML = `Connected ${esc(me)}, but this link was made for ${esc(owner)}. Switch accounts in your wallet and press the button again.`;
         go.disabled = false;
         return;
       }
       await ensurePharos(p0);
-      let lastHash = "";
       for (const s of steps) {
         const li = $(`#step-${s.key}`), st = $(`#st-${s.key}`);
         if (li.classList.contains("done")) continue;
         li.className = "now";
         const { hash, receipt } = await sendOne(p0, s.tx, { onStatus: (m) => { st.textContent = m; } });
-        if (receipt.status !== "0x1") { st.innerHTML = `Reverted: ${txLink(hash)}. Nothing was bought.`; go.disabled = false; return; }
+        if (receipt.status !== "0x1") { st.innerHTML = `Reverted: ${txLink(hash)}. ${s.reverted}`; go.disabled = false; return; }
         st.innerHTML = `Done: ${txLink(hash)}`;
-        if (s.key === "buy") lastHash = hash;
+        hashes[s.key] = hash;
         li.className = "done";
       }
-      // the chat page writes the question itself from these two values; see home.js
-      const ask = `/?bought=${encodeURIComponent(lastHash)}&market=${encodeURIComponent(p.market)}`;
-      act.innerHTML = `<p><strong>Bought.</strong> The tokens are in your wallet.${p.source === "alert" || !p.source ? " The agent's notes on this launch are in your Telegram." : ""}</p>
-        <p><a class="btn" href="${ask}">Ask the agent about this buy</a></p>`;
+      act.innerHTML = done(hashes);
     } catch (e) {
       $("#who").textContent = e.message || String(e);
       go.disabled = false;
     }
   });
+}
+
+const stepList = (steps) =>
+  `<ol class="steps" id="steps">${steps.map((s, i) => `<li id="step-${s.key}" class="${i === 0 ? "now" : ""}">${s.text}<div class="small" id="st-${s.key}"></div></li>`).join("")}</ol>`;
+
+function drawBuy(r) {
+  const p = r.request.params;
+  const c = r.freshCheck;
+  const amount = BigInt(p.amountWei);
+  // older links carry no source; they all came from alerts
+  const madeBy = { agent: "Prepared by the agent", page: "Prepared on the Launches page" }[p.source] ?? "Alert sent";
+  const head = `<h1>Buy into a fresh Prosper launch</h1>
+    <p class="lede">Market ${addrLink(p.market)}${c?.pToken ? `, token ${addrLink(c.pToken)}` : ""}. ${madeBy} at ${blockLink(r.request.createdBlock)}${c ? `, checked again at ${blockLink(c.block)}` : ""}.</p>`;
+  if (r.refusal) return refusalPanel(head, r.refusal, `<a href="/launches/">Launches</a> shows which markets are still open.`);
+
+  const steps = [];
+  if (r.setLimits) steps.push({ key: "limits", reverted: "Nothing was bought.", text: `Set your limits in the gate: up to ${pros(r.setLimits.limits.maxPerBuy)} PROS per buy, ${pros(r.setLimits.limits.maxPerDay)} PROS a day, only while at most ${pros(r.setLimits.limits.maxReserveBefore)} PROS is in the curve. A one-time step; no money moves.`, tx: r.setLimits });
+  steps.push({ key: "buy", reverted: "Nothing was bought.", text: `Buy: send ${pros(amount)} PROS through the gate. You get at least ${pros(r.tx.minOut)} tokens or the whole thing reverts. The offer expires five minutes after this page loaded.`, tx: r.tx });
+
+  out.innerHTML = `${head}
+    <div class="panel ok">
+      <p>${BigInt(c.reserveBefore) === 0n ? "Still nobody ahead of you: the curve is empty." : `${pros(c.reserveBefore)} PROS is in the curve now, within your limit of ${pros(p.maxReserveBeforeWei)}.`} The market is a genuine Prosper one and its code has not changed since this link was made.</p>
+      <p class="bigamount">${pros(amount)} PROS</p>
+      <p class="small muted">That is the amount your wallet will ask you to send. Some wallets (OKX) show only the total; check it matches.</p>
+    </div>
+    <h2>What you will sign, one at a time</h2>
+    ${stepList(steps)}
+    <div id="act"></div>
+    <p class="small muted">The gate checks all of this again inside the transaction. If someone buys first, or the market code is swapped, it reverts and you lose only gas.</p>`;
+
+  signSteps(p.owner, steps, (h) => {
+    // the chat page writes the question itself from these two values; see home.js
+    const ask = `/?bought=${encodeURIComponent(h.buy ?? "")}&market=${encodeURIComponent(p.market)}`;
+    return `<p><strong>Bought.</strong> The tokens are in your wallet.${p.source === "alert" || !p.source ? " The agent's notes on this launch are in your Telegram." : ""}</p>
+      <p><a class="btn" href="${ask}">Ask the agent about this buy</a></p>`;
+  });
+}
+
+function drawSell(r) {
+  const p = r.request.params;
+  const s = r.sell;
+  const sym = esc(p.symbol || s?.symbol || "tokens");
+  const head = `<h1>Sell ${sym} back into its curve</h1>
+    <p class="lede">Market ${addrLink(p.market)}, token ${addrLink(p.pToken)}. Prepared by the agent at ${blockLink(r.request.createdBlock)}${s ? `, checked again at ${blockLink(s.block)}` : ""}.</p>`;
+  if (r.refusal) return refusalPanel(head, r.refusal, "Ask the agent for a new quote if you still want to sell.");
+
+  const d = s.decimals;
+  const share = BigInt(s.balance) > 0n ? Math.round(Number((BigInt(s.amount) * 1_000_000n) / BigInt(s.balance)) / 100) / 100 : 0;
+  const steps = [];
+  if (r.approve) steps.push({ key: "approve", reverted: "Nothing was sold.", tx: r.approve,
+    text: `Approve: let Prosper's trade router take exactly <b>${exact(s.amount, d)} ${sym}</b>, no more. No tokens move yet. If your wallet asks for an amount (OKX does), type exactly this one.` });
+  steps.push({ key: "sell", reverted: "Nothing was sold; your tokens are still yours.", tx: r.tx,
+    text: `Sell: ${tokens(s.amount, d)} ${sym} go into the curve, at least <b>${pros(r.tx.minOut)} PROS</b> come back to your wallet or the whole thing reverts. The offer expires ten minutes after this page loaded.` });
+
+  out.innerHTML = `${head}
+    <div class="panel ok">
+      <p>You hold ${tokens(s.balance, d)} ${sym}; this sells ${share === 100 ? "all of it" : `${share}% of it`}.</p>
+      <p class="bigamount">${tokens(s.amount, d)} ${sym}</p>
+      <p>At this block the curve pays <b>${pros(s.quoteNet)} PROS</b> after its ${pros(s.quoteFee)} PROS fee.</p>
+      <p class="small muted">${r.approve ? "Two transactions, the same ones Prosper's own app sends." : "The router may already take these tokens, so this is one transaction."} Your wallet signs each one; nothing here can.</p>
+    </div>
+    <h2>What you will sign, one at a time</h2>
+    ${stepList(steps)}
+    <div id="act"></div>
+    <p class="small muted">The curve checks the floor inside the transaction. If the price drops below it before yours lands, it reverts and you lose only gas.</p>`;
+
+  signSteps(p.owner, steps, (h) => `<p><strong>Sold.</strong> The PROS is in your wallet: ${txLink(h.sell)}.</p>
+    <p><a class="btn" href="/">Back to the chat</a></p>`);
+}
+
+async function load() {
+  let r;
+  try { r = await api(`/req/${encodeURIComponent(id)}`); }
+  catch (e) {
+    out.innerHTML = `<h1>This link does not work</h1><p>${e.status === 404 ? "We have no request with this id. Links from Telegram are copied in full; try opening it again from the message." : esc(e.message)}</p>`;
+    return;
+  }
+  if (r.request.kind === "sell") drawSell(r);
+  else drawBuy(r);
 }
 
 load();
