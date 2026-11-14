@@ -13,6 +13,7 @@ import { limitsRefusal, prepareBuy, refusalFor } from "./prepare.js";
 import { launchRefresher } from "./freshLaunches.js";
 import QRCode from "qrcode";
 import { requestUrl } from "./links.js";
+import { parseSubs, type AlertBook } from "./subscriptions.js";
 
 export const GATE_ABI = parseAbi([
   "function buy(address market, uint256 minOut, uint256 deadline) payable returns (uint256)",
@@ -43,6 +44,8 @@ export interface ApiDeps {
   agent: (messages: ChatMessage[], env: WalletEnv, sessionKey: string, signal?: AbortSignal) => Promise<Response>;
   /** The bot's username, or null when whoever runs this copy has not set up their own bot (then no alerts go out). */
   telegramBot: () => string | null;
+  /** the bot's subscriptions; absent on a copy without a bot */
+  alerts?: AlertBook;
   /** questions one person (their linked wallets and IPs) may ask per minute */
   perMinute: number;
   /** questions one person may ask per UTC day */
@@ -312,14 +315,51 @@ export function createApi(d: ApiDeps) {
           });
         }
       }
-      if (req.method === "GET" && path === "/alerts") return send(res, 200, { bot: d.telegramBot() });
+      if (req.method === "GET" && path === "/alerts") {
+        const me = signedIn(req);
+        if (!me || !d.alerts) return send(res, 200, { bot: d.telegramBot() });
+        return send(res, 200, {
+          bot: d.telegramBot(),
+          me: {
+            address: me, linked: d.store.watchesFor(me).some((w) => w.telegramChatId !== undefined),
+            subs: d.alerts.subsOf(me), pausedUntil: d.alerts.pausedUntil(me), follows: d.alerts.follows(me),
+          },
+        });
+      }
       if (req.method === "POST" && path === "/telegram/link") {
         const bot = d.telegramBot();
         if (!bot) return send(res, 409, { error: "This copy of Prosperion has no Telegram bot, so it sends no alerts." });
         const me = signedIn(req);
         if (!me) return send(res, 401, { error: "sign in first" });
-        if (!d.store.watchesFor(me).length) return send(res, 400, { error: "save a watch first" });
         return send(res, 200, { code: d.store.newLinkCode(me), bot });
+      }
+      // The shared bot's settings for the signed-in wallet. Only that wallet's own rows are read or written.
+      if (path.startsWith("/alerts/") || path === "/telegram/unlink") {
+        const me = signedIn(req);
+        if (!me) return send(res, 401, { error: "sign in first" });
+        if (!d.alerts) return send(res, 409, { error: "This copy of Prosperion has no Telegram bot, so it sends no alerts." });
+        if (req.method === "POST" && path === "/alerts/subs") {
+          const subs = parseSubs(await readJson(req));
+          if ("error" in subs) return send(res, 400, subs);
+          d.alerts.saveSubs(me, subs);
+          return send(res, 200, { subs: d.alerts.subsOf(me) });
+        }
+        if (req.method === "POST" && path === "/alerts/pause") {
+          const hours = Number((await readJson(req)).hours);
+          if (!Number.isFinite(hours) || hours < 0 || hours > 720) return send(res, 400, { error: "hours is 0 to 720" });
+          d.alerts.pause(me, hours ? Date.now() + hours * 3_600_000 : 0);
+          return send(res, 200, { pausedUntil: d.alerts.pausedUntil(me) });
+        }
+        if (req.method === "POST" && path === "/alerts/unfollow") {
+          const m = (await readJson(req)).market;
+          if (!isAddress(m)) return send(res, 400, { error: "market must be an address" });
+          d.alerts.unfollow(me, m);
+          return send(res, 200, { follows: d.alerts.follows(me) });
+        }
+        if (req.method === "POST" && path === "/telegram/unlink") {
+          d.alerts.unlinkAddress(me);
+          return send(res, 200, { linked: false });
+        }
       }
       send(res, 404, { error: "not found" });
     } catch (e) {

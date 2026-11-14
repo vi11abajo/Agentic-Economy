@@ -1,57 +1,118 @@
-import { $, api, esc } from "./app.js";
+// The Alerts page: sign in, link Telegram to the shared Prosperion bot, and pick what it sends. The page only
+// edits the signed-in wallet's own settings; the server checks every field again (subscriptions.ts parseSubs).
+import { $, api, esc, addrLink } from "./app.js";
 import { mountShell, whoAmI, connectWallet } from "./shell.js";
 
 mountShell();
+const form = $("#subs-form");
+const field = (name) => form.elements.namedItem(name);
+for (let h = 0; h < 24; h++) field("digest.hourUtc").insertAdjacentHTML("beforeend", `<option value="${h}">${String(h).padStart(2, "0")}:00</option>`);
 
-// One sign-in for the whole site: if the wallet button already signed in, the watch form is open straight away.
-async function openWatch(address) {
-  $("#signin-status").textContent = `Signed in as ${address}.`;
-  $("#watch-form").hidden = false;
-  const w = await api("/watch").catch(() => null);
-  if (w) { $("#per-buy").value = Number(BigInt(w.maxPerBuyWei)) / 1e18; $("#max-reserve").value = Number(BigInt(w.maxReserveBeforeWei)) / 1e18; }
+function note(el, text, bad = false) {
+  el.classList.toggle("bad", bad);
+  el.innerHTML = text;
 }
-whoAmI().then((me) => { if (me.address) openWatch(me.address); });
-// Signing in or out from the wallet menu changes whose watch this is.
-document.addEventListener("prosperion:me", (e) => {
-  if (!$("#watch-form")) return; // a bot-less copy replaced the panel
-  if (e.detail.address) return openWatch(e.detail.address);
-  $("#watch-form").hidden = true;
-  $("#signin-status").textContent = "";
-  $("#watch-status").textContent = "";
+
+// ---- settings in and out of the form
+function fill(s) {
+  for (const k of ["launch", "snipe", "progress", "positions", "whales", "security", "digest"]) field(`${k}.on`).checked = !!s[k].on;
+  field("launch.maxInCurvePros").value = s.launch.maxInCurvePros ?? "";
+  field("launch.skipCurators").value = s.launch.skipCurators.join(", ");
+  field("snipe.amountPros").value = s.snipe.amountPros;
+  field("snipe.maxInCurvePros").value = s.snipe.maxInCurvePros;
+  for (const t of [25, 50, 75, 90]) field(`progress.t${t}`).checked = s.progress.thresholds.includes(t);
+  field("progress.phase").checked = s.progress.phase;
+  field("progress.scope").value = s.progress.scope;
+  field("positions.movePct").value = s.positions.movePct;
+  field("positions.navMovePct").value = s.positions.navMovePct;
+  field("whales.minPros").value = s.whales.minPros;
+  field("whales.scope").value = s.whales.scope;
+  field("digest.hourUtc").value = String(s.digest.hourUtc);
+  markOn();
+}
+function read() {
+  const v = (n) => field(n).value.trim();
+  return {
+    launch: { on: field("launch.on").checked, maxInCurvePros: v("launch.maxInCurvePros") || null, skipCurators: v("launch.skipCurators").split(/[\s,]+/).filter(Boolean) },
+    snipe: { on: field("snipe.on").checked, amountPros: v("snipe.amountPros"), maxInCurvePros: v("snipe.maxInCurvePros") || "0" },
+    progress: { on: field("progress.on").checked, thresholds: [25, 50, 75, 90].filter((t) => field(`progress.t${t}`).checked), phase: field("progress.phase").checked, scope: v("progress.scope") },
+    positions: { on: field("positions.on").checked, movePct: Number(v("positions.movePct")), navMovePct: Number(v("positions.navMovePct")) },
+    whales: { on: field("whales.on").checked, minPros: v("whales.minPros"), scope: v("whales.scope") },
+    security: { on: field("security.on").checked },
+    digest: { on: field("digest.on").checked, hourUtc: Number(v("digest.hourUtc")) },
+  };
+}
+// a switched-off kind keeps its numbers but looks quiet
+function markOn() {
+  for (const p of form.querySelectorAll(".kind")) p.classList.toggle("off", !field(`${p.dataset.kind}.on`).checked);
+}
+form.addEventListener("change", markOn);
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const n = $("#subs-note");
+  try {
+    note(n, "Saving...");
+    await api("/alerts/subs", { method: "POST", body: JSON.stringify(read()) });
+    note(n, state.linked ? "Saved. The bot uses these from now on." : "Saved. Link Telegram above so the bot has somewhere to send them.");
+  } catch (err) { note(n, esc(err.message), true); }
 });
 
-$("#signin-btn").addEventListener("click", async () => {
-  const st = $("#signin-status");
-  try {
-    st.textContent = "Check your wallet...";
-    const me = await connectWallet();
-    await openWatch(me.address);
-  } catch (e) { st.textContent = e.message; }
+// ---- Telegram link, pause, follows
+let state = { linked: false };
+function drawTelegram(me, bot) {
+  state = me;
+  const paused = me.pausedUntil ? ` Paused until ${new Date(me.pausedUntil).toISOString().slice(0, 16).replace("T", " ")} UTC.` : "";
+  $("#tg-state").innerHTML = me.linked
+    ? `Linked: <a href="https://t.me/${esc(bot)}">@${esc(bot)}</a> sends your alerts to your chat.${paused}`
+    : `Not linked yet. Press the button, open the link in Telegram and press Start; the bot is <a href="https://t.me/${esc(bot)}">@${esc(bot)}</a>.`;
+  $("#tg-actions").innerHTML = me.linked
+    ? `${me.pausedUntil ? `<button type="button" id="tg-resume">Resume</button>` : `<button type="button" class="quiet" id="tg-pause">Pause for 24 h</button>`}
+       <button type="button" class="quiet" id="tg-link">Link another chat</button> <button type="button" class="quiet" id="tg-unlink">Unlink</button>`
+    : `<button type="button" id="tg-link">Link Telegram</button>`;
+  $("#tg-link")?.addEventListener("click", linkTelegram);
+  $("#tg-unlink")?.addEventListener("click", () => act("/telegram/unlink", {}, "Unlinked. The bot sends nothing until you link again."));
+  $("#tg-pause")?.addEventListener("click", () => act("/alerts/pause", { hours: 24 }, "Paused for 24 hours."));
+  $("#tg-resume")?.addEventListener("click", () => act("/alerts/pause", { hours: 0 }, "Alerts are back on."));
+  const f = me.follows ?? [];
+  $("#follows-panel").hidden = !f.length;
+  $("#follows").innerHTML = f.map((m) => `<p class="row">${addrLink(m)} <button type="button" class="quiet" data-unfollow="${esc(m)}">Unfollow</button></p>`).join("");
+}
+$("#follows").addEventListener("click", (e) => {
+  const m = e.target.closest("[data-unfollow]")?.dataset.unfollow;
+  if (m) act("/alerts/unfollow", { market: m }, "Not following it any more.");
 });
-
-const toWei = (x) => BigInt(Math.round(Number(x) * 1e6)) * 10n ** 12n;
-$("#watch-form").addEventListener("submit", async (ev) => {
-  ev.preventDefault();
-  try {
-    await api("/watch", { method: "POST", body: JSON.stringify({ maxPerBuyWei: toWei($("#per-buy").value).toString(), maxReserveBeforeWei: toWei($("#max-reserve").value).toString() }) });
-    $("#watch-status").textContent = "Saved. Now link Telegram so the alerts have somewhere to go.";
-  } catch (e) { $("#watch-status").textContent = e.message; }
-});
-$("#tg-btn").addEventListener("click", async () => {
+async function act(path, body, done) {
+  try { await api(path, { method: "POST", body: JSON.stringify(body) }); await load(); note($("#tg-note"), done); }
+  catch (e) { note($("#tg-note"), esc(e.message), true); }
+}
+async function linkTelegram() {
   try {
     const { code, bot } = await api("/telegram/link", { method: "POST" });
     const link = `https://t.me/${bot}?start=${code}`;
-    $("#watch-status").innerHTML = `Open <a href="${link}">${esc(link)}</a> and press Start. The code works once, for ten minutes.`;
-  } catch (e) { $("#watch-status").textContent = e.message; }
-});
-
-// Alerts need a Telegram bot, and every copy of Prosperion brings its own (or none). Without one we say so
-// instead of offering a sign-in that leads to a bot nobody runs.
-const OWN_BOT_STEPS = "https://github.com/vi11abajo/Agentic-Economy/tree/main/26-prosperion#your-own-telegram-bot";
-async function loadAlerts() {
-  const { bot } = await api("/alerts").catch(() => ({ bot: null }));
-  if (bot) return;
-  $("#alerts-intro").innerHTML = `This copy runs without a Telegram bot, so it sends no alerts. New launches still show up on the <a href="/launches/">Launches</a> page with their checks, and the agent will look into any of them.`;
-  $("#alert-panel").innerHTML = `<p>Alerts come from a bot you own: run Prosperion yourself, make a bot with <a href="https://t.me/BotFather">@BotFather</a> and give your copy its token. <a href="${OWN_BOT_STEPS}">The steps are in the README.</a></p>`;
+    note($("#tg-note"), `<a class="btn" href="${link}" target="_blank" rel="noopener">Open @${esc(bot)} and press Start</a> <span class="muted">The link works once, for ten minutes. Come back and reload when it says Linked.</span>`);
+  } catch (e) { note($("#tg-note"), esc(e.message), true); }
 }
-loadAlerts();
+
+// ---- who is here
+async function load() {
+  const r = await api("/alerts").catch(() => ({ bot: null }));
+  if (!r.bot) {
+    $("#alerts-intro").textContent = "This copy of Prosperion runs without a Telegram bot, so it sends no alerts. New launches still show on the Launches page with their checks.";
+    for (const id of ["#who-panel", "#tg-panel", "#subs-form", "#follows-panel"]) $(id).hidden = true;
+    return;
+  }
+  const signedIn = !!r.me;
+  $("#who-panel").hidden = signedIn;
+  $("#tg-panel").hidden = !signedIn;
+  form.hidden = !signedIn;
+  if (!signedIn) { $("#follows-panel").hidden = true; return; }
+  drawTelegram(r.me, r.bot);
+  fill(r.me.subs);
+}
+$("#signin-btn").addEventListener("click", async () => {
+  const st = $("#signin-status");
+  try { st.textContent = "Check your wallet..."; await connectWallet(); st.textContent = ""; await load(); }
+  catch (e) { st.textContent = e.message; }
+});
+document.addEventListener("prosperion:me", () => load());
+whoAmI().then(() => load());

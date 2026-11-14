@@ -42,7 +42,7 @@ async function serve(over: Partial<ApiDeps> = {}) {
   const http = createServer(createApi(deps));
   await new Promise<void>((r) => http.listen(0, "127.0.0.1", r));
   const base = `http://127.0.0.1:${(http.address() as AddressInfo).port}`;
-  return { base, store, close: () => new Promise<void>((r) => http.close(() => r())) };
+  return { base, store: deps.store, close: () => new Promise<void>((r) => http.close(() => r())) };
 }
 
 const buyRequest = (store: ReturnType<typeof openStore>, maxReserveBeforeWei = "0", acceptedImpl = IMPL) =>
@@ -426,5 +426,37 @@ test("the Launches list re-checks markets still on the curve before it answers",
     const [l] = await (await fetch(`${s.base}/api/launches`)).json();
     assert.equal(l.checks.reserveBefore, (18_909n * 10n ** 15n).toString());
     assert.equal(l.checks.block, "777");
+  } finally { await s.close(); }
+});
+
+// ---- the shared bot's settings
+const alertsCall = (s: { base: string; store: ReturnType<typeof openStore> }, path: string, method = "GET", body?: unknown, signedIn = true) =>
+  fetch(`${s.base}/api${path}`, {
+    method,
+    headers: { "content-type": "application/json", ...(signedIn ? { cookie: `${SESSION_COOKIE}=${s.store.newSession(ME, SESSION_TTL_MS)}` } : {}) },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+test("alert settings: saved per wallet, checked kind by kind, and only for the signed-in wallet", async () => {
+  const { openAlertBook } = await import("./subscriptions.js");
+  const store = openStore(":memory:");
+  const s = await serve({ store, alerts: openAlertBook(store.db), telegramBot: () => "prospeMonitor_bot" });
+  try {
+    const before = await (await alertsCall(s, "/alerts")).json();
+    assert.equal(before.bot, "prospeMonitor_bot");
+    assert.equal(before.me.linked, false);
+    assert.equal(before.me.subs.snipe.on, false);
+    const saved = await alertsCall(s, "/alerts/subs", "POST", { snipe: { on: true, amountPros: "0.5", maxInCurvePros: "0" }, security: { on: true } });
+    assert.equal(saved.status, 200);
+    const after = await (await alertsCall(s, "/alerts")).json();
+    assert.equal(after.me.subs.snipe.amountPros, "0.5");
+    assert.equal(after.me.subs.security.on, true);
+    const bad = await alertsCall(s, "/alerts/subs", "POST", { digest: { on: true, hourUtc: 30 } });
+    assert.equal(bad.status, 400);
+    assert.match((await bad.json()).error, /digest/);
+    assert.equal((await alertsCall(s, "/alerts/subs", "POST", {}, false)).status, 401);
+    const link = await alertsCall(s, "/telegram/link", "POST");
+    assert.equal(link.status, 200, "linking no longer needs a launch watch saved first");
+    assert.match((await link.json()).code, /^[0-9a-f]{12}$/);
   } finally { await s.close(); }
 });

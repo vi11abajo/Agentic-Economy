@@ -32,6 +32,7 @@ const GATE: Address | null = env.PROSPERION_GATE && isAddress(env.PROSPERION_GAT
 
 mkdirSync(dirname(DB), { recursive: true });
 const store = openStore(DB);
+const alertBook = openAlertBook(store.db);
 const BEACON_ABI = parseAbi(["function implementation() view returns (address)"]);
 
 async function readLimits(owner: Address): Promise<GateLimits | null> {
@@ -73,6 +74,7 @@ const api = createApi({
   explainNavMove,
   agent: (messages, env, key, signal) => chatAgent(messages, env, key, signal, botName),
   telegramBot: () => botName,
+  alerts: alertBook,
   perMinute: Number(env.CHAT_PER_MINUTE ?? 3),
   userDaily: Number(env.USER_DAILY_TURNS ?? 30),
   dailyCap: Number(env.AGENT_DAILY_CAP ?? 300),
@@ -83,7 +85,6 @@ createServer(api).listen(API_PORT, "127.0.0.1", () => console.log(`[api] 127.0.0
 // Every buy and sell on every Prosper curve, indexed from the first launch on. A fresh database starts an hour before
 // the oldest market Prosper lists and catches up at a few windows a second; after that it follows the head.
 const book = openTradeBook(store.db);
-const alertBook = openAlertBook(store.db);
 let notifier: Notifier | null = null;
 let marketList: { at: number; markets: Address[] } | null = null;
 async function allMarkets(): Promise<Address[]> {

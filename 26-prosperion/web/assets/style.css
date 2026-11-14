@@ -255,3 +255,18 @@ td a:hover { text-decoration: underline; }
 }
 .wallet-menu button:hover, .wallet-menu a:hover, .wallet-menu button:focus-visible, .wallet-menu a:focus-visible { background: var(--chip); }
 .wallet-menu #wm-signout { color: var(--bad, #b42318); }
+
+/* Alerts: one panel per kind, a switch on top, its numbers below; a kind that is off fades its numbers */
+.kind .switch { display: flex; gap: 10px; align-items: center; margin: 0; font-size: 17px; }
+.kind .switch input, .kind .inline input { width: auto; margin: 0; }
+.kind > p { margin: 6px 0 0; }
+.kind .fields { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; }
+.kind .fields label { margin: 0; font-size: 14px; flex: 0 1 220px; }
+.kind .fields label.wide { flex-basis: 100%; }
+.kind .fields input, .kind .fields select { display: block; margin-top: 6px; }
+.kind fieldset { border: 0; padding: 0; margin: 0; flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.kind legend { font-size: 14px; font-weight: 500; padding: 0; margin-bottom: 6px; }
+.kind .inline { display: flex; gap: 6px; align-items: center; font-weight: 400; margin: 0; font-size: 15px; flex: 0 0 auto; }
+.kind.off .fields { opacity: 0.45; }
+.save-row { margin: 6px 0 24px; }
+#subs-note.bad, #tg-note.bad { color: var(--bad, #b42318); }

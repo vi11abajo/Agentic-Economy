@@ -14,19 +14,90 @@
 <div class="app">
   <aside class="side" id="side"></aside>
   <main class="main"><div class="page">
-    <h1>Launch alerts</h1>
-    <p class="lede" id="alerts-intro">Sign in with your wallet (a message, not a transaction), set how much you would put into a fresh launch, and link Telegram. When a launch passes the checks you get its facts and a link right away, and the agent's notes a minute later.</p>
-    <div class="panel" id="alert-panel">
-      <div id="signin-step" class="row"><button id="signin-btn" type="button">Sign in with your wallet</button> <span id="signin-status" class="muted small"></span></div>
-      <form id="watch-form" hidden>
-        <label for="per-buy">PROS per buy</label>
-        <input id="per-buy" type="number" min="0.01" max="1000" step="0.01" value="1">
-        <label for="max-reserve">Only alert while at most this much PROS is already in the curve</label>
-        <input id="max-reserve" type="number" min="0" step="0.1" value="0">
-        <p class="muted small">0 means: only launches nobody has bought into yet.</p>
-        <div class="row"><button type="submit">Save my watch</button><button class="quiet" type="button" id="tg-btn">Link Telegram</button></div>
-        <p id="watch-status" class="small"></p>
-      </form>
+    <h1>Telegram alerts</h1>
+    <p class="lede" id="alerts-intro">One Prosperion bot for everyone: link your Telegram to your wallet, pick what you want to hear about, and the bot sends it. A snipe arrives as a buy already prepared for your address; your wallet still signs it, nothing here can.</p>
+
+    <div class="panel" id="who-panel">
+      <div class="row"><button id="signin-btn" type="button">Sign in with your wallet</button> <span id="signin-status" class="muted small"></span></div>
+    </div>
+
+    <div class="panel" id="tg-panel" hidden>
+      <h2>Your Telegram</h2>
+      <p id="tg-state"></p>
+      <div class="row" id="tg-actions"></div>
+      <p class="small" id="tg-note"></p>
+    </div>
+
+    <form id="subs-form" hidden>
+      <div class="panel kind" data-kind="snipe">
+        <label class="switch"><input type="checkbox" name="snipe.on"> Snipe new launches</label>
+        <p class="small muted">The moment a new Prosper market passes the checks, the bot sends a buy for your address: a QR and buttons that open the sign page in OKX, Rabby or MetaMask. Connect, sign once. If your <a href="/launches/#limits">gate limits</a> would stop it, you get the reason instead of a link.</p>
+        <div class="fields">
+          <label>PROS per snipe<input name="snipe.amountPros" type="number" min="0.000001" max="1000" step="any" value="0.1"></label>
+          <label>Only while at most this much PROS is in the curve<input name="snipe.maxInCurvePros" type="number" min="0" max="20000" step="any" value="0"></label>
+        </div>
+      </div>
+
+      <div class="panel kind" data-kind="launch">
+        <label class="switch"><input type="checkbox" name="launch.on"> New launches</label>
+        <p class="small muted">Each new market with what the chain says about it, then the agent's notes as a reply. Buttons under it follow or mute that market.</p>
+        <div class="fields">
+          <label>At most this much PROS already in the curve (empty: any)<input name="launch.maxInCurvePros" type="number" min="0" max="20000" step="any" value="0"></label>
+          <label class="wide">Skip vaults run by these curators (addresses, comma separated)<input name="launch.skipCurators" type="text" placeholder="0x..., 0x..."></label>
+        </div>
+      </div>
+
+      <div class="panel kind" data-kind="progress">
+        <label class="switch"><input type="checkbox" name="progress.on"> Progress to graduation</label>
+        <p class="small muted">A curve crossing a share of its 20,000 PROS target, and the moment it graduates or fails.</p>
+        <div class="fields">
+          <fieldset><legend>At</legend>
+            <label class="inline"><input type="checkbox" name="progress.t25"> 25%</label>
+            <label class="inline"><input type="checkbox" name="progress.t50" checked> 50%</label>
+            <label class="inline"><input type="checkbox" name="progress.t75"> 75%</label>
+            <label class="inline"><input type="checkbox" name="progress.t90" checked> 90%</label>
+            <label class="inline"><input type="checkbox" name="progress.phase" checked> graduated or failed</label>
+          </fieldset>
+          <label>For<select name="progress.scope"><option value="mine">markets I hold or follow</option><option value="all">every market</option></select></label>
+        </div>
+      </div>
+
+      <div class="panel kind" data-kind="positions">
+        <label class="switch"><input type="checkbox" name="positions.on"> My positions</label>
+        <p class="small muted">What your wallet holds, read every five minutes: a pToken's sell value or a vault share's price moving this much since the last alert, and a market you hold graduating or failing.</p>
+        <div class="fields">
+          <label>pToken move, %<input name="positions.movePct" type="number" min="1" max="90" step="1" value="10"></label>
+          <label>Vault share price move, %<input name="positions.navMovePct" type="number" min="0.1" max="50" step="0.1" value="1"></label>
+        </div>
+      </div>
+
+      <div class="panel kind" data-kind="whales">
+        <label class="switch"><input type="checkbox" name="whales.on"> Big trades</label>
+        <p class="small muted">A buy or sell on a curve of at least this much PROS, within a few seconds of the block.</p>
+        <div class="fields">
+          <label>At least, PROS<input name="whales.minPros" type="number" min="1" step="any" value="500"></label>
+          <label>For<select name="whales.scope"><option value="mine">markets I hold or follow</option><option value="all">every market</option></select></label>
+        </div>
+      </div>
+
+      <div class="panel kind" data-kind="security">
+        <label class="switch"><input type="checkbox" name="security.on"> My wallet on the gate</label>
+        <p class="small muted">Any change to your gate limits and any buy through the gate from your wallet. If it was not you, you hear about it at once.</p>
+      </div>
+
+      <div class="panel kind" data-kind="digest">
+        <label class="switch"><input type="checkbox" name="digest.on"> Daily digest</label>
+        <p class="small muted">Once a day: what you hold and what it is worth, and the five launches closest to graduating.</p>
+        <div class="fields"><label>At (UTC)<select name="digest.hourUtc"></select></label></div>
+      </div>
+
+      <div class="row save-row"><button type="submit">Save alerts</button><span id="subs-note" class="small"></span></div>
+    </form>
+
+    <div class="panel" id="follows-panel" hidden>
+      <h2>Markets you follow</h2>
+      <p class="small muted">Followed markets count as yours for progress and big trades. Follow one with the button under an alert, or <code>/follow 0x…</code> in the chat.</p>
+      <div id="follows"></div>
     </div>
   </div></main>
 </div>
