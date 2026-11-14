@@ -1,6 +1,7 @@
 // Prosperion's own MCP server: the agent's only way to get Prosper numbers. Every answer carries the block it was
 // read at, so the agent can quote the block and cross-check it through the Pharos Chain MCP at that same block.
-// One tool writes: prepare_buy saves a request and hands back a link to our sign page. No tool here builds, signs or
+// Two tools write: prepare_buy and prepare_sell save a request and hand back a link to our sign page (a sell is
+// worked out first with sell_quote and confirmed by the visitor). No tool here builds, signs or
 // sends a transaction; the sign page builds it when the visitor's own wallet is about to open.
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { formatEther, getAddress, isAddress, parseEther, toFunctionSelector, type Address } from "viem";
@@ -14,6 +15,7 @@ import { rewardUnlock } from "./rewards.js";
 import { readVault } from "./vault.js";
 import { findVault } from "./vaultLookup.js";
 import type { PrepareInput, Prepared } from "./prepare.js";
+import type { PrepareSellInput, PreparedSell, SellPreview } from "./sell.js";
 import { rankBoard, readBoard, readVaultProfile } from "./board.js";
 import { readPortfolio } from "./portfolio.js";
 import { readPool } from "./pool.js";
@@ -30,6 +32,9 @@ export interface LaunchRow {
 export interface McpDeps {
   listLaunches: (limit: number) => LaunchRow[];
   prepareBuy: (input: PrepareInput) => Promise<Prepared>;
+  /** the arithmetic of a sell on the wallet's own balance; absent where selling is not set up */
+  sellQuote?: (market: Address, owner: Address, amount: string) => Promise<SellPreview | { ok: false; refusal: string; block?: bigint }>;
+  prepareSell?: (input: PrepareSellInput) => Promise<PreparedSell>;
   /** Prosperion's index of every curve buy and sell; null in tests that do not need it */
   trades?: TradeBook | null;
   /** the head block, to say how far behind the trade index is */
@@ -285,6 +290,33 @@ export function createProsperionMcp(deps: McpDeps): McpServer {
         : { ok: false, refusal: r.refusal, block: r.check?.block });
     },
   );
+
+  const { sellQuote, prepareSell } = deps;
+  if (sellQuote && prepareSell) {
+    server.registerTool(
+      "sell_quote",
+      {
+        title: "Work out a sell of the visitor's pToken back into its curve",
+        description: "Step one of a sell, before any link. owner = the visitor's connected address from the page note. market = the Prosper market of that token (wallet_portfolio lists each holding with its market). amount is one of: \"all\", a share like \"50%\" or \"12.5%\", or a number of tokens like \"1000\". Turn the visitor's words into that yourself (half = 50%, a quarter = 25%, a third = 33.33%, everything = all); never do the multiplication yourself. Returns, at one block, what the wallet holds, the exact amountTokens that would be sold, its share, the PROS the curve pays after its fee (netPros) and the floor the transaction will ask for (minNetPros), and whether an approve step comes first. Show the visitor exactly that and ask them to confirm the amount and that they want to sell. Curve sells only: a graduated token refuses (it trades on FaroSwap).",
+        inputSchema: { market: addr, owner: addr, amount: z.string().min(1).max(40).describe("all | 50% | 1000") },
+      },
+      async (a) => json(await sellQuote(getAddress(a.market), getAddress(a.owner), a.amount)),
+    );
+    server.registerTool(
+      "prepare_sell",
+      {
+        title: "Prepare a confirmed sell for the visitor to sign",
+        description: "Step two, only after the visitor said yes to the sell_quote you showed them. Pass amountTokens exactly as sell_quote returned it. Re-reads the wallet and the curve, saves a request and returns a link to the Prosperion sign page, where the visitor's own wallet signs: approve the Prosper trade router for exactly that many tokens (skipped if it may already take them), then the sell, which pays PROS to the wallet and reverts below the floor. ok=false with a refusal if the wallet holds less now or the token left the curve.",
+        inputSchema: { market: addr, owner: addr, amountTokens: z.string().regex(/^\d+(\.\d+)?$/).describe("exactly as sell_quote returned it") },
+      },
+      async (a) => {
+        const r = await prepareSell({ market: getAddress(a.market), owner: getAddress(a.owner), amountTokens: a.amountTokens, source: "agent" });
+        return json(r.ok
+          ? { ok: true, url: r.url, block: r.preview.block, amountTokens: r.preview.amountTokens, netPros: r.preview.netPros, minNetPros: r.preview.minNetPros, approveNeeded: r.preview.approveNeeded, note: "Give the visitor this link. Their own wallet signs on that page; nothing has been sent." }
+          : r);
+      },
+    );
+  }
 
   return server;
 }

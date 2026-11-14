@@ -12,7 +12,7 @@ H="$HOME/.local/bin/hermes"
 "$H" config set agent.disabled_toolsets '["terminal","file","code_execution","browser","delegation","cronjob","memory","kanban","catalog","skills","web","search","image_gen","video_gen","tts","vision","computer_use","connections","session_search","todo","x_search","context_engine","desktop_ui","project"]'
 
 # Every tool in plain sight. With tool_search on, the agent spent an extra model call describing each tool
-# before using it; our 26 tools fit in about 3,300 tokens, cheaper than those round trips.
+# before using it; our tools (26 when measured) fit in about 3,300 tokens, cheaper than those round trips.
 "$H" config set tools.tool_search.enabled off
 
 # Two agy workers at most: each turn is a separate process and the box is shared.
