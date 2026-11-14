@@ -18,6 +18,7 @@ import { startMcpHttp } from "./mcpHttp.js";
 import { explainNavMove } from "./navmove.js";
 import { prepareBuy } from "./prepare.js";
 import { chainSellReader, prepareSell, sellQuote } from "./sell.js";
+import { gateLimitsView } from "./gateView.js";
 import { openStore, type Launch } from "./store.js";
 import { listVaults, vaultDetail } from "./prosperApi.js";
 import { BOT_COMMANDS, pollTelegram, telegramChannel } from "./telegram.js";
@@ -45,10 +46,18 @@ async function readLimits(owner: Address, blockNumber?: bigint): Promise<GateLim
   return maxPerBuy === 0n && /^0x0{40}$/.test(acceptedMarketImpl) ? null : { maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl };
 }
 
-async function spentToday(owner: Address): Promise<bigint> {
+async function spentToday(owner: Address, blockNumber?: bigint): Promise<bigint> {
   if (!GATE) return 0n;
   const day = BigInt(Math.floor(Date.now() / 1000 / 86_400)); // the gate's own day: block.timestamp / 1 days
-  return client.readContract({ address: GATE, abi: GATE_ABI, functionName: "spentOn", args: [owner, day] });
+  return client.readContract({ address: GATE, abi: GATE_ABI, functionName: "spentOn", args: [owner, day], blockNumber });
+}
+
+/** The gate limits for the agent, every figure from the same block. */
+async function gateLimitsFor(owner: Address) {
+  const block = await client.getBlockNumber({ cacheTime: 0 });
+  const [limits, spent, implNow] = await Promise.all([readLimits(owner, block), spentToday(owner, block), marketImpl()]);
+  const dayEndsAt = (Math.floor(Date.now() / 1000 / 86_400) + 1) * 86_400;
+  return gateLimitsView({ block, limits, spent, implNow, dayEndsAt });
 }
 
 // The beacon never moves (it is immutable in the gate), so ask once; what it points at is read every time.
@@ -127,6 +136,7 @@ await startMcpHttp({
   listLaunches: (n) => store.listLaunches(n),
   sellQuote: (m, o, a) => sellQuote(readSell, m, o, a),
   prepareSell: (i) => prepareSell(store, readSell, i),
+  ...(GATE ? { gateLimits: gateLimitsFor } : {}),
   prepareBuy: (i) => prepareBuy(store, checkMarket, i, { readLimits: (a) => readLimits(a), spentToday }),
   trades: book, head: () => client.getBlockNumber({ cacheTime: 0 }),
 }, MCP_PORT);
