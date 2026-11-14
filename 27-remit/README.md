@@ -64,6 +64,8 @@ With the network on (the default), `plan` reads Pharos mainnet through `rpc.phar
   succeeded is `ALREADY_PAID`, with the tx link. The explorer only nominates candidates; the verdict comes from the chain.
 - **With `--from`:** your balance of the token, then `eth_estimateGas` for the exact transaction from your address.
   If Pharos would reject it, you hear why now, not in your wallet. The gas limit is the estimate plus 20%.
+  The public RPC drops a request now and then: a dry run that fails without a revert is tried 3 times, then
+  reported as `CHAIN_UNREACHABLE`, never as `WOULD_REVERT`.
 - A payee that is a contract gets a warning, not a stop: multisigs and merchant vaults are normal.
 
 ## Where the reference goes
@@ -105,6 +107,31 @@ small test wallet.
 | `08-typo-in-address.txt` | STOP: checksum broken by one changed digit |
 | `09-tutorial-address.txt` | STOP: Hardhat account #1, public key |
 | `10-ethereum-qr.png` | STOP: the QR is for chain 1 |
+
+## Live run
+
+Recorded on 2026-11-14 with a Claude Code agent that installed the skill from this repo and was handed four of the
+samples, paying from the test wallet `0x4644…D3Bb`:
+
+| Invoice | What the agent got back |
+|---|---|
+| `01-hosting.json` | plan: 0.3 USDC to `0xa991…4348`, reference `INV:INV-2026-1107`, dry run 58,957 gas at 10 gwei |
+| `08-typo-in-address.txt` | STOP `INVALID_PAYEE`: the checksum of `…414349` is broken; the agent named the near-identical `…414348` from the first invoice and offered no "fixed" address |
+| `07-just-dollars.json` | STOP `AMBIGUOUS_CURRENCY`: "$" isn't a token, ask the issuer |
+| `04-checkout-qr.png` | plan: 0.1 USDC, reference `INV:INV-2026-QR-0042`, then `sign --detach` gave a 127.0.0.1 link |
+
+The person opened the link and confirmed in their own browser wallet. The page rechecked at block 23060124, the
+wallet sent the tx, and `remit status` reported:
+
+```
+tx 0x3725a38986d1a8e291feb898aa06abb359d6fb0372d096c97fc4f87be3544841 PAID: mined, succeeded, and to/value/input match the plan
+  block 23060142 · from 0x46441dc99f8000959e9c48cf2a01a018d131d3bb · status success
+  to matches · value matches · input matches byte for byte, reference included
+```
+
+Read back from `rpc.pharos.xyz`: USDC `transfer` of 0.1 to `0xa991B44106b336B547259bD2B9b2f45931414348`, the bytes
+after the arguments decode to `INV:INV-2026-QR-0042`, 45,379 gas at 10 gwei.
+[pharosscan](https://www.pharosscan.xyz/tx/0x3725a38986d1a8e291feb898aa06abb359d6fb0372d096c97fc4f87be3544841)
 
 ## Layout
 
