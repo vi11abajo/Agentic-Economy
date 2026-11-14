@@ -134,6 +134,9 @@ export function openAlertBook(db: DatabaseSync) {
     addressesOfChat(chatId: number): Address[] {
       return (db.prepare("SELECT address FROM watches WHERE tg_chat = ?").all(chatId) as { address: Address }[]).map((r) => r.address);
     },
+    unlinkAddress(address: string) {
+      db.prepare("UPDATE watches SET tg_chat = NULL WHERE address = ?").run(getAddress(address));
+    },
     unlinkChat(chatId: number): number {
       return Number(db.prepare("UPDATE watches SET tg_chat = NULL WHERE tg_chat = ?").run(chatId).changes);
     },
