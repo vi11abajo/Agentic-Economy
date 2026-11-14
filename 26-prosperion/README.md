@@ -68,9 +68,20 @@ Every number below comes from Prosperion's own tools and can be re-read at the b
 6. **Your buy limits**, at the top of Launches, shows what the gate holds for your wallet: per buy, per day with
    today's spend, and how much may already be in the curve. Change them, or press **Stop all buys** to clear them so
    the gate refuses every buy from your wallet and every buy link says so. Either is one `setLimits` transaction you sign; no PROS moves.
-7. **Alerts** lets you leave the page open in Telegram instead: set your amount and how much may already be in the
-   curve, link the bot, and each launch that passes the checks arrives with the facts, a sign link and the agent's
-   write-up. The live copy runs without a bot; see [Your own Telegram bot](#your-own-telegram-bot).
+7. **Alerts** is one Prosperion bot for everyone ([@prospeMonitor_bot](https://t.me/prospeMonitor_bot) on the live
+   copy). Sign in, press **Link Telegram**, press Start, and switch on what you want:
+   - **Snipe**: the moment a new market passes the checks, a buy of your amount is prepared for your address and
+     arrives as a QR plus buttons that open the sign page in OKX, Rabby or MetaMask. Connect, sign once. If your
+     gate limits would stop it, the message says which limit instead of carrying a link that would revert.
+   - **New launches** with the facts from the chain and the agent's notes as a reply; skip curators you do not trust.
+   - **Progress**: a curve crossing 25/50/75/90% of its 20,000 PROS target, graduating or failing.
+   - **My positions**: a pToken's sell value or a vault share's price moving by your threshold.
+   - **Big trades** of at least N PROS, seconds after the block, from the trade index.
+   - **My wallet on the gate**: any limits change or gate buy from your wallet, so a stolen key shows up at once.
+   - **Daily digest** at your hour: holdings and the five launches closest to graduating.
+
+   Progress and big trades can cover every market or only yours: the ones you hold and the ones you follow (the
+   Follow button under an alert, or `/follow 0x…`). In the chat: `/status`, `/pause 6h`, `/resume`, `/unlink`.
 
 Phone wallets: OKX, Rabby and MetaMask mobile all open the sign page from the links it gives, and the agent adapts its
 instructions to the wallet the page detects.
@@ -156,7 +167,7 @@ Each chat answer and each launch write-up is logged and readable at `/api/decisi
 
 | Path | What lives there |
 |---|---|
-| `src/` | TypeScript server: `api.ts` (HTTP API), `agent.ts` (talks to Hermes), `mcp.ts` (our MCP tools), `vault.ts`, `navmove.ts`, `market.ts`, `protocol.ts` (Prosper reads), `prepare.ts` (sign requests), `watcher.ts` + `alerts.ts` + `telegram.ts` (launch alerts), `store.ts` (SQLite), `auth.ts` (sign-in with Ethereum). |
+| `src/` | TypeScript server: `api.ts` (HTTP API), `agent.ts` (talks to Hermes), `mcp.ts` (our MCP tools), `vault.ts`, `navmove.ts`, `market.ts`, `protocol.ts` (Prosper reads), `prepare.ts` (sign requests), `watcher.ts` (new markets), `subscriptions.ts` + `rules.ts` + `notifier.ts` + `telegram.ts` (the bot), `store.ts` (SQLite), `auth.ts` (sign-in with Ethereum). |
 | `web/` | Static pages, plain ES modules, no build step. |
 | `contracts/` | `ProsperionGate.sol`, its Foundry tests on a mainnet fork, the deploy script. |
 | `hermes/` | Agent identity (`SOUL.md`), `apply.sh` (Hermes settings: model, MCP servers, disabled toolsets), unit file, smoke test. |
@@ -248,21 +259,25 @@ compares it with the RPC.
 | `USER_DAILY_TURNS` | 30 | Questions per person per UTC day. |
 | `AGENT_DAILY_CAP` | 300 | Questions for everyone together per UTC day. |
 
-### Your own Telegram bot
+### The Telegram bot
 
-Alerts come from a bot that belongs to whoever runs the copy. The live copy has none, so it shows launches on the page
-and sends nothing. To get alerts from your own copy:
+One bot serves everyone who uses a copy; whoever runs the copy gives it the token, users never make bots. The token
+sits only in the server's `.env`. Linking goes through the site, because only a wallet signature proves which address a
+chat belongs to: the site makes a one-time code (ten minutes), `/start <code>` in the bot binds the chat.
 
-1. In Telegram, talk to [@BotFather](https://t.me/BotFather), send `/newbot`, and copy the token.
-2. From `26-prosperion/`, run the line below and paste the token when asked. It is read from the terminal, not
-   passed as an argument, and checked with Telegram before anything is saved.
+Behind it: a subscription row per wallet and kind, a delivery ledger so one event reaches one wallet once (restarts and
+two sources included), follows, mutes and a pause, and an outbox that keeps one chat's messages in order and waits out
+Telegram's rate limits. Sources: the factory watcher (launches), the trade index (live trades only, not the backfill),
+one multicall over every market a minute (progress, phases), portfolios every five minutes for those who need them,
+and the gate's `LimitsSet`/`Bought` logs every 15 seconds.
 
-   ```bash
-   ssh -t <your-server> 'sudo bash -s' < deploy/telegram-bot.sh
-   ```
+To give your own copy a bot: make one with [@BotFather](https://t.me/BotFather) (`/newbot`), then from
+`26-prosperion/` run the line below and paste the token when asked. It is read from the terminal, not passed as an
+argument, and checked with Telegram before anything is saved.
 
-3. Open **Alerts** on your page, sign in, save your amounts, press **Link Telegram**, open the link it shows and
-   press Start. The link works once, for ten minutes.
+```bash
+ssh -t <your-server> 'sudo bash -s' < deploy/telegram-bot.sh
+```
 
 ## Limits
 
