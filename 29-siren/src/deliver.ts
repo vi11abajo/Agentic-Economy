@@ -90,7 +90,13 @@ async function telegram(net: Net, s: Secrets, method: string, body: object): Pro
   throw new DeliveryError(`Telegram ${method}: ${d}`, res.status === 429 ? "Telegram asks to slow down; kept for the next round" : "Telegram refused it; kept for the next round", true);
 }
 
-export function channels(s: Secrets, net: Net = fetch): Channel[] {
+const nap = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
+
+// Discord answers 429 when a webhook posts faster than about 5 messages in 2 s (a --since replay does), and says in
+// retry_after how long to wait. Waiting that long here beats leaving the alert for the next round.
+const DISCORD_TRIES = 4;
+
+export function channels(s: Secrets, net: Net = fetch, wait: (ms: number) => Promise<void> = nap): Channel[] {
   const out: Channel[] = [];
   if (s.telegramToken && s.telegramChatId) {
     out.push({
@@ -105,15 +111,26 @@ export function channels(s: Secrets, net: Net = fetch): Channel[] {
       name: "discord",
       send: async (a) => {
         let res: Response;
-        try {
-          res = await net(s.discordWebhook!, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(discordBody(a)) });
-        } catch (e) {
-          throw new DeliveryError(redact(`Discord did not answer: ${(e as Error).message}`, s), "no internet or Discord is down; kept for the next round", true);
+        let text = "";
+        for (let attempt = 1; ; attempt++) {
+          try {
+            res = await net(s.discordWebhook!, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(discordBody(a)) });
+          } catch (e) {
+            throw new DeliveryError(redact(`Discord did not answer: ${(e as Error).message}`, s), "no internet or Discord is down; kept for the next round", true);
+          }
+          if (res.ok) return;
+          text = redact((await res.text().catch(() => "")).slice(0, 200), s);
+          if (res.status !== 429 || attempt >= DISCORD_TRIES) break;
+          let after = Number(res.headers.get("retry-after") ?? "1");
+          try {
+            after = Number((JSON.parse(text) as { retry_after?: number }).retry_after ?? after);
+          } catch {
+            // not JSON: keep the header's value
+          }
+          await wait(Math.min(Math.max(after, 0.2), 10) * 1000);
         }
-        if (res.ok) return;
-        const text = redact((await res.text().catch(() => "")).slice(0, 200), s);
         if (res.status === 401 || res.status === 404) throw new DeliveryError(`Discord webhook: HTTP ${res.status} ${text}`, "the webhook was deleted or the URL is wrong: make a new one", false);
-        throw new DeliveryError(`Discord webhook: HTTP ${res.status} ${text}`, "Discord refused it; kept for the next round", true);
+        throw new DeliveryError(`Discord webhook: HTTP ${res.status} ${text}`, res.status === 429 ? "Discord still asks to slow down; kept for the next round" : "Discord refused it; kept for the next round", true);
       },
     });
   }
