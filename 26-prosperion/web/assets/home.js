@@ -143,7 +143,8 @@ function chosenWallet() {
   try { const p = localStorage.getItem(PICKED); if (p && WALLETS[p]) return p; } catch {}
   return "okx";
 }
-const qrSrc = (id, w) => `/api/req/${id}/qr.svg?wallet=${w}`;
+// v= keeps Cloudflare's day-long cache apart from answers made before the server knew ?wallet=
+const qrSrc = (id, w) => `/api/req/${id}/qr.svg?wallet=${w}&v=2`;
 function signCards(text) {
   const ids = [...new Set([...text.matchAll(/https:\/\/[^\s`*<>()]*\/sign\/\?r=([A-Za-z0-9_-]{1,64})/g)].map((m) => m[1]))];
   const w = chosenWallet();
