@@ -42,8 +42,10 @@ token answers symbol/decimals, the feed answers) and shows the live price next t
 - `node scripts/siren.mjs watch` runs until Ctrl+C, one round every `pollSeconds` (default 10). On its first run it
   starts at the current block.
 - `--since <blocks>` on a first run reads that many blocks back, to show what the rules would have caught. Pharos
-  makes a block about every 0.84 s, so 4000 blocks is about an hour.
-- `--once` does a single round. `--console-only` only prints, even when a channel is set up; what it prints counts
+  makes a block about every 0.84 s, so 4000 blocks is about an hour and 100000 about a day. At whale-sized lines a
+  quiet hour can catch nothing; a day is the better look back.
+- `--once` reads up to the current block and stops (a round takes at most 10,000 blocks, so a `--since` day is
+  a few rounds, about 4 minutes). `--console-only` only prints, even when a channel is set up; what it prints counts
   as alerted, so a later run won't send it again.
 - `node scripts/siren.mjs status`: last block read, how many events were alerted, what is still waiting.
 

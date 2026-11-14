@@ -8,7 +8,7 @@ import { flush } from "./outbox.js";
 import { FEED_ABI, RPC_URL, addressLink, pharos } from "./pharos.js";
 import { RuleError, describe, loadRules } from "./rules.js";
 import { homeDir, loadState, saveState } from "./state.js";
-import { round } from "./watch.js";
+import { MAX_ROUND, round } from "./watch.js";
 
 const HELP = `siren: watches Pharos mainnet and tells you on Telegram or Discord when your rule matches
 
@@ -120,8 +120,11 @@ async function main(): Promise<number> {
       console.log(`${stamp()} stopping after this round`);
     });
     for (let first = true; !stop; first = false) {
+      // a round reads at most MAX_ROUND blocks; --once keeps going until it reaches the head, so a --since day is a day
+      let behind = false;
       try {
         const r = await round(ctx, first && !state.lastBlock ? since : 0n);
+        behind = r.to - r.from + 1n >= MAX_ROUND;
         const f = await flush(state, chans, (l) => console.log(l));
         saveState(statePath, state);
         const span = r.from <= r.to ? `blocks ${r.from}-${r.to}` : `block ${r.to}`;
@@ -131,7 +134,10 @@ async function main(): Promise<number> {
         saveState(statePath, state);
         console.log(`${stamp()} round failed: ${redact((e as Error).message.split("\n")[0], secrets)}; same blocks again next round`);
       }
-      if (argv.includes("--once")) break;
+      if (argv.includes("--once")) {
+        if (behind) continue;
+        break;
+      }
       for (let t = 0; t < cfg.pollSeconds * 10 && !stop; t++) await new Promise((res) => setTimeout(res, 100));
     }
     return 0;

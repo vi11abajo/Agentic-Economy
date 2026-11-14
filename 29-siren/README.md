@@ -26,18 +26,19 @@ siren's folder is `SIREN_HOME`, or `%APPDATA%\siren` on Windows and `~/.config/s
 
 ## Rules
 
-This is what `siren init` writes:
+This is what `siren init` writes. The lines sit at about 5,000 PROS (some $2,300 that day): below that, on
+2026-11-14 the rules mostly caught three wallets passing $500 back and forth.
 
 ```json
 {
   "pollSeconds": 10,
   "rules": [
-    { "name": "usdc-400", "kind": "transfer", "token": "USDC", "min": 400 },
-    { "name": "wpros-800", "kind": "transfer", "token": "WPROS", "min": 800 },
+    { "name": "usdc-2500", "kind": "transfer", "token": "USDC", "min": 2500 },
+    { "name": "wpros-5000", "kind": "transfer", "token": "WPROS", "min": 5000 },
     { "name": "pros-below-45c", "kind": "price", "feed": "PROS/USD", "below": 0.45 },
     { "name": "pros-above-50c", "kind": "price", "feed": "PROS/USD", "above": 0.50 },
-    { "name": "dodo-swap-50-pros", "kind": "call", "label": "DODO swap paid with 50+ PROS",
-      "to": "0xa5ca5fbe34e444f366b373170541ec6902b0f75c", "minValue": 50 }
+    { "name": "dodo-swap-5000-pros", "kind": "call", "label": "DODO swap paid with 5000+ PROS",
+      "to": "0xa5ca5fbe34e444f366b373170541ec6902b0f75c", "minValue": 5000 }
   ]
 }
 ```
