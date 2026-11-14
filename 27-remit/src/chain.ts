@@ -17,6 +17,32 @@ export function pharos(rpc = PHAROS_RPC): PublicClient {
 
 const firstLine = (e: unknown) => String((e as { shortMessage?: string }).shortMessage ?? (e as Error).message ?? e).split("\n")[0];
 
+// A dry run that fails can mean the payment would revert, or just that the public RPC dropped the request (it does,
+// now and then, with a bare "RPC Request failed."). Only the first is about the payment. Calling the second a
+// revert sent a demo agent looking for a bug in a perfectly good invoice.
+const REVERT = /revert|insufficient|exceeds balance|invalid opcode|out of gas/i;
+export function reverted(e: unknown): boolean {
+  for (let x = e as { name?: string; message?: string; shortMessage?: string; details?: string; cause?: unknown } | undefined, i = 0; x && i < 8; x = x.cause as typeof x, i++) {
+    if (x.name === "ExecutionRevertedError") return true;
+    if (REVERT.test(`${x.shortMessage ?? ""} ${x.details ?? ""} ${x.message ?? ""}`)) return true;
+  }
+  return false;
+}
+
+export const DRY_RUN_TRIES = 3;
+export const retryPause = { ms: 1500 };
+
+async function dryRun<T>(run: () => Promise<T>): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await run();
+    } catch (e) {
+      if (reverted(e) || attempt >= DRY_RUN_TRIES) throw e;
+      await new Promise((r) => setTimeout(r, retryPause.ms));
+    }
+  }
+}
+
 type Seen = { hash: Hex; to: string };
 
 /**
@@ -106,10 +132,9 @@ export async function checkOnChain(client: PublicClient, invoice: ValidatedInvoi
       say("FATAL", "NOT_ENOUGH_FUNDS", `${from} holds ${formatUnits(holds, token.decimals)} ${token.symbol}; the invoice needs ${invoice.amount}.`, addressLink(from));
 
     try {
-      const [gas, price] = await Promise.all([
-        client.estimateGas({ account: from, to: tx.to, value: BigInt(tx.value), data: tx.data }),
-        client.getGasPrice(),
-      ]);
+      const [gas, price] = await dryRun(() =>
+        Promise.all([client.estimateGas({ account: from, to: tx.to, value: BigInt(tx.value), data: tx.data }), client.getGasPrice()]),
+      );
       const padded = (gas * 12n) / 10n; // 20% headroom, the wallet may still pick its own
       gasLimit = `0x${padded.toString(16)}`;
       chain.gasEstimate = gas.toString();
@@ -119,8 +144,13 @@ export async function checkOnChain(client: PublicClient, invoice: ValidatedInvoi
       if (native < needsNative)
         say("FATAL", "NOT_ENOUGH_FUNDS", `${from} has ${formatEther(native)} PROS; this needs about ${formatEther(needsNative)} PROS including gas.`, addressLink(from));
     } catch (e) {
-      if (!flags.some((f) => f.code === "NOT_ENOUGH_FUNDS"))
+      if (flags.some((f) => f.code === "NOT_ENOUGH_FUNDS")) {
+        // the balance line already says why
+      } else if (reverted(e)) {
         say("FATAL", "WOULD_REVERT", `Pharos refused the dry run of this exact transaction from ${from}: ${firstLine(e)}`);
+      } else {
+        say("FATAL", "CHAIN_UNREACHABLE", `The Pharos RPC didn't answer the dry run (${firstLine(e)}), ${DRY_RUN_TRIES} tries. That says nothing about the payment itself; make the plan again in a minute.`);
+      }
     }
   }
 

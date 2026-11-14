@@ -4,10 +4,11 @@ import type { PublicClient } from "viem";
 import { parseInvoice } from "../src/parser/index.js";
 import { validateInvoice } from "../src/validator.js";
 import { createPaymentPlan, encodeReferenceMemo } from "../src/tx.js";
-import { checkOnChain } from "../src/chain.js";
+import { checkOnChain, retryPause } from "../src/chain.js";
 
 // A pretend Pharos: just enough of a viem client for the checks, with knobs for each case.
-function fakeChain(o: { tokenCode?: string; balance?: bigint; gasFails?: boolean; paidInput?: string } = {}) {
+function fakeChain(o: { tokenCode?: string; balance?: bigint; gasFails?: boolean; rpcDrops?: number; paidInput?: string } = {}) {
+  let drops = o.rpcDrops ?? 0;
   return {
     getBlockNumber: async () => 22_900_000n,
     getCode: async ({ address }: { address: string }) => (address.toLowerCase().startsWith("0xc879") ? (o.tokenCode ?? "0x60") : "0x"),
@@ -16,6 +17,7 @@ function fakeChain(o: { tokenCode?: string; balance?: bigint; gasFails?: boolean
     getBalance: async () => 10n ** 17n,
     estimateGas: async () => {
       if (o.gasFails) throw new Error("execution reverted: ERC20: transfer amount exceeds balance");
+      if (drops-- > 0) throw Object.assign(new Error("RPC Request failed."), { shortMessage: "RPC Request failed." });
       return 50_000n;
     },
     getGasPrice: async () => 10_000_000_000n,
@@ -50,6 +52,15 @@ test("token with no code, payer too poor, tx that would revert", async () => {
   assert.deepEqual(stops(await checkOnChain(fakeChain({ tokenCode: "0x" }), invoice, tx)), ["TOKEN_NOT_ON_CHAIN"]);
   assert.deepEqual(stops(await checkOnChain(fakeChain({ balance: 1n, gasFails: true }), invoice, tx, payer)), ["NOT_ENOUGH_FUNDS"]);
   assert.deepEqual(stops(await checkOnChain(fakeChain({ gasFails: true }), invoice, tx, payer)), ["WOULD_REVERT"]);
+});
+
+test("an RPC that drops the dry run is retried, and a dead one isn't called a revert", async () => {
+  retryPause.ms = 5;
+  historyWith([]);
+  const flaky = await checkOnChain(fakeChain({ rpcDrops: 2 }), invoice, tx, payer);
+  assert.deepEqual(stops(flaky), []);
+  assert.equal(flaky.chain.gasEstimate, "50000");
+  assert.deepEqual(stops(await checkOnChain(fakeChain({ rpcDrops: 99 }), invoice, tx, payer)), ["CHAIN_UNREACHABLE"]);
 });
 
 test("the same reference already paid to this payee stops the plan", async () => {
