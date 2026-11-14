@@ -114,7 +114,7 @@ export async function checkOnChain(client: PublicClient, invoice: ValidatedInvoi
       gasLimit = `0x${padded.toString(16)}`;
       chain.gasEstimate = gas.toString();
       chain.gasPriceGwei = formatGwei(price);
-      chain.feePros = formatEther(padded * price);
+      chain.feePros = formatEther(gas * price); // what the estimate costs; the padded limit is only a ceiling
       const needsNative = padded * price + (token.isNative ? invoice.amountRaw : 0n);
       if (native < needsNative)
         say("FATAL", "NOT_ENOUGH_FUNDS", `${from} has ${formatEther(native)} PROS; this needs about ${formatEther(needsNative)} PROS including gas.`, addressLink(from));
