@@ -161,7 +161,7 @@ Each chat answer and each launch write-up is logged and readable at `/api/decisi
  │ prosperion.service (Node)                 │───────┘             │
  │  API :18620   SIWE, limits, /prepare, /req│                     │
  │  watcher      new markets, checks         │── Telegram alerts   │
- │  MCP :18621   10 Prosper tools            │                     │
+ │  MCP :18621   18 Prosper tools            │                     │
  │  indexer      every curve buy and sell    │
  │  SQLite       launches, trades, requests  │                     │
  └────────────┬──────────────────▲───────────┘                     │
