@@ -136,7 +136,12 @@ export interface IndexerDeps {
   getLogs: (markets: Address[], from: bigint, to: bigint) => Promise<RawTradeLog[]>;
   /** where to start on a fresh database: the block of Prosper's first launch */
   startBlock: () => Promise<bigint>;
+  /** new trades from a window near the head, for the bot */
+  onTrades?: (trades: Trade[]) => Promise<void>;
 }
+
+/** How close to the head a window must be for its trades to count as news (about five minutes of blocks). */
+export const LIVE_BLOCKS = 600n;
 
 export class TradeIndexer {
   constructor(private book: TradeBook, private deps: IndexerDeps) {}
@@ -150,8 +155,11 @@ export class TradeIndexer {
     const to = from + WINDOW - 1n < head ? from + WINDOW - 1n : head;
     const markets = await this.deps.markets();
     const logs = markets.length ? await this.deps.getLogs(markets, from, to) : [];
-    this.book.save(logs.map(decodeTrade).filter((t): t is Trade => t !== null));
+    const trades = logs.map(decodeTrade).filter((t): t is Trade => t !== null);
+    this.book.save(trades);
     this.book.setCoverage(cov?.from ?? from, to);
+    // live trades only: a backfill of last week is history, not news
+    if (this.deps.onTrades && trades.length && head - to <= LIVE_BLOCKS) await this.deps.onTrades(trades);
     return true;
   }
 
