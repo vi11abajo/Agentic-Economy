@@ -30,7 +30,7 @@ export interface Decision {
   reason: string;
   block: bigint | null;
 }
-export type RequestKind = "buy" | "setLimits" | "deposit" | "redeem";
+export type RequestKind = "buy" | "sell" | "setLimits" | "deposit" | "redeem";
 export interface TxRequest {
   id: string;
   kind: RequestKind;
