@@ -1,0 +1,22 @@
+{
+  "name": "sonar",
+  "version": "1.0.0",
+  "description": "sonar: watches a list of Pharos mainnet wallets and explains their big moves with on-chain context",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "sonar": "skill/sonar/scripts/sonar.mjs"
+  },
+  "scripts": {
+    "build": "tsc && node bundle.mjs",
+    "test": "node --test \"dist/test/**/*.test.js\""
+  },
+  "dependencies": {
+    "viem": "2.57.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "minUsd": 1000,
+  "whales": [
+    {
+      "address": "0x1793fa30477a624ef2082a87ceec124cff3069d2",
+      "label": "#26 PROS holder",
+      "note": "4,706,305 PROS on 2026-11-14, from the pharosscan top accounts list"
+    },
+    {
+      "address": "0xaad2057ccfa90c1124b1a099d557ab514c663d97",
+      "label": "#30 PROS holder",
+      "note": "3,778,174 PROS on 2026-11-14, from the pharosscan top accounts list"
+    },
+    {
+      "address": "0x4f5528ca5c681abb1afa83c153674e1039b06bde",
+      "label": "#33 PROS holder",
+      "note": "3,190,387 PROS on 2026-11-14, from the pharosscan top accounts list"
+    },
+    {
+      "address": "0x4cad1efbfd5f0848e0c3c14fab23f92b2fa81f17",
+      "label": "#35 PROS holder",
+      "note": "3,140,956 PROS on 2026-11-14, from the pharosscan top accounts list"
+    },
+    {
+      "address": "0xf37483383aeb25cd782a0c38fab281b9552d5c88",
+      "label": "#60 PROS holder",
+      "note": "784,398 PROS on 2026-11-14, from the pharosscan top accounts list"
+    },
+    {
+      "address": "0x00200d064137e5ade3be4926956b3d38c991c3a1",
+      "label": "#73 PROS holder",
+      "note": "410,599 PROS on 2026-11-14, from the pharosscan top accounts list"
+    },
+    {
+      "address": "0x6361b2ae6186875692dadc2a27436c9b4a62b711",
+      "label": "#82 PROS holder",
+      "note": "278,607 PROS on 2026-11-14, from the pharosscan top accounts list"
+    }
+  ]
+}
