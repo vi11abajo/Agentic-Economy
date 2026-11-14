@@ -21,7 +21,7 @@ const amount = (n: number, max = 4) => n.toLocaleString("en-US", { maximumFracti
 const iso = (sec: bigint | number) => new Date(Number(sec) * 1000).toISOString();
 
 // how far back a round may read in one go when siren was off for a while; the rest is picked up next round
-const MAX_ROUND = 10_000n;
+export const MAX_ROUND = 10_000n;
 // the explorer API can be a few blocks behind the RPC, so the call watch always looks this far back again
 // (seen ids stop repeats)
 const CALL_OVERLAP = 300n;
