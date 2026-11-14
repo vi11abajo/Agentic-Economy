@@ -5,7 +5,7 @@ import { getAddress, type Address } from "viem";
 import { requestUrl } from "./links.js";
 import { MIN_OUT_BPS } from "./prepare.js";
 import {
-  launchAlert, snipePlan, snipeText, progressEvents, whaleAlert, positionMoves, gateAlert, digestText,
+  launchAlert, snipePlan, snipeText, snipeSkipped, progressEvents, whaleAlert, positionMoves, gateAlert, digestText,
   type Alert, type Button, type BoardSnap, type GateEvent, type HoldingValue, type PositionBase,
 } from "./rules.js";
 import type { GateLimits } from "./api.js";
@@ -50,7 +50,12 @@ export interface NotifierDeps {
   store: Store;
   book: AlertBook;
   out: (m: OutMessage) => Promise<number | null>;
-  gate: { readLimits: (a: Address) => Promise<GateLimits | null>; spentToday: (a: Address) => Promise<bigint> };
+  gate: {
+    readLimits: (a: Address) => Promise<GateLimits | null>;
+    spentToday: (a: Address) => Promise<bigint>;
+    /** the limits as they were at a past block, so a change can say what it was before */
+    limitsAt?: (a: Address, block: bigint) => Promise<GateLimits | null>;
+  };
   curatorOf: (vault: Address) => Promise<string | null>;
   askAgent: (prompt: string) => Promise<string>;
   agentTimeoutMs: number;
@@ -95,11 +100,12 @@ export function makeNotifier(d: NotifierDeps) {
     async onLaunch(l: Launch) {
       d.store.saveLaunch(l);
       const sent: { chatId: number; id: number }[] = [];
+      const sym = d.symbolOf(getAddress(l.market));
       const launchers = d.book.recipients("launch", now());
       if (launchers.length) {
         const curator = await d.curatorOf(l.vault).catch(() => null);
         for (const r of launchers) {
-          const a = launchAlert(l, r.params, curator);
+          const a = launchAlert(l, r.params, curator, sym);
           const id = a && (await deliver(r, a));
           if (id) sent.push({ chatId: r.chatId, id });
         }
@@ -110,7 +116,7 @@ export function makeNotifier(d: NotifierDeps) {
         if (!plan) continue;
         const key = `snipe:${getAddress(l.market)}`;
         if (!plan.ok) {
-          await deliver(r, { key, market: l.market, text: `<b>A launch matched your snipe, but no link this time.</b>\n${plan.reason}` });
+          await deliver(r, { key, market: l.market, text: snipeSkipped(l, plan.reason, sym) });
           continue;
         }
         const reqId = d.store.saveRequest({
@@ -121,7 +127,7 @@ export function makeNotifier(d: NotifierDeps) {
           },
         });
         const url = requestUrl(reqId);
-        const id = await deliver(r, { key, market: l.market, text: snipeText(l, plan.amountWei, url, !!have) }, { sign: { url } });
+        const id = await deliver(r, { key, market: l.market, text: snipeText(l, plan.amountWei, r.address, !!have, sym) }, { sign: { url } });
         if (id) sent.push({ chatId: r.chatId, id });
       }
       if (!sent.length) return;
@@ -133,7 +139,7 @@ export function makeNotifier(d: NotifierDeps) {
         dossier = `Agent unavailable right now (${(e as Error).message}). The facts above were read from the chain at block ${l.checks?.block}.`;
       }
       const esc = dossier.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      for (const s of sent) await d.out({ chatId: s.chatId, html: `<b>The agent's notes</b>\n${esc}`, replyTo: s.id });
+      for (const s of sent) await d.out({ chatId: s.chatId, html: `🤖 <b>Agent's notes</b>\n<blockquote>${esc}</blockquote>`, replyTo: s.id });
     },
 
     /** A fresh look at every market. Progress and phase changes go to progress subscribers (their scope and
@@ -193,7 +199,9 @@ export function makeNotifier(d: NotifierDeps) {
       const byAddress = new Map(d.book.recipients("security", now()).map((r) => [r.address.toLowerCase(), r]));
       for (const e of events) {
         const r = byAddress.get(e.user.toLowerCase());
-        if (r) await deliver(r, gateAlert(e));
+        if (!r) continue;
+        const before = e.kind === "limits" && d.gate.limitsAt ? await d.gate.limitsAt(r.address, e.block - 1n).catch(() => null) : null;
+        await deliver(r, gateAlert(e, before, e.kind === "bought" ? d.symbolOf(e.market) : undefined));
       }
     },
 

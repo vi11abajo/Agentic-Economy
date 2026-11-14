@@ -19,32 +19,43 @@ export interface Alert {
   buttons?: Button[][];
 }
 
-const pros = (w: bigint) => `${Number(formatEther(w)).toLocaleString("en-US", { maximumFractionDigits: 4 })} PROS`;
-const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
-const addr = (a: string) => `<a href="${EXPLORER}/address/${a}">${short(a)}</a>`;
-const txl = (h: string, label = "tx") => `<a href="${EXPLORER}/tx/${h}">${label}</a>`;
+// One look for every alert: an icon and a headline that already says the news, a blank line, short "label: value"
+// lines with the numbers that matter in bold, then links by name (never a bare 66-character hash) and, last, a hint.
+const num = (x: number, d = 4) => x.toLocaleString("en-US", { maximumFractionDigits: d });
+const pros = (w: bigint) => `${num(Number(formatEther(w)))} PROS`;
+const tokens = (w: bigint) => num(Number(formatEther(w)), 0);
+const short = (x: string) => `${x.slice(0, 6)}…${x.slice(-4)}`;
+const esc = (x: string) => x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const a = (href: string, label: string) => `<a href="${href}">${label}</a>`;
+const addr = (x: string) => a(`${EXPLORER}/address/${x}`, short(x));
+const blk = (b: bigint) => a(`${EXPLORER}/block/${b}`, `#${num(Number(b), 0)}`);
+const links = (...l: [string, string][]) => `🔗 ${l.map(([label, href]) => a(href, label)).join(" · ")}`;
+const card = (head: string, rows: (string | false | null | undefined)[], ...tail: (string | false)[]) =>
+  [head, "", ...rows.filter(Boolean), ...(tail.some(Boolean) ? ["", ...tail.filter(Boolean)] : [])].join("\n");
+const notYou = `⚠️ Not you? Your wallet's key is in someone else's hands. Press ${a(`${SITE}/launches/`, "Stop all buys")} and move your funds.`;
 const marketButtons = (m: Address): Button[][] => [[
   { text: "Follow", data: `follow:${m}` }, { text: "Mute this market", data: `mute:${m}` },
   { text: "Launches", url: `${SITE}/launches/` },
 ]];
+const TARGET = 20_000;
 
 const fresh = (l: Launch) => !!l.checks && l.checks.genuine && l.checks.phase === 0;
 
 /** A new market that passed the checks, unless your filters say otherwise. `curator` comes from Prosper's API. */
-export function launchAlert(l: Launch, p: Subs["launch"], curator: string | null): Alert | null {
+export function launchAlert(l: Launch, p: Subs["launch"], curator: string | null, symbol?: string): Alert | null {
   if (!fresh(l)) return null;
   const c = l.checks!;
   if (p.maxInCurvePros !== null && c.reserveBefore > parseEther(p.maxInCurvePros)) return null;
   if (curator && p.skipCurators.includes(curator.toLowerCase())) return null;
   return {
     key: `launch:${getAddress(l.market)}`, market: getAddress(l.market),
-    text: [
-      `<b>New Prosper launch</b>, checked at block ${c.block}`,
-      `Market ${addr(l.market)}, token ${addr(l.pToken)}, vault ${addr(l.vault)}`,
-      `Listed by Prosper's factory: yes. On the curve: yes. Already in it: ${pros(c.reserveBefore)}${c.reserveBefore === 0n ? " (nobody yet)" : ""}.`,
-      curator ? `Curator: ${addr(curator)}` : "",
-      `Created in ${txl(l.tx, "this tx")}. The agent's notes follow.`,
-    ].filter(Boolean).join("\n"),
+    text: card(`🚀 <b>New Prosper launch${symbol ? `: ${esc(symbol)}` : ""}</b>`, [
+      `In the curve: <b>${pros(c.reserveBefore)}</b>${c.reserveBefore === 0n ? ", nobody has bought yet" : ""}`,
+      `To graduate: ${num(TARGET)} PROS`,
+      `Checked at ${blk(c.block)}: listed by Prosper's factory, on the curve`,
+      curator && `Curator: ${addr(curator)}`,
+      links(["Market", `${EXPLORER}/address/${l.market}`], ["Token", `${EXPLORER}/address/${l.pToken}`], ["Vault", `${EXPLORER}/address/${l.vault}`], ["Creation tx", `${EXPLORER}/tx/${l.tx}`]),
+    ], "<i>The agent's notes follow as a reply.</i>"),
     buttons: marketButtons(getAddress(l.market)),
   };
 }
@@ -66,18 +77,24 @@ export function snipePlan(l: Launch, p: Subs["snipe"], gate: { have: GateLimits 
   return over ? { ok: false, reason: over } : { ok: true, amountWei, maxReserveWei };
 }
 
-export function snipeText(l: Launch, amountWei: bigint, url: string, hasLimits: boolean): string {
+export function snipeText(l: Launch, amountWei: bigint, owner: Address, hasLimits: boolean, symbol?: string): string {
   const c = l.checks!;
-  return [
-    `<b>Snipe ready: ${pros(amountWei)} into a new Prosper launch</b>`,
-    `Market ${addr(l.market)}, checked at block ${c.block}: listed by Prosper's factory, on the curve, ${pros(c.reserveBefore)} in it.`,
-    "",
-    `Your buy is prepared for your wallet: ${url}`,
-    hasLimits
-      ? "Open it in your wallet (buttons below, or scan the QR), press Connect and sign once."
-      : "Your wallet has no limits on the gate yet, so the page asks you to sign them first, then the buy.",
-    "The page checks the market again right before your wallet opens; if someone got in first, it says so and offers nothing.",
-  ].join("\n");
+  return card(`🎯 <b>Snipe ready: ${pros(amountWei)} into ${symbol ? esc(symbol) : "a new launch"}</b>`, [
+    `For: ${addr(owner)} (your wallet)`,
+    `In the curve now: <b>${pros(c.reserveBefore)}</b>, checked at ${blk(c.block)}`,
+    links(["Market", `${EXPLORER}/address/${l.market}`], ["Creation tx", `${EXPLORER}/tx/${l.tx}`]),
+  ],
+  hasLimits
+    ? "👉 Tap your wallet below or scan the QR, then Connect and sign once."
+    : "👉 Tap your wallet below or scan the QR. Your gate has no limits yet: the page asks you to sign them first (no PROS moves), then the buy.",
+  "<i>The page checks again before your wallet opens. If someone got in first, it stops and offers nothing.</i>");
+}
+
+export function snipeSkipped(l: Launch, reason: string, symbol?: string): string {
+  return card(`⛔ <b>Snipe skipped: ${symbol ? esc(symbol) : short(l.market)}</b>`, [
+    `Why: ${esc(reason)}`,
+    links(["Market", `${EXPLORER}/address/${l.market}`], ["Your buy limits", `${SITE}/launches/#limits`]),
+  ]);
 }
 
 export interface BoardSnap { [market: string]: { symbol: string; phase: number; bps: number } }
@@ -91,17 +108,24 @@ export function progressEvents(prev: BoardSnap | undefined, cur: BoardSnap, thre
     const was = prev[m];
     if (!was) continue;
     const market = getAddress(m);
+    const sym = esc(now.symbol);
+    const where = links(["Market", `${EXPLORER}/address/${market}`], ["Launches", `${SITE}/launches/`]);
     if (was.phase !== now.phase) {
-      const [head, tail] = now.phase === 2 ? ["graduated", "it now trades on FaroSwap"]
-        : now.phase === 3 ? ["failed", "its window closed short of the target"] : [`moved to phase ${now.phase}`, ""];
-      out.push({ key: `phase:${market}:${now.phase}`, market, text: `<b>${now.symbol} ${head}</b>${tail ? `: ${tail}` : ""}. Market ${addr(market)}.` });
+      const text = now.phase === 2 ? card(`🎓 <b>${sym} graduated</b>`, ["It reached 20,000 PROS and now trades on FaroSwap. Ask the agent for its pool price.", where])
+        : now.phase === 3 ? card(`❌ <b>${sym} failed</b>`, ["Its window closed short of 20,000 PROS.", where])
+        : card(`🔄 <b>${sym} moved to phase ${now.phase}</b>`, [where]);
+      out.push({ key: `phase:${market}:${now.phase}`, market, text });
       continue;
     }
     if (now.phase !== 0) continue;
     for (const t of thresholds) {
       if (was.bps < t * 100 && now.bps >= t * 100) {
-        out.push({ key: `progress:${market}:${t}`, market,
-          text: `<b>${now.symbol} crossed ${t}%</b> of its 20,000 PROS target (now ${(now.bps / 100).toFixed(1)}%). Market ${addr(market)}.` });
+        const inCurve = (now.bps * TARGET) / 10_000;
+        out.push({ key: `progress:${market}:${t}`, market, text: card(`📈 <b>${sym} passed ${t}% of its target</b>`, [
+          `In the curve: <b>${num(inCurve, 0)} of ${num(TARGET)} PROS</b> (${(now.bps / 100).toFixed(1)}%)`,
+          `Left to graduate: about ${num(TARGET - inCurve, 0)} PROS`,
+          where,
+        ]) });
       }
     }
   }
@@ -110,10 +134,16 @@ export function progressEvents(prev: BoardSnap | undefined, cur: BoardSnap, thre
 
 export function whaleAlert(t: Trade, minWei: bigint, symbol: string): Alert | null {
   if (t.prosGross < minWei) return null;
-  const verb = t.kind === "buy" ? "bought in with" : "sold out for";
+  const buy = t.kind === "buy";
   return {
     key: `trade:${t.tx}:${t.logIndex}`, market: t.market,
-    text: `<b>${symbol}: ${short(t.trader)} ${t.kind === "buy" ? "bought" : "sold"}</b>, ${verb} ${pros(t.prosGross)} at block ${t.block}. ${txl(t.tx)} · market ${addr(t.market)}`,
+    text: card(`🐋 <b>${esc(symbol)}: ${buy ? "buy" : "sell"} of ${pros(t.prosGross)}</b>`, [
+      `${buy ? "Buyer" : "Seller"}: ${addr(t.trader)}`,
+      `Tokens ${buy ? "bought" : "sold"}: <b>${tokens(t.tokens)}</b>`,
+      `${buy ? "Reached the curve" : "Paid out"}: ${pros(t.prosNet)} after the ${pros(t.fee)} fee`,
+      `Block: ${blk(t.block)}`,
+      links(["Tx", `${EXPLORER}/tx/${t.tx}`], ["Market", `${EXPLORER}/address/${t.market}`]),
+    ]),
     buttons: marketButtons(t.market),
   };
 }
@@ -137,10 +167,15 @@ export function positionMoves(base: PositionBase, holdings: HoldingValue[], move
     const limit = h.kind === "pToken" ? movePct : navMovePct;
     if (Math.abs(pct) < limit) { next[h.token] = b; continue; }
     next[h.token] = fresh;
-    const worth = h.kind === "pToken" ? `a full sell on the curve pays ${pros(h.value)}` : `worth ${(Number(h.value) / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 })} USDC at the vault's price`;
+    const usdc = (v: bigint) => `${num(Number(v) / 1e6, 2)} USDC`;
     alerts.push({
       key: `position:${h.token}:${h.value}`,
-      text: `<b>${h.symbol} ${pct > 0 ? "up" : "down"} ${Math.abs(Math.round(pct))}%</b> since the last alert: ${worth}.`,
+      text: card(`${pct > 0 ? "📈" : "📉"} <b>${esc(h.symbol)} ${pct > 0 ? "up" : "down"} ${Math.abs(Math.round(pct))}%</b> since the last alert`, [
+        h.kind === "pToken"
+          ? `A full sell on the curve pays: <b>${pros(h.value)}</b> (was ${pros(was)})`
+          : `Worth at the vault's price: <b>${usdc(h.value)}</b> (was ${usdc(was)})`,
+        `You hold: ${tokens(h.balance)} ${h.kind === "pToken" ? "tokens" : "shares"}`,
+      ]),
     });
   }
   return { alerts, base: next };
@@ -166,28 +201,45 @@ export function decodeGateLog(l: GateLog): GateEvent | null {
   return null;
 }
 
-export function gateAlert(e: GateEvent): Alert {
+/** `before`: the limits one block earlier, so the message can say what changed. `symbol`: the market's, for a buy. */
+export function gateAlert(e: GateEvent, before?: GateLimits | null, symbol?: string): Alert {
   const key = `gate:${e.tx}:${e.logIndex}`;
+  const where = `Block: ${blk(e.block)} · ${a(`${EXPLORER}/tx/${e.tx}`, "Tx")}`;
   if (e.kind === "bought") {
-    return { key, market: e.market, text: `<b>Your wallet bought through the Prosperion gate</b>: ${pros(e.value)} into ${addr(e.market)} for ${(Number(e.out) / 1e18).toLocaleString("en-US", { maximumFractionDigits: 2 })} tokens, block ${e.block}. ${txl(e.tx)}` };
+    return { key, market: e.market, text: card(`🛒 <b>Bought through the gate: ${pros(e.value)} into ${symbol ? esc(symbol) : short(e.market)}</b>`, [
+      `Wallet: ${addr(e.user)}`,
+      `Got: <b>${tokens(e.out)} tokens</b>`,
+      `${where} · ${a(`${EXPLORER}/address/${e.market}`, "Market")}`,
+    ], notYou) };
   }
   const l = e.limits;
-  const now = l.maxPerBuy === 0n
-    ? "every buy is stopped"
-    : `${pros(l.maxPerBuy).replace(" PROS", " PROS per buy")}, ${pros(l.maxPerDay).replace(" PROS", " PROS a day")}, only while at most ${pros(l.maxReserveBefore)} is in the curve`;
+  const was = (now: bigint, then: bigint | undefined) => (before && then !== undefined && then !== now ? ` (was ${pros(then).replace(" PROS", "")})` : "");
+  const stopped = l.maxPerBuy === 0n;
   return {
     key,
-    text: `<b>Your gate limits changed</b> at block ${e.block}: ${now}. ${txl(e.tx)}\nIf this was not you, your wallet's key is in someone else's hands: press Stop all buys on ${SITE}/launches/ and move your funds.`,
+    text: card(`🔐 <b>${stopped ? "All buys stopped on your gate" : "Your gate limits changed"}</b>`, [
+      `Wallet: ${addr(e.user)}`,
+      ...(stopped ? ["Every buy from this wallet is refused until you save new limits."] : [
+        `Per buy: <b>${pros(l.maxPerBuy)}</b>${was(l.maxPerBuy, before?.maxPerBuy)}`,
+        `Per day: <b>${pros(l.maxPerDay)}</b>${was(l.maxPerDay, before?.maxPerDay)}`,
+        `Most PROS already in the curve: <b>${pros(l.maxReserveBefore)}</b>${was(l.maxReserveBefore, before?.maxReserveBefore)}`,
+      ]),
+      where,
+    ], notYou),
   };
 }
 
 export function digestText(date: string, holdings: { symbol: string; kind: string; text: string }[], top: { symbol: string; bps: number; hoursLeft: number }[]): string {
-  return [
-    `<b>Prosperion, ${date}</b>`,
-    holdings.length ? "What you hold:" : "You hold nothing in Prosper right now.",
-    ...holdings.map((h) => `· ${h.symbol} (${h.kind}): ${h.text}`),
+  const day = new Date(`${date}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  return card(`☀️ <b>Prosperion daily, ${day}</b>`, [
+    "<b>You hold</b>",
+    ...(holdings.length ? holdings.map((h) => `• ${esc(h.symbol)}: ${h.text}`) : ["Nothing in Prosper right now."]),
     "",
-    top.length ? "Closest to graduating:" : "No launch is open on the curve.",
-    ...top.map((t) => `· ${t.symbol}: ${(t.bps / 100).toFixed(1)}% of 20,000 PROS, ${t.hoursLeft > 0 ? `${Math.round(t.hoursLeft)} h left` : "window closed"}`),
-  ].join("\n");
+    "<b>Closest to graduating</b>",
+    ...(top.length
+      ? top.map((t, i) => `${i + 1}. ${esc(t.symbol)}: ${(t.bps / 100).toFixed(1)}% of ${num(TARGET)} PROS, ${t.hoursLeft > 0 ? `${Math.round(t.hoursLeft)} h left` : "window closed"}`)
+      : ["No launch is open on the curve."]),
+    "",
+    links(["Launches", `${SITE}/launches/`], ["Alert settings", `${SITE}/alerts/`]),
+  ]);
 }

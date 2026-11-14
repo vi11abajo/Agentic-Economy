@@ -4,6 +4,7 @@ import { parseEther, type Address } from "viem";
 import {
   launchAlert, snipePlan, progressEvents, whaleAlert, positionMoves, gateAlert, decodeGateLog, digestText,
   LIMITS_SET_TOPIC, BOUGHT_TOPIC, type BoardSnap,
+  type GateEvent,
 } from "./rules.js";
 import { DEFAULT_SUBS } from "./subscriptions.js";
 import type { Launch } from "./store.js";
@@ -62,7 +63,7 @@ test("a whale trade is sized on the PROS that moved, and keyed by its log so two
   assert.equal(whaleAlert(t, parseEther("700"), "pANTA"), null);
   const a = whaleAlert(t, parseEther("500"), "pANTA")!;
   assert.equal(a.key, "trade:0xdead:3");
-  assert.match(a.text, /sold .*600 PROS/);
+  assert.match(a.text, /sell of 600 PROS/);
 });
 
 test("positions alert on a move per unit since the last alert; a changed balance resets quietly", () => {
@@ -85,25 +86,33 @@ test("the gate's own events about your wallet read as plain words", () => {
     data: `0x${[parseEther("10"), parseEther("30"), parseEther("11415"), BigInt(IMPL)].map((x) => x.toString(16).padStart(64, "0")).join("")}`,
     transactionHash: "0x20a0", logIndex: "0x1", blockNumber: "0x15e8d44",
   };
-  const d = decodeGateLog(limitsLog)!;
+  const d = decodeGateLog(limitsLog)! as Extract<GateEvent, { kind: "limits" }>;
   assert.equal(d.user, ME);
   const a = gateAlert(d);
   assert.match(a.text, /limits changed/i);
-  assert.match(a.text, /10 PROS per buy, 30 PROS a day/);
+  assert.match(a.text, /Per buy: <b>10 PROS<\/b>/);
+  assert.match(a.text, /Per day: <b>30 PROS<\/b>/);
+  assert.doesNotMatch(a.text, /was/, "no earlier limits known, nothing to compare");
+  const withBefore = gateAlert(d, { maxPerBuy: parseEther("0.1"), maxPerDay: parseEther("30"), maxReserveBefore: 0n, acceptedMarketImpl: IMPL });
+  assert.match(withBefore.text, /Per buy: <b>10 PROS<\/b> \(was 0\.1\)/);
+  assert.doesNotMatch(withBefore.text, /Per day: <b>30 PROS<\/b> \(was/, "an unchanged limit says nothing about before");
+  assert.match(withBefore.text, /in the curve: <b>11,415 PROS<\/b> \(was 0\)/);
+  const stop = gateAlert({ ...d, limits: { ...d.limits, maxPerBuy: 0n, maxPerDay: 0n, maxReserveBefore: 0n } });
+  assert.match(stop.text, /All buys stopped/);
   assert.match(a.text, /not you/i);
   const boughtLog = {
     topics: [BOUGHT_TOPIC, `0x000000000000000000000000${ME.slice(2).toLowerCase()}`, `0x000000000000000000000000${MARKET.slice(2).toLowerCase()}`],
     data: `0x${[parseEther("10"), 123n * 10n ** 18n].map((x) => x.toString(16).padStart(64, "0")).join("")}`,
     transactionHash: "0x3d23", logIndex: "0x2", blockNumber: "0x15e8d4e",
   };
-  assert.match(gateAlert(decodeGateLog(boughtLog)!).text, /bought .*10 PROS/i);
+  assert.match(gateAlert(decodeGateLog(boughtLog)!).text, /Bought through the gate: 10 PROS/);
 });
 
 test("the digest lists what you hold and the launches closest to graduating", () => {
   const t = digestText("2026-11-14", [{ symbol: "pANTA", kind: "pToken", text: "204,641 tokens, a full sell pays 9.8 PROS" }], [
     { symbol: "pANTA", bps: 5_712, hoursLeft: 133.2 },
   ]);
-  assert.match(t, /2026-11-14/);
+  assert.match(t, /14 Nov 2026/);
   assert.match(t, /pANTA.*204,641/);
   assert.match(t, /57\.1%/);
   assert.match(digestText("2026-11-14", [], []), /nothing in Prosper/i);
