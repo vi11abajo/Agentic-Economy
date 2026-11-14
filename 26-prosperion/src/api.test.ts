@@ -7,6 +7,8 @@ import { createApi, GATE_ABI, type ApiDeps } from "./api.js";
 import { openStore } from "./store.js";
 import { SESSION_COOKIE, SESSION_TTL_MS } from "./auth.js";
 import type { MarketCheck } from "./market.js";
+import QRCode from "qrcode";
+import { requestUrl, walletLinks } from "./links.js";
 
 const MARKET = "0x94228EB493173E75a12e76E667bfe9b0939aae64";
 const IMPL = "0xb05749a8Cc5Dd1205Bc36326Cf94A2cA83f7D672";
@@ -103,6 +105,23 @@ test("a saved sign link has a QR code a phone wallet can scan; an unknown one ha
     assert.equal(qr.headers.get("content-type"), "image/svg+xml");
     assert.match(await qr.text(), /^<svg[^>]*viewBox/);
     assert.equal((await fetch(`${s.base}/api/req/nope/qr.svg`)).status, 404);
+  } finally { await s.close(); }
+});
+
+test("the QR can carry a wallet's own link, so a phone camera opens the page straight inside that wallet", async () => {
+  const s = await serve();
+  try {
+    const id = buyRequest(s.store);
+    const page = requestUrl(id);
+    // what each QR holds, read back by drawing the expected text the same way and comparing the pictures
+    const drawn = (text: string) => QRCode.toString(text, { type: "svg", errorCorrectionLevel: "M", margin: 2 });
+    const got = async (q: string) => (await fetch(`${s.base}/api/req/${id}/qr.svg${q}`)).text();
+    const l = walletLinks(page);
+    assert.equal(await got("?wallet=rabby"), await drawn(l.rabby));
+    assert.equal(await got("?wallet=okx"), await drawn(l.okx));
+    assert.equal(await got("?wallet=metamask"), await drawn(l.metamask));
+    assert.equal(await got(""), await drawn(page), "no wallet named: the plain page, as before");
+    assert.equal((await fetch(`${s.base}/api/req/${id}/qr.svg?wallet=phantom`)).status, 400);
   } finally { await s.close(); }
 });
 
