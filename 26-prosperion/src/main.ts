@@ -35,10 +35,10 @@ const store = openStore(DB);
 const alertBook = openAlertBook(store.db);
 const BEACON_ABI = parseAbi(["function implementation() view returns (address)"]);
 
-async function readLimits(owner: Address): Promise<GateLimits | null> {
+async function readLimits(owner: Address, blockNumber?: bigint): Promise<GateLimits | null> {
   if (!GATE) return null;
   const [maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl] = await client.readContract({
-    address: GATE, abi: GATE_ABI, functionName: "limitsOf", args: [owner],
+    address: GATE, abi: GATE_ABI, functionName: "limitsOf", args: [owner], blockNumber,
   });
   // all zeros and no market code: never set. Zeros with a code is "Stop all buys", which is not the same thing.
   return maxPerBuy === 0n && /^0x0{40}$/.test(acceptedMarketImpl) ? null : { maxPerBuy, maxPerDay, maxReserveBefore, acceptedMarketImpl };
@@ -119,7 +119,7 @@ const indexer = new TradeIndexer(book, {
 void indexer.run((e) => console.error(`[trades] ${e.message}`));
 
 await startMcpHttp({
-  listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i, { readLimits, spentToday }),
+  listLaunches: (n) => store.listLaunches(n), prepareBuy: (i) => prepareBuy(store, checkMarket, i, { readLimits: (a) => readLimits(a), spentToday }),
   trades: book, head: () => client.getBlockNumber({ cacheTime: 0 }),
 }, MCP_PORT);
 console.log(`[mcp] 127.0.0.1:${MCP_PORT}/mcp`);
@@ -162,7 +162,7 @@ if (token) {
   const tg = telegramChannel(token);
   const n = makeNotifier({
     store, book: alertBook, out: makeOutbox((m) => tg.send(m)),
-    gate: { readLimits, spentToday },
+    gate: { readLimits: (a) => readLimits(a), spentToday, limitsAt: (a, b) => readLimits(a, b) },
     curatorOf: async (v) => (await vaultDetail(v)).r25Display?.curator?.address ?? null,
     askAgent: (p) => askAgent(p), agentTimeoutMs: 180_000,
     symbolOf, readHoldings,

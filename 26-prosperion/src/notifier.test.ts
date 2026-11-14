@@ -51,7 +51,7 @@ test("a launch goes to launch subscribers, a ready buy to snipers, and the agent
   assert.match(toYou[0].html, /New Prosper launch/);
   // out() returns the message's place in `sent` as its id; the notes reply to that id in each chat
   assert.equal(toMe[1].replyTo, sent.indexOf(toMe[0]) + 1);
-  assert.match(toMe[1].html, /agent's notes/);
+  assert.match(toMe[1].html, /Agent's notes/);
   assert.equal(toYou[1].replyTo, sent.indexOf(toYou[0]) + 1);
   await n.onLaunch(launch);
   assert.equal(sent.length, 4, "the same launch seen again sends nothing new");
@@ -61,7 +61,7 @@ test("a snipe over your own gate limits says which limit instead of sending a li
   const { sent, n, link } = setup({ maxPerBuy: parseEther("0.1"), maxPerDay: parseEther("0.3"), maxReserveBefore: 0n, acceptedMarketImpl: IMPL });
   link(ME, 1, { snipe: { on: true, amountPros: "10", maxInCurvePros: "0" } });
   await n.onLaunch(launch);
-  assert.match(sent[0].html, /no link this time/);
+  assert.match(sent[0].html, /Snipe skipped/);
   assert.match(sent[0].html, /above your limit of 0\.1 PROS per buy/);
   assert.equal(sent[0].sign, undefined);
 });
