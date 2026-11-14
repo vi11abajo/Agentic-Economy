@@ -115,3 +115,12 @@ test("the outbox waits out Telegram's 429 and keeps one chat's messages in order
   const dropped = await makeOutbox(async () => { throw new Error("Forbidden: bot was blocked by the user"); }, { gapMs: 0, sleep: async () => {} })({ chatId: 3, html: "x" });
   assert.equal(dropped, null);
 });
+
+test("when the agent is down, the reply says so instead of staying silent, and the alert itself never waited", async () => {
+  const { sent, n, link, setAgent } = setup();
+  link(YOU, 2, { launch: { on: true, maxInCurvePros: "0", skipCurators: [] } });
+  setAgent(async () => { throw new Error("hermes is restarting"); });
+  await n.onLaunch(launch);
+  assert.match(sent[0].html, /New Prosper launch/);
+  assert.match(sent[1].html, /Agent unavailable right now \(hermes is restarting\)/);
+});

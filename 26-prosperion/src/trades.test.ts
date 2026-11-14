@@ -78,6 +78,16 @@ test("the indexer walks the chain in 1000-block windows from the first launch to
   assert.equal(book.trades(FROG, 50).length, 2);
 });
 
+test("only trades near the head reach the bot; the backfill stays history", async () => {
+  const book = openTradeBook(openStore(":memory:").db);
+  const c = fakeChain([realSell, realBuy], 22_890_100n);
+  const told: bigint[] = [];
+  const ix = new TradeIndexer(book, { ...c.deps, onTrades: async (ts) => { told.push(...ts.map((t) => t.block)); } });
+  while (await ix.step()) { /* until caught up */ }
+  assert.equal(book.trades(FROG, 50).length, 2, "both are indexed");
+  assert.deepEqual(told, [BigInt(realBuy.blockNumber)], "only the one within the last 600 blocks is news");
+});
+
 test("a market's story: buyers, sellers, PROS in and out, and who still holds from curve trades", async () => {
   const book = openTradeBook(openStore(":memory:").db);
   const buyB6d = { ...realBuy, blockNumber: `0x${(22_814_291).toString(16)}`, transactionHash: "0x29d2" as Hex, topics: [BUY_TOPIC, pad(ROUTER), pad(WB6D)] as Hex[],

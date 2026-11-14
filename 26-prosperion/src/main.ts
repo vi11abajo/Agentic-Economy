@@ -3,18 +3,23 @@
 import { createServer } from "node:http";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { getAddress, isAddress, parseAbi, type Address } from "viem";
+import { formatEther, getAddress, isAddress, parseAbi, type Address } from "viem";
 import { askAgent, chatAgent } from "./agent.js";
-import { onLaunch } from "./alerts.js";
 import { GATE_ABI, createApi, type GateLimits } from "./api.js";
+import { rankBoard, readBoard } from "./board.js";
+import { makeNotifier, makeOutbox, type Notifier } from "./notifier.js";
+import { readPortfolio } from "./portfolio.js";
+import { BOUGHT_TOPIC, LIMITS_SET_TOPIC, decodeGateLog, type BoardSnap, type GateLog } from "./rules.js";
+import { openAlertBook } from "./subscriptions.js";
+
 import { client } from "./chain.js";
 import { checkMarket } from "./market.js";
 import { startMcpHttp } from "./mcpHttp.js";
 import { explainNavMove } from "./navmove.js";
 import { prepareBuy } from "./prepare.js";
 import { openStore, type Launch } from "./store.js";
-import { listVaults } from "./prosperApi.js";
-import { pollTelegram, telegramChannel } from "./telegram.js";
+import { listVaults, vaultDetail } from "./prosperApi.js";
+import { BOT_COMMANDS, pollTelegram, telegramChannel } from "./telegram.js";
 import { readVault } from "./vault.js";
 import { LaunchWatcher, rpcWatcherDeps } from "./watcher.js";
 import { BUY_TOPIC, SELL_TOPIC, TradeIndexer, openTradeBook, type RawTradeLog } from "./trades.js";
@@ -78,6 +83,8 @@ createServer(api).listen(API_PORT, "127.0.0.1", () => console.log(`[api] 127.0.0
 // Every buy and sell on every Prosper curve, indexed from the first launch on. A fresh database starts an hour before
 // the oldest market Prosper lists and catches up at a few windows a second; after that it follows the head.
 const book = openTradeBook(store.db);
+const alertBook = openAlertBook(store.db);
+let notifier: Notifier | null = null;
 let marketList: { at: number; markets: Address[] } | null = null;
 async function allMarkets(): Promise<Address[]> {
   if (!marketList || Date.now() - marketList.at > 10 * 60_000) {
@@ -106,6 +113,7 @@ const indexer = new TradeIndexer(book, {
     const first = (await listVaults()).map((r) => Date.parse(r.createdAt)).filter(Number.isFinite).sort((a, b) => a - b)[0];
     return blockAtTime(Math.floor(first / 1000) - 3600);
   },
+  onTrades: async (trades) => { await notifier?.onTrades(trades); },
 });
 void indexer.run((e) => console.error(`[trades] ${e.message}`));
 
@@ -115,23 +123,86 @@ await startMcpHttp({
 }, MCP_PORT);
 console.log(`[mcp] 127.0.0.1:${MCP_PORT}/mcp`);
 
-// The quote in an alert uses the biggest per-buy limit anyone set, so the number means something.
-const quoteAmount = () => store.allWatches().reduce((m, w) => (w.maxPerBuyWei > m ? w.maxPerBuyWei : m), 10n ** 18n);
+// The quote a launch check makes uses the biggest snipe anyone set, so the number in the alert means something.
+const quoteAmount = () => alertBook.recipients("snipe").reduce((m, r) => {
+  const w = BigInt(Math.round(Number(r.params.amountPros) * 1e6)) * 10n ** 12n;
+  return w > m ? w : m;
+}, 10n ** 18n);
 const watcher = new LaunchWatcher(rpcWatcherDeps(quoteAmount));
 watcher.on("error", (e) => console.error(`[watcher] ${(e as Error).message}`));
+
+// ---- the bot's sources. Each one reads, hands the notifier what it saw, and the notifier decides who hears it.
+const every = (ms: number, name: string, f: () => Promise<unknown>) => {
+  const run = () => f().catch((e) => console.error(`[${name}] ${(e as Error).message}`)).finally(() => setTimeout(run, ms));
+  setTimeout(run, 5_000);
+};
+let vaultRows: { at: number; rows: Awaited<ReturnType<typeof listVaults>> } | null = null;
+const rows = async () => {
+  if (!vaultRows || Date.now() - vaultRows.at > 5 * 60_000) vaultRows = { at: Date.now(), rows: await listVaults() };
+  return vaultRows.rows;
+};
+const symbolOf = (m: Address) => vaultRows?.rows.find((r) => r.market.toLowerCase() === m.toLowerCase())?.pVaultSymbol ?? `market ${m.slice(0, 6)}…${m.slice(-4)}`;
+const amount = (w: bigint) => Number(formatEther(w)).toLocaleString("en-US", { maximumFractionDigits: 2 });
+async function readHoldings(owner: Address) {
+  const p = await readPortfolio(owner, await rows());
+  return {
+    holdings: p.holdings.map((h) => ({
+      token: h.token, symbol: h.symbol, kind: h.kind, balance: h.balance, market: h.market,
+      value: h.kind === "pToken" ? (h.sellNetPros ?? 0n) : (h.valueUsdc ?? 0n),
+      text: h.kind === "pToken"
+        ? `${amount(h.balance)} tokens, ${h.sellNetPros == null ? `${h.phase}: trades on FaroSwap` : `a full sell on the curve pays ${amount(h.sellNetPros)} PROS`}`
+        : `${amount(h.balance)} shares, worth ${(Number(h.valueUsdc ?? 0n) / 1e6).toLocaleString("en-US", { maximumFractionDigits: 2 })} USDC`,
+    })),
+  };
+}
 
 const token = env.TELEGRAM_BOT_TOKEN;
 if (token) {
   const tg = telegramChannel(token);
+  const n = makeNotifier({
+    store, book: alertBook, out: makeOutbox((m) => tg.send(m)),
+    gate: { readLimits, spentToday },
+    curatorOf: async (v) => (await vaultDetail(v)).r25Display?.curator?.address ?? null,
+    askAgent: (p) => askAgent(p), agentTimeoutMs: 180_000,
+    symbolOf, readHoldings,
+  });
+  notifier = n;
   watcher.on("launch", (l: Launch) => {
     console.log(`[watcher] launch ${l.market} at ${l.block}`);
-    void onLaunch(l, store, { telegram: tg, askAgent: (p) => askAgent(p), agentTimeoutMs: 180_000 })
-      .catch((e) => console.error(`[alerts] ${(e as Error).message}`));
+    void n.onLaunch(l).catch((e) => console.error(`[alerts] ${(e as Error).message}`));
   });
+  // every market at one block, once a minute: progress and phase changes
+  every(60_000, "board", async () => {
+    const board = await readBoard(await rows());
+    const snap: BoardSnap = {};
+    for (const e of board.entries) snap[e.market] = { symbol: e.symbol, phase: e.phase, bps: e.progressBps };
+    alertBook.setState("boardTop", rankBoard(board.entries, "curve", 5).map((e) => ({ symbol: e.symbol, bps: e.progressBps, hoursLeft: e.hoursLeft })));
+    await n.onBoard(snap);
+  });
+  every(5 * 60_000, "portfolios", () => n.onPortfolios());
+  every(5 * 60_000, "digest", () => n.onClock());
+  // the gate's own events: LimitsSet and Bought, from where we stopped, 1,000 blocks at a time
+  if (GATE) {
+    every(15_000, "gate-logs", async () => {
+      const head = await client.getBlockNumber({ cacheTime: 0 });
+      let from = BigInt(alertBook.getState<string>("gateCursor") ?? (head - 50n).toString()) + 1n;
+      while (from <= head) {
+        const to = from + 999n < head ? from + 999n : head;
+        const logs = (await client.request({
+          method: "eth_getLogs",
+          params: [{ address: GATE, topics: [[LIMITS_SET_TOPIC, BOUGHT_TOPIC]], fromBlock: `0x${from.toString(16)}`, toBlock: `0x${to.toString(16)}` }],
+        } as never)) as GateLog[];
+        await n.onGateEvents(logs.map(decodeGateLog).filter((e) => e !== null));
+        alertBook.setState("gateCursor", to.toString());
+        from = to + 1n;
+      }
+    });
+  }
   tg.api("getMe", {})
     .then((me: { username?: string }) => { botName = me.username ?? null; console.log(`[tg] bot @${botName} polling`); })
     .catch((e) => console.error(`[tg] the token did not work: ${(e as Error).message}`));
-  void pollTelegram(store, tg, () => false);
+  tg.api("setMyCommands", { commands: BOT_COMMANDS }).catch((e) => console.error(`[tg] commands: ${(e as Error).message}`));
+  void pollTelegram(store, tg, () => false, alertBook);
 } else {
   watcher.on("launch", (l: Launch) => { store.saveLaunch(l); console.log(`[watcher] launch ${l.market} (no bot token, stored only)`); });
   console.log("[tg] TELEGRAM_BOT_TOKEN not set: no bot on this copy, launches are stored and shown, nobody is pinged");
