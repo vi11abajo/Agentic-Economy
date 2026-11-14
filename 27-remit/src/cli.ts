@@ -97,6 +97,8 @@ async function main(): Promise<number> {
     if (!existsSync(log)) return console.log("no signing page was started for this plan"), 1;
     const text = readFileSync(log, "utf8").trim();
     console.log(text || "page is up, nothing happened yet");
+    // before the wallet answers the log only holds the page's link, which an agent can read as "done"
+    if (!/wallet sent|PAID:|NOT CONFIRMED|closed after/.test(text)) console.log("not paid yet: no transaction has come back from the wallet");
     return /PAID:/.test(text) ? 0 : 2;
   }
 
