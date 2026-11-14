@@ -20,8 +20,9 @@ One bundled script, Node 20+: `node scripts/siren.mjs <command>`.
 
 1. `node scripts/siren.mjs init`: makes siren's folder with an empty `.env` and an example `rules.json`, and
    prints both paths.
-2. The user opens that `.env` themselves and pastes the Telegram bot token and/or the Discord webhook URL.
-   Never ask for them in chat, never read the file out, never put them on a command line.
+2. The user opens that `.env` themselves and pastes the Telegram bot token after `SIREN_TELEGRAM_BOT_TOKEN=` and/or
+   the Discord webhook URL after `SIREN_DISCORD_WEBHOOK=` (both lines are already there; tell them these exact
+   names). Never ask for them in chat, never read the file out, never put them on a command line.
 3. Telegram only: the user sends `/start` to their bot, then `node scripts/siren.mjs connect` saves the chat.
 4. `node scripts/siren.mjs test` must show a ✓ per channel. A ✗ comes with a hint: pass it on as it is.
 
